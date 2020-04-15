@@ -1,0 +1,59 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
+    <default>
+        <payment>
+            <!-- Conekta Config -->
+            <conekta_config>
+                <model>Conekta\Payments\Model\Config</model>
+                <!-- Setup API Key's -->
+                <test_private_api_key backend_model="Magento\Config\Model\Config\Backend\Encrypted" />
+                <live_private_api_key backend_model="Magento\Config\Model\Config\Backend\Encrypted" />
+                <!-- // Setup API Key's // -->
+                <sandbox_mode>1</sandbox_mode>
+            </conekta_config>
+            <!-- // Conekta Config // -->
+            
+            <!-- Conekta Card -->
+            <conekta_card>
+                <active>0</active>
+                <model>Conekta\Payments\Model\Card</model>
+                <payment_action>authorize_capture</payment_action>
+                <title>Credit and Debit Cards</title>
+                <active_monthly_installments>1</active_monthly_installments>
+                <monthly_installments>3,6,9,12</monthly_installments>
+                <minimum_amount_monthly_installments>300</minimum_amount_monthly_installments>
+                <cctypes>AE,VI,MC</cctypes>
+                <allowspecific>0</allowspecific>
+                <min_order_total>0.50</min_order_total>
+            </conekta_card>
+            <!-- // Conekta Card // -->
+
+            <!-- Conekta OXXO -->
+            <conekta_oxxo>
+                <active>0</active>
+                <title>Tiendas Oxxo</title>
+                <order_status>pending_payment</order_status>
+                <oxxo_instructions>Instructions for OXXO payment.</oxxo_instructions>
+                <payment_action>authorize</payment_action>
+                <model>Conekta\Payments\Model\Oxxo</model>
+                <group>offline</group>
+                <expiry_days>30</expiry_days>
+            </conekta_oxxo>
+            <!-- // Conekta OXXO // -->
+            
+            <!-- Conekta SPEI -->
+            <conekta_spei>
+                <active>0</active>
+                <title>Transferencia SPEI</title>
+                <order_status>pending_payment</order_status>
+                <spei_instructions>Instructions for SPEI payment.</spei_instructions>
+                <payment_action>authorize</payment_action>
+                <model>Conekta\Payments\Model\Spei</model>
+                <group>offline</group>
+                <expiry_days>180</expiry_days>
+                <account_owner>Description for CLABE reference</account_owner>
+            </conekta_spei>
+            <!-- // Conekta SPEI // -->
+        </payment>
+    </default>
+</config>

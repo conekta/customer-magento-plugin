@@ -1,0 +1,229 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+    <system>
+        <section id="payment" translate="label">
+            <!-- Conekta Config -->
+            <group id="conekta_config" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Conekta Configuration</label>
+                <comment>
+                    <![CDATA[<a href="https://conekta.io/" target="_blank">Click here to sign up for Conekta account</a>]]>
+                </comment>
+                <!-- Key's Setup -->
+                <field id="test_public_api_key" translate="label" type="text" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Test Public Key</label>
+                </field>
+                <field id="test_private_api_key" translate="label" type="obscure" sortOrder="4" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Test Private Key</label>
+                    <backend_model>Magento\Config\Model\Config\Backend\Encrypted</backend_model>
+                </field>
+                <field id="live_public_api_key" translate="label" type="text" sortOrder="5" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Live Public Key</label>
+                </field>
+                <field id="live_private_api_key" translate="label" type="obscure" sortOrder="6" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Live Private Key</label>
+                    <backend_model>Magento\Config\Model\Config\Backend\Encrypted</backend_model>
+                </field>
+                <!-- // Key's Setup // -->
+                <field id="sandbox_mode" translate="label" type="select" sortOrder="7" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Sandbox</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="conekta_webhook" translate="label" type="text" sortOrder="8" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Webhook</label>
+                    <comment>
+                        <![CDATA[Default webhook is: <strong>your_magento_host/conekta/webhook/listener</strong>]]>
+                    </comment>
+                </field>
+            </group>
+            <!-- // Conekta Config // -->
+
+            <!-- Conekta Card -->
+            <group id="conekta_card" translate="label" type="text" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Conekta Card</label>
+                <field id="active" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Enabled</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="title" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Title</label>
+                </field>
+                <!-- Monthly Installments Setup -->
+                <field id="active_monthly_installments" translate="label" type="select" sortOrder="8" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Active Monthly Installments</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="monthly_installments" translate="label" type="multiselect" sortOrder="9" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Monthly Installments Available</label>
+                    <source_model>Conekta\Payments\Model\Source\MonthlyInstallments</source_model>
+                    <depends>
+                        <field id="active_monthly_installments">1</field>
+                    </depends>
+                </field>
+                <field id="minimum_amount_monthly_installments" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Minimum Amount for Monthly Installments</label>
+                    <validate>validate-number validate-number-range number-range-300-10000000000</validate>
+                    <comment>The minimum amount is $300 [MXN]</comment>
+                    <depends>
+                        <field id="active_monthly_installments">1</field>
+                    </depends>
+                </field>
+                <!-- // Monthly Installments // -->
+                <field id="cctypes" translate="label" type="multiselect" sortOrder="11" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Credit Card Types</label>
+                    <source_model>Conekta\Payments\Model\Source\Cctype</source_model>
+                </field>
+                <field id="sort_order" translate="label" type="text" sortOrder="100" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Sort Order</label>
+                </field>
+                <field id="allowspecific" translate="label" type="allowspecific" sortOrder="12" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Payment from Applicable Countries</label>
+                    <source_model>Magento\Payment\Model\Config\Source\Allspecificcountries</source_model>
+                </field>
+                <field id="specificcountry" translate="label" type="multiselect" sortOrder="13" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Payment from Specific Countries</label>
+                    <source_model>Magento\Directory\Model\Config\Source\Country</source_model>
+                </field>
+                <field id="min_order_total" translate="label" type="text" sortOrder="14" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Minimum Order Total</label>
+                </field>
+                <field id="max_order_total" translate="label" type="text" sortOrder="15" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Maximum Order Total</label>
+                    <comment>Leave empty to disable limit</comment>
+                </field>
+            </group>
+            <!-- // Conekta Card // -->
+
+            <!-- Conekta OXXO -->
+            <group id="conekta_oxxo" translate="label" type="text" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Conekta Oxxo</label>
+                <field id="active" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Enabled</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="title" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Title</label>
+                </field>
+                <field id="order_status" translate="label" type="select" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>New Order Status</label>
+                    <source_model>Conekta\Payments\Model\Config\Source\Order\Status\Pendingpayment</source_model>
+                </field>
+         
+                <field id="allowspecific" translate="label" type="allowspecific" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Payment from Applicable Countries</label>
+                    <source_model>Magento\Payment\Model\Config\Source\Allspecificcountries</source_model>
+                </field>
+                <field id="specificcountry" translate="label" type="multiselect" sortOrder="41" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Payment from Specific Countries</label>
+                    <source_model>Magento\Directory\Model\Config\Source\Country</source_model>
+                    <can_be_empty>1</can_be_empty>
+                </field>
+                <field id="oxxo_instructions" translate="label" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Instructions</label>
+                </field>
+                <field id="sort_order" translate="label" type="text" sortOrder="100" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Sort Order</label>
+                    <frontend_class>validate-number</frontend_class>
+                </field>
+                <field id="min_order_total" translate="label" type="text" sortOrder="14" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Minimum Order Total</label>
+                </field>
+                <field id="max_order_total" translate="label" type="text" sortOrder="15" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Maximum Order Total</label>
+                    <comment>Leave empty to disable limit</comment>
+                </field>
+                <field id="expiry_days" translate="label" type="text" sortOrder="1000" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Expiry (# days)</label>
+                </field>
+            </group>
+            <!-- // Conekta OXXO // -->
+            
+            <!-- Conekta SPEI -->
+            <group id="conekta_spei" translate="label" type="text" sortOrder="6" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Conekta SPEI</label>
+                <field id="active" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Enabled</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="title" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Title</label>
+                </field>
+                <field id="order_status" translate="label" type="select" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>New Order Status</label>
+                    <source_model>Conekta\Payments\Model\Config\Source\Order\Status\Pendingpayment</source_model>
+                </field>
+         
+                <field id="allowspecific" translate="label" type="allowspecific" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Payment from Applicable Countries</label>
+                    <source_model>Magento\Payment\Model\Config\Source\Allspecificcountries</source_model>
+                </field>
+                <field id="specificcountry" translate="label" type="multiselect" sortOrder="41" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Payment from Specific Countries</label>
+                    <source_model>Magento\Directory\Model\Config\Source\Country</source_model>
+                    <can_be_empty>1</can_be_empty>
+                </field>
+                <field id="spei_instructions" translate="label" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Instructions</label>
+                </field>
+                <field id="sort_order" translate="label" type="text" sortOrder="100" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Sort Order</label>
+                    <frontend_class>validate-number</frontend_class>
+                </field>
+                <field id="min_order_total" translate="label" type="text" sortOrder="14" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Minimum Order Total</label>
+                </field>
+                <field id="max_order_total" translate="label" type="text" sortOrder="15" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Maximum Order Total</label>
+                    <comment>Leave empty to disable limit</comment>
+                </field>
+                <field id="expiry_days" translate="label" type="text" sortOrder="1000" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Expiry (# days)</label>
+                </field>
+                <field id="account_owner" translate="label" type="text" sortOrder="2000" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Account Owner</label>
+                </field>
+            </group>
+            <!-- // Conekta SPEI // -->
+            <!-- Conekta Cash Payment -->
+            <group id="conekta_cash" translate="label" type="text" sortOrder="7" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Cash Payment</label>
+                <field id="enable_cash_payments" translate="label" type="select" sortOrder="9" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Enable Cash Payments</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="payment_method_name_oxxo" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Nombre del Método de Pago para Oxxo</label>
+                    <depends>
+                        <field id="enable_cash_payments">1</field>
+                    </depends>
+                </field>
+                <field id="notify_email_paid" translate="label" type="text" sortOrder="11" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Correos a notificar cuando la referencia es pagada</label>
+                    <depends>
+                        <field id="enable_cash_payments">1</field>
+                    </depends>
+                </field>
+                <field id="email_support" translate="label" type="text" sortOrder="12" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Correo de soporte a donde se puede comunicar el cliente</label>
+                    <depends>
+                        <field id="enable_cash_payments">1</field>
+                    </depends>
+                    <validate>validate-email</validate>
+                </field>
+                <field id="store_name_ticket" translate="label" type="text" sortOrder="13" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Nombre de tu tienda para mostrar los datos de tu boleta</label>
+                    <depends>
+                        <field id="enable_cash_payments">1</field>
+                    </depends>
+                </field>
+                <field id="number_of_days_payment" translate="label" type="text" sortOrder="14" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Cantidad de días que tiene el cliente para realizar su pago</label>
+                    <depends>
+                        <field id="enable_cash_payments">1</field>
+                    </depends>
+                    <validate>validate-limitnumber</validate>
+                </field>
+            </group>
+            <!-- // Conekta Cash Payment // !-->
+        </section>
+    </system>
+</config>

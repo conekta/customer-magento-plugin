@@ -1,0 +1,54 @@
+<?php
+/**
+ * @var \Magento\Payment\Block\Info $block
+ * @see \Magento\Payment\Block\Info
+ */
+$title = $block->escapeHtml($block->getMethod()->getTitle());
+$data = $block->getOfflineInfo();
+
+$type = $data["type"];
+$info = $data["data"];
+?>
+<dl class="payment-method">
+    <dt class="title"><?php /* @noEscape */ echo $title; ?></dt>
+    <dd style="margin: 0 !important; -webkit-margin-start: 0 !important;">
+        <table class="data-table admin__table-secondary">
+            <tbody>
+                <?php 
+                     switch ($type):
+                        case "conekta_oxxo": ?>
+                        <tr>
+                            <th><strong><?php echo __('Reference Number:'); ?></strong></th>
+                            <td>
+                                <?php echo $info["reference"]; ?>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th><strong><?php echo __('Expires at:'); ?></strong></th>
+                            <td>
+                                <?php echo date("Y-m-d", (integer) $info["expires_at"]); ?>
+                            </td>
+                        </tr>
+                <?php
+                     break;
+                        case "conekta_spei": ?>
+                        <tr>
+                            <th><strong><?php echo __('CLABE:'); ?></strong></th>
+                            <td><?php echo $info["clabe"]; ?></td>
+                        </tr>
+                        <tr>
+                            <th><strong><?php echo __('Bank Name:'); ?></strong></th>
+                            <td><?php echo $info["bank_name"]; ?></td>
+                        </tr>
+                        <tr>
+                            <th><strong><?php echo __('Expires at:'); ?></strong></th>
+                            <td><?php echo date("Y-m-d", (integer) $info["expires_at"]); ?></td>
+                        </tr>
+                <?php
+                     break;
+                    endswitch; ?>
+            </tbody>
+        </table>
+    </dd>
+</dl>
+<?php echo $block->getChildHtml(); ?>
