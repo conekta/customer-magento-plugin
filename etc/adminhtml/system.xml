@@ -220,7 +220,7 @@
                     <depends>
                         <field id="enable_cash_payments">1</field>
                     </depends>
-                    <validate>validate-limitnumber</validate>
+                    <validate>validate-custom-length</validate>
                 </field>
             </group>
             <!-- // Conekta Cash Payment // !-->
