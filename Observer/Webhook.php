@@ -6,6 +6,7 @@ use Magento\Framework\Event\ObserverInterface;
 use Magento\Framework\Message\ManagerInterface;
 use Conekta\Payments\Model\Config;
 use Magento\Framework\Event\Observer;
+
 /**
  * Class CreateWebhook
  */
@@ -24,7 +25,7 @@ class Webhook implements ObserverInterface
      * @param ManagerInterface $messageManager
      */
     public function __construct(
-        Config $config, 
+        Config $config,
         ManagerInterface $messageManager
     ) {
         $this->config = $config;
@@ -33,9 +34,10 @@ class Webhook implements ObserverInterface
     /**
      * Create Webhook
      *
-     * @param Observer $observer          
+     * @param Observer $observer
      */
-    public function execute(Observer $observer) {
+    public function execute(Observer $observer)
+    {
         return $this->config->createWebhook();
     }
 }

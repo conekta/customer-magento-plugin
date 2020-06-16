@@ -1,0 +1,26 @@
+<?php
+$title = $block->escapeHtml($block->getMethod()->getTitle());
+$data = $block->getDataSpei();
+?>
+
+<dl class="payment-method">
+    <dt class="title"><?php /* @noEscape */ echo $title; ?></dt>
+    <?php if ($data) { ?>
+    <dd style="margin: 0 !important; -webkit-margin-start: 0 !important;">
+        <table class="data-table admin__table-secondary">
+            <tbody>
+                <tr>
+                    <td><strong><?php echo __('CLABE:'); ?></strong><br><?php echo $data["clabe"]; ?></td>
+                </tr>
+                <tr>
+                    <td><strong><?php echo __('Bank Name:'); ?></strong><br><?php echo $data["bank_name"]; ?></td>
+                </tr>
+                <tr>
+                    <td><strong><?php echo __('Expires at:'); ?></strong><br><?php echo date("Y-m-d", (integer) $data["expires_at"]); ?></td>
+                </tr>
+            </tbody>
+        </table>
+    </dd>
+    <?php } ?>
+</dl>
+<?php echo $block->getChildHtml(); ?>

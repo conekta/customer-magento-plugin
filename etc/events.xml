@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
+
+    <!-- Notification Status Change -->
+    <event name="conekta_payment_notification_status_change">
+        <observer name="conekta_payment_notification_status_change_observer" instance="Conekta\Payments\Observer\NotificationObserver" />
+    </event>
+
+    <event name="payment_method_assign_data">
+        <observer name="conekta_payment_gateway_data_assign" instance="Conekta\Payments\Observer\DataAssignObserver" />
+    </event>
+</config>

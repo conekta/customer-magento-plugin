@@ -1,0 +1,54 @@
+<fieldset data-bind="attr: {class: 'fieldset payment items ccard ' + getCode(), id: 'payment_form_top' + getCode()}">
+    <div class="field text required">
+        <label data-bind="attr: {for: getCode() + '_card_holder_name'}" class="label">
+            <span><!-- ko i18n: 'Nombre del titular'--><!-- /ko --></span>
+        </label>
+        <div class="control">
+            <input type="text" name="payment[card_holder_name]" class="input-text" value=""
+                   data-bind="attr: {
+                                    id: getCode() + '_card_holder_name',
+                                    title: $t('Nombre del titular'),
+                                    'data-container': getCode() + '-card_holder_name',
+                                    'data-validate': JSON.stringify({required:true})
+                                    },
+                              enable: isActive($parents)"/>
+        </div>
+    </div>
+
+    <input type="hidden" name="payment[card_token]" class="input-text" value=""
+           data-bind="attr: {
+                            id: getCode() + '_card_token',
+                            'data-container': getCode() + '-card_token'
+                            }"/>
+
+</fieldset>
+
+<input type="hidden" id="card_token" name="card_token" value="" >
+
+<!-- ko template: 'Magento_Payment/payment/cc-form' --><!-- /ko -->
+
+<!-- ko if: activeMonthlyInstallments() && getTotal() >= getMinimumAmountMonthlyInstallments() -->
+<fieldset data-bind="attr: {class: 'fieldset payment items ccard ' + getCode(), id: 'payment_form_bottom' + getCode()}">
+    <div class="field type">
+        <label data-bind="attr: {for: getCode() + '_monthly_installments'}" class="label">
+            <span><!-- ko i18n: 'Meses sin intereses'--><!-- /ko --></span>
+        </label>
+        <div class="control">
+            <select name="payment[monthly_installments]" class="select select-monthly_installments"
+                    data-bind="attr: {
+                                        id: getCode() + '_monthly_installments', 'data-container': getCode() + '-monthly_installments',
+                                        'data-validate': JSON.stringify({})},
+                                        enable: isActive($parents),
+                                        options: getMonthlyInstallments(),
+                                        optionsText: function(month) {
+                                            if (month == 1) {
+                                                return 'Un solo pago';
+                                            } else {
+                                                return month + ' meses';
+                                            }
+                                      }">
+            </select>
+        </div>
+    </div>
+</fieldset>
+<!--/ko-->

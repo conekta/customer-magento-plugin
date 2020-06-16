@@ -1,29 +1,15 @@
 {
     "name": "conekta/conekta_payments",
-    "description": "Conekta rules!",
-    "type": "magento2-module",
-    "version": "2.0.2",
-    "minimum-stability": "stable",
+    "description": "Conekta payment gateway",
     "require": {
+        "magento/module-sales": "^101.0.0|^102.0.0",
+        "magento/module-checkout": "^100.2.0|^100.3.0",
+        "magento/module-payment": "^100.2.0|^100.3.0",
+        "magento/framework": "^101.0.0|^102.0.0",
         "conekta/conekta-php": "*"
     },
-    "authors": [
-        {
-            "name": "Conekta",
-            "homepage": "http://conekta.com/",
-            "email": "soporte@conekta.com"
-        },
-        {
-            "name": "Eduardo Enriquez",
-            "homepage": "http://conekta.com",
-            "email": "eenriquez@conekta.com"
-        },
-        {
-            "name": "Jorge Martinez",
-            "homepage": "http://conekta.com",
-            "email": "jorge@conekta.com"
-        }
-    ],
+    "type": "magento2-module",
+    "version": "3.0.0",
     "license": [
         "OSL-3.0",
         "AFL-3.0"

@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
-<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-      xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
     <head>
-        <link src="Wagento_Payments::js/validation.js"/>
+        <css src="Conekta_Payments::css/styles.css"/>
+        <link src="Conekta_Payments::js/validation-expiry.js"/>
     </head>
 </page>

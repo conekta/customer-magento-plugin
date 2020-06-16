@@ -2,7 +2,8 @@
 
 namespace Conekta\Payments\Model\Source;
 
-class MonthlyInstallments implements \Magento\Framework\Option\ArrayInterface {
+class MonthlyInstallments implements \Magento\Framework\Option\ArrayInterface
+{
     /**
      * Options getter
      *
@@ -10,7 +11,7 @@ class MonthlyInstallments implements \Magento\Framework\Option\ArrayInterface {
      */
     public function toOptionArray()
     {
-        return [ 
+        return [
             [
                 'value' => 3,
                 'label' => __('3 Meses')
@@ -26,6 +27,10 @@ class MonthlyInstallments implements \Magento\Framework\Option\ArrayInterface {
             [
                 'value' => 12,
                 'label' => __('12 Meses')
+            ],
+            [
+                'value' => 18,
+                'label' => __('18 Meses')
             ]
         ];
     }

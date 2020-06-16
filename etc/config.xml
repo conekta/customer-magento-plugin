@@ -2,58 +2,82 @@
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
     <default>
         <payment>
-            <!-- Conekta Config -->
-            <conekta_config>
-                <model>Conekta\Payments\Model\Config</model>
-                <!-- Setup API Key's -->
-                <test_private_api_key backend_model="Magento\Config\Model\Config\Backend\Encrypted" />
-                <live_private_api_key backend_model="Magento\Config\Model\Config\Backend\Encrypted" />
-                <!-- // Setup API Key's // -->
-                <sandbox_mode>1</sandbox_mode>
-            </conekta_config>
-            <!-- // Conekta Config // -->
-            
-            <!-- Conekta Card -->
-            <conekta_card>
+            <conekta_cc>
                 <active>0</active>
-                <model>Conekta\Payments\Model\Card</model>
-                <payment_action>authorize_capture</payment_action>
-                <title>Credit and Debit Cards</title>
-                <active_monthly_installments>1</active_monthly_installments>
-                <monthly_installments>3,6,9,12</monthly_installments>
-                <minimum_amount_monthly_installments>300</minimum_amount_monthly_installments>
+                <title><![CDATA[Pago con tarjeta de crédito o débito]]></title>
+                <group>conekta</group>
+                <model>ConektaPaymentsCreditCardFacade</model>
                 <cctypes>AE,VI,MC</cctypes>
-                <allowspecific>0</allowspecific>
-                <min_order_total>0.50</min_order_total>
-            </conekta_card>
-            <!-- // Conekta Card // -->
+                <monthly_installments>3,6,9,12,18</monthly_installments>
+                <minimum_amount_monthly_installments>300</minimum_amount_monthly_installments>
+                <sort_order>1</sort_order>
+                <order_status>pending</order_status>
+                <payment_action>authorize</payment_action>
+                <min_order_total>10</min_order_total>
+                <max_order_total></max_order_total>
+                <can_authorize>1</can_authorize>
+                <can_capture>1</can_capture>
+                <can_refund>1</can_refund>
+                <can_refund_partial_per_invoice>0</can_refund_partial_per_invoice>
+                <can_use_checkout>1</can_use_checkout>
+                <is_gateway>1</is_gateway>
+                <debugReplaceKeys>MERCHANT_KEY</debugReplaceKeys>
+                <paymentInfoKeys>FRAUD_MSG_LIST</paymentInfoKeys>
+                <privateInfoKeys>FRAUD_MSG_LIST</privateInfoKeys>
+            </conekta_cc>
 
             <!-- Conekta OXXO -->
             <conekta_oxxo>
                 <active>0</active>
-                <title>Tiendas Oxxo</title>
-                <order_status>pending_payment</order_status>
-                <oxxo_instructions>Instructions for OXXO payment.</oxxo_instructions>
+                <title>Pago en Efectivo con Oxxo</title>
+                <model>ConektaPaymentsOxxoFacade</model>
                 <payment_action>authorize</payment_action>
-                <model>Conekta\Payments\Model\Oxxo</model>
+                <order_status>pending_payment</order_status>
                 <group>offline</group>
-                <expiry_days>30</expiry_days>
+                <min_order_total>10</min_order_total>
+                <max_order_total>10000</max_order_total>
+                <expiry_days>7</expiry_days>
+                <instructions><![CDATA[Instrucciones de Pago]]></instructions>
+                <is_offline>1</is_offline>
+                <can_use_checkout>1</can_use_checkout>
+                <can_authorize>1</can_authorize>
+                <can_capture>0</can_capture>
+                <can_refund>0</can_refund>
+                <can_void>0</can_void>
+                <can_cancel>1</can_cancel>
+                <can_edit>1</can_edit>
             </conekta_oxxo>
             <!-- // Conekta OXXO // -->
-            
+
             <!-- Conekta SPEI -->
             <conekta_spei>
                 <active>0</active>
                 <title>Transferencia SPEI</title>
-                <order_status>pending_payment</order_status>
-                <spei_instructions>Instructions for SPEI payment.</spei_instructions>
+                <model>ConektaPaymentsSpeiFacade</model>
                 <payment_action>authorize</payment_action>
-                <model>Conekta\Payments\Model\Spei</model>
+                <order_status>pending_payment</order_status>
                 <group>offline</group>
-                <expiry_days>180</expiry_days>
-                <account_owner>Description for CLABE reference</account_owner>
+                <min_order_total>15</min_order_total>
+                <max_order_total></max_order_total>
+                <expiry_days>7</expiry_days>
+                <instructions><![CDATA[Instrucciones de Pago]]></instructions>
+                <is_offline>1</is_offline>
+                <can_use_checkout>1</can_use_checkout>
+                <can_authorize>1</can_authorize>
+                <can_capture>0</can_capture>
+                <can_refund>0</can_refund>
+                <can_void>0</can_void>
+                <can_cancel>1</can_cancel>
+                <can_edit>1</can_edit>
             </conekta_spei>
             <!-- // Conekta SPEI // -->
         </payment>
+        <conekta>
+            <global>
+                <api_version><![CDATA[2.0.0]]></api_version>
+                <plugin_type><![CDATA[Magento 2]]></plugin_type>
+                <plugin_version><![CDATA[3.0.0]]></plugin_version>
+            </global>
+        </conekta>
     </default>
 </config>

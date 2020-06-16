@@ -1,0 +1,58 @@
+//
+//  Common
+//  _____________________________________________
+
+& when (@media-common = true) {
+    .payment-method-conekta-payments {
+        &._active {
+            .payment-method-title {
+            }
+        }
+        .payment-method-title {
+            label {
+            }
+        }
+        .payment-method-content {
+        }
+        .payment-method-footer {
+            display: none;
+            img {
+                position: relative;
+                top: 8px;
+                height: 30px;
+            }
+        }
+    }
+}
+
+//
+//  Mobile @screen__m
+//  _____________________________________________
+
+.media-width(@extremum, @break) when (@extremum = 'max') and (@break = @screen__m) {
+
+}
+
+//
+//  Mobile @screen__s
+//  _____________________________________________
+
+.media-width(@extremum, @break) when (@extremum = 'max') and (@break = @screen__s) {
+
+}
+
+//
+//  Desktop
+//  _____________________________________________
+
+.media-width(@extremum, @break) when (@extremum = 'min') and (@break = @screen__m) {
+
+}
+
+//
+//  Desktop large
+//  _____________________________________________
+
+.media-width(@extremum, @break) when (@extremum = 'min') and (@break = @screen__xl) {
+
+}
