@@ -55,6 +55,7 @@ class AuthorizeRequest implements BuilderInterface
 
     public function getChargeOxxo($amount, $expiry_date)
     {
+        $amount = $amount * 100;
         $charge = [
             'payment_method' => [
                 'type' => 'oxxo_cash',
