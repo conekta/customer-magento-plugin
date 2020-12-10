@@ -82,6 +82,7 @@ class TransactionCapture implements ClientInterface
         if (!empty($request['shipping_contact'])) {
             $orderParams['shipping_contact'] = $request['shipping_contact'];
         }
+        $orderParams['metadata'] = $request['metadata'];
         $chargeParams = $request['payment_method_details'];
 
         $txn_id = '';

@@ -50,6 +50,10 @@ class CaptureRequest implements BuilderInterface
                 $amount,
                 $token
             );
+            $request['metadata'] = [
+                'checkout_id'       => $order->getOrderIncrementId(),
+                'soft_validations'  => true
+            ];
             if ($this->_validateMonthlyInstallments($amount, $installments)) {
                 $request['payment_method_details']['payment_method']['monthly_installments'] = $installments;
             }
