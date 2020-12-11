@@ -46,6 +46,13 @@ class AuthorizeRequest implements BuilderInterface
             'soft_validations'  => true
 
         ];
+
+        $variable = $expiry_date;
+        $writer = new \Zend\Log\Writer\Stream(BP . '/var/log/test.log');
+        $logger = new \Zend\Log\Logger();
+        $logger->addWriter($writer);
+        $logger->info(print_r($variable,true));
+
         $request['payment_method_details'] = $this->getChargeOxxo($amount, $expiry_date);
         $request['CURRENCY'] = $order->getCurrencyCode();
         $request['TXN_TYPE'] = 'A';
