@@ -38,20 +38,18 @@ class AuthorizeRequest implements BuilderInterface
         $paymentDO = $this->subjectReader->readPayment($buildSubject);
         $payment = $paymentDO->getPayment();
         $order = $paymentDO->getOrder();
-        $expiry_date = strtotime("+" . $this->_conektaHelper->getConfigData('conekta_oxxo', 'expiry_days') . " days");
+        $timeFormat = $this->_conektaHelper->getConfigData('conekta_oxxo', 'days_or_hours');
+        if (!$timeFormat) {
+            $expiry_date = strtotime("+" . $this->_conektaHelper->getConfigData('conekta_oxxo', 'expiry_hours') . " hours");
+        } else {
+            $expiry_date = strtotime("+" . $this->_conektaHelper->getConfigData('conekta_oxxo', 'expiry_days') . " days");
+        }
         $amount = (int)$order->getGrandTotalAmount();
 
         $request['metadata'] = [
             'checkout_id'       => $order->getOrderIncrementId(),
             'soft_validations'  => true
-
         ];
-
-        $variable = $expiry_date;
-        $writer = new \Zend\Log\Writer\Stream(BP . '/var/log/test.log');
-        $logger = new \Zend\Log\Logger();
-        $logger->addWriter($writer);
-        $logger->info(print_r($variable,true));
 
         $request['payment_method_details'] = $this->getChargeOxxo($amount, $expiry_date);
         $request['CURRENCY'] = $order->getCurrencyCode();
