@@ -8,13 +8,6 @@ use Magento\Framework\Option\ArrayInterface;
 class TimeFormat implements ArrayInterface
 {
     /**
-     * Options array
-     *
-     * @var array
-     */
-    // public $options = null;
-
-    /**
      * @return array
      */
     // public function toOptionArray()
@@ -33,13 +26,4 @@ class TimeFormat implements ArrayInterface
         return [['value' => 1, 'label' => __('Days')], ['value' => 0, 'label' => __('Hours')]];
     }
 
-    /**
-     * Get options in "key-value" format
-     *
-     * @return array
-     */
-    public function toArray()
-    {
-        return [1 => __('Days'), 0 => __('Hours')];
-    }
 }

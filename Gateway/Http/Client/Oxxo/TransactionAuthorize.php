@@ -70,7 +70,6 @@ class TransactionAuthorize implements ClientInterface
     {
         $this->_conektaLogger->info('HTTP Client Oxxo TransactionAuthorize :: placeRequest');
         $request = $transferObject->getBody();
-
         $orderParams['currency']         = $request['CURRENCY'];
         $orderParams['line_items']       = $request['line_items'];
         $orderParams['tax_lines']        = $request['tax_lines'];

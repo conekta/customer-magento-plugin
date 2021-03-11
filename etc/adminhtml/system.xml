@@ -42,6 +42,12 @@
                         <label>Debug</label>
                         <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     </field>
+                    <field id="metadata_additional_products" translate="label" type="multiselect" sortOrder="80" showInDefault="1" showInWebsite="1" showInStore="0">
+                        <label>Additional metadata of products to send</label>
+                        <tooltip>(Ctrl + Click to select more options)</tooltip>
+                        <can_be_empty>1</can_be_empty>
+                        <source_model>Conekta\Payments\Model\System\Config\Source\MetadataProduct</source_model>
+                    </field>
                 </group>
                 <!--creditcard-->
                 <group id="conekta_creditcard" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="1">
