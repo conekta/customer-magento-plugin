@@ -47,6 +47,13 @@
                         <tooltip>(Ctrl + Click to select more options)</tooltip>
                         <can_be_empty>1</can_be_empty>
                         <source_model>Conekta\Payments\Model\System\Config\Source\MetadataProduct</source_model>
+                        <validate>validate-product-attributes</validate>
+                    </field>
+                    <field id="metadata_additional_order" translate="label" type="multiselect" sortOrder="90" showInDefault="1" showInWebsite="1" showInStore="0">
+                        <label>Additional metadata of order to send</label>
+                        <tooltip>(Ctrl + Click to select more options)</tooltip>
+                        <can_be_empty>1</can_be_empty>
+                        <source_model>Conekta\Payments\Model\System\Config\Source\MetadataOrder</source_model>
                     </field>
                 </group>
                 <!--creditcard-->

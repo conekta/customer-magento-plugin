@@ -5,7 +5,7 @@ namespace Conekta\Payments\Model\System\Config\Source;
 
 use Magento\Framework\Option\ArrayInterface;
 
-class MetadataProduct implements ArrayInterface
+class MetadataOrder implements ArrayInterface
 {
     /**
      * @var \Magento\Framework\Api\SearchCriteriaBuilder
@@ -14,15 +14,17 @@ class MetadataProduct implements ArrayInterface
     /**
      * @var \Magento\Eav\Api\AttributeRepositoryInterface
      */
-    protected $attributeRepository;
-
+    // protected $orderRepository;
+    protected $orderInterface;
 
     public function __construct(
         \Magento\Framework\Api\SearchCriteriaBuilder $searchCriteriaBuilder,
-        \Magento\Eav\Api\AttributeRepositoryInterface $attributeRepository
+        \Magento\Sales\Api\Data\OrderInterface $orderInterface
+        // \Magento\Sales\Api\OrderRepositoryInterface $orderRepository
     ) {
             $this->searchCriteriaBuilder = $searchCriteriaBuilder;
-            $this->attributeRepository = $attributeRepository;     
+            $this->orderInterface = $orderInterface;
+            // $this->orderRepository = $orderRepository;
     }
     
     public function toOptionArray()
@@ -39,18 +41,16 @@ class MetadataProduct implements ArrayInterface
 
     public function getOptions()
     {
-        $searchCriteria = $this->searchCriteriaBuilder->create();
-        $attributeRepository = $this->attributeRepository->getList(
-            \Magento\Catalog\Api\Data\ProductAttributeInterface::ENTITY_TYPE_CODE,
-            $searchCriteria
-        );
+        // $searchCriteria = $this->searchCriteriaBuilder->create();
+        // $order = $this->orderInterface->getConstants();
+        // // $order = $this->orderRepository->getData();
+        // var_dump($order);die();
 
         $optionsMetadata = [];
         
-        foreach ($attributeRepository->getItems() as $items) {
-            $optionsMetadata[$items->getAttributeCode()] = $items->getFrontendLabel();
-        }
-        
+        // // foreach ($attributeRepository->getItems() as $items) {
+        // //     $optionsMetadata[$items->getAttributeCode()] = $items->getFrontendLabel();
+        // // }
 
         return $optionsMetadata;
     }
