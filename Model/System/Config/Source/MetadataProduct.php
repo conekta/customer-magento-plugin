@@ -51,7 +51,6 @@ class MetadataProduct implements ArrayInterface
             $optionsMetadata[$items->getAttributeCode()] = $items->getFrontendLabel();
         }
         
-
         return $optionsMetadata;
     }
 }
