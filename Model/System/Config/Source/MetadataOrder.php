@@ -15,16 +15,14 @@ class MetadataOrder implements ArrayInterface
      * @var \Magento\Eav\Api\AttributeRepositoryInterface
      */
     // protected $orderRepository;
-    protected $orderInterface;
+    protected $attributeRepository;
 
     public function __construct(
         \Magento\Framework\Api\SearchCriteriaBuilder $searchCriteriaBuilder,
-        \Magento\Sales\Api\Data\OrderInterface $orderInterface
-        // \Magento\Sales\Api\OrderRepositoryInterface $orderRepository
+        \Magento\Eav\Api\AttributeRepositoryInterface $attributeRepository
     ) {
             $this->searchCriteriaBuilder = $searchCriteriaBuilder;
-            $this->orderInterface = $orderInterface;
-            // $this->orderRepository = $orderRepository;
+            $this->attributeRepository = $attributeRepository;
     }
     
     public function toOptionArray()
@@ -41,17 +39,15 @@ class MetadataOrder implements ArrayInterface
 
     public function getOptions()
     {
-        // $searchCriteria = $this->searchCriteriaBuilder->create();
-        // $order = $this->orderInterface->getConstants();
-        // // $order = $this->orderRepository->getData();
-        // var_dump($order);die();
+        $searchCriteria = $this->searchCriteriaBuilder->create();
+        $attributeRepository = $this->attributeRepository->getList('order',$searchCriteria);
 
         $optionsMetadata = [];
         
-        // // foreach ($attributeRepository->getItems() as $items) {
-        // //     $optionsMetadata[$items->getAttributeCode()] = $items->getFrontendLabel();
-        // // }
-
+        foreach ($attributeRepository->getItems() as $items) {
+            $optionsMetadata[$items->getAttributeCode()] = $items->getFrontendLabel();
+        }
+        
         return $optionsMetadata;
     }
 }

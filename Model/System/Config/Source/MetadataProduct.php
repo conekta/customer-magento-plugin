@@ -47,8 +47,8 @@ class MetadataProduct implements ArrayInterface
 
         $optionsMetadata = [];
         
-        foreach ($attributeRepository->getItems() as $items) {
-            $optionsMetadata[$items->getAttributeCode()] = $items->getFrontendLabel();
+        foreach ($attributeRepository->getItems() as $item) {
+            $optionsMetadata[$item->getAttributeCode()] = $item->getFrontendLabel();
         }
         
         return $optionsMetadata;
