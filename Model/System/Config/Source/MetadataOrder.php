@@ -11,18 +11,27 @@ class MetadataOrder implements ArrayInterface
      * @var \Magento\Framework\Api\SearchCriteriaBuilder
      */
     protected $searchCriteriaBuilder;
+
     /**
      * @var \Magento\Eav\Api\AttributeRepositoryInterface
      */
-    // protected $orderRepository;
+
     protected $attributeRepository;
+
+    /**
+     * @var \Magento\Sales\Model\ResourceModel\Order
+     */
+
+    protected $orderResource;
 
     public function __construct(
         \Magento\Framework\Api\SearchCriteriaBuilder $searchCriteriaBuilder,
-        \Magento\Eav\Api\AttributeRepositoryInterface $attributeRepository
+        \Magento\Eav\Api\AttributeRepositoryInterface $attributeRepository,
+        \Magento\Sales\Model\ResourceModel\Order $orderResource
     ) {
             $this->searchCriteriaBuilder = $searchCriteriaBuilder;
             $this->attributeRepository = $attributeRepository;
+            $this->orderResource = $orderResource;
     }
     
     public function toOptionArray()
@@ -39,15 +48,14 @@ class MetadataOrder implements ArrayInterface
 
     public function getOptions()
     {
-        $searchCriteria = $this->searchCriteriaBuilder->create();
-        $attributeRepository = $this->attributeRepository->getList('order',$searchCriteria);
-
+        $orderAttributes = array_keys($this->orderResource->getConnection()->describeTable('sales_order'));
         $optionsMetadata = [];
-        
-        foreach ($attributeRepository->getItems() as $items) {
-            $optionsMetadata[$items->getAttributeCode()] = $items->getFrontendLabel();
+
+        foreach ($orderAttributes as $attr) {
+            $label = ucwords(str_replace('_',' ',$attr));
+            $optionsMetadata[$attr] = $label;
         }
-        
+
         return $optionsMetadata;
     }
 }

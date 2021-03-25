@@ -10,17 +10,7 @@ class TimeFormat implements ArrayInterface
     /**
      * @return array
      */
-    // public function toOptionArray()
-    // {
-    //     if (!$this->options) {
-    //         $this->options = [
-    //             ['value' => 'new', 'label' => __('New')],
-    //             ['value' => 'refurbished', 'label' => __('Refurbished')],
-    //         ];
-    //     }
-
-        // return $this->options;
-
+    
     public function toOptionArray()
     {
         return [['value' => 1, 'label' => __('Days')], ['value' => 0, 'label' => __('Hours')]];

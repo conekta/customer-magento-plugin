@@ -48,7 +48,7 @@ class AuthorizeRequest implements BuilderInterface
 
         $request['metadata'] = [
             'order_id'       => $order->getOrderIncrementId(),
-            'soft_validations'  => true
+            'soft_validations'  => 'true'
         ];
 
         $request['payment_method_details'] = $this->getChargeOxxo($amount, $expiry_date);

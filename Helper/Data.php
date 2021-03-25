@@ -99,10 +99,10 @@ class Data extends AbstractHelper
         return $this->_productMetadata->getVersion();
     }
 
-    public function getProductAttributes()
+    public function getMetadataAttributes($metadataPath)
     {
-        $productAttributes = $this->getConfigData('conekta/conekta_global','metadata_additional_products');
-        $attributesArray = explode(",",$productAttributes);
+        $attributes = $this->getConfigData('conekta/conekta_global',$metadataPath);
+        $attributesArray = explode(",",$attributes);
         
         return $attributesArray;
     }

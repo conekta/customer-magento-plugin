@@ -48,6 +48,9 @@ class MetadataProduct implements ArrayInterface
         $optionsMetadata = [];
         
         foreach ($attributeRepository->getItems() as $item) {
+            if ($item->getAttributeCode() == 'media_gallery') {
+                continue;
+            }
             $optionsMetadata[$item->getAttributeCode()] = $item->getFrontendLabel();
         }
         
