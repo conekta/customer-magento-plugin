@@ -8,29 +8,14 @@ use Magento\Framework\Option\ArrayInterface;
 class MetadataOrder implements ArrayInterface
 {
     /**
-     * @var \Magento\Framework\Api\SearchCriteriaBuilder
-     */
-    protected $searchCriteriaBuilder;
-
-    /**
-     * @var \Magento\Eav\Api\AttributeRepositoryInterface
-     */
-
-    protected $attributeRepository;
-
-    /**
      * @var \Magento\Sales\Model\ResourceModel\Order
      */
 
     protected $orderResource;
 
     public function __construct(
-        \Magento\Framework\Api\SearchCriteriaBuilder $searchCriteriaBuilder,
-        \Magento\Eav\Api\AttributeRepositoryInterface $attributeRepository,
         \Magento\Sales\Model\ResourceModel\Order $orderResource
     ) {
-            $this->searchCriteriaBuilder = $searchCriteriaBuilder;
-            $this->attributeRepository = $attributeRepository;
             $this->orderResource = $orderResource;
     }
     
@@ -48,7 +33,7 @@ class MetadataOrder implements ArrayInterface
 
     public function getOptions()
     {
-        $orderAttributes = array_keys($this->orderResource->getConnection()->describeTable('sales_order'));
+        $orderAttributes = array_keys($this->orderResource->getConnection()->describeTable('quote'));
         $optionsMetadata = [];
 
         foreach ($orderAttributes as $attr) {

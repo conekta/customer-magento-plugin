@@ -6,15 +6,13 @@ use Conekta\Payments\Logger\Logger as ConektaLogger;
 use Magento\Framework\Escaper;
 use Magento\Payment\Gateway\Data\PaymentDataObjectInterface;
 use Magento\Payment\Gateway\Request\BuilderInterface;
-use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Catalog\Model\ProductRepository;
 use Magento\Payment\Gateway\Helper\SubjectReader;
+use Magento\Checkout\Model\Session;
 
 class MetadataBuilder implements BuilderInterface
 {
     private $_conektaLogger;
-
-    protected $orderFactory;
 
     protected $_conektaHelper;
 
@@ -22,25 +20,23 @@ class MetadataBuilder implements BuilderInterface
 
     private $subjectReader;
 
-    private $repo;
+    private $session;
 
     public function __construct(
         Escaper $_escaper,
         ConektaHelper $conektaHelper,
         ConektaLogger $conektaLogger,
-        \Magento\Sales\Model\OrderFactory $orderFactory,
         ProductRepository $productRepository,
         SubjectReader $subjectReader,
-        OrderRepositoryInterface $repo
+        Session $session
     ) {
         $this->_conektaLogger = $conektaLogger;
         $this->_conektaLogger->info('Request MetadataBuilder :: __construct');
         $this->_conektaHelper = $conektaHelper;
         $this->_escaper = $_escaper;
-        $this->orderFactory = $orderFactory;
         $this->productRepository = $productRepository;
         $this->subjectReader = $subjectReader;
-        $this->repo = $repo;
+        $this->session = $session;
     }
 
     public function build(array $buildSubject)
@@ -55,8 +51,6 @@ class MetadataBuilder implements BuilderInterface
 
         $payment = $this->subjectReader->readPayment($buildSubject);
         $order = $payment->getOrder();
-        $orderID = $payment->getOrder()->getId();
-        $this->_conektaLogger->info('ID',[$order]);
         $items = $order->getItems();
         $productAttributes = $this->_conektaHelper->getMetadataAttributes('metadata_additional_products');
         $request = [];
@@ -73,38 +67,20 @@ class MetadataBuilder implements BuilderInterface
                 }
             }
         }
-        $this->_conektaLogger->info('hola');
-        $orderIncrementId = $order->getOrderIncrementId();
-        $this->_conektaLogger->info('hola1');
-        // $this->_conektaLogger->info('ORDERMODELdata1',[$order->getOrderModel()->load()->getData('')]);
-        // $this->_conektaLogger->info('ORDERMODELdata2',[$order->getOrderModel()->getData()]);
-        // $this->_conektaLogger->info('hola3');
-        // // $newOrder = $this->orderFactory->create()->loadByIncrementId($orderIncrementId);
-        // // $this->_conektaLogger->info('newOrder',[$newOrder]);
-
-        // $this->_conektaLogger->info('getPAYMENTdata',[$payment->getPayment()->getData()]);
-        // $this->_conektaLogger->info('getPAYMENThas',[$payment->getPayment()->getAdditionalInformation()]);
+        $this->_conektaLogger->info('sessionGetQuote',[$this->session->getQuote()->getData()]);
         $orderAttributes = $this->_conektaHelper->getMetadataAttributes('metadata_additional_order');
         if (count($orderAttributes) > 0) {
             foreach ($orderAttributes as $attr) {
-                // if ($order->getData($attr) == null) {
-                //     $request['metadata'][$attr] = '';
-                //     continue;
-                // }
-                // if (is_array($order->getData($attr))) {
-                //     $request['metadata'][$attr] = $order->getData($attr);
-                //     continue;
-                // }
-                // $req = $request['metadata'];
-                // $this->_conektaLogger->info('Request MetadataBuilder :: build : return req', $req);
-                // $this->_conektaLogger->info('punto de control');
-                // $var1 = [$attr];
-                // $this->_conektaLogger->info('OK atributo', $var1);
-                // $var2 = [$order];
-                // $this->_conektaLogger->info('ORDER: ', $var2);
-                // $var3 = [$order->getData('status')];
-                // $this->_conektaLogger->info('get STATUS', $var3);
-                $request['metadata'][$attr] = $order->getData($attr);
+                $quoteValue = $this->session->getQuote()->getData($attr);
+                if ($quoteValue == null) {
+                    $request['metadata'][$attr] = 'null';
+                    continue;
+                }
+                if (is_array($quoteValue)) {
+                    $request['metadata'][$attr] = $this->customImplode($quoteValue, ' | ');
+                    continue;
+                }
+                $request['metadata'][$attr] = $quoteValue;
             } 
         }
 
