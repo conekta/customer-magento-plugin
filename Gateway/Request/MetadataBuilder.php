@@ -67,7 +67,6 @@ class MetadataBuilder implements BuilderInterface
                 }
             }
         }
-        $this->_conektaLogger->info('sessionGetQuote',[$this->session->getQuote()->getData()]);
         $orderAttributes = $this->_conektaHelper->getMetadataAttributes('metadata_additional_order');
         if (count($orderAttributes) > 0) {
             foreach ($orderAttributes as $attr) {

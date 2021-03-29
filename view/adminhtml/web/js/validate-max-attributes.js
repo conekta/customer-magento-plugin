@@ -3,7 +3,6 @@ require([
     'mage/translate',
     'jquery/validate'],
     function($){
-        alert("as");
         const MAX_ATTRIBUTES = 12;
         var productAmount = 0;
         var orderAmount = 0;
