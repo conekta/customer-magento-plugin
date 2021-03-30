@@ -37,6 +37,9 @@ class MetadataOrder implements ArrayInterface
         $optionsMetadata = [];
 
         foreach ($orderAttributes as $attr) {
+            if ($attr == 'entity_id') {
+                continue;
+            }
             $label = ucwords(str_replace('_',' ',$attr));
             $optionsMetadata[$attr] = $label;
         }

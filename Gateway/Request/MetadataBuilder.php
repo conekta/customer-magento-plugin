@@ -79,7 +79,7 @@ class MetadataBuilder implements BuilderInterface
                     $request['metadata'][$attr] = $this->customImplode($quoteValue, ' | ');
                     continue;
                 }
-                $request['metadata'][$attr] = $quoteValue;
+                $request['metadata'][$attr] = strval($quoteValue);
             } 
         }
 
