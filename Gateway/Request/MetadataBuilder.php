@@ -8,7 +8,9 @@ use Magento\Payment\Gateway\Data\PaymentDataObjectInterface;
 use Magento\Payment\Gateway\Request\BuilderInterface;
 use Magento\Catalog\Model\ProductRepository;
 use Magento\Payment\Gateway\Helper\SubjectReader;
-use Magento\Checkout\Model\Session;
+use Magento\Checkout\Model\Session as CheckoutSession;
+use Magento\Customer\Model\Session as CustomerSession;
+ 
 
 class MetadataBuilder implements BuilderInterface
 {
@@ -20,7 +22,9 @@ class MetadataBuilder implements BuilderInterface
 
     private $subjectReader;
 
-    private $session;
+    private $checkoutSession;
+
+    private $customerSession;
 
     public function __construct(
         Escaper $_escaper,
@@ -28,7 +32,8 @@ class MetadataBuilder implements BuilderInterface
         ConektaLogger $conektaLogger,
         ProductRepository $productRepository,
         SubjectReader $subjectReader,
-        Session $session
+        CheckoutSession $checkoutSession,
+        CustomerSession $customerSession
     ) {
         $this->_conektaLogger = $conektaLogger;
         $this->_conektaLogger->info('Request MetadataBuilder :: __construct');
@@ -36,7 +41,8 @@ class MetadataBuilder implements BuilderInterface
         $this->_escaper = $_escaper;
         $this->productRepository = $productRepository;
         $this->subjectReader = $subjectReader;
-        $this->session = $session;
+        $this->checkoutSession = $checkoutSession;
+        $this->customerSession = $customerSession;
     }
 
     public function build(array $buildSubject)
@@ -63,23 +69,49 @@ class MetadataBuilder implements BuilderInterface
                     foreach ($productAttributes as $attr) {
                         $productValues[$attr] = $product->getData($attr);
                     }
-                    $request['metadata']['Product-' . $productId] = $this->customImplode($productValues, ' | ');
+                    $request['metadata']['Product-' . $productId] = $this->customFormat($productValues, ' | ');
                 }
             }
         }
         $orderAttributes = $this->_conektaHelper->getMetadataAttributes('metadata_additional_order');
         if (count($orderAttributes) > 0) {
             foreach ($orderAttributes as $attr) {
-                $quoteValue = $this->session->getQuote()->getData($attr);
+                $quoteValue = $this->checkoutSession->getQuote()->getData($attr);
                 if ($quoteValue == null) {
                     $request['metadata'][$attr] = 'null';
-                    continue;
                 }
-                if (is_array($quoteValue)) {
-                    $request['metadata'][$attr] = $this->customImplode($quoteValue, ' | ');
-                    continue;
+                else if (is_array($quoteValue)) {
+                    $request['metadata'][$attr] = $this->customFormat($quoteValue, ' | ');
                 }
-                $request['metadata'][$attr] = strval($quoteValue);
+                else {
+                    if (!is_string($quoteValue)) {
+                        if ($attr == 'customer_gender') {
+                            $customer = $this->customerSession->getCustomer();
+                            $gender = $customer->getAttribute('gender')->getSource()->getOptionText($customer->getData('gender'));
+                            $request['metadata'][$attr] = $gender;
+                        } else {
+                            $request['metadata'][$attr] = strval($quoteValue);
+                        }
+                    } else {
+                        if ( 
+                            $attr == 'is_active' || 
+                            $attr == 'is_virtual' || 
+                            $attr == 'is_multi_shipping' ||
+                            $attr == 'customer_is_guest' || 
+                            $attr == 'is_changed' || 
+                            $attr == 'is_persistent'
+                        )   {
+                            if ($quoteValue  == '0') {
+                                $request['metadata'][$attr] = 'no';
+                            }
+                            else if ($quoteValue  == '1') {
+                                $request['metadata'][$attr] = 'yes';
+                            }
+                        } else {
+                            $request['metadata'][$attr] = $quoteValue;
+                        }
+                    }
+                }
             } 
         }
 
@@ -88,7 +120,7 @@ class MetadataBuilder implements BuilderInterface
         return $request;
     }
 
-    private function customImplode($array, $glue) {
+    private function customFormat($array, $glue) {
         $ret = '';
         foreach ($array as $key => $item) {    
             if (is_array($item)) {
@@ -103,6 +135,14 @@ class MetadataBuilder implements BuilderInterface
             } else {
                 if ($item == '') {
                     $item = 'null';
+                } 
+                else if ($key == 'has_options' || $key == 'new') {
+                    if ($item == '0') {
+                        $item = 'no';
+                    }
+                    else if ($item == '1') {
+                        $item = 'yes';
+                    }
                 }
                 $ret .=  $key . ' : ' . $item . $glue;
             }
