@@ -79,16 +79,20 @@ class MetadataBuilder implements BuilderInterface
                 $quoteValue = $this->checkoutSession->getQuote()->getData($attr);
                 if ($quoteValue == null) {
                     $request['metadata'][$attr] = 'null';
-                }
-                else if (is_array($quoteValue)) {
+                } else if (is_array($quoteValue)) {
                     $request['metadata'][$attr] = $this->customFormat($quoteValue, ' | ');
-                }
-                else {
+                } else {
                     if (!is_string($quoteValue)) {
                         if ($attr == 'customer_gender') {
                             $customer = $this->customerSession->getCustomer();
                             $gender = $customer->getAttribute('gender')->getSource()->getOptionText($customer->getData('gender'));
                             $request['metadata'][$attr] = strtolower($gender);
+                        } else if ($attr == 'is_changed') {
+                            if ($quoteValue  == 0) {
+                                $request['metadata'][$attr] = 'no';  
+                            } else if ($quoteValue  == 1) {
+                                $request['metadata'][$attr] = 'yes';
+                            }
                         } else {
                             $request['metadata'][$attr] = strval($quoteValue);
                         }
@@ -98,13 +102,11 @@ class MetadataBuilder implements BuilderInterface
                             $attr == 'is_virtual' || 
                             $attr == 'is_multi_shipping' ||
                             $attr == 'customer_is_guest' || 
-                            $attr == 'is_changed' || 
                             $attr == 'is_persistent'
                         )   {
                             if ($quoteValue  == '0') {
                                 $request['metadata'][$attr] = 'no';
-                            }
-                            else if ($quoteValue  == '1') {
+                            } else if ($quoteValue  == '1') {
                                 $request['metadata'][$attr] = 'yes';
                             }
                         } else {
@@ -114,7 +116,6 @@ class MetadataBuilder implements BuilderInterface
                 }
             } 
         }
-
         $this->_conektaLogger->info('Request MetadataBuilder :: build : return request', $request);
 
         return $request;
@@ -135,12 +136,10 @@ class MetadataBuilder implements BuilderInterface
             } else {
                 if ($item == '') {
                     $item = 'null';
-                } 
-                else if ($key == 'has_options' || $key == 'new') {
+                } else if ($key == 'has_options' || $key == 'new') {
                     if ($item == '0') {
                         $item = 'no';
-                    }
-                    else if ($item == '1') {
+                    } else if ($item == '1') {
                         $item = 'yes';
                     }
                 }
