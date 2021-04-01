@@ -88,7 +88,7 @@ class MetadataBuilder implements BuilderInterface
                         if ($attr == 'customer_gender') {
                             $customer = $this->customerSession->getCustomer();
                             $gender = $customer->getAttribute('gender')->getSource()->getOptionText($customer->getData('gender'));
-                            $request['metadata'][$attr] = $gender;
+                            $request['metadata'][$attr] = strtolower($gender);
                         } else {
                             $request['metadata'][$attr] = strval($quoteValue);
                         }
