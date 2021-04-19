@@ -2,11 +2,11 @@
     "name": "conekta/conekta_payments",
     "description": "Conekta payment gateway",
     "require": {
-        
+        "magento/module-sales": "103.0.*",
         "conekta/conekta-php": "*"
     },
     "type": "magento2-module",
-    "version": "3.0.0",
+    "version": "4.0.0",
     "license": [
         "OSL-3.0",
         "AFL-3.0"
