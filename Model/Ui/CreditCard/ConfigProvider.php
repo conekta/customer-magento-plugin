@@ -42,7 +42,7 @@ class ConfigProvider implements ConfigProviderInterface
                     'hasVerification' => true,
                     'cvvImageUrl' => $this->getCvvImageUrl(),
                     'monthly_installments' => $this->getMonthlyInstallments(),
-                    'active_monthly_installments' => $this->getMonthlyInstallments(),
+                    'active_monthly_installments' => $this->getActiveMonthlyInstallments(),
                     'minimum_amount_monthly_installments' => $this->getMinimumAmountMonthlyInstallments(),
                     'total' => $this->getQuote()->getGrandTotal()
                 ]
@@ -87,6 +87,19 @@ class ConfigProvider implements ConfigProviderInterface
     public function getMinimumAmountMonthlyInstallments()
     {
         return $this->_conektaHelper->getConfigData('conekta_cc', 'minimum_amount_monthly_installments');
+    }
+
+    public function getActiveMonthlyInstallments()
+    {
+      $active_monthly_installments = $this->_conektaHelper->getConfigData('conekta/conekta_creditcard', 'active_monthly_installments');
+      if ($active_monthly_installments == "0")
+      {
+        return false;
+      }
+      else
+      {
+        return true;
+      }
     }
 
     public function getCvvImageUrl()
