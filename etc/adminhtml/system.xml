@@ -35,12 +35,27 @@
                     <field id="conekta_webhook" translate="label" type="text" sortOrder="60" showInDefault="1" showInWebsite="0" showInStore="0">
                         <label>Webhook</label>
                         <comment>
-                            <![CDATA[Default webhook is: <strong>your_magento_host/conekta/webhook/listener</strong>]]>
+                            <![CDATA[Default webhook is: <strong>your_magenpaymentsto_host/conekta/webhook/listener</strong>]]>
                         </comment>
                     </field>
                     <field id="debug" translate="label" type="select" sortOrder="70" showInDefault="1" showInWebsite="1" showInStore="0">
                         <label>Debug</label>
                         <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    </field>
+                    <field id="explanation" translate="label" type="Conekta\Payments\Block\Adminhtml\ExplanationLabel" sortOrder="75" showInDefault="1" showInWebsite="1" showInStore="0"/>
+                    <field id="metadata_additional_products" translate="label" type="multiselect" sortOrder="80" showInDefault="1" showInWebsite="1" showInStore="0">
+                        <label>Additional products attributes to send in metadata</label>
+                        <tooltip>(Ctrl + Click to select more options)</tooltip>
+                        <can_be_empty>1</can_be_empty>
+                        <source_model>Conekta\Payments\Model\System\Config\Source\MetadataProduct</source_model>
+                        <validate>validate-product-attributes</validate>
+                    </field>
+                    <field id="metadata_additional_order" translate="label" type="multiselect" sortOrder="90" showInDefault="1" showInWebsite="1" showInStore="0">
+                        <label>Additional order attributes to send in metadata</label>
+                        <tooltip>(Ctrl + Click to select more options)</tooltip>
+                        <can_be_empty>1</can_be_empty>
+                        <source_model>Conekta\Payments\Model\System\Config\Source\MetadataOrder</source_model>
+                        <validate>validate-order-attributes</validate>
                     </field>
                 </group>
                 <!--creditcard-->
