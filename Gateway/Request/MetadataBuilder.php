@@ -10,7 +10,6 @@ use Magento\Catalog\Model\ProductRepository;
 use Magento\Payment\Gateway\Helper\SubjectReader;
 use Magento\Checkout\Model\Session as CheckoutSession;
 use Magento\Customer\Model\Session as CustomerSession;
- 
 
 class MetadataBuilder implements BuilderInterface
 {
@@ -79,7 +78,7 @@ class MetadataBuilder implements BuilderInterface
                 $quoteValue = $this->checkoutSession->getQuote()->getData($attr);
                 if ($quoteValue == null) {
                     $request['metadata'][$attr] = 'null';
-                } else if (is_array($quoteValue)) {
+                } elseif (is_array($quoteValue)) {
                     $request['metadata'][$attr] = $this->customFormat($quoteValue, ' | ');
                 } else {
                     if (!is_string($quoteValue)) {
@@ -87,26 +86,25 @@ class MetadataBuilder implements BuilderInterface
                             $customer = $this->customerSession->getCustomer();
                             $gender = $customer->getAttribute('gender')->getSource()->getOptionText($customer->getData('gender'));
                             $request['metadata'][$attr] = strtolower($gender);
-                        } else if ($attr == 'is_changed') {
+                        } elseif ($attr == 'is_changed') {
                             if ($quoteValue  == 0) {
-                                $request['metadata'][$attr] = 'no';  
-                            } else if ($quoteValue  == 1) {
+                                $request['metadata'][$attr] = 'no';
+                            } elseif ($quoteValue  == 1) {
                                 $request['metadata'][$attr] = 'yes';
                             }
                         } else {
                             $request['metadata'][$attr] = strval($quoteValue);
                         }
                     } else {
-                        if ( 
-                            $attr == 'is_active' || 
-                            $attr == 'is_virtual' || 
+                        if ($attr == 'is_active' ||
+                            $attr == 'is_virtual' ||
                             $attr == 'is_multi_shipping' ||
-                            $attr == 'customer_is_guest' || 
+                            $attr == 'customer_is_guest' ||
                             $attr == 'is_persistent'
-                        )   {
+                        ) {
                             if ($quoteValue  == '0') {
                                 $request['metadata'][$attr] = 'no';
-                            } else if ($quoteValue  == '1') {
+                            } elseif ($quoteValue  == '1') {
                                 $request['metadata'][$attr] = 'yes';
                             }
                         } else {
@@ -114,16 +112,17 @@ class MetadataBuilder implements BuilderInterface
                         }
                     }
                 }
-            } 
+            }
         }
         $this->_conektaLogger->info('Request MetadataBuilder :: build : return request', $request);
 
         return $request;
     }
 
-    private function customFormat($array, $glue) {
+    private function customFormat($array, $glue)
+    {
         $ret = '';
-        foreach ($array as $key => $item) {    
+        foreach ($array as $key => $item) {
             if (is_array($item)) {
                 if (count($item) == 0) {
                     $item = 'null';
@@ -136,10 +135,10 @@ class MetadataBuilder implements BuilderInterface
             } else {
                 if ($item == '') {
                     $item = 'null';
-                } else if ($key == 'has_options' || $key == 'new') {
+                } elseif ($key == 'has_options' || $key == 'new') {
                     if ($item == '0') {
                         $item = 'no';
-                    } else if ($item == '1') {
+                    } elseif ($item == '1') {
                         $item = 'yes';
                     }
                 }

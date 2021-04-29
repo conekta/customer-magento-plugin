@@ -22,7 +22,7 @@ class MetadataProduct implements ArrayInterface
         \Magento\Eav\Api\AttributeRepositoryInterface $attributeRepository
     ) {
             $this->searchCriteriaBuilder = $searchCriteriaBuilder;
-            $this->attributeRepository = $attributeRepository;     
+            $this->attributeRepository = $attributeRepository;
     }
     
     public function toOptionArray()

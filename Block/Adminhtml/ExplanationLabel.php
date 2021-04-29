@@ -2,7 +2,6 @@
 
 namespace Conekta\Payments\Block\Adminhtml;
 
-
 class ExplanationLabel extends \Magento\Framework\Data\Form\Element\AbstractElement
 {
 
