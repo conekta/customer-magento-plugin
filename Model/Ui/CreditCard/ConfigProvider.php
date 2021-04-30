@@ -91,15 +91,12 @@ class ConfigProvider implements ConfigProviderInterface
 
     public function getActiveMonthlyInstallments()
     {
-      $active_monthly_installments = $this->_conektaHelper->getConfigData('conekta/conekta_creditcard', 'active_monthly_installments');
-      if ($active_monthly_installments == "0")
-      {
-        return false;
-      }
-      else
-      {
-        return true;
-      }
+        $isActive = $this->_conektaHelper->getConfigData('conekta/conekta_creditcard', 'active_monthly_installments');
+        if ($isActive == "0") {
+            return false;
+        } else {
+            return true;
+        }
     }
 
     public function getCvvImageUrl()
