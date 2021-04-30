@@ -16,7 +16,6 @@ class MetadataProduct implements ArrayInterface
      */
     protected $attributeRepository;
 
-
     public function __construct(
         \Magento\Framework\Api\SearchCriteriaBuilder $searchCriteriaBuilder,
         \Magento\Eav\Api\AttributeRepositoryInterface $attributeRepository

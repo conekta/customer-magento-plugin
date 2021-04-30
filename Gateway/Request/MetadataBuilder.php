@@ -80,38 +80,38 @@ class MetadataBuilder implements BuilderInterface
                     $request['metadata'][$attr] = 'null';
                 } elseif (is_array($quoteValue)) {
                     $request['metadata'][$attr] = $this->customFormat($quoteValue, ' | ');
-                } else {
-                    if (!is_string($quoteValue)) {
-                        if ($attr == 'customer_gender') {
-                            $customer = $this->customerSession->getCustomer();
-                            $gender = $customer->getAttribute('gender')->getSource()->getOptionText($customer->getData('gender'));
-                            $request['metadata'][$attr] = strtolower($gender);
-                        } elseif ($attr == 'is_changed') {
-                            if ($quoteValue  == 0) {
-                                $request['metadata'][$attr] = 'no';
-                            } elseif ($quoteValue  == 1) {
-                                $request['metadata'][$attr] = 'yes';
-                            }
-                        } else {
-                            $request['metadata'][$attr] = strval($quoteValue);
+                } elseif (!is_string($quoteValue)) {
+                    if ($attr == 'customer_gender') {
+                        $customer = $this->customerSession->getCustomer();
+                        $customerDataGender = $customer->getData('gender');
+                        $gender = $customer->getAttribute('gender')->getSource()->getOptionText($customerDataGender);
+                        $request['metadata'][$attr] = strtolower($gender);
+                    } elseif ($attr == 'is_changed') {
+                        if ($quoteValue  == 0) {
+                            $request['metadata'][$attr] = 'no';
+                        } elseif ($quoteValue  == 1) {
+                            $request['metadata'][$attr] = 'yes';
                         }
                     } else {
-                        if ($attr == 'is_active' ||
-                            $attr == 'is_virtual' ||
-                            $attr == 'is_multi_shipping' ||
-                            $attr == 'customer_is_guest' ||
-                            $attr == 'is_persistent'
-                        ) {
-                            if ($quoteValue  == '0') {
-                                $request['metadata'][$attr] = 'no';
-                            } elseif ($quoteValue  == '1') {
-                                $request['metadata'][$attr] = 'yes';
-                            }
-                        } else {
-                            $request['metadata'][$attr] = $quoteValue;
+                        $request['metadata'][$attr] = (string)$quoteValue;
+                    }
+                } else {
+                    if ($attr == 'is_active' ||
+                        $attr == 'is_virtual' ||
+                        $attr == 'is_multi_shipping' ||
+                        $attr == 'customer_is_guest' ||
+                        $attr == 'is_persistent'
+                    ) {
+                        if ($quoteValue  == '0') {
+                            $request['metadata'][$attr] = 'no';
+                        } elseif ($quoteValue  == '1') {
+                            $request['metadata'][$attr] = 'yes';
                         }
+                    } else {
+                        $request['metadata'][$attr] = $quoteValue;
                     }
                 }
+                
             }
         }
         $this->_conektaLogger->info('Request MetadataBuilder :: build : return request', $request);
