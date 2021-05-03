@@ -101,8 +101,8 @@ class Data extends AbstractHelper
 
     public function getMetadataAttributes($metadataPath)
     {
-        $attributes = $this->getConfigData('conekta/conekta_global',$metadataPath);
-        $attributesArray = explode(",",$attributes);
+        $attributes = $this->getConfigData('conekta/conekta_global', $metadataPath);
+        $attributesArray = explode(",", $attributes);
         
         return $attributesArray;
     }

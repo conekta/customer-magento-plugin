@@ -15,5 +15,4 @@ class TimeFormat implements ArrayInterface
     {
         return [['value' => 1, 'label' => __('Days')], ['value' => 0, 'label' => __('Hours')]];
     }
-
 }
