@@ -34,7 +34,6 @@ class RefundBuilder implements BuilderInterface
         $order = $payment->getOrder();
         $amount =  $this->subjectReader->readAmount($buildSubject);
 
-
         $request['metadata'] = [
             'plugin' => 'Magento',
             'plugin_version' => $this->_conektaHelper->getMageVersion()
