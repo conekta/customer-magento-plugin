@@ -40,13 +40,17 @@ class AuthorizeRequest implements BuilderInterface
         
         $timeFormat = $this->_conektaHelper->getConfigData('conekta_oxxo', 'days_or_hours');
         if (!$timeFormat) {
-            $expiry_date = strtotime("+" . $this->_conektaHelper->getConfigData('conekta_oxxo', 'expiry_hours') . " hours");
+            $expiryHours = $this->_conektaHelper->getConfigData('conekta_oxxo', 'expiry_hours');
+            $expiry_date = strtotime("+" . $expiryHours . " hours");
         } else {
-            $expiry_date = strtotime("+" . $this->_conektaHelper->getConfigData('conekta_oxxo', 'expiry_days') . " days");
+            $expiryDays = $this->_conektaHelper->getConfigData('conekta_oxxo', 'expiry_days');
+            $expiry_date = strtotime("+" . $expiryDays . " days");
         }
         $amount = (int)$order->getGrandTotalAmount();
 
         $request['metadata'] = [
+            'plugin' => 'Magento',
+            'plugin_version' => $this->_conektaHelper->getMageVersion(),
             'order_id'       => $order->getOrderIncrementId(),
             'soft_validations'  => 'true'
         ];

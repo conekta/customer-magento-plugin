@@ -51,6 +51,8 @@ class CaptureRequest implements BuilderInterface
                 $token
             );
             $request['metadata'] = [
+                'plugin' => 'Magento',
+                'plugin_version' => $this->_conektaHelper->getMageVersion(),
                 'order_id'       => $order->getOrderIncrementId(),
                 'soft_validations'  => 'true'
             ];
