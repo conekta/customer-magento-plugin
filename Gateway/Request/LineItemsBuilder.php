@@ -48,12 +48,11 @@ class LineItemsBuilder implements BuilderInterface
             
             if ($version > 240) {
                 if ($item->getProductType() != 'bundle' && $item->getProductType() != 'configurable') {
-
                     
                     $price = (int) $item->getPrice();
-                    if($price === 0 && !empty($item->getParentItem()) )
+                    if ($price === 0 && !empty($item->getParentItem())) {
                         $price = (int) $item->getParentItem()->getPrice();
-                    
+                    }
 
                     $request['line_items'][] = [
                         'name' => $item->getName(),
