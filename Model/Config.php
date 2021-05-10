@@ -55,12 +55,10 @@ class Config
         try {
             $different = true;
             $webhooks = $this->_conektaWebhook->where();
-            $this->_conektaLogger->info('*****************', ['webhooks'=>$webhooks]);
             foreach ($webhooks as $webhook) {
                 if (strpos($webhook->webhook_url, $urlWebhook) !== false) {
                     $different = false;
                 }
-                $this->_conektaLogger->info('*****************', ['url'=>$urlWebhook, 'webhookUrl'=> $webhook->webhook_url, 'diferente' => $different ]);
             }
             if ($different) {
                 if (!$sandboxMode) {
