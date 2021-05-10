@@ -38,24 +38,13 @@
                             <![CDATA[Default webhook is: <strong>your_magento_host/conekta/webhook/listener</strong>]]>
                         </comment>
                     </field>
+                    <field id="enable_saved_card" translate="label" type="select" sortOrder="65" showInDefault="1" showInWebsite="1" showInStore="0">
+                        <label>Enable Save Card</label>
+                        <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    </field>
                     <field id="debug" translate="label" type="select" sortOrder="70" showInDefault="1" showInWebsite="1" showInStore="0">
                         <label>Debug</label>
                         <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-                    </field>
-                    <field id="explanation" translate="label" type="Conekta\Payments\Block\Adminhtml\ExplanationLabel" sortOrder="75" showInDefault="1" showInWebsite="1" showInStore="0"/>
-                    <field id="metadata_additional_products" translate="label" type="multiselect" sortOrder="80" showInDefault="1" showInWebsite="1" showInStore="0">
-                        <label>Additional products attributes to send in metadata</label>
-                        <tooltip>(Ctrl + Click to select more options)</tooltip>
-                        <can_be_empty>1</can_be_empty>
-                        <source_model>Conekta\Payments\Model\System\Config\Source\MetadataProduct</source_model>
-                        <validate>validate-product-attributes</validate>
-                    </field>
-                    <field id="metadata_additional_order" translate="label" type="multiselect" sortOrder="90" showInDefault="1" showInWebsite="1" showInStore="0">
-                        <label>Additional order attributes to send in metadata</label>
-                        <tooltip>(Ctrl + Click to select more options)</tooltip>
-                        <can_be_empty>1</can_be_empty>
-                        <source_model>Conekta\Payments\Model\System\Config\Source\MetadataOrder</source_model>
-                        <validate>validate-order-attributes</validate>
                     </field>
                 </group>
                 <!--creditcard-->
@@ -64,6 +53,15 @@
                     <field id="active" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="0">
                         <label>Enabled</label>
                         <config_path>payment/conekta_cc/active</config_path>
+                        <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    </field>
+                    <field id="title" translate="label" type="text" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+                        <label>Title</label>
+                        <config_path>payment/conekta_cc/title</config_path>
+                    </field>
+                    <field id="iframe_enabled" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="0">
+                        <label>3D-Secure Enabled</label>
+                        <config_path>payment/conekta_cc/iframe_enabled</config_path>
                         <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     </field>
                     <field id="cctypes" translate="label" type="multiselect" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="0">
@@ -155,42 +153,22 @@
                         <comment>The maximum amount is $10000 [MXN]</comment>
                         <config_path>payment/conekta_oxxo/max_order_total</config_path>
                     </field>
-                    <field id="days_or_hours" translate="label" type="select" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="0">
-                        <depends>
-                            <field id="active">1</field>
-                        </depends>
-                        <label>Expiration Format</label>
-                        <config_path>payment/conekta_oxxo/days_or_hours</config_path>
-                        <source_model>Conekta\Payments\Model\System\Config\Source\TimeFormat</source_model>
-                    </field>
-	                <field id="expiry_days" translate="label" type="text" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="0">
+	                <field id="expiry_days" translate="label" type="text" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="0">
 	                    <label>Expiry (# days)</label>
                         <depends>
                             <field id="active">1</field>
-                            <field id="days_or_hours">1</field>
                         </depends>
                         <config_path>payment/conekta_oxxo/expiry_days</config_path>
                         <validate>validate-expiry-days</validate>
-                        <comment>The maximum is 31 days</comment>
 	                </field>
-	                <field id="expiry_hours" translate="label" type="text" sortOrder="60" showInDefault="1" showInWebsite="1" showInStore="0">
-	                    <label>Expiry (# hours)</label>
-                        <depends>
-                            <field id="active">1</field>
-                            <field id="days_or_hours">0</field>
-                        </depends>
-                        <config_path>payment/conekta_oxxo/expiry_hours</config_path>
-                        <validate>validate-expiry-hours</validate>
-                        <comment>The maximum is 23 hours</comment>
-	                </field>
-	                <field id="instructions" translate="label" type="textarea" sortOrder="70" showInDefault="1" showInWebsite="1" showInStore="1">
+	                <field id="instructions" translate="label" type="textarea" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
 	                    <label>Instructions</label>
                         <depends>
                             <field id="active">1</field>
                         </depends>
 	                    <config_path>payment/conekta_oxxo/instructions</config_path>
 	                </field>
-                    <field id="order_status" translate="label" type="select" sortOrder="80" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <field id="order_status" translate="label" type="select" sortOrder="60" showInDefault="1" showInWebsite="1" showInStore="0">
                         <label>New Order Status</label>
                         <source_model>Conekta\Payments\Model\Source\Order\Status\Pendingpayment</source_model>
                         <depends>

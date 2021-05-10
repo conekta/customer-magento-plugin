@@ -1,13 +1,13 @@
 <?php
 namespace Conekta\Payments\Gateway\Http\Client\Oxxo;
 
+use Conekta\Order as ConektaOrder;
 use Conekta\Payments\Gateway\Http\Util\HttpUtil;
 use Conekta\Payments\Helper\Data as ConektaHelper;
 use Conekta\Payments\Logger\Logger as ConektaLogger;
 use Magento\Payment\Gateway\Http\ClientInterface;
 use Magento\Payment\Gateway\Http\TransferInterface;
 use Magento\Payment\Model\Method\Logger;
-use Conekta\Order as ConektaOrder;
 
 class TransactionAuthorize implements ClientInterface
 {
@@ -70,6 +70,7 @@ class TransactionAuthorize implements ClientInterface
     {
         $this->_conektaLogger->info('HTTP Client Oxxo TransactionAuthorize :: placeRequest');
         $request = $transferObject->getBody();
+
         $orderParams['currency']         = $request['CURRENCY'];
         $orderParams['line_items']       = $request['line_items'];
         $orderParams['tax_lines']        = $request['tax_lines'];
@@ -104,6 +105,7 @@ class TransactionAuthorize implements ClientInterface
             $error_code = $e->getMessage();
             $result_code = 666;
             $this->logger->error(__('[Conekta]: Payment capturing error.'));
+            $this->_conektaHelper->deleteSavedCard($orderParams, $chargeParams);
             $this->logger->debug(
                 [
                     'request' => $request,

@@ -106,6 +106,7 @@ class TransactionAuthorize implements ClientInterface
             $error_code = $e->getMessage();
             $result_code = 666;
             $this->logger->error(__('[Conekta]: Payment capturing error.'));
+            $this->_conektaHelper->deleteSavedCard($orderParams, $chargeParams);
             $this->logger->debug(
                 [
                     'request' => $request,
