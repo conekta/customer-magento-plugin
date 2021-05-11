@@ -16,13 +16,12 @@ class MetadataProduct implements ArrayInterface
      */
     protected $attributeRepository;
 
-
     public function __construct(
         \Magento\Framework\Api\SearchCriteriaBuilder $searchCriteriaBuilder,
         \Magento\Eav\Api\AttributeRepositoryInterface $attributeRepository
     ) {
             $this->searchCriteriaBuilder = $searchCriteriaBuilder;
-            $this->attributeRepository = $attributeRepository;     
+            $this->attributeRepository = $attributeRepository;
     }
     
     public function toOptionArray()
