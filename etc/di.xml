@@ -84,7 +84,6 @@
             <argument name="builders" xsi:type="array">
                 <item name="requestBuilder" xsi:type="string">Conekta\Payments\Gateway\Request\CreditCard\CaptureRequest</item>
                 <item name="lineItems" xsi:type="string">Conekta\Payments\Gateway\Request\LineItemsBuilder</item>
-                <item name="metadata" xsi:type="string">Conekta\Payments\Gateway\Request\MetadataBuilder</item>
                 <item name="taxLines" xsi:type="string">Conekta\Payments\Gateway\Request\TaxLinesBuilder</item>
                 <item name="customerInfo" xsi:type="string">Conekta\Payments\Gateway\Request\CustomerInfoBuilder</item>
                 <item name="shippingLines" xsi:type="string">Conekta\Payments\Gateway\Request\ShippingLinesBuilder</item>
@@ -222,7 +221,6 @@
             <argument name="builders" xsi:type="array">
                 <item name="requestBuilder" xsi:type="string">Conekta\Payments\Gateway\Request\Oxxo\AuthorizeRequest</item>
                 <item name="lineItems" xsi:type="string">Conekta\Payments\Gateway\Request\LineItemsBuilder</item>
-                <item name="metadata" xsi:type="string">Conekta\Payments\Gateway\Request\MetadataBuilder</item>
                 <item name="taxLines" xsi:type="string">Conekta\Payments\Gateway\Request\TaxLinesBuilder</item>
                 <item name="customerInfo" xsi:type="string">Conekta\Payments\Gateway\Request\CustomerInfoBuilder</item>
                 <item name="shippingLines" xsi:type="string">Conekta\Payments\Gateway\Request\ShippingLinesBuilder</item>
@@ -326,7 +324,6 @@
             <argument name="builders" xsi:type="array">
                 <item name="requestBuilder" xsi:type="string">Conekta\Payments\Gateway\Request\Spei\AuthorizeRequest</item>
                 <item name="lineItems" xsi:type="string">Conekta\Payments\Gateway\Request\LineItemsBuilder</item>
-                <item name="metadata" xsi:type="string">Conekta\Payments\Gateway\Request\MetadataBuilder</item>
                 <item name="taxLines" xsi:type="string">Conekta\Payments\Gateway\Request\TaxLinesBuilder</item>
                 <item name="customerInfo" xsi:type="string">Conekta\Payments\Gateway\Request\CustomerInfoBuilder</item>
                 <item name="shippingLines" xsi:type="string">Conekta\Payments\Gateway\Request\ShippingLinesBuilder</item>

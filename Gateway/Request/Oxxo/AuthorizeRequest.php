@@ -34,6 +34,7 @@ class AuthorizeRequest implements BuilderInterface
     public function build(array $buildSubject)
     {
         $this->_conektaLogger->info('Request Oxxo AuthorizeRequest :: build');
+
         $paymentDO = $this->subjectReader->readPayment($buildSubject);
         $payment = $paymentDO->getPayment();
         $order = $paymentDO->getOrder();

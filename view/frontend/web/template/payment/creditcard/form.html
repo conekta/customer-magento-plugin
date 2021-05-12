@@ -1,54 +1,70 @@
-<fieldset data-bind="attr: {class: 'fieldset payment items ccard ' + getCode(), id: 'payment_form_top' + getCode()}">
-    <div class="field text required">
-        <label data-bind="attr: {for: getCode() + '_card_holder_name'}" class="label">
-            <span><!-- ko i18n: 'Nombre del titular'--><!-- /ko --></span>
+<!-- ko if: getSaveCardEnable() && getCardList().length >= 1 -->
+    <fieldset data-bind="attr: {class: 'fieldset payment items ccard ' + getCode(), id: 'payment_form_top_card' + getCode()}">
+        <label data-bind="attr: {for: getCode() + '_saved_card'}" class="label">
+            <span><!-- ko i18n: 'Saved Card'--><!-- /ko --></span>
         </label>
-        <div class="control">
-            <input type="text" name="payment[card_holder_name]" class="input-text" value=""
-                   data-bind="attr: {
-                                    id: getCode() + '_card_holder_name',
-                                    title: $t('Nombre del titular'),
-                                    'data-container': getCode() + '-card_holder_name',
-                                    'data-validate': JSON.stringify({required:true})
-                                    },
-                              enable: isActive($parents)"/>
-        </div>
-    </div>
+        <select name="payment[saved_card]" class="select input-text"
+                data-bind="
+                        attr: {id: getCode()+'_saved_card'},
+                        options: getCardList(),
+                        optionsValue: 'value',
+                        optionsText: 'type',
+                        optionsCaption: $t('--Please Select Saved Card or Add New Card--'),
+                        value: ChangeCard
+                        ">
+        </select>
+    </fieldset>
+    <!-- ko if: paymentsShowNewCardSection() -->
+        <!-- ko if: paymentsShowNewCardSection() === true && activeMonthlyInstallments() && getTotal() >= getMinimumAmountMonthlyInstallments() -->
+        <fieldset data-bind="attr: {class: 'fieldset payment items ccard ' + getCode(), id: 'payment_form_bottom' + getCode()}">
+            <div class="field type">
+                <label data-bind="attr: {for: getCode() + '_monthly_installments'}" class="label">
+                    <span><!-- ko i18n: 'Meses sin intereses'--><!-- /ko --></span>
+                </label>
+                <div class="control">
+                    <select name="payment[monthly_installments]" class="select select-monthly_installments"
+                            data-bind="attr: {
+                                                id: getCode() + '_monthly_installments', 'data-container': getCode() + '-monthly_installments',
+                                                'data-validate': JSON.stringify({})},
+                                                enable: isActive($parents),
+                                                options: getMonthlyInstallments(),
+                                                optionsText: function(month) {
+                                                    if (month == 1) {
+                                                        return 'Un solo pago';
+                                                    } else {
+                                                        return month + ' meses';
+                                                    }
+                                              }">
+                    </select>
+                </div>
+            </div>
+        </fieldset>
+        <!--/ko-->
+    <!--/ko-->
 
-    <input type="hidden" name="payment[card_token]" class="input-text" value=""
-           data-bind="attr: {
-                            id: getCode() + '_card_token',
-                            'data-container': getCode() + '-card_token'
-                            }"/>
-
-</fieldset>
-
+<!--/ko-->
 <input type="hidden" id="card_token" name="card_token" value="" >
 
-<!-- ko template: 'Magento_Payment/payment/cc-form' --><!-- /ko -->
+<!-- ko if: paymentsShowNewCardSection() === false -->
+    <!-- ko if: isLoggedIn() && getSaveCardEnable() -->
+        <fieldset data-bind="attr: {class: 'fieldset payment items ccard ' + getCode(), id: 'payment_form_save_card_later' + getCode()}">
+            <div class="field type">
 
-<!-- ko if: activeMonthlyInstallments() && getTotal() >= getMinimumAmountMonthlyInstallments() -->
-<fieldset data-bind="attr: {class: 'fieldset payment items ccard ' + getCode(), id: 'payment_form_bottom' + getCode()}">
-    <div class="field type">
-        <label data-bind="attr: {for: getCode() + '_monthly_installments'}" class="label">
-            <span><!-- ko i18n: 'Meses sin intereses'--><!-- /ko --></span>
-        </label>
-        <div class="control">
-            <select name="payment[monthly_installments]" class="select select-monthly_installments"
-                    data-bind="attr: {
-                                        id: getCode() + '_monthly_installments', 'data-container': getCode() + '-monthly_installments',
-                                        'data-validate': JSON.stringify({})},
-                                        enable: isActive($parents),
-                                        options: getMonthlyInstallments(),
-                                        optionsText: function(month) {
-                                            if (month == 1) {
-                                                return 'Un solo pago';
-                                            } else {
-                                                return month + ' meses';
-                                            }
-                                      }">
-            </select>
-        </div>
-    </div>
-</fieldset>
+                <label data-bind="attr: {for: getCode() + '_saved_card_later'}" class="label">
+                    <span><!-- ko i18n: 'Save Card for Later?'--><!-- /ko --></span>
+                    <!--                <div class="control"></div>-->
+                    <input type="checkbox"
+                           name="payment[saved_card_later]"
+                           class="checkbox"
+                           data-bind="attr: {'id': getCode() + '_saved_card_later'}, checked: SavedCardLater"/>
+
+                </label>
+            </div>
+        </fieldset>
+    <!--/ko-->
+    <!-- ko if: paymentsShowNewCardSection() === false && getIframe() -->
+    <fieldset data-bind="attr: {class: 'fieldset payment items threeds_checkout ' + getCode(), id: 'threeds_checkout' + getCode()}">
+        <div id="conektaIframeContainer" style="width: 500px; height: 700px; margin-left: auto; margin-right: auto;"></div>
+    </fieldset>
+    <!--/ko-->
 <!--/ko-->

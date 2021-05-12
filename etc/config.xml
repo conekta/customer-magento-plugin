@@ -4,11 +4,12 @@
         <payment>
             <conekta_cc>
                 <active>0</active>
-                <title><![CDATA[Pago con tarjeta de crédito o débito]]></title>
+                <title>3D-Secure</title>
                 <group>conekta</group>
                 <model>ConektaPaymentsCreditCardFacade</model>
                 <cctypes>AE,VI,MC</cctypes>
                 <monthly_installments>3,6,9,12,18</monthly_installments>
+                <iframe_enabled>0</iframe_enabled>
                 <minimum_amount_monthly_installments>300</minimum_amount_monthly_installments>
                 <sort_order>1</sort_order>
                 <order_status>pending</order_status>
@@ -36,9 +37,7 @@
                 <group>offline</group>
                 <min_order_total>10</min_order_total>
                 <max_order_total>10000</max_order_total>
-                <days_or_hours>1</days_or_hours>
-                <expiry_days>2</expiry_days>
-                <expiry_hours>23</expiry_hours>
+                <expiry_days>7</expiry_days>
                 <instructions><![CDATA[Instrucciones de Pago]]></instructions>
                 <is_offline>1</is_offline>
                 <can_use_checkout>1</can_use_checkout>

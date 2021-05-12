@@ -32,4 +32,16 @@
             </argument>
         </arguments>
     </type>
+
+    <!-- // Conekta Checkout Variables // -->
+    <virtualType name="Conekta\Payments\Model\Session\Storage" type="Magento\Framework\Session\Storage">
+        <arguments>
+            <argument name="namespace" xsi:type="string">conektacheckoutconfig</argument>
+        </arguments>
+    </virtualType>
+    <type name="Conekta\Payments\Model\Session">
+        <arguments>
+            <argument name="storage" xsi:type="object">Conekta\Payments\Model\Session\Storage</argument>
+        </arguments>
+    </type>
 </config>
