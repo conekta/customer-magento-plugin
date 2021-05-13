@@ -150,11 +150,13 @@ class ConektaOrder extends AbstractHelper
             $customerId = $customer->getId();
             $customerRequest = [];
             if ($customerId) {
-                $customerRequest['name'] = $customer->getName();
+                //name without numbers
+                $customerRequest['name'] = preg_replace('/[0-9]+/', '', $customer->getName());
                 $customerRequest['email'] = $customer->getEmail();
                 $customerRequest['phone'] = $shippingAddress->getTelephone();
             } else {
-                $customerRequest['name'] = $shippingAddress->getName();
+                //name without numbers
+                $customerRequest['name'] = preg_replace('/[0-9]+/', '',$shippingAddress->getName());
                 $customerRequest['email'] = $guestEmail;
                 $customerRequest['phone'] = $shippingAddress->getTelephone();
             }
@@ -190,22 +192,23 @@ class ConektaOrder extends AbstractHelper
         $validOrderWithCheckout['customer_info'] = [
             'customer_id' => $conektaCustomerId
         ];
-
+        
+        $threeDsEnabled =  $this->_conektaHelper->getConfigData('conekta_cc', 'iframe_enabled') ? true : false;
         $installments = $this->getMonthlyInstallments();
         $validOrderWithCheckout['checkout']    = [
             'allowed_payment_methods' => ["cash", "card", "bank_transfer"],
             'monthly_installments_enabled' => $installments['active_installments'] ? true : false,
             'monthly_installments_options' => $installments['monthly_installments'],
-            'on_demand_enabled' => true, //agregar deteccion
-            'force_3ds_flow' => true, 
+            'on_demand_enabled' => true, //TODO detect from configuration
+            'force_3ds_flow' => $threeDsEnabled,
         ];
         $validOrderWithCheckout['currency']= self::CURRENCY_CODE;
         $validOrderWithCheckout['checkout']['expires_at'] = $this->getExpiredAt();
         $validOrderWithCheckout['metadata'] = $this->getQuoteId();
-        $iframeEnabled =  $this->_conektaHelper->getConfigData('conekta_cc', 'iframe_enabled') ? true : false;
-        $validOrderWithCheckout['force_3ds_flow'] = true;//$iframeEnabled;
+        
+        $validOrderWithCheckout['force_3ds_flow'] = $threeDsEnabled;
         $checkoutId = '';
-
+        
         try {
             $order = $this->conektaOrderApi->create($validOrderWithCheckout);
             $this->conektaLogger->info('The Order is created');
@@ -297,7 +300,7 @@ class ConektaOrder extends AbstractHelper
     {
         $version = (int)str_replace('.', '', $this->_conektaHelper->getMageVersion());
         $request = [];
-        $items = $this->getQuote()->getItems();
+        $items = $this->getQuote()->getAllItems();
         foreach ($items as $itemId => $item) {
             if ($version > 233) {
                 if ($item->getProductType() != 'bundle' && $item->getProductType() != 'configurable') {
@@ -311,6 +314,7 @@ class ConektaOrder extends AbstractHelper
                             $item->getProductType()
                         ]
                     ];
+
                 }
             } else {
                 if ($item->getProductType() != 'bundle' && $item->getPrice() > 0) {
