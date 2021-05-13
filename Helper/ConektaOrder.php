@@ -131,7 +131,7 @@ class ConektaOrder extends AbstractHelper
             $customer = $this->customerSession->getCustomer();
             $customerApi = null;
             $conektaCustomerId = $customer->getConektaCustomerId();
-            $this->conektaLogger->info('Create Blank Order :: customer', ['customer'=>$customer->getConektaCustomerId()]);
+            
             try {
                 $customerApi = $this->conektaCustomer->find($conektaCustomerId);
             } catch (\Conekta\ProcessingError $error) {
