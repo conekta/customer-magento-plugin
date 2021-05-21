@@ -2,6 +2,7 @@
 namespace Conekta\Payments\Gateway\Request;
 
 use Conekta\Payments\Logger\Logger as ConektaLogger;
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Payment\Gateway\Data\PaymentDataObjectInterface;
 use Magento\Payment\Gateway\Helper\SubjectReader;
 use Magento\Payment\Gateway\Request\BuilderInterface;
@@ -36,14 +37,14 @@ class ShippingLinesBuilder implements BuilderInterface
         $quote_id = $payment->getAdditionalInformation('quote_id');
         $quote = $this->_cartRepository->get($quote_id);
         $amount = $quote->getShippingAddress()->getShippingAmount();
-
-        if (!empty($amount)) {
+        
+        if (isset($amount) && $amount >= 0) {
             $shipping_lines['amount'] = (int)($amount * 100);
             $shipping_lines['method'] = $quote->getShippingAddress()->getShippingMethod();
             $shipping_lines['carrier'] = $quote->getShippingAddress()->getShippingDescription();
             $request['shipping_lines'][] = $shipping_lines;
         } else {
-            $request['shipping_lines'] = [];
+            throw new LocalizedException(__('Shippment information should be provided'));
         }
 
         $this->_conektaLogger->info('Request ShippingLinesBuilder :: build : return request', $request);
