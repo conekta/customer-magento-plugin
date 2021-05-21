@@ -74,9 +74,7 @@ class Config
                     array_merge(["url" => $urlWebhook], $mode, $events)
                 );
             } else {
-                throw new \Magento\Framework\Validator\Exception(
-                    __('Webhook was already registered in Conekta!<br>URL: ' . $urlWebhook)
-                );
+                $this->_conektaLogger->info('[Conekta]: El webhook ' . $urlWebhook . ' ya se encuentra en Conekta!');
             }
         } catch (\Exception $e) {
             $errorMessage = $e->getMessage();
