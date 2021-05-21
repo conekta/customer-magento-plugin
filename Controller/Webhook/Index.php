@@ -100,7 +100,7 @@ class Index extends Action implements CsrfAwareActionInterface
             $charge = $body['data']['object'];
             if (isset($charge['payment_status']) && $charge['payment_status'] === "paid") {
                 try {
-                    $order = $this->orderInterface->loadByIncrementId($charge['metadata']['checkout_id']);
+                    $order = $this->orderInterface->loadByIncrementId($charge['metadata']['order_id']);
                     if (!$order->getId()) {
                         $this->_conektaLogger->error(
                             'Controller Index :: execute - The order does not allow an invoice to be created'
