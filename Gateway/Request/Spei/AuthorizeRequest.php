@@ -42,10 +42,10 @@ class AuthorizeRequest implements BuilderInterface
         $amount = (int)$order->getGrandTotalAmount();
 
         $request['metadata'] = [
-            'checkout_id'       => $order->getOrderIncrementId(),
-            'soft_validations'  => true
-
+            'order_id'       => $order->getOrderIncrementId(),
+            'soft_validations'  => 'true'
         ];
+        
         $request['payment_method_details'] = $this->getChargeSpei($amount, $expiry_date);
         $request['CURRENCY'] = $order->getCurrencyCode();
         $request['TXN_TYPE'] = 'A';
