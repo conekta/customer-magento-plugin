@@ -40,19 +40,21 @@ class Config
 
     public function createWebhook()
     {
-        $sandboxMode = $this->_conektaHelper->getConfigData('conekta/conekta_global', 'sandbox_mode');
-
-        $this->initializeConektaLibrary();
-
-        $urlWebhook = $this->_conektaHelper->getConfigData('conekta/conekta_global', 'conekta_webhook');
-
-        if (empty($urlWebhook)) {
-            $baseUrl = $this->_storeManager->getStore()->getBaseUrl();
-            $urlWebhook = $baseUrl . "conekta/webhook/listener";
-        }
-        $events = ["events" => ["charge.paid"]];
-        $errorMessage = null;
+        
         try {
+            $sandboxMode = $this->_conektaHelper->getConfigData('conekta/conekta_global', 'sandbox_mode');
+            $urlWebhook = $this->_conektaHelper->getConfigData('conekta/conekta_global', 'conekta_webhook');
+
+            if (empty($urlWebhook)) {
+                $baseUrl = $this->_storeManager->getStore()->getBaseUrl();
+                $urlWebhook = $baseUrl . "conekta/webhook/listener";
+            }
+            $events = ["events" => ["charge.paid"]];
+            $errorMessage = null;
+
+            //If library can't be initialized throws exception
+            $this->initializeConektaLibrary();
+
             $different = true;
             $webhooks = $this->_conektaWebhook->where();
             foreach ($webhooks as $webhook) {
@@ -74,10 +76,12 @@ class Config
                     array_merge(["url" => $urlWebhook], $mode, $events)
                 );
             } else {
-                throw new \Magento\Framework\Validator\Exception(
-                    __('Webhook was already registered in Conekta!<br>URL: ' . $urlWebhook)
-                );
+                $this->_conektaLogger->info('[Conekta]: El webhook ' . $urlWebhook . ' ya se encuentra en Conekta!');
             }
+        } catch (\Magento\Framework\Validator\Exception $e) {
+            $errorMessage = $e->getMessage();
+            $this->_conektaLogger->info('[Conekta]: CreateWebhook error, Message: ' . $errorMessage);
+
         } catch (\Exception $e) {
             $errorMessage = $e->getMessage();
             $this->_conektaLogger->info('[Conekta]: Webhook error, Message: ' . $errorMessage . ' URL: ' . $urlWebhook);
