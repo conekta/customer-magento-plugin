@@ -123,7 +123,7 @@ class ConektaOrder extends AbstractHelper
 //            return $this->conektaSession->getConektaCheckoutId();
         }
 
-        $this->conektaLogger->info('Create Blank Order :: createOrder');
+        $this->conektaLogger->error('Create Blank Order :: createOrder');
 
         \Conekta\Conekta::setApiKey($this->_conektaHelper->getPrivateKey());
         \Conekta\Conekta::setApiVersion("2.0.0");
@@ -135,13 +135,13 @@ class ConektaOrder extends AbstractHelper
             try {
                 $customerApi = $this->conektaCustomer->find($conektaCustomerId);
             } catch (\Conekta\ProcessingError $error) {
-                $this->conektaLogger->info('Create Order. Find Customer: ' . $error->getMessage());
+                $this->conektaLogger->error('Create Order. Find Customer: ' . $error->getMessage());
                 $conektaCustomerId = '';
             } catch (\Conekta\ParameterValidationError $error) {
-                $this->conektaLogger->info('Create Order. Find Customer: ' . $error->getMessage());
+                $this->conektaLogger->error('Create Order. Find Customer: ' . $error->getMessage());
                 $conektaCustomerId = '';
             } catch (\Conekta\Handler $error) {
-                $this->conektaLogger->info('Create Order. Find Customer: ' . $error->getMessage());
+                $this->conektaLogger->error('Create Order. Find Customer: ' . $error->getMessage());
                 $conektaCustomerId = '';
             }
 
@@ -171,18 +171,18 @@ class ConektaOrder extends AbstractHelper
                         $this->customerRepository->save($customer);
                     }
                 } catch (\Conekta\Handler $error) {
-                    $this->conektaLogger->info($error->getMessage());
+                    $this->conektaLogger->error('Create Order. Create Customer: ' .$error->getMessage());
                 }
             } else {
-                //If cutomer API exists, always update info
+                //If cutomer API exists, always update error
                 $customerApi->update($customerRequest);
             }
         } catch (\Conekta\ProcessingError $error) {
-            $this->conektaLogger->info($error->getMessage());
+            $this->conektaLogger->error($error->getMessage());
         } catch (\Conekta\ParameterValidationError $error) {
-            $this->conektaLogger->info($error->getMessage());
+            $this->conektaLogger->error($error->getMessage());
         } catch (\Conekta\Handler $error) {
-            $this->conektaLogger->info($error->getMessage());
+            $this->conektaLogger->error($error->getMessage());
         }
 
         $validOrderWithCheckout = [];
@@ -194,12 +194,14 @@ class ConektaOrder extends AbstractHelper
         ];
         
         $threeDsEnabled =  $this->_conektaHelper->getConfigData('conekta_cc', 'iframe_enabled') ? true : false;
+        $saveCardEnabled =  $this->_conektaHelper->getConfigData('conekta/conekta_global', 'enable_saved_card') ? true : false;
+        
         $installments = $this->getMonthlyInstallments();
         $validOrderWithCheckout['checkout']    = [
-            'allowed_payment_methods' => ["cash", "card", "bank_transfer"],
+            'allowed_payment_methods' => ["card"],//, "cash", "bank_transfer"],
             'monthly_installments_enabled' => $installments['active_installments'] ? true : false,
             'monthly_installments_options' => $installments['monthly_installments'],
-            'on_demand_enabled' => true, //TODO detect from configuration
+            'on_demand_enabled' => $saveCardEnabled,
             'force_3ds_flow' => $threeDsEnabled,
         ];
         $validOrderWithCheckout['currency']= self::CURRENCY_CODE;
@@ -216,11 +218,11 @@ class ConektaOrder extends AbstractHelper
             $checkoutId =  $order['checkout']['id'];
             $this->conektaSession->setConektaCheckoutId($checkoutId);
         } catch (\Conekta\ProcessingError $error) {
-            $this->conektaLogger->info($error->getMessage());
+            $this->conektaLogger->error($error->getMessage());
         } catch (\Conekta\ParameterValidationError $error) {
-            $this->conektaLogger->info($error->getMessage());
+            $this->conektaLogger->error($error->getMessage());
         } catch (\Conekta\Handler $error) {
-            $this->conektaLogger->info($error->getMessage());
+            $this->conektaLogger->error($error->getMessage());
         }
         return $checkoutId;
     }

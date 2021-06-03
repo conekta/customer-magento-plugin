@@ -88,7 +88,7 @@ define(
                             targetIFrame: '#conektaIframeContainer',
                             checkoutRequestId: checkout_id,
                             publicKey: this.getPublicKey(),
-                            paymentMethods: ['Card', 'Cash', 'BankTransfer'],
+                            paymentMethods: ['Card'],
                             options: {
                                 theme: 'default'
                             },
@@ -111,6 +111,7 @@ define(
                 }
                 return true;
             },
+            
 
             onSavedCardLaterChanged: function(newValue)
             {
