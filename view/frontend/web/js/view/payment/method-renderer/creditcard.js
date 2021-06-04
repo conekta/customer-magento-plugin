@@ -70,9 +70,19 @@ define(
                     async: false,
                     success: function (response) {
                         self.checkoutId(response.checkout_id);
+
+                        if(!self.checkoutId){
+                            self.messageContainer.clear();
+                            self.messageContainer.addErrorMessage({
+                                message: "El medio de pago seleccionado no puede utilizarse"
+                            });
+                        }
+                        
                     },
                     error: function (res) {
-                        console.log(res);
+                        console.error(res);
+
+                        
                     }
                 });
             },
@@ -88,7 +98,7 @@ define(
                             targetIFrame: '#conektaIframeContainer',
                             checkoutRequestId: checkout_id,
                             publicKey: this.getPublicKey(),
-                            paymentMethods: ['Card'],
+                            paymentMethods: ['Card', 'Cash', 'BankTransfer'],
                             options: {
                                 theme: 'default'
                             },
@@ -111,7 +121,6 @@ define(
                 }
                 return true;
             },
-            
 
             onSavedCardLaterChanged: function(newValue)
             {

@@ -4,7 +4,7 @@
         <payment>
             <conekta_cc>
                 <active>0</active>
-                <title>3D-Secure</title>
+                <title>Tarjeta de Crédito</title>
                 <group>conekta</group>
                 <model>ConektaPaymentsCreditCardFacade</model>
                 <cctypes>AE,VI,MC</cctypes>

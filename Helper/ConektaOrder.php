@@ -7,12 +7,14 @@ use Conekta\Order as ConektaOrderApi;
 use Conekta\Payments\Helper\Data as ConektaHelper;
 use Conekta\Payments\Logger\Logger as ConektaLogger;
 use Conekta\Payments\Model\Ui\CreditCard\ConfigProvider;
+use Exception;
 use Magento\Checkout\Model\Session;
 use Magento\Customer\Api\CustomerRepositoryInterface;
 use Magento\Customer\Model\Session as CustomerSession;
 use Magento\Framework\App\Helper\AbstractHelper;
 use Magento\Framework\App\Helper\Context;
 use Magento\Framework\Escaper;
+use Magento\Framework\Exception\LocalizedException;
 
 /**
  * Class ConektaOrder
@@ -134,13 +136,7 @@ class ConektaOrder extends AbstractHelper
             
             try {
                 $customerApi = $this->conektaCustomer->find($conektaCustomerId);
-            } catch (\Conekta\ProcessingError $error) {
-                $this->conektaLogger->error('Create Order. Find Customer: ' . $error->getMessage());
-                $conektaCustomerId = '';
-            } catch (\Conekta\ParameterValidationError $error) {
-                $this->conektaLogger->error('Create Order. Find Customer: ' . $error->getMessage());
-                $conektaCustomerId = '';
-            } catch (\Conekta\Handler $error) {
+            } catch (Exception $error) {
                 $this->conektaLogger->error('Create Order. Find Customer: ' . $error->getMessage());
                 $conektaCustomerId = '';
             }
@@ -171,18 +167,18 @@ class ConektaOrder extends AbstractHelper
                         $this->customerRepository->save($customer);
                     }
                 } catch (\Conekta\Handler $error) {
-                    $this->conektaLogger->error('Create Order. Create Customer: ' .$error->getMessage());
+                    $this->conektaLogger->info('Create Order. Create Customer: ' .$error->getMessage());
                 }
             } else {
                 //If cutomer API exists, always update error
                 $customerApi->update($customerRequest);
             }
         } catch (\Conekta\ProcessingError $error) {
-            $this->conektaLogger->error($error->getMessage());
+            $this->conektaLogger->info($error->getMessage());
         } catch (\Conekta\ParameterValidationError $error) {
-            $this->conektaLogger->error($error->getMessage());
+            $this->conektaLogger->info($error->getMessage());
         } catch (\Conekta\Handler $error) {
-            $this->conektaLogger->error($error->getMessage());
+            $this->conektaLogger->info($error->getMessage());
         }
 
         $validOrderWithCheckout = [];
@@ -194,8 +190,7 @@ class ConektaOrder extends AbstractHelper
         ];
         
         $threeDsEnabled =  $this->_conektaHelper->getConfigData('conekta_cc', 'iframe_enabled') ? true : false;
-        $saveCardEnabled =  $this->_conektaHelper->getConfigData('conekta/conekta_global', 'enable_saved_card') ? true : false;
-        
+        $saveCardEnabled =  $this->_conektaHelper->getConfigData('conekta_cc', 'enable_saved_card') ? true : false;
         $installments = $this->getMonthlyInstallments();
         $validOrderWithCheckout['checkout']    = [
             'allowed_payment_methods' => ["card"],//, "cash", "bank_transfer"],
@@ -208,9 +203,7 @@ class ConektaOrder extends AbstractHelper
         $validOrderWithCheckout['checkout']['expires_at'] = $this->getExpiredAt();
         $validOrderWithCheckout['metadata'] = $this->getQuoteId();
         
-        $validOrderWithCheckout['force_3ds_flow'] = $threeDsEnabled;
         $checkoutId = '';
-        
         try {
             $order = $this->conektaOrderApi->create($validOrderWithCheckout);
             $this->conektaLogger->info('The Order is created');
@@ -223,7 +216,7 @@ class ConektaOrder extends AbstractHelper
             $this->conektaLogger->error($error->getMessage());
         } catch (\Conekta\Handler $error) {
             $this->conektaLogger->error($error->getMessage());
-        }
+        } 
         return $checkoutId;
     }
 
