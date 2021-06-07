@@ -125,7 +125,7 @@ class ConektaOrder extends AbstractHelper
 //            return $this->conektaSession->getConektaCheckoutId();
         }
 
-        $this->conektaLogger->error('Create Blank Order :: createOrder');
+        $this->conektaLogger->info('Create Blank Order :: createOrder');
 
         \Conekta\Conekta::setApiKey($this->_conektaHelper->getPrivateKey());
         \Conekta\Conekta::setApiVersion("2.0.0");
