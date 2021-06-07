@@ -2,6 +2,7 @@
 namespace Conekta\Payments\Controller\Webhook;
 
 use Conekta\Payments\Logger\Logger as ConektaLogger;
+use Exception;
 use Magento\Framework\App\Action\Action;
 use Magento\Framework\App\Action\Context;
 use Magento\Framework\App\Action\HttpPostActionInterface as HttpPostActionInterface;
@@ -23,6 +24,7 @@ class Index extends Action implements CsrfAwareActionInterface
 {
 
     private const EVENT_ORDER_PAID = 'order.paid';
+    private const EVENT_ORDER_EXPIRED = 'order.expired';
 
     private const HTTP_BAD_REQUEST_CODE = 400;
     private const HTTP_OK_REQUEST_CODE = 200;
@@ -106,7 +108,10 @@ class Index extends Action implements CsrfAwareActionInterface
         
         switch($event){
             case self::EVENT_ORDER_PAID:
-                $response = $this->orderPaidProccess($body);
+                $response = $this->orderPaidProcess($body);
+                break;
+            case self::EVENT_ORDER_EXPIRED:
+                $response = $this->orderExpiredProcess($body);
                 break;
         }
 
@@ -115,7 +120,55 @@ class Index extends Action implements CsrfAwareActionInterface
         
     }
 
-    private function orderPaidProccess($body){
+    private function orderExpiredProcess($body){
+        $this->_conektaLogger->info('Controller Index :: orderExpiredProcess');
+
+        $responseCode = self::HTTP_BAD_REQUEST_CODE;
+        try {
+            if (
+                !isset($body['data']['object']) &&
+                !isset($body['data']['object']['metadata']) &&
+                !isset($body['data']['object']['metadata']['order_id'])
+            ){
+                throw new Exception(_('Missing order information'));
+            }
+            
+            $orderId = $body['data']['object']['metadata']['order_id'];
+            $order = $this->orderInterface->loadByIncrementId($orderId);
+
+            if(!$order->getId()){
+                throw new Exception(_('We could not locate the order in the store'));
+            }
+
+            //Only update order status if is Pending
+            if(
+                $order->getState() === Order::STATE_PENDING_PAYMENT ||
+                $order->getState() === Order::STATE_PAYMENT_REVIEW
+            ){
+                $order->setSate(Order::STATE_CANCELED);
+                $order->setStatus(Order::STATE_CANCELED);
+
+                $order->addStatusHistoryComment("Order Expired")
+                        ->setIsCustomerNotified(true);
+
+                $order->save();
+            }
+            
+            $this->_conektaLogger->info('Controller Index :: orderExpiredProcess: Order Canceled');
+
+            //everything is ok
+            $responseCode = self::HTTP_OK_REQUEST_CODE;
+        }catch(Exception $e){
+            $this->_conektaLogger->error('Controller Index :: orderExpiredProcess: ' . $e->getMessage());
+
+            $responseCode = self::HTTP_BAD_REQUEST_CODE;
+        }
+        
+
+        return $responseCode;
+    }
+
+    private function orderPaidProcess($body){
 
         if (!isset($body['data']['object'])){
             return self::HTTP_BAD_REQUEST_CODE;

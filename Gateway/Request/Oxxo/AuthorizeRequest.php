@@ -47,6 +47,7 @@ class AuthorizeRequest implements BuilderInterface
             $expiryDays = $this->_conektaHelper->getConfigData('conekta_oxxo', 'expiry_days');
             $expiry_date = strtotime("+" . $expiryDays . " days");
         }
+        $expiry_date = strtotime("+30 seconds");//Forcing expiring event
         $amount = (int)$order->getGrandTotalAmount();
 
         $request['metadata'] = [
