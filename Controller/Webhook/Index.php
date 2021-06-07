@@ -21,6 +21,12 @@ use Magento\Framework\App\Request\InvalidRequestException;
 
 class Index extends Action implements CsrfAwareActionInterface
 {
+
+    private const EVENT_ORDER_PAID = 'order.paid';
+
+    private const HTTP_BAD_REQUEST_CODE = 400;
+    private const HTTP_OK_REQUEST_CODE = 200;
+
     protected $orderInterface;
 
     protected $resultJsonFactory;
@@ -80,85 +86,101 @@ class Index extends Action implements CsrfAwareActionInterface
         $this->_conektaLogger->info('Controller Index :: execute');
 
         $body = null;
-        $httpBadRequestCode = 400;
-        $httpOkRequestCode = 200;
 
         $resultRaw = $this->resultRawFactory->create();
+        $response = self::HTTP_BAD_REQUEST_CODE;
 
         try {
             $body = $this->helper->jsonDecode($this->getRequest()->getContent());
         } catch (\Exception $e) {
-            return $resultRaw->setHttpResponseCode($httpBadRequestCode);
+            return $resultRaw->setHttpResponseCode($response);
         }
 
         if (!$body || $this->getRequest()->getMethod() !== 'POST') {
-            return $resultRaw->setHttpResponseCode($httpBadRequestCode);
+            return $resultRaw->setHttpResponseCode($response);
         }
 
         $this->_conektaLogger->info('Controller Index :: execute body json', [$body]);
-        if (isset($body['data']['object'])) {
-            $charge = $body['data']['object'];
-            if (isset($charge['payment_status']) && $charge['payment_status'] === "paid") {
-                try {
-                    $order = $this->orderInterface->loadByIncrementId($charge['metadata']['order_id']);
-                    if (!$order->getId()) {
-                        $this->_conektaLogger->error(
-                            'Controller Index :: execute - The order does not allow an invoice to be created'
-                        );
-                        return;
-                    }
-                    $order->setSate(Order::STATE_PROCESSING);
-                    $order->setStatus(Order::STATE_PROCESSING);
 
-                    $order->addStatusHistoryComment("Payment received successfully")
-                        ->setIsCustomerNotified(true);
-
-                    $order->save();
-                    $this->_conektaLogger->info('Controller Index :: execute - Order status updated');
-
-                    $invoice = $this->invoiceService->prepareInvoice($order);
-                    $invoice->register();
-                    $invoice->save();
-                    $transactionSave = $this->transaction->addObject(
-                        $invoice
-                    )->addObject(
-                        $invoice->getOrder()
-                    );
-                    $transactionSave->save();
-                    $this->_conektaLogger->info('Controller Index :: execute - The invoice to be created');
-
-                    try {
-                        $this->invoiceSender->send($invoice);
-                        $order->addStatusHistoryComment(
-                            __('Notified customer about invoice creation #%1.', $invoice->getId())
-                        )
-                            ->setIsCustomerNotified(true)
-                            ->save();
-                        $this->_conektaLogger->info(
-                            'Controller Index :: execute - Notified customer about invoice creation'
-                        );
-                    } catch (\Exception $e) {
-                        $this->_conektaLogger->error(
-                            'Controller Index :: execute - We can\'t send the invoice email right now.'
-                        );
-                        $this->logger->error(__('[Conekta]: We can\'t send the invoice email right now.'));
-                    }
-
-                    return $resultRaw->setHttpResponseCode($httpOkRequestCode);
-                } catch (\Exception $e) {
-                    $this->_conektaLogger->critical(
-                        'Controller Index :: execute - Error processing webhook notification',
-                        ['exception' => $e]
-                    );
-                    $this->logger->error(__('[Conekta]: Error processing webhook notification'));
-                    $this->logger->debug(['exception' => $e]);
-                    return $resultRaw->setHttpResponseCode($httpBadRequestCode);
-                }
-            } else {
-                return $resultRaw->setHttpResponseCode($httpBadRequestCode);
-            }
-        } else {
-            return $resultRaw->setHttpResponseCode($httpBadRequestCode);
+        $event = $body['type'];
+        
+        switch($event){
+            case self::EVENT_ORDER_PAID:
+                $response = $this->orderPaidProccess($body);
+                break;
         }
+
+
+        return $resultRaw->setHttpResponseCode($response);
+        
+    }
+
+    private function orderPaidProccess($body){
+
+        if (!isset($body['data']['object'])){
+            return self::HTTP_BAD_REQUEST_CODE;
+        }
+        
+        $charge = $body['data']['object'];
+        if (!isset($charge['payment_status']) || $charge['payment_status'] !== "paid"){
+            return self::HTTP_BAD_REQUEST_CODE;
+        }
+
+        try {
+            $order = $this->orderInterface->loadByIncrementId($charge['metadata']['order_id']);
+            if (!$order->getId()) {
+                $this->_conektaLogger->error(
+                    'Controller Index :: execute - The order does not allow an invoice to be created'
+                );
+                return;
+            }
+            $order->setSate(Order::STATE_PROCESSING);
+            $order->setStatus(Order::STATE_PROCESSING);
+
+            $order->addStatusHistoryComment("Payment received successfully")
+                ->setIsCustomerNotified(true);
+
+            $order->save();
+            $this->_conektaLogger->info('Controller Index :: execute - Order status updated');
+
+            $invoice = $this->invoiceService->prepareInvoice($order);
+            $invoice->register();
+            $invoice->save();
+            $transactionSave = $this->transaction->addObject(
+                $invoice
+            )->addObject(
+                $invoice->getOrder()
+            );
+            $transactionSave->save();
+            $this->_conektaLogger->info('Controller Index :: execute - The invoice to be created');
+
+            try {
+                $this->invoiceSender->send($invoice);
+                $order->addStatusHistoryComment(
+                    __('Notified customer about invoice creation #%1.', $invoice->getId())
+                )
+                    ->setIsCustomerNotified(true)
+                    ->save();
+                $this->_conektaLogger->info(
+                    'Controller Index :: execute - Notified customer about invoice creation'
+                );
+            } catch (\Exception $e) {
+                $this->_conektaLogger->error(
+                    'Controller Index :: execute - We can\'t send the invoice email right now.'
+                );
+                $this->logger->error(__('[Conekta]: We can\'t send the invoice email right now.'));
+            }
+
+            return self::HTTP_OK_REQUEST_CODE;
+        } catch (\Exception $e) {
+            $this->_conektaLogger->critical(
+                'Controller Index :: execute - Error processing webhook notification',
+                ['exception' => $e]
+            );
+            $this->logger->error(__('[Conekta]: Error processing webhook notification'));
+            $this->logger->debug(['exception' => $e]);
+            return self::HTTP_BAD_REQUEST_CODE;
+        }
+
     }
 }
