@@ -205,6 +205,7 @@ class ConektaOrder extends AbstractHelper
         
         $checkoutId = '';
         try {
+            $this->conektaLogger->info('Creating Order. Parameters: ', $validOrderWithCheckout);
             $order = $this->conektaOrderApi->create($validOrderWithCheckout);
             $this->conektaLogger->info('The Order is created');
             $order = (array) $order;
@@ -301,8 +302,10 @@ class ConektaOrder extends AbstractHelper
                 if ($item->getProductType() != 'bundle' && $item->getProductType() != 'configurable') {
                     
                     $price = (int) $item->getPrice();
+                    $qty= (int)$item->getQty();
                     if ($price === 0 && !empty($item->getParentItem())) {
                         $price = (int) $item->getParentItem()->getPrice();
+                        $qty = (int)$item->getParentItem()->getQty();
                     }
 
                     $request[] = [
@@ -310,7 +313,7 @@ class ConektaOrder extends AbstractHelper
                         'sku' => $item->getSku(),
                         'unit_price' => $price * 100,
                         'description' => $this->_escaper->escapeHtml($item->getName() . ' - ' . $item->getSku()),
-                        'quantity' => (int)($item->getQty()),
+                        'quantity' => $qty,
                         'tags' => [
                             $item->getProductType()
                         ]
