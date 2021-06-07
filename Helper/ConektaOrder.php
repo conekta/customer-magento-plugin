@@ -297,7 +297,27 @@ class ConektaOrder extends AbstractHelper
         $request = [];
         $items = $this->getQuote()->getAllItems();
         foreach ($items as $itemId => $item) {
-            if ($version > 233) {
+            if ($version > 240) {
+                if ($item->getProductType() != 'bundle' && $item->getProductType() != 'configurable') {
+                    
+                    $price = (int) $item->getPrice();
+                    if ($price === 0 && !empty($item->getParentItem())) {
+                        $price = (int) $item->getParentItem()->getPrice();
+                    }
+
+                    $request[] = [
+                        'name' => $item->getName(),
+                        'sku' => $item->getSku(),
+                        'unit_price' => $price * 100,
+                        'description' => $this->_escaper->escapeHtml($item->getName() . ' - ' . $item->getSku()),
+                        'quantity' => (int)($item->getQty()),
+                        'tags' => [
+                            $item->getProductType()
+                        ]
+                    ];
+
+                }
+            } elseif ($version > 233) {
                 if ($item->getProductType() != 'bundle' && $item->getProductType() != 'configurable') {
                     $request[] = [
                         'name' => $item->getName(),
