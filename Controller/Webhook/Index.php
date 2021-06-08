@@ -23,6 +23,7 @@ use Magento\Framework\App\Request\InvalidRequestException;
 class Index extends Action implements CsrfAwareActionInterface
 {
 
+    private const EVENT_WEBHOOK_PING = 'webhook_ping';
     private const EVENT_ORDER_PAID = 'order.paid';
     private const EVENT_ORDER_EXPIRED = 'order.expired';
 
@@ -107,6 +108,9 @@ class Index extends Action implements CsrfAwareActionInterface
         $event = $body['type'];
         
         switch($event){
+            case self::EVENT_WEBHOOK_PING:
+                $response = self::HTTP_OK_REQUEST_CODE;
+                break;
             case self::EVENT_ORDER_PAID:
                 $response = $this->orderPaidProcess($body);
                 break;
