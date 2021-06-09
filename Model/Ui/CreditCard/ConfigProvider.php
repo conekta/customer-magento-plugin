@@ -11,10 +11,6 @@ use Magento\Framework\View\Asset\Repository;
 use Magento\Payment\Model\CcConfig;
 use Magento\Framework\UrlInterface;
 
-/**
- * Class ConfigProvider
- * @package Conekta\Payments\Model\Ui\CreditCard
- */
 class ConfigProvider implements ConfigProviderInterface
 {
     /**
@@ -138,7 +134,11 @@ class ConfigProvider implements ConfigProviderInterface
                     $customerApi = \Conekta\Customer::find($customer->getConektaCustomerId());
                     $response = (array) $customerApi->payment_sources;
                     foreach ($response as $payment) {
-                        $result[$payment['id']] = $payment['name'] . ' XXXX-' . $payment['last4'] . ' ' . $payment['brand'];
+                        $result[$payment['id']] = $payment['name'] .
+                                                  ' XXXX-' .
+                                                  $payment['last4'] .
+                                                  ' ' .
+                                                  $payment['brand'];
                     }
                 } catch (\Conekta\ProccessingError $error) {
                     $this->conektaLogger->info($error->getMessage());

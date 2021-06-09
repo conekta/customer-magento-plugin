@@ -79,7 +79,6 @@ class TransactionCapture implements ClientInterface
             $response['error_code'] = '';
             $response['payment_method_details'] =  $request['payment_method_details'];
 
-
             $this->_conektaLogger->info(
                 'HTTP Client TransactionCapture Iframe Payment :: placeRequest',
                 [
@@ -88,14 +87,17 @@ class TransactionCapture implements ClientInterface
                 ]
             );
 
-
             return $response;
         }
 
+        $customerInfo = $request['customer_info'];
+        if ($request['CONNEKTA_CUSTOMER_ID']) {
+            $customerInfo = $request['CONNEKTA_CUSTOMER_ID'];
+        }
         $orderParams['currency']         = $request['CURRENCY'];
         $orderParams['line_items']       = $request['line_items'];
         $orderParams['tax_lines']        = $request['tax_lines'];
-        $orderParams['customer_info']    = $request['CONNEKTA_CUSTOMER_ID'] ? $request['CONNEKTA_CUSTOMER_ID'] : $request['customer_info'];
+        $orderParams['customer_info']    = $customerInfo;
         $orderParams['discount_lines']   = $request['discount_lines'];
         if (!empty($request['shipping_lines'])) {
             $orderParams['shipping_lines']   = $request['shipping_lines'];
@@ -160,7 +162,6 @@ class TransactionCapture implements ClientInterface
                 'response' => $response
             ]
         );
-
 
         return $response;
     }
