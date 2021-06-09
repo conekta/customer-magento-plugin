@@ -14,10 +14,6 @@ use Magento\Framework\App\Helper\AbstractHelper;
 use Magento\Framework\App\Helper\Context;
 use Magento\Framework\Escaper;
 
-/**
- * Class ConektaOrder
- * @package Conekta\Payments\Helper
- */
 class ConektaOrder extends AbstractHelper
 {
     const CURRENCY_CODE = 'mxn';
@@ -119,10 +115,6 @@ class ConektaOrder extends AbstractHelper
      */
     public function createOrder($guestEmail)
     {
-        if ($this->conektaSession->getConektaCheckoutId()) {
-//            return $this->conektaSession->getConektaCheckoutId();
-        }
-
         $this->conektaLogger->info('Create Blank Order :: createOrder');
 
         \Conekta\Conekta::setApiKey($this->_conektaHelper->getPrivateKey());
@@ -156,7 +148,7 @@ class ConektaOrder extends AbstractHelper
                 $customerRequest['phone'] = $shippingAddress->getTelephone();
             } else {
                 //name without numbers
-                $customerRequest['name'] = preg_replace('/[0-9]+/', '',$shippingAddress->getName());
+                $customerRequest['name'] = preg_replace('/[0-9]+/', '', $shippingAddress->getName());
                 $customerRequest['email'] = $guestEmail;
                 $customerRequest['phone'] = $shippingAddress->getTelephone();
             }
@@ -233,7 +225,7 @@ class ConektaOrder extends AbstractHelper
     public function getMonthlyInstallments()
     {
         $result = [];
-        $isInstallmentsAvilable = intval(true);
+        $isInstallmentsAvilable = (int)true;
         $quote = $this->getQuote();
         $total = $quote->getGrandTotal();
         $active_monthly_installments = $this->_conektaHelper->getConfigData(
@@ -251,16 +243,16 @@ class ConektaOrder extends AbstractHelper
                         $months[$k] = (int) $months[$k];
                     }
                 }
-                $result['active_installments'] = intval(true);
+                $result['active_installments'] = (int)true;
                 $result['monthly_installments'] = $months;
             } else {
-                $isInstallmentsAvilable = intval(false);
+                $isInstallmentsAvilable = (int)false;
             }
         } else {
-            $isInstallmentsAvilable = intval(false);
+            $isInstallmentsAvilable = (int)false;
         }
         if ($isInstallmentsAvilable == false) {
-            $result['active_installments'] = intval(false);
+            $result['active_installments'] = (int)false;
             $result['monthly_installments'] = [];
         }
         return $result;

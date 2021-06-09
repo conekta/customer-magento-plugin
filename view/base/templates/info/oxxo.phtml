@@ -18,7 +18,7 @@ $data = $block->getDataOxxo();
             <tr>
                 <th><strong><?= /* @noEscape */ __('Expires at:'); ?></strong></th>
                 <td>
-                    <?= $block->escapeHtml($data['expires_at']); ?>
+                    <?= $block->escapeHtml(date("Y-m-d", (integer) $data["expires_at"])); ?>
                 </td>
             </tr>
             </tbody>
