@@ -49,8 +49,8 @@ class OrderRepository
     {
         $this->_conektaLogger->info('OrderRepository :: findByMetadataOrderId started');
 
-        if (!isset($body['data']['object']) &&
-            !isset($body['data']['object']['metadata']) &&
+        if (!isset($body['data']['object']) ||
+            !isset($body['data']['object']['metadata']) ||
             !isset($body['data']['object']['metadata']['order_id'])
         ) {
             throw new LocalizedException(__('Missing order information'));
