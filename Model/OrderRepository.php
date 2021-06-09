@@ -37,24 +37,22 @@ class OrderRepository
         $this->_conektaLogger->info('OrderRepository :: __construct');
     }
 
-
     /**
-     * Find store order in request body. 
-     * If the keys['data']['object']['metadata']['order_id'] does not exist 
+     * Find store order in request body.
+     * If the keys['data']['object']['metadata']['order_id'] does not exist
      * in $body, throws an Exception
-     * 
      * @param array $body
      * @return Order
      * @throws LocalizedException
      */
-    function findByMetadataOrderId($body){
+    public function findByMetadataOrderId($body)
+    {
         $this->_conektaLogger->info('OrderRepository :: findByMetadataOrderId started');
 
-        if (
-            !isset($body['data']['object']) &&
+        if (!isset($body['data']['object']) &&
             !isset($body['data']['object']['metadata']) &&
             !isset($body['data']['object']['metadata']['order_id'])
-        ){
+        ) {
             throw new LocalizedException(__('Missing order information'));
         }
         
@@ -73,20 +71,20 @@ class OrderRepository
      * @return void
      * @throws LocalizedException
      */
-    function expireOrder($body){
+    public function expireOrder($body)
+    {
         $this->_conektaLogger->info('OrderRepository :: expireOrder started');
 
         $order = $this->findByMetadataOrderId($body);
 
-        if(!$order->getId()){
+        if (!$order->getId()) {
             throw new LocalizedException(__('We could not locate the order in the store'));
         }
 
         //Only update order status if is Pending
-        if(
-            $order->getState() === Order::STATE_PENDING_PAYMENT ||
+        if ($order->getState() === Order::STATE_PENDING_PAYMENT ||
             $order->getState() === Order::STATE_PAYMENT_REVIEW
-        ){
+        ) {
             $order->setSate(Order::STATE_CANCELED);
             $order->setStatus(Order::STATE_CANCELED);
 
@@ -99,14 +97,15 @@ class OrderRepository
         $this->_conektaLogger->info('OrderRepository :: orderExpiredProcess: Order has been Canceled');
     }
 
-    function payOrder($body){
+    public function payOrder($body)
+    {
 
-        if (!isset($body['data']['object'])){
+        if (!isset($body['data']['object'])) {
             throw new LocalizedException(__('Missing order information'));
         }
         
         $charge = $body['data']['object'];
-        if (!isset($charge['payment_status']) || $charge['payment_status'] !== "paid"){
+        if (!isset($charge['payment_status']) || $charge['payment_status'] !== "paid") {
             throw new LocalizedException(__('Missing order information'));
         }
 
@@ -154,6 +153,5 @@ class OrderRepository
                 'OrderRepository :: execute - We can\'t send the invoice email right now.'
             );
         }
-
     }
 }

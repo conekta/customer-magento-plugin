@@ -48,7 +48,6 @@ class Index extends Action implements CsrfAwareActionInterface
         Logger $logger,
         ConektaLogger $conektaLogger,
         OrderRepository $conektaOrderRepository
-
     ) {
         parent::__construct($context);
         $this->_conektaLogger = $conektaLogger;
@@ -94,10 +93,10 @@ class Index extends Action implements CsrfAwareActionInterface
 
         $event = $body['type'];
         
-        try{
+        try {
 
             $response = self::HTTP_OK_REQUEST_CODE;
-            switch($event){
+            switch ($event) {
                 case self::EVENT_WEBHOOK_PING:
                     $response = self::HTTP_OK_REQUEST_CODE;
                     break;
@@ -120,14 +119,11 @@ class Index extends Action implements CsrfAwareActionInterface
                     $response = self::HTTP_BAD_REQUEST_CODE;
             }
 
-        }catch(Exception $e){
+        } catch (Exception $e) {
             $this->_conektaLogger->error('Controller Index :: '. $e->getMessage());
             $response = self::HTTP_BAD_REQUEST_CODE;
         }
         
         return $resultRaw->setHttpResponseCode($response);
-        
     }
-
-    
 }
