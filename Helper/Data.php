@@ -6,6 +6,7 @@ use Magento\Framework\App\Helper\Context;
 use Magento\Framework\App\ProductMetadataInterface;
 use Magento\Framework\Encryption\EncryptorInterface;
 use Magento\Framework\Module\ModuleListInterface;
+use Magento\Store\Model\StoreManagerInterface;
 
 class Data extends AbstractHelper
 {
@@ -15,16 +16,20 @@ class Data extends AbstractHelper
 
     protected $_productMetadata;
 
+    private $_storeManager;
+
     public function __construct(
         Context $context,
         ModuleListInterface $moduleList,
         EncryptorInterface $encryptor,
-        ProductMetadataInterface $productMetadata
+        ProductMetadataInterface $productMetadata,
+        StoreManagerInterface $storeManager
     ) {
         parent::__construct($context);
         $this->_moduleList = $moduleList;
         $this->_encryptor = $encryptor;
         $this->_productMetadata = $productMetadata;
+        $this->_storeManager = $storeManager;
     }
 
     public function getConfigData($area, $field, $storeId = null)
@@ -105,5 +110,15 @@ class Data extends AbstractHelper
         $attributesArray = explode(",", $attributes);
         
         return $attributesArray;
+    }
+
+    public function getUrlWebhookOrDefault()
+    {
+        $urlWebhook = $this->getConfigData('conekta/conekta_global', 'conekta_webhook');
+        if (empty($urlWebhook)) {
+            $baseUrl = $this->_storeManager->getStore()->getBaseUrl();
+            $urlWebhook = $baseUrl . "conekta/webhook/listener";
+        }
+        return $urlWebhook;
     }
 }

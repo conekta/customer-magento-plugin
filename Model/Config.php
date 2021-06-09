@@ -5,7 +5,6 @@ use Conekta\Payments\Helper\Data as ConektaHelper;
 use Conekta\Payments\Logger\Logger as ConektaLogger;
 use Conekta\Webhook;
 use Magento\Framework\Encryption\EncryptorInterface;
-use Magento\Store\Model\StoreManagerInterface;
 use Magento\Framework\Locale\Resolver;
 
 class Config
@@ -16,8 +15,6 @@ class Config
 
     private $_conektaLogger;
 
-    protected $_storeManager;
-
     protected $_resolver;
 
     protected $_conektaWebhook;
@@ -25,14 +22,12 @@ class Config
     public function __construct(
         EncryptorInterface $encryptor,
         ConektaHelper $conektaHelper,
-        StoreManagerInterface $storeManager,
         Resolver $resolver,
         ConektaLogger $conektaLogger,
         Webhook $conektaWebhook
     ) {
         $this->_encryptor = $encryptor;
         $this->_conektaHelper = $conektaHelper;
-        $this->_storeManager = $storeManager;
         $this->_resolver = $resolver;
         $this->_conektaLogger = $conektaLogger;
         $this->_conektaWebhook = $conektaWebhook;
@@ -43,12 +38,8 @@ class Config
         
         try {
             $sandboxMode = $this->_conektaHelper->getConfigData('conekta/conekta_global', 'sandbox_mode');
-            $urlWebhook = $this->_conektaHelper->getConfigData('conekta/conekta_global', 'conekta_webhook');
+            $urlWebhook = $this->_conektaHelper->getUrlWebhookOrDefault();
 
-            if (empty($urlWebhook)) {
-                $baseUrl = $this->_storeManager->getStore()->getBaseUrl();
-                $urlWebhook = $baseUrl . "conekta/webhook/listener";
-            }
             $events = ["events" => ["charge.paid"]];
             $errorMessage = null;
 
