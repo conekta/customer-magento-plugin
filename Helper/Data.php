@@ -9,10 +9,6 @@ use Magento\Framework\App\ProductMetadataInterface;
 use Magento\Framework\Encryption\EncryptorInterface;
 use Magento\Framework\Module\ModuleListInterface;
 
-/**
- * Class Data
- * @package Conekta\Payments\Helper
- */
 class Data extends AbstractHelper
 {
     /**
@@ -166,8 +162,16 @@ class Data extends AbstractHelper
         $this->conektaLogger->info('deleteSavedCard: Remove Decline Card From Conekta Customer');
 
         try {
-            $paymentSourceId = isset($chargeParams['payment_method']['payment_source_id']) ? $chargeParams['payment_method']['payment_source_id'] : '';
-            $customerId = isset($orderParams['customer_info']['customer_id']) ? $orderParams['customer_info']['customer_id'] : '';
+            $paymentSourceId = '';
+            if (isset($chargeParams['payment_method']['payment_source_id'])) {
+                $paymentSourceId = $chargeParams['payment_method']['payment_source_id'];
+            }
+
+            $customerId = '';
+            if (isset($orderParams['customer_info']['customer_id'])) {
+                $customerId = $orderParams['customer_info']['customer_id'];
+            }
+
             if ($customerId && $paymentSourceId) {
                 $customer = $this->conektaCustomer->find($customerId);
                 $customer->deletePaymentSourceById($paymentSourceId);
@@ -179,7 +183,6 @@ class Data extends AbstractHelper
         } catch (\Conekta\Handler $error) {
             $this->conektaLogger->info($error->getMessage());
         }
-        return;
     }
 
     public function getMetadataAttributes($metadataPath)

@@ -4,10 +4,6 @@ namespace Conekta\Payments\Controller\Index;
 
 use Magento\Framework\App\Action\HttpPostActionInterface;
 
-/**
- * Class CreateOrder
- * @package Conekta\Payment\Controller\Index
- */
 class CreateOrder extends \Magento\Framework\App\Action\Action implements HttpPostActionInterface
 {
     /**

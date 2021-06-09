@@ -10,10 +10,6 @@ use Magento\Payment\Gateway\ConfigInterface;
 use Magento\Payment\Gateway\Helper\SubjectReader;
 use Magento\Payment\Gateway\Request\BuilderInterface;
 
-/**
- * Class CaptureRequest
- * @package Conekta\Payments\Gateway\Request\CreditCard
- */
 class CaptureRequest implements BuilderInterface
 {
     /**

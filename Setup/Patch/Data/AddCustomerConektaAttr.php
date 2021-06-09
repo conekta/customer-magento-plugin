@@ -8,10 +8,6 @@ use Magento\Framework\Setup\ModuleDataSetupInterface;
 use Magento\Framework\Setup\Patch\DataPatchInterface;
 use Magento\Framework\Setup\Patch\PatchInterface;
 
-/**
- * Class AddCustomerConektaAttr
- * @package Conekta\Payments\Setup\Patch\Data
- */
 class AddCustomerConektaAttr implements DataPatchInterface
 {
     /**
