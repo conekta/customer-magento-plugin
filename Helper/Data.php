@@ -8,6 +8,10 @@ use Magento\Framework\App\Helper\Context;
 use Magento\Framework\App\ProductMetadataInterface;
 use Magento\Framework\Encryption\EncryptorInterface;
 use Magento\Framework\Module\ModuleListInterface;
+use Magento\Checkout\Model\Session as CheckoutSession;
+use Magento\Customer\Model\Session as CustomerSession;
+use Magento\Catalog\Model\ProductRepository;
+use Magento\Framework\Escaper;
 
 class Data extends AbstractHelper
 {
@@ -32,6 +36,14 @@ class Data extends AbstractHelper
      */
     protected $conektaCustomer;
 
+    private $checkoutSession;
+
+    private $customerSession;
+
+    private $productRepository;
+
+    private $_escaper;
+
     /**
      * Data constructor.
      * @param Context $context
@@ -47,7 +59,11 @@ class Data extends AbstractHelper
         EncryptorInterface $encryptor,
         ProductMetadataInterface $productMetadata,
         ConektaLogger $conektaLogger,
-        Customer $conektaCustomer
+        Customer $conektaCustomer,
+        CheckoutSession $checkoutSession,
+        CustomerSession $customerSession,
+        ProductRepository $productRepository,
+        Escaper $_escaper
     ) {
         parent::__construct($context);
         $this->_moduleList = $moduleList;
@@ -55,6 +71,10 @@ class Data extends AbstractHelper
         $this->_productMetadata = $productMetadata;
         $this->conektaLogger = $conektaLogger;
         $this->conektaCustomer = $conektaCustomer;
+        $this->checkoutSession = $checkoutSession;
+        $this->customerSession = $customerSession;
+        $this->productRepository = $productRepository;
+        $this->_escaper = $_escaper;
     }
 
     /**
@@ -192,4 +212,184 @@ class Data extends AbstractHelper
         
         return $attributesArray;
     }
+
+
+    public function is3DSEnabled()
+    {
+        return (boolean)$this->getConfigData('conekta_cc', 'iframe_enabled');
+    }
+    
+    public function isSaveCardEnabled()
+    {
+        return (boolean)$this->getConfigData('conekta_cc', 'enable_saved_card');
+    }
+
+    /**
+     * @return string
+     */
+    public function getExpiredAt()
+    {
+        $datetime = new \Datetime();
+        $datetime->add(new \DateInterval('P3D'));
+        return $datetime->format('U');
+    }
+
+
+    private function customFormat($array, $glue)
+    {
+        $ret = '';
+        foreach ($array as $key => $item) {
+            if (is_array($item)) {
+                if (count($item) == 0) {
+                    $item = 'null';
+                    $ret .=  $key . ' : ' . $item . $glue;
+                    continue;
+                }
+                foreach ($item as $k => $i) {
+                    $ret .=  $key . '_' . $k . ' : ' . $i  . $glue;
+                }
+            } else {
+                if ($item == '') {
+                    $item = 'null';
+                } elseif ($key == 'has_options' || $key == 'new') {
+                    if ($item == '0') {
+                        $item = 'no';
+                    } elseif ($item == '1') {
+                        $item = 'yes';
+                    }
+                }
+                $ret .=  $key . ' : ' . $item . $glue;
+            }
+        }
+        $ret = substr($ret, 0, 0-strlen($glue));
+        return $ret;
+    }
+
+    public function getMetadataAttributesConketa($items){
+        $productAttributes = $this->getMetadataAttributes('metadata_additional_products');
+        $request = [];
+        if (count($productAttributes) > 0) {
+            foreach ($items as $item) {
+                if ($item->getProductType() != 'configurable') {
+                    $productValues = [];
+                    $productId = $item->getProductId();
+                    $product = $this->productRepository->getById($productId);
+                    foreach ($productAttributes as $attr) {
+                        $productValues[$attr] = $product->getData($attr);
+                    }
+                    $request['Product-' . $productId] = $this->customFormat($productValues, ' | ');
+                }
+            }
+        }
+        $orderAttributes = $this->getMetadataAttributes('metadata_additional_order');
+        if (count($orderAttributes) > 0) {
+            foreach ($orderAttributes as $attr) {
+                $quoteValue = $this->checkoutSession->getQuote()->getData($attr);
+                if ($quoteValue == null) {
+                    $request[$attr] = 'null';
+                } elseif (is_array($quoteValue)) {
+                    $request[$attr] = $this->customFormat($quoteValue, ' | ');
+                } elseif (!is_string($quoteValue)) {
+                    if ($attr == 'customer_gender') {
+                        $customer = $this->customerSession->getCustomer();
+                        $customerDataGender = $customer->getData('gender');
+                        $gender = $customer->getAttribute('gender')->getSource()->getOptionText($customerDataGender);
+                        $request[$attr] = strtolower($gender);
+                    } elseif ($attr == 'is_changed') {
+                        if ($quoteValue  == 0) {
+                            $request[$attr] = 'no';
+                        } elseif ($quoteValue  == 1) {
+                            $request[$attr] = 'yes';
+                        }
+                    } else {
+                        $request[$attr] = (string)$quoteValue;
+                    }
+                } else {
+                    if ($attr == 'is_active' ||
+                        $attr == 'is_virtual' ||
+                        $attr == 'is_multi_shipping' ||
+                        $attr == 'customer_is_guest' ||
+                        $attr == 'is_persistent'
+                    ) {
+                        if ($quoteValue  == '0') {
+                            $request[$attr] = 'no';
+                        } elseif ($quoteValue  == '1') {
+                            $request[$attr] = 'yes';
+                        }
+                    } else {
+                        $request[$attr] = $quoteValue;
+                    }
+                }
+                
+            }
+        }
+        return $request;
+    }
+
+    public function getMagentoMetadata(){
+        return [
+            'plugin' => 'Magento',
+            'plugin_version' => $this->getMageVersion()
+        ];
+    }
+
+    public function getLineItems($items, $isQuoteItem = true){
+        $version = (int)str_replace('.', '', $this->getMageVersion());
+        $request = [];
+        $quantityMethod = $isQuoteItem? "getQty":"getQtyOrdered";
+        foreach ($items as $itemId => $item) {
+            if ($version > 240) {
+                if ($item->getProductType() != 'bundle' && $item->getProductType() != 'configurable') {
+                    
+                    $price = (int) $item->getPrice();
+                    $qty= (int)$item->{$quantityMethod}();
+                    if ($price === 0 && !empty($item->getParentItem())) {
+                        $price = (int) $item->getParentItem()->getPrice();
+                        $qty = (int)$item->getParentItem()->getQty();
+                    }
+
+                    $request[] = [
+                        'name' => $item->getName(),
+                        'sku' => $item->getSku(),
+                        'unit_price' => $price * 100,
+                        'description' => $this->_escaper->escapeHtml($item->getName() . ' - ' . $item->getSku()),
+                        'quantity' => $qty,
+                        'tags' => [
+                            $item->getProductType()
+                        ]
+                    ];
+
+                }
+            } elseif ($version > 233) {
+                if ($item->getProductType() != 'bundle' && $item->getProductType() != 'configurable') {
+                    $request[] = [
+                        'name' => $item->getName(),
+                        'sku' => $item->getSku(),
+                        'unit_price' => (int)($item->getPrice() * 100),
+                        'description' => $this->_escaper->escapeHtml($item->getName() . ' - ' . $item->getSku()),
+                        'quantity' => (int)($item->{$quantityMethod}()),
+                        'tags' => [
+                            $item->getProductType()
+                        ]
+                    ];
+
+                }
+            } else {
+                if ($item->getProductType() != 'bundle' && $item->getPrice() > 0) {
+                    $request[] = [
+                        'name' => $item->getName(),
+                        'sku' => $item->getSku(),
+                        'unit_price' => (int)($item->getPrice() * 100),
+                        'description' => $this->_escaper->escapeHtml($item->getName() . ' - ' . $item->getSku()),
+                        'quantity' => (int)($item->{$quantityMethod}()),
+                        'tags' => [
+                            $item->getProductType()
+                        ]
+                    ];
+                }
+            }
+        }
+        return $request;
+    }
+    
 }

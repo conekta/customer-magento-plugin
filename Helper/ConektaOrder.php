@@ -173,16 +173,18 @@ class ConektaOrder extends AbstractHelper
             $this->conektaLogger->info($error->getMessage());
         }
 
+        $orderItems = $this->getQuote()->getAllItems();
+
         $validOrderWithCheckout = [];
-        $validOrderWithCheckout['line_items'] = $this->getLineItems();
+        $validOrderWithCheckout['line_items'] = $this->_conektaHelper->getLineItems($orderItems);
         $validOrderWithCheckout['shipping_lines'] = $this->getShippingLines();
         $validOrderWithCheckout['shipping_contact'] = $this->getShippingContact($guestEmail);
         $validOrderWithCheckout['customer_info'] = [
             'customer_id' => $conektaCustomerId
         ];
         
-        $threeDsEnabled =  $this->_conektaHelper->getConfigData('conekta_cc', 'iframe_enabled') ? true : false;
-        $saveCardEnabled =  $this->_conektaHelper->getConfigData('conekta_cc', 'enable_saved_card') ? true : false;
+        $threeDsEnabled =  $this->_conektaHelper->is3DSEnabled();
+        $saveCardEnabled =  $this->_conektaHelper->isSaveCardEnabled();
         $installments = $this->getMonthlyInstallments();
         $validOrderWithCheckout['checkout']    = [
             'allowed_payment_methods' => ["card"],//, "cash", "bank_transfer"],
@@ -193,7 +195,10 @@ class ConektaOrder extends AbstractHelper
         ];
         $validOrderWithCheckout['currency']= self::CURRENCY_CODE;
         $validOrderWithCheckout['checkout']['expires_at'] = $this->getExpiredAt();
-        $validOrderWithCheckout['metadata'] = $this->getQuoteId();
+        $validOrderWithCheckout['metadata'] = array_merge(
+            $this->_conektaHelper->getMagentoMetadata(),
+            $this->_conektaHelper->getMetadataAttributesConketa($orderItems)
+        );
         
         $checkoutId = '';
         try {
@@ -277,71 +282,6 @@ class ConektaOrder extends AbstractHelper
             $this->quote = $this->_checkoutSession->getQuote();
         }
         return $this->quote;
-    }
-
-    /**
-     * @return array
-     * @throws \Magento\Framework\Exception\LocalizedException
-     * @throws \Magento\Framework\Exception\NoSuchEntityException
-     */
-    public function getLineItems()
-    {
-        $version = (int)str_replace('.', '', $this->_conektaHelper->getMageVersion());
-        $request = [];
-        $items = $this->getQuote()->getAllItems();
-        foreach ($items as $itemId => $item) {
-            if ($version > 240) {
-                if ($item->getProductType() != 'bundle' && $item->getProductType() != 'configurable') {
-                    
-                    $price = (int) $item->getPrice();
-                    $qty= (int)$item->getQty();
-                    if ($price === 0 && !empty($item->getParentItem())) {
-                        $price = (int) $item->getParentItem()->getPrice();
-                        $qty = (int)$item->getParentItem()->getQty();
-                    }
-
-                    $request[] = [
-                        'name' => $item->getName(),
-                        'sku' => $item->getSku(),
-                        'unit_price' => $price * 100,
-                        'description' => $this->_escaper->escapeHtml($item->getName() . ' - ' . $item->getSku()),
-                        'quantity' => $qty,
-                        'tags' => [
-                            $item->getProductType()
-                        ]
-                    ];
-
-                }
-            } elseif ($version > 233) {
-                if ($item->getProductType() != 'bundle' && $item->getProductType() != 'configurable') {
-                    $request[] = [
-                        'name' => $item->getName(),
-                        'sku' => $item->getSku(),
-                        'unit_price' => (int)($item->getPrice() * 100),
-                        'description' => $this->_escaper->escapeHtml($item->getName() . ' - ' . $item->getSku()),
-                        'quantity' => (int)($item->getQty()),
-                        'tags' => [
-                            $item->getProductType()
-                        ]
-                    ];
-
-                }
-            } else {
-                if ($item->getProductType() != 'bundle' && $item->getPrice() > 0) {
-                    $request[] = [
-                        'name' => $item->getName(),
-                        'sku' => $item->getSku(),
-                        'unit_price' => (int)($item->getPrice() * 100),
-                        'description' => $this->_escaper->escapeHtml($item->getName() . ' - ' . $item->getSku()),
-                        'quantity' => (int)($item->getQtyOrdered()),
-                        'tags' => [
-                            $item->getProductType()
-                        ]
-                    ];
-                }
-            }
-        }
-        return $request;
     }
 
     /**

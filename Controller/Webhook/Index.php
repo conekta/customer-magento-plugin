@@ -51,7 +51,6 @@ class Index extends Action implements CsrfAwareActionInterface
     ) {
         parent::__construct($context);
         $this->_conektaLogger = $conektaLogger;
-        $this->_conektaLogger->info('Controller Index :: __construct');
         $this->resultJsonFactory = $resultJsonFactory;
         $this->resultRawFactory = $resultRawFactory;
         $this->helper = $helper;
@@ -89,9 +88,9 @@ class Index extends Action implements CsrfAwareActionInterface
             return $resultRaw->setHttpResponseCode($response);
         }
 
-        $this->_conektaLogger->info('Controller Index :: execute body json', [$body]);
-
         $event = $body['type'];
+
+        $this->_conektaLogger->info('Controller Index :: execute body json ', ['event' => $event]);
         
         try {
 

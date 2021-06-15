@@ -34,7 +34,6 @@ class OrderRepository
         $this->invoiceSender = $invoiceSender;
         $this->transaction = $transaction;
         $this->_conektaLogger = $conektaLogger;
-        $this->_conektaLogger->info('OrderRepository :: __construct');
     }
 
     /**
@@ -100,16 +99,13 @@ class OrderRepository
     public function payOrder($body)
     {
 
-        if (!isset($body['data']['object'])) {
-            throw new LocalizedException(__('Missing order information'));
-        }
+        $order = $this->findByMetadataOrderId($body);
         
         $charge = $body['data']['object'];
         if (!isset($charge['payment_status']) || $charge['payment_status'] !== "paid") {
             throw new LocalizedException(__('Missing order information'));
         }
-
-        $order = $this->orderInterface->loadByIncrementId($charge['metadata']['order_id']);
+        
         if (!$order->getId()) {
             $message = 'The order does not allow an invoice to be created';
             $this->_conektaLogger->error(

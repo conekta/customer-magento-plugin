@@ -41,38 +41,8 @@ class LineItemsBuilder implements BuilderInterface
 
         $payment = $buildSubject['payment'];
         $order = $payment->getOrder();
-        $version = (int)str_replace('.', '', $this->_conektaHelper->getMageVersion());
-        $request = [];
         $items = $order->getItems();
-        foreach ($items as $itemId => $item) {
-            if ($version > 233) {
-                if ($item->getProductType() != 'bundle' && $item->getProductType() != 'configurable') {
-                    $request['line_items'][] = [
-                        'name' => $item->getName(),
-                        'sku' => $item->getSku(),
-                        'unit_price' => (int)($item->getPrice() * 100),
-                        'description' => $this->_escaper->escapeHtml($item->getName() . ' - ' . $item->getSku()),
-                        'quantity' => (int)($item->getQtyOrdered()),
-                        'tags' => [
-                            $item->getProductType()
-                        ]
-                    ];
-                }
-            } else {
-                if ($item->getProductType() != 'bundle' && $item->getPrice() > 0) {
-                    $request['line_items'][] = [
-                        'name' => $item->getName(),
-                        'sku' => $item->getSku(),
-                        'unit_price' => (int)($item->getPrice() * 100),
-                        'description' => $this->_escaper->escapeHtml($item->getName() . ' - ' . $item->getSku()),
-                        'quantity' => (int)($item->getQtyOrdered()),
-                        'tags' => [
-                            $item->getProductType()
-                        ]
-                    ];
-                }
-            }
-        }
+        $request['line_items'] = $this->_conektaHelper->getLineItems($items, false);
 
         $this->_conektaLogger->info('Request LineItemsBuilder :: build : return request', $request);
 
