@@ -51,6 +51,4 @@ class MetadataBuilder implements BuilderInterface
 
         return $request;
     }
-
-    
 }

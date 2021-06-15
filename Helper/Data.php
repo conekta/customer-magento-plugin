@@ -213,7 +213,6 @@ class Data extends AbstractHelper
         return $attributesArray;
     }
 
-
     public function is3DSEnabled()
     {
         return (boolean)$this->getConfigData('conekta_cc', 'iframe_enabled');
@@ -233,7 +232,6 @@ class Data extends AbstractHelper
         $datetime->add(new \DateInterval('P3D'));
         return $datetime->format('U');
     }
-
 
     private function customFormat($array, $glue)
     {
@@ -265,7 +263,8 @@ class Data extends AbstractHelper
         return $ret;
     }
 
-    public function getMetadataAttributesConketa($items){
+    public function getMetadataAttributesConketa($items)
+    {
         $productAttributes = $this->getMetadataAttributes('metadata_additional_products');
         $request = [];
         if (count($productAttributes) > 0) {
@@ -326,14 +325,16 @@ class Data extends AbstractHelper
         return $request;
     }
 
-    public function getMagentoMetadata(){
+    public function getMagentoMetadata()
+    {
         return [
             'plugin' => 'Magento',
             'plugin_version' => $this->getMageVersion()
         ];
     }
 
-    public function getLineItems($items, $isQuoteItem = true){
+    public function getLineItems($items, $isQuoteItem = true)
+    {
         $version = (int)str_replace('.', '', $this->getMageVersion());
         $request = [];
         $quantityMethod = $isQuoteItem? "getQty":"getQtyOrdered";
@@ -391,5 +392,4 @@ class Data extends AbstractHelper
         }
         return $request;
     }
-    
 }

@@ -214,7 +214,7 @@ class ConektaOrder extends AbstractHelper
             $this->conektaLogger->error($error->getMessage());
         } catch (\Conekta\Handler $error) {
             $this->conektaLogger->error($error->getMessage());
-        } 
+        }
         return $checkoutId;
     }
 
