@@ -346,7 +346,7 @@ class Data extends AbstractHelper
                     $qty= (int)$item->{$quantityMethod}();
                     if ($price === 0 && !empty($item->getParentItem())) {
                         $price = (int) $item->getParentItem()->getPrice();
-                        $qty = (int)$item->getParentItem()->getQty();
+                        $qty = (int)$item->getParentItem()->{$quantityMethod}();
                     }
 
                     $request[] = [
