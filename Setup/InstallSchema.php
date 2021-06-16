@@ -19,7 +19,7 @@ class InstallSchema implements InstallSchemaInterface
 			)
 				->addColumn(
 					'conekta_order_id',
-					\Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
+					Table::TYPE_TEXT,
 					150,
 					[
 						'identity' => false,
@@ -30,7 +30,7 @@ class InstallSchema implements InstallSchemaInterface
 				)
 				->addColumn(
 					'order_id',
-					\Magento\Framework\DB\Ddl\Table::TYPE_INTEGER,
+					Table::TYPE_INTEGER,
 					1,
 					[
                         'identity' => false,
@@ -39,6 +39,18 @@ class InstallSchema implements InstallSchemaInterface
                     ],
 					'Sales Order'
 				)
+                ->addColumn(
+                    'created_at',
+                    Table::TYPE_TIMESTAMP,
+                    null,
+                    ['nullable' => false, 'default' => Table::TIMESTAMP_INIT],
+                    'Created At'
+                )->addColumn(
+                    'updated_at',
+                    Table::TYPE_TIMESTAMP,
+                    null,
+                    ['nullable' => false, 'default' => Table::TIMESTAMP_INIT_UPDATE],
+                    'Updated At')
 				->setComment('Conekta Orders Table');
 			$installer->getConnection()->createTable($table);
 
