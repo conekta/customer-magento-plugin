@@ -55,16 +55,7 @@ class InstallSchema implements InstallSchemaInterface
 			$installer->getConnection()->createTable($table);
 
 		}
-
-        $setup->getConnection()->addColumn(
-            $setup->getTable('sales_order_grid'),
-            'conekta_order_id',
-            [
-                'type' => Table::TYPE_TEXT,
-                'comment' => 'Conekta Order'
-            ]
-        );
-
+        
 		$installer->endSetup();
 	}
 }

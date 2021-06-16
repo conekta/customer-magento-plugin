@@ -7,18 +7,4 @@
             </argument>
         </arguments>
     </type>
-    <virtualType name="Magento\Sales\Model\ResourceModel\Order\Grid">
-        <arguments>
-            <argument name="joins" xsi:type="array">
-                <item name="conekta_salesorder" xsi:type="array">
-                    <item name="table" xsi:type="string">conekta_salesorder</item>
-                    <item name="origin_column" xsi:type="string">entity_id</item>
-                    <item name="target_column" xsi:type="string">order_id</item>
-                </item>
-            </argument>
-            <argument name="columns" xsi:type="array">
-                <item name="conekta_order_id" xsi:type="string">conekta_salesorder.conekta_order_id</item>
-            </argument>
-        </arguments>
-    </virtualType>
 </config>
