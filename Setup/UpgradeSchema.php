@@ -18,8 +18,8 @@ class UpgradeSchema implements UpgradeSchemaInterface
 		if(version_compare($context->getVersion(), '3.6.0', '<')) {
 			if (!$installer->tableExists('conekta_salesorder')) {
 				$table = $installer->getConnection()->newTable(
-						$installer->getTable('conekta_salesorder')
-					)
+					$installer->getTable('conekta_salesorder')
+				)
 					->addColumn(
 						'id',
 						Table::TYPE_INTEGER,
@@ -40,11 +40,11 @@ class UpgradeSchema implements UpgradeSchemaInterface
 						'Conekta Order'
 					)
 					->addColumn(
-						'order_id',
-						Table::TYPE_INTEGER,
-						1,
+						'increment_order_id',
+						Table::TYPE_TEXT,
+						150,
 						['nullable' => false],
-						'Sales Order'
+						'Sales Order Increment Id'
 					)
 					->addColumn(
 						'created_at',
@@ -65,23 +65,11 @@ class UpgradeSchema implements UpgradeSchemaInterface
 					$installer->getTable('conekta_salesorder'),
 					$setup->getIdxName(
 						$installer->getTable('conekta_salesorder'),
-						['conekta_order_id'],
+						['conekta_order_id', 'increment_order_id'],
 						AdapterInterface::INDEX_TYPE_FULLTEXT
 					),
-					['conekta_order_id'],
+					['conekta_order_id', 'increment_order_id'],
 					AdapterInterface::INDEX_TYPE_FULLTEXT
-				);
-	
-
-				$installer->getConnection()->addIndex(
-					$installer->getTable('conekta_salesorder'),
-					$setup->getIdxName(
-						$installer->getTable('conekta_salesorder'),
-						['order_id'],
-						AdapterInterface::INDEX_TYPE_INDEX
-					),
-					['order_id'],
-					AdapterInterface::INDEX_TYPE_INDEX
 				);
 			}			
 		}

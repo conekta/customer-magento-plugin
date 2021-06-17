@@ -8,6 +8,7 @@ use Magento\Payment\Gateway\Http\ClientInterface;
 use Magento\Payment\Gateway\Http\TransferInterface;
 use Magento\Payment\Model\Method\Logger;
 use Conekta\Order as ConektaOrder;
+use Conekta\Payments\Model\Api\Data\ConektaSalesOrderInterface;
 use Conekta\Payments\Model\ConektaSalesOrderFactory;
 
 class TransactionAuthorize implements ClientInterface
@@ -57,6 +58,7 @@ class TransactionAuthorize implements ClientInterface
         $this->_httpUtil = $httpUtil;
         $this->_conektaLogger->info('HTTP Client Spei TransactionAuthorize :: __construct');
         $this->logger = $logger;
+        $this->conektaSalesOrderFactory = $conektaSalesOrderFactory;
 
         $config = [
             'locale' => 'es'
@@ -107,8 +109,8 @@ class TransactionAuthorize implements ClientInterface
                 $this->conektaSalesOrderFactory
                         ->create()
                         ->setData(array(
-                            'conekta_order_id' => $request['order_id'],
-                            'order_id' => $request['metadata']['order_id']
+                            ConektaSalesOrderInterface::CONEKTA_ORDER_ID => $ord_id,
+                            ConektaSalesOrderInterface::INCREMENT_ORDER_ID => $orderParams['metadata']['order_id']
                         ))
                         ->save();
 

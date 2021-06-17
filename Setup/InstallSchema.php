@@ -38,11 +38,11 @@ class InstallSchema implements InstallSchemaInterface
 					'Conekta Order'
 				)
 				->addColumn(
-					'order_id',
-					Table::TYPE_INTEGER,
-					1,
+					'increment_order_id',
+					Table::TYPE_TEXT,
+					150,
 					['nullable' => false],
-					'Sales Order'
+					'Sales Order Increment Id'
 				)
                 ->addColumn(
                     'created_at',
@@ -63,22 +63,11 @@ class InstallSchema implements InstallSchemaInterface
 				$installer->getTable('conekta_salesorder'),
 				$setup->getIdxName(
 					$installer->getTable('conekta_salesorder'),
-					['conekta_order_id'],
+					['conekta_order_id', 'increment_order_id'],
 					AdapterInterface::INDEX_TYPE_FULLTEXT
 				),
-				['conekta_order_id'],
+				['conekta_order_id', 'increment_order_id'],
 				AdapterInterface::INDEX_TYPE_FULLTEXT
-			);
-
-			$installer->getConnection()->addIndex(
-				$installer->getTable('conekta_salesorder'),
-				$setup->getIdxName(
-					$installer->getTable('conekta_salesorder'),
-					['order_id'],
-					AdapterInterface::INDEX_TYPE_INDEX
-				),
-				['order_id'],
-				AdapterInterface::INDEX_TYPE_INDEX
 			);
 
 		}
