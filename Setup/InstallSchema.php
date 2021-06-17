@@ -4,6 +4,7 @@ namespace Conekta\Payments\Setup;
 use Magento\Framework\Setup\InstallSchemaInterface;
 use Magento\Framework\Setup\ModuleContextInterface;
 use Magento\Framework\Setup\SchemaSetupInterface;
+use Magento\Framework\DB\Adapter\AdapterInterface;
 use Magento\Framework\DB\Ddl\Table;
 
 class InstallSchema implements InstallSchemaInterface
@@ -18,25 +19,29 @@ class InstallSchema implements InstallSchemaInterface
 				$installer->getTable('conekta_salesorder')
 			)
 				->addColumn(
+					'id',
+					Table::TYPE_INTEGER,
+					null,
+					[
+						'identity' => true,
+						'nullable' => false,
+						'primary'  => true,
+						'unsigned'  => true
+					],
+					'Conekta Sales Order ID'
+				)
+				->addColumn(
 					'conekta_order_id',
 					Table::TYPE_TEXT,
 					150,
-					[
-						'identity' => false,
-						'nullable' => false,
-						'primary'  => true,
-					],
+					['nullable' => false],
 					'Conekta Order'
 				)
 				->addColumn(
 					'order_id',
 					Table::TYPE_INTEGER,
 					1,
-					[
-                        'identity' => false,
-						'nullable' => false,
-						'primary'  => false,
-                    ],
+					['nullable' => false],
 					'Sales Order'
 				)
                 ->addColumn(
@@ -53,6 +58,28 @@ class InstallSchema implements InstallSchemaInterface
                     'Updated At')
 				->setComment('Conekta Orders Table');
 			$installer->getConnection()->createTable($table);
+
+			$installer->getConnection()->addIndex(
+				$installer->getTable('conekta_salesorder'),
+				$setup->getIdxName(
+					$installer->getTable('conekta_salesorder'),
+					['conekta_order_id'],
+					AdapterInterface::INDEX_TYPE_FULLTEXT
+				),
+				['conekta_order_id'],
+				AdapterInterface::INDEX_TYPE_FULLTEXT
+			);
+
+			$installer->getConnection()->addIndex(
+				$installer->getTable('conekta_salesorder'),
+				$setup->getIdxName(
+					$installer->getTable('conekta_salesorder'),
+					['order_id'],
+					AdapterInterface::INDEX_TYPE_INDEX
+				),
+				['order_id'],
+				AdapterInterface::INDEX_TYPE_INDEX
+			);
 
 		}
         
