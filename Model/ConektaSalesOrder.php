@@ -1,15 +1,16 @@
-<?php 
+<?php
 namespace Conekta\Payments\Model;
 
 use Conekta\Payments\Model\Api\Data\ConektaSalesOrderInterface;
 use Magento\Framework\Model\AbstractModel;
+use Conekta\Payments\Model\ResourceModel\ConektaSalesOrder as ResourceConektaSalesOrder;
 
 class ConektaSalesOrder extends AbstractModel implements ConektaSalesOrderInterface
 {
 
     protected function _construct()
     {
-        $this->_init('Conekta\Payments\Model\ResourceModel\ConektaSalesOrder');
+        $this->_init(ResourceConektaSalesOrder::class);
     }
 
     public function setConektaOrderId($value)

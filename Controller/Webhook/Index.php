@@ -81,7 +81,7 @@ class Index extends Action implements CsrfAwareActionInterface
             $body = $this->helper->jsonDecode($this->getRequest()->getContent());
 
             if (!$body || $this->getRequest()->getMethod() !== 'POST') {
-                throw new Exception(__("Incorrect request"));
+                return $response;
             }
 
             $event = $body['type'];
@@ -97,7 +97,7 @@ class Index extends Action implements CsrfAwareActionInterface
                 case self::EVENT_ORDER_CREATED:
                 case self::EVENT_ORDER_PENDING_PAYMENT:
                     $order = $this->webhookRepository->findByMetadataOrderId($body);
-                    if(!$order->getId()){
+                    if (!$order->getId()) {
                         $response = self::HTTP_BAD_REQUEST_CODE;
                     }
                     break;

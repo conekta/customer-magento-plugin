@@ -85,10 +85,10 @@ class TransactionCapture implements ClientInterface
 
             $this->conektaSalesOrderFactory
                         ->create()
-                        ->setData(array(
+                        ->setData([
                             ConektaSalesOrderInterface::CONEKTA_ORDER_ID => $request['order_id'],
                             ConektaSalesOrderInterface::INCREMENT_ORDER_ID => $request['metadata']['order_id']
-                        ))
+                        ])
                         ->save();
 
             $response['error_code'] = '';
@@ -136,10 +136,10 @@ class TransactionCapture implements ClientInterface
 
                 $this->conektaSalesOrderFactory
                         ->create()
-                        ->setData(array(
+                        ->setData([
                             ConektaSalesOrderInterface::CONEKTA_ORDER_ID => $ord_id,
                             ConektaSalesOrderInterface::INCREMENT_ORDER_ID => $request['metadata']['order_id']
-                        ))
+                        ])
                         ->save();
             } else {
                 $result_code = 666;

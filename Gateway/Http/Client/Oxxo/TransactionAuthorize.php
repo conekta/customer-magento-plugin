@@ -73,7 +73,7 @@ class TransactionAuthorize implements ClientInterface
      */
     public function placeRequest(TransferInterface $transferObject)
     {
-        $this->_conektaLogger->info('HTTP Client Oxxo TransactionAuthorize :: placeRequest', $transferObject->getBody());
+        $this->_conektaLogger->info('HTTP Client Oxxo TransactionAuthorize :: placeRequest');
         $request = $transferObject->getBody();
 
         $orderParams['currency']         = $request['CURRENCY'];
@@ -106,10 +106,10 @@ class TransactionAuthorize implements ClientInterface
 
                 $this->conektaSalesOrderFactory
                         ->create()
-                        ->setData(array(
+                        ->setData([
                             ConektaSalesOrderInterface::CONEKTA_ORDER_ID => $ord_id,
                             ConektaSalesOrderInterface::INCREMENT_ORDER_ID => $orderParams['metadata']['order_id']
-                        ))
+                        ])
                         ->save();
             } else {
                 $result_code = 666;

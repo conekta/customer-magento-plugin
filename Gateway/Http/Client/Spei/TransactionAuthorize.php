@@ -108,10 +108,10 @@ class TransactionAuthorize implements ClientInterface
 
                 $this->conektaSalesOrderFactory
                         ->create()
-                        ->setData(array(
+                        ->setData([
                             ConektaSalesOrderInterface::CONEKTA_ORDER_ID => $ord_id,
                             ConektaSalesOrderInterface::INCREMENT_ORDER_ID => $orderParams['metadata']['order_id']
-                        ))
+                        ])
                         ->save();
 
             } else {
