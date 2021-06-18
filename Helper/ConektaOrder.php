@@ -205,7 +205,7 @@ class ConektaOrder extends AbstractHelper
         try {
             $this->conektaLogger->info('Creating Order. Parameters: ', $validOrderWithCheckout);
             $order = $this->conektaOrderApi->create($validOrderWithCheckout);
-            $this->conektaLogger->info('The Order is created');
+            $this->conektaLogger->info('The Order has been created');
             $order = (array) $order;
             $checkoutId =  $order['checkout']['id'];
             $this->conektaSession->setConektaCheckoutId($checkoutId);

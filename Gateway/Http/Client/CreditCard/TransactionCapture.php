@@ -5,6 +5,8 @@ use Conekta\Order as ConektaOrder;
 use Conekta\Payments\Gateway\Http\Util\HttpUtil;
 use Conekta\Payments\Helper\Data as ConektaHelper;
 use Conekta\Payments\Logger\Logger as ConektaLogger;
+use Conekta\Payments\Model\Api\Data\ConektaSalesOrderInterface;
+use Conekta\Payments\Model\ConektaSalesOrderFactory;
 use Magento\Payment\Gateway\Http\ClientInterface;
 use Magento\Payment\Gateway\Http\TransferInterface;
 use Magento\Payment\Model\Method\Logger;
@@ -35,6 +37,8 @@ class TransactionCapture implements ClientInterface
 
     protected $_httpUtil;
 
+    protected $conektaSalesOrderFactory;
+
     /**
      * @param Logger $logger
      * @param ConektaHelper $conektaHelper
@@ -45,7 +49,8 @@ class TransactionCapture implements ClientInterface
         ConektaHelper $conektaHelper,
         ConektaLogger $conektaLogger,
         ConektaOrder $conektaOrder,
-        HttpUtil $httpUtil
+        HttpUtil $httpUtil,
+        ConektaSalesOrderFactory $conektaSalesOrderFactory
     ) {
         $this->_conektaHelper = $conektaHelper;
         $this->_conektaLogger = $conektaLogger;
@@ -53,6 +58,7 @@ class TransactionCapture implements ClientInterface
         $this->_httpUtil = $httpUtil;
         $this->_conektaLogger->info('HTTP Client TransactionCapture :: __construct');
         $this->logger = $logger;
+        $this->conektaSalesOrderFactory = $conektaSalesOrderFactory;
 
         $config = [
             'locale' => 'es'
@@ -76,6 +82,15 @@ class TransactionCapture implements ClientInterface
                 $request['txn_id'],
                 $request['order_id']
             );
+
+            $this->conektaSalesOrderFactory
+                        ->create()
+                        ->setData(array(
+                            ConektaSalesOrderInterface::CONEKTA_ORDER_ID => $request['order_id'],
+                            ConektaSalesOrderInterface::INCREMENT_ORDER_ID => $request['metadata']['order_id']
+                        ))
+                        ->save();
+
             $response['error_code'] = '';
             $response['payment_method_details'] =  $request['payment_method_details'];
 
@@ -118,6 +133,14 @@ class TransactionCapture implements ClientInterface
                 $result_code = 1;
                 $txn_id = $newCharge->id;
                 $ord_id = $newOrder->id;
+
+                $this->conektaSalesOrderFactory
+                        ->create()
+                        ->setData(array(
+                            ConektaSalesOrderInterface::CONEKTA_ORDER_ID => $ord_id,
+                            ConektaSalesOrderInterface::INCREMENT_ORDER_ID => $request['metadata']['order_id']
+                        ))
+                        ->save();
             } else {
                 $result_code = 666;
             }
@@ -169,6 +192,7 @@ class TransactionCapture implements ClientInterface
     protected function generateResponseForCode($resultCode, $txn_id, $ord_id)
     {
         $this->_conektaLogger->info('HTTP Client TransactionCapture :: generateResponseForCode');
+        
         if (empty($txn_id)) {
             $txn_id = $this->generateTxnId();
         }

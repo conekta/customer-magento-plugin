@@ -3,6 +3,7 @@
 namespace Conekta\Payments\Model;
 
 use Conekta\Payments\Logger\Logger as ConektaLogger;
+use Conekta\Payments\Model\Api\Data\ConektaSalesOrderInterface;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Sales\Api\Data\OrderInterface;
 use Magento\Sales\Model\Order;
@@ -10,7 +11,7 @@ use Magento\Sales\Model\Order\Email\Sender\InvoiceSender;
 use Magento\Sales\Model\Service\InvoiceService;
 use Magento\Framework\DB\Transaction;
 
-class OrderRepository
+class WebhookRepository
 {
     protected $orderInterface;
 
@@ -22,18 +23,22 @@ class OrderRepository
 
     private $_conektaLogger;
 
+    private $conektaOrderSalesInterface;
+
     public function __construct(
         OrderInterface $orderInterface,
         InvoiceService $invoiceService,
         InvoiceSender $invoiceSender,
         Transaction $transaction,
-        ConektaLogger $conektaLogger
+        ConektaLogger $conektaLogger,
+        ConektaSalesOrderInterface $conektaOrderSalesInterface
     ) {
         $this->orderInterface = $orderInterface;
         $this->invoiceService = $invoiceService;
         $this->invoiceSender = $invoiceSender;
         $this->transaction = $transaction;
         $this->_conektaLogger = $conektaLogger;
+        $this->conektaOrderSalesInterface = $conektaOrderSalesInterface;
     }
 
     /**
@@ -49,14 +54,14 @@ class OrderRepository
         $this->_conektaLogger->info('OrderRepository :: findByMetadataOrderId started');
 
         if (!isset($body['data']['object']) ||
-            !isset($body['data']['object']['metadata']) ||
-            !isset($body['data']['object']['metadata']['order_id'])
+            !isset($body['data']['object']['id'])
         ) {
             throw new LocalizedException(__('Missing order information'));
         }
+
+        $conetakSalesOrder = $this->conektaOrderSalesInterface->loadByConektaOrderId($body['data']['object']['id']);
         
-        $orderId = $body['data']['object']['metadata']['order_id'];
-        $order = $this->orderInterface->loadByIncrementId($orderId);
+        $order = $this->orderInterface->loadByIncrementId($conetakSalesOrder->getIncrementOrderId());
         
         return $order;
     }

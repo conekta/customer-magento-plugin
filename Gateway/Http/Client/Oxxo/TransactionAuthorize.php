@@ -5,6 +5,8 @@ use Conekta\Order as ConektaOrder;
 use Conekta\Payments\Gateway\Http\Util\HttpUtil;
 use Conekta\Payments\Helper\Data as ConektaHelper;
 use Conekta\Payments\Logger\Logger as ConektaLogger;
+use Conekta\Payments\Model\Api\Data\ConektaSalesOrderInterface;
+use Conekta\Payments\Model\ConektaSalesOrderFactory;
 use Magento\Payment\Gateway\Http\ClientInterface;
 use Magento\Payment\Gateway\Http\TransferInterface;
 use Magento\Payment\Model\Method\Logger;
@@ -35,6 +37,8 @@ class TransactionAuthorize implements ClientInterface
 
     protected $_httpUtil;
 
+    protected $conektaSalesOrderFactory;
+
     /**
      * @param Logger $logger
      * @param ConektaHelper $conektaHelper
@@ -45,7 +49,8 @@ class TransactionAuthorize implements ClientInterface
         ConektaHelper $conektaHelper,
         ConektaLogger $conektaLogger,
         ConektaOrder $conektaOrder,
-        HttpUtil $httpUtil
+        HttpUtil $httpUtil,
+        ConektaSalesOrderFactory $conektaSalesOrderFactory
     ) {
         $this->_conektaHelper = $conektaHelper;
         $this->_conektaLogger = $conektaLogger;
@@ -53,7 +58,7 @@ class TransactionAuthorize implements ClientInterface
         $this->_httpUtil = $httpUtil;
         $this->_conektaLogger->info('HTTP Client Oxxo TransactionAuthorize :: __construct');
         $this->logger = $logger;
-
+        $this->conektaSalesOrderFactory = $conektaSalesOrderFactory;
         $config = [
             'locale' => 'es'
         ];
@@ -68,7 +73,7 @@ class TransactionAuthorize implements ClientInterface
      */
     public function placeRequest(TransferInterface $transferObject)
     {
-        $this->_conektaLogger->info('HTTP Client Oxxo TransactionAuthorize :: placeRequest');
+        $this->_conektaLogger->info('HTTP Client Oxxo TransactionAuthorize :: placeRequest', $transferObject->getBody());
         $request = $transferObject->getBody();
 
         $orderParams['currency']         = $request['CURRENCY'];
@@ -98,6 +103,14 @@ class TransactionAuthorize implements ClientInterface
                 $result_code = 1;
                 $txn_id = $charge->id;
                 $ord_id = $conektaOrder->id;
+
+                $this->conektaSalesOrderFactory
+                        ->create()
+                        ->setData(array(
+                            ConektaSalesOrderInterface::CONEKTA_ORDER_ID => $ord_id,
+                            ConektaSalesOrderInterface::INCREMENT_ORDER_ID => $orderParams['metadata']['order_id']
+                        ))
+                        ->save();
             } else {
                 $result_code = 666;
             }
