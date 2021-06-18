@@ -89,7 +89,7 @@ class WebhookRepository
         if ($order->getState() === Order::STATE_PENDING_PAYMENT ||
             $order->getState() === Order::STATE_PAYMENT_REVIEW
         ) {
-            $order->setSate(Order::STATE_CANCELED);
+            $order->setState(Order::STATE_CANCELED);
             $order->setStatus(Order::STATE_CANCELED);
 
             $order->addStatusHistoryComment("Order Expired")
@@ -119,7 +119,7 @@ class WebhookRepository
             throw new LocalizedException(__($message));
         }
 
-        $order->setSate(Order::STATE_PROCESSING);
+        $order->setState(Order::STATE_PROCESSING);
         $order->setStatus(Order::STATE_PROCESSING);
 
         $order->addStatusHistoryComment("Payment received successfully")
