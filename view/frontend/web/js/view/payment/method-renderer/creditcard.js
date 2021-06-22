@@ -70,9 +70,19 @@ define(
                     async: false,
                     success: function (response) {
                         self.checkoutId(response.checkout_id);
+
+                        if(!self.checkoutId){
+                            self.messageContainer.clear();
+                            self.messageContainer.addErrorMessage({
+                                message: "El medio de pago seleccionado no puede utilizarse"
+                            });
+                        }
+                        
                     },
                     error: function (res) {
-                        console.log(res);
+                        console.error(res);
+
+                        
                     }
                 });
             },

@@ -7,12 +7,14 @@ use Conekta\Order as ConektaOrderApi;
 use Conekta\Payments\Helper\Data as ConektaHelper;
 use Conekta\Payments\Logger\Logger as ConektaLogger;
 use Conekta\Payments\Model\Ui\CreditCard\ConfigProvider;
+use Exception;
 use Magento\Checkout\Model\Session;
 use Magento\Customer\Api\CustomerRepositoryInterface;
 use Magento\Customer\Model\Session as CustomerSession;
 use Magento\Framework\App\Helper\AbstractHelper;
 use Magento\Framework\App\Helper\Context;
 use Magento\Framework\Escaper;
+use Magento\Framework\Exception\LocalizedException;
 
 class ConektaOrder extends AbstractHelper
 {
@@ -126,14 +128,8 @@ class ConektaOrder extends AbstractHelper
             
             try {
                 $customerApi = $this->conektaCustomer->find($conektaCustomerId);
-            } catch (\Conekta\ProcessingError $error) {
-                $this->conektaLogger->info('Create Order. Find Customer: ' . $error->getMessage());
-                $conektaCustomerId = '';
-            } catch (\Conekta\ParameterValidationError $error) {
-                $this->conektaLogger->info('Create Order. Find Customer: ' . $error->getMessage());
-                $conektaCustomerId = '';
-            } catch (\Conekta\Handler $error) {
-                $this->conektaLogger->info('Create Order. Find Customer: ' . $error->getMessage());
+            } catch (Exception $error) {
+                $this->conektaLogger->error('Create Order. Find Customer: ' . $error->getMessage());
                 $conektaCustomerId = '';
             }
 
@@ -163,10 +159,10 @@ class ConektaOrder extends AbstractHelper
                         $this->customerRepository->save($customer);
                     }
                 } catch (\Conekta\Handler $error) {
-                    $this->conektaLogger->info($error->getMessage());
+                    $this->conektaLogger->info('Create Order. Create Customer: ' .$error->getMessage());
                 }
             } else {
-                //If cutomer API exists, always update info
+                //If cutomer API exists, always update error
                 $customerApi->update($customerRequest);
             }
         } catch (\Conekta\ProcessingError $error) {
@@ -177,42 +173,48 @@ class ConektaOrder extends AbstractHelper
             $this->conektaLogger->info($error->getMessage());
         }
 
+        $orderItems = $this->getQuote()->getAllItems();
+
         $validOrderWithCheckout = [];
-        $validOrderWithCheckout['line_items'] = $this->getLineItems();
+        $validOrderWithCheckout['line_items'] = $this->_conektaHelper->getLineItems($orderItems);
         $validOrderWithCheckout['shipping_lines'] = $this->getShippingLines();
         $validOrderWithCheckout['shipping_contact'] = $this->getShippingContact($guestEmail);
         $validOrderWithCheckout['customer_info'] = [
             'customer_id' => $conektaCustomerId
         ];
         
-        $threeDsEnabled =  $this->_conektaHelper->getConfigData('conekta_cc', 'iframe_enabled') ? true : false;
+        $threeDsEnabled =  $this->_conektaHelper->is3DSEnabled();
+        $saveCardEnabled =  $this->_conektaHelper->isSaveCardEnabled();
         $installments = $this->getMonthlyInstallments();
         $validOrderWithCheckout['checkout']    = [
-            'allowed_payment_methods' => ["cash", "card", "bank_transfer"],
+            'allowed_payment_methods' => ["card"],//, "cash", "bank_transfer"],
             'monthly_installments_enabled' => $installments['active_installments'] ? true : false,
             'monthly_installments_options' => $installments['monthly_installments'],
-            'on_demand_enabled' => true, //TODO detect from configuration
+            'on_demand_enabled' => $saveCardEnabled,
             'force_3ds_flow' => $threeDsEnabled,
         ];
         $validOrderWithCheckout['currency']= self::CURRENCY_CODE;
         $validOrderWithCheckout['checkout']['expires_at'] = $this->getExpiredAt();
-        $validOrderWithCheckout['metadata'] = $this->getQuoteId();
+        $validOrderWithCheckout['metadata'] = array_merge(
+            $this->_conektaHelper->getMagentoMetadata(),
+            ['quote_id' => $this->getQuote()->getId()],
+            $this->_conektaHelper->getMetadataAttributesConketa($orderItems)
+        );
         
-        $validOrderWithCheckout['force_3ds_flow'] = $threeDsEnabled;
         $checkoutId = '';
-        
         try {
+            $this->conektaLogger->info('Creating Order. Parameters: ', $validOrderWithCheckout);
             $order = $this->conektaOrderApi->create($validOrderWithCheckout);
-            $this->conektaLogger->info('The Order is created');
+            $this->conektaLogger->info('The Order has been created');
             $order = (array) $order;
             $checkoutId =  $order['checkout']['id'];
             $this->conektaSession->setConektaCheckoutId($checkoutId);
         } catch (\Conekta\ProcessingError $error) {
-            $this->conektaLogger->info($error->getMessage());
+            $this->conektaLogger->error($error->getMessage());
         } catch (\Conekta\ParameterValidationError $error) {
-            $this->conektaLogger->info($error->getMessage());
+            $this->conektaLogger->error($error->getMessage());
         } catch (\Conekta\Handler $error) {
-            $this->conektaLogger->info($error->getMessage());
+            $this->conektaLogger->error($error->getMessage());
         }
         return $checkoutId;
     }
@@ -281,49 +283,6 @@ class ConektaOrder extends AbstractHelper
             $this->quote = $this->_checkoutSession->getQuote();
         }
         return $this->quote;
-    }
-
-    /**
-     * @return array
-     * @throws \Magento\Framework\Exception\LocalizedException
-     * @throws \Magento\Framework\Exception\NoSuchEntityException
-     */
-    public function getLineItems()
-    {
-        $version = (int)str_replace('.', '', $this->_conektaHelper->getMageVersion());
-        $request = [];
-        $items = $this->getQuote()->getAllItems();
-        foreach ($items as $itemId => $item) {
-            if ($version > 233) {
-                if ($item->getProductType() != 'bundle' && $item->getProductType() != 'configurable') {
-                    $request[] = [
-                        'name' => $item->getName(),
-                        'sku' => $item->getSku(),
-                        'unit_price' => (int)($item->getPrice() * 100),
-                        'description' => $this->_escaper->escapeHtml($item->getName() . ' - ' . $item->getSku()),
-                        'quantity' => (int)($item->getQty()),
-                        'tags' => [
-                            $item->getProductType()
-                        ]
-                    ];
-
-                }
-            } else {
-                if ($item->getProductType() != 'bundle' && $item->getPrice() > 0) {
-                    $request[] = [
-                        'name' => $item->getName(),
-                        'sku' => $item->getSku(),
-                        'unit_price' => (int)($item->getPrice() * 100),
-                        'description' => $this->_escaper->escapeHtml($item->getName() . ' - ' . $item->getSku()),
-                        'quantity' => (int)($item->getQtyOrdered()),
-                        'tags' => [
-                            $item->getProductType()
-                        ]
-                    ];
-                }
-            }
-        }
-        return $request;
     }
 
     /**

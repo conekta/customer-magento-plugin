@@ -1,5 +1,7 @@
 <?xml version="1.0"?>
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <preference for="Conekta\Payments\Model\Api\Data\ConektaSalesOrderInterface" type="Conekta\Payments\Model\ConektaSalesOrder"/>
+    
     <type name="Magento\Checkout\Model\CompositeConfigProvider">
         <arguments>
             <argument name="configProviders" xsi:type="array">
@@ -84,6 +86,7 @@
             <argument name="builders" xsi:type="array">
                 <item name="requestBuilder" xsi:type="string">Conekta\Payments\Gateway\Request\CreditCard\CaptureRequest</item>
                 <item name="lineItems" xsi:type="string">Conekta\Payments\Gateway\Request\LineItemsBuilder</item>
+                <item name="metadata" xsi:type="string">Conekta\Payments\Gateway\Request\MetadataBuilder</item>
                 <item name="taxLines" xsi:type="string">Conekta\Payments\Gateway\Request\TaxLinesBuilder</item>
                 <item name="customerInfo" xsi:type="string">Conekta\Payments\Gateway\Request\CustomerInfoBuilder</item>
                 <item name="shippingLines" xsi:type="string">Conekta\Payments\Gateway\Request\ShippingLinesBuilder</item>
@@ -221,6 +224,7 @@
             <argument name="builders" xsi:type="array">
                 <item name="requestBuilder" xsi:type="string">Conekta\Payments\Gateway\Request\Oxxo\AuthorizeRequest</item>
                 <item name="lineItems" xsi:type="string">Conekta\Payments\Gateway\Request\LineItemsBuilder</item>
+                <item name="metadata" xsi:type="string">Conekta\Payments\Gateway\Request\MetadataBuilder</item>
                 <item name="taxLines" xsi:type="string">Conekta\Payments\Gateway\Request\TaxLinesBuilder</item>
                 <item name="customerInfo" xsi:type="string">Conekta\Payments\Gateway\Request\CustomerInfoBuilder</item>
                 <item name="shippingLines" xsi:type="string">Conekta\Payments\Gateway\Request\ShippingLinesBuilder</item>
@@ -324,6 +328,7 @@
             <argument name="builders" xsi:type="array">
                 <item name="requestBuilder" xsi:type="string">Conekta\Payments\Gateway\Request\Spei\AuthorizeRequest</item>
                 <item name="lineItems" xsi:type="string">Conekta\Payments\Gateway\Request\LineItemsBuilder</item>
+                <item name="metadata" xsi:type="string">Conekta\Payments\Gateway\Request\MetadataBuilder</item>
                 <item name="taxLines" xsi:type="string">Conekta\Payments\Gateway\Request\TaxLinesBuilder</item>
                 <item name="customerInfo" xsi:type="string">Conekta\Payments\Gateway\Request\CustomerInfoBuilder</item>
                 <item name="shippingLines" xsi:type="string">Conekta\Payments\Gateway\Request\ShippingLinesBuilder</item>
