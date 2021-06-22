@@ -6,7 +6,6 @@ use Magento\Framework\Exception\LocalizedException;
 use Magento\Payment\Gateway\Data\PaymentDataObjectInterface;
 use Magento\Payment\Gateway\Helper\SubjectReader;
 use Magento\Payment\Gateway\Request\BuilderInterface;
-use Magento\Quote\Api\CartRepositoryInterface;
 
 class ShippingLinesBuilder implements BuilderInterface
 {
@@ -18,7 +17,6 @@ class ShippingLinesBuilder implements BuilderInterface
 
     public function __construct(
         SubjectReader $subjectReader,
-        CartRepositoryInterface $cartRepository,
         ConektaLogger $conektaLogger
     ) {
         $this->_conektaLogger = $conektaLogger;
@@ -48,7 +46,7 @@ class ShippingLinesBuilder implements BuilderInterface
         }
 
         $this->_conektaLogger->info('Request ShippingLinesBuilder :: build : return request', $request);
-
+        throw new LocalizedException(__('Shippment information should be provided'));
         return $request;
     }
 }

@@ -8,6 +8,7 @@ use Magento\Framework\App\Helper\Context;
 use Magento\Framework\App\ProductMetadataInterface;
 use Magento\Framework\Encryption\EncryptorInterface;
 use Magento\Framework\Module\ModuleListInterface;
+use Magento\Quote\Api\CartRepositoryInterface;
 
 class Data extends AbstractHelper
 {
@@ -32,6 +33,8 @@ class Data extends AbstractHelper
      */
     protected $conektaCustomer;
 
+    protected $_cartRepository;
+
     /**
      * Data constructor.
      * @param Context $context
@@ -47,7 +50,8 @@ class Data extends AbstractHelper
         EncryptorInterface $encryptor,
         ProductMetadataInterface $productMetadata,
         ConektaLogger $conektaLogger,
-        Customer $conektaCustomer
+        Customer $conektaCustomer,
+        CartRepositoryInterface $cartRepository
     ) {
         parent::__construct($context);
         $this->_moduleList = $moduleList;
@@ -191,5 +195,23 @@ class Data extends AbstractHelper
         $attributesArray = explode(",", $attributes);
         
         return $attributesArray;
+    }
+
+    public function getShippingLines($quoteId){
+
+        $quote = $this->_cartRepository->get($quoteId);
+        $shippingAddress = $quote->getShippingAddress();
+        $this->_conektaLogger->info('Request ShippingLinesBuilder :: build', ['isVirtual'=>$quote->getIsVirtual()]);
+        $shippingLines = [];
+        
+        if ($quote->getIsVirtual()) {
+            $shippingLines['amount'] = 0;
+        } elseif($shippingAddress) {
+            $shipping_lines['amount'] = (int)($shippingAddress->getShippingAmount() * 100);
+            $shipping_lines['method'] = $quote->getShippingAddress()->getShippingMethod();
+            $shipping_lines['carrier'] = $quote->getShippingAddress()->getShippingDescription();
+        }
+
+        return $shippingLines;
     }
 }
