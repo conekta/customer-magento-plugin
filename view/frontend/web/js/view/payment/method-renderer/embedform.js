@@ -23,6 +23,10 @@ define(
                 return 'Conekta_Payments/payment/embedform/form'
             },
 
+            getTitle: function(){
+                return 'Pagos Conekta';
+            },
+
             initObservable: function () {
 
                 this._super()

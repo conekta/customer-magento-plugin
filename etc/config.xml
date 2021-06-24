@@ -77,10 +77,9 @@
             <conekta_ef>
                 <active>1</active>
                 <title>Pagos Conekta</title>
-                <group>conekta</group>
+                <group>offline</group>
                 <model>ConektaPaymentsEmbedFormFacade</model>
                 <order_status>pending_payment</order_status>
-                <group>offline</group>
             </conekta_ef>
         </payment>
         <conekta>

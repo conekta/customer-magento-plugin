@@ -83,8 +83,6 @@ class ConfigProvider implements ConfigProviderInterface
         $this->config = $config;
         $this->conektaLogger = $conektaLogger;
         $this->url = $url;
-
-        $this->conektaLogger->info('Config EMBED FORM');
     }
 
     /**
@@ -93,7 +91,6 @@ class ConfigProvider implements ConfigProviderInterface
     public function getConfig()
     {
         $savedCardEnable = $this->getEnableSaveCardConfig() ? true : false;
-        $this->conektaLogger->info('Config EMBED FORM');
         return [
             'payment' => [
                 self::CODE => [
