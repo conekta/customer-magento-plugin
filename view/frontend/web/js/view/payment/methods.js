@@ -20,6 +20,10 @@ define(
             {
                 type: 'conekta_spei',
                 component: 'Conekta_Payments/js/view/payment/method-renderer/spei'
+            },
+            {
+                type: 'conekta_ef',
+                component: 'Conekta_Payments/js/view/payment/method-renderer/embedform'
             }
         );
         return Component.extend({});

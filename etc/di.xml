@@ -27,6 +27,20 @@
         </arguments>
     </type>
 
+    <!-- ++++++++++++++++++++++++++++++++++++++++++ Embed Form ++++++++++++++++++++++++++++++++++++++++++++++ -->
+    <!-- Payment Method Facade configuration -->
+    <virtualType name="ConektaPaymentsEmbedFormFacade" type="Magento\Payment\Model\Method\Adapter">
+        <arguments>
+            <argument name="code" xsi:type="const">\Conekta\Payments\Model\Ui\EmbedForm\ConfigProvider::CODE</argument>
+            <argument name="formBlockType" xsi:type="string">Magento\Payment\Block\Form</argument>
+            <argument name="infoBlockType" xsi:type="string">Conekta\Payments\Block\CreditCard\CcInfo</argument>
+            <argument name="valueHandlerPool" xsi:type="object">ConektaPaymentsCreditCardValueHandlerPool</argument>
+            <argument name="commandPool" xsi:type="object">ConektaPaymentsCreditCardCommandPool</argument>
+        </arguments>
+    </virtualType>
+
+    <!-- **************************************** Credit Card END ******************************************* -->
+
     <!-- ++++++++++++++++++++++++++++++++++++++++++ Credit Card ++++++++++++++++++++++++++++++++++++++++++++++ -->
     <!-- Payment Method Facade configuration -->
     <virtualType name="ConektaPaymentsCreditCardFacade" type="Magento\Payment\Model\Method\Adapter">

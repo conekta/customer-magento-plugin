@@ -72,6 +72,16 @@
                 <can_edit>1</can_edit>
             </conekta_spei>
             <!-- // Conekta SPEI // -->
+
+            <!-- Conekta EMBED FORM -->
+            <conekta_ef>
+                <active>1</active>
+                <title>Pagos Conekta</title>
+                <group>conekta</group>
+                <model>ConektaPaymentsEmbedFormFacade</model>
+                <order_status>pending_payment</order_status>
+                <group>offline</group>
+            </conekta_ef>
         </payment>
         <conekta>
             <global>
