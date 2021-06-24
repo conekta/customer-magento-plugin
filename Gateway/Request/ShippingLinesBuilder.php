@@ -1,6 +1,7 @@
 <?php
 namespace Conekta\Payments\Gateway\Request;
 
+use Conekta\Payments\Helper\Data as ConektaHelper;
 use Conekta\Payments\Logger\Logger as ConektaLogger;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Payment\Gateway\Data\PaymentDataObjectInterface;
@@ -13,16 +14,17 @@ class ShippingLinesBuilder implements BuilderInterface
 
     private $_conektaLogger;
 
-    protected $_cartRepository;
+    private $_conektaHelper;
 
     public function __construct(
         SubjectReader $subjectReader,
-        ConektaLogger $conektaLogger
+        ConektaLogger $conektaLogger,
+        ConektaHelper $conektaHelper
     ) {
         $this->_conektaLogger = $conektaLogger;
         $this->_conektaLogger->info('Request ShippingLinesBuilder :: __construct');
         $this->subjectReader = $subjectReader;
-        $this->_cartRepository = $cartRepository;
+        $this->_conektaHelper = $conektaHelper;
     }
 
     public function build(array $buildSubject)
@@ -33,20 +35,17 @@ class ShippingLinesBuilder implements BuilderInterface
         $payment = $paymentDO->getPayment();
 
         $quote_id = $payment->getAdditionalInformation('quote_id');
-        $quote = $this->_cartRepository->get($quote_id);
-        $amount = $quote->getShippingAddress()->getShippingAmount();
         
-        if (isset($amount) && $amount >= 0) {
-            $shipping_lines['amount'] = (int)($amount * 100);
-            $shipping_lines['method'] = $quote->getShippingAddress()->getShippingMethod();
-            $shipping_lines['carrier'] = $quote->getShippingAddress()->getShippingDescription();
-            $request['shipping_lines'][] = $shipping_lines;
-        } else {
+        $shippingLines = $this->_conektaHelper->getShippingLines($quote_id);
+
+        if (empty($shippingLines)) {
             throw new LocalizedException(__('Shippment information should be provided'));
         }
 
+        $request['shipping_lines'] = $shippingLines;
+
         $this->_conektaLogger->info('Request ShippingLinesBuilder :: build : return request', $request);
-        throw new LocalizedException(__('Shippment information should be provided'));
+        
         return $request;
     }
 }

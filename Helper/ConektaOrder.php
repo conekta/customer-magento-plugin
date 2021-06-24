@@ -117,7 +117,7 @@ class ConektaOrder extends AbstractHelper
      */
     public function createOrder($guestEmail)
     {
-        $this->conektaLogger->info('Create Blank Order :: createOrder');
+        $this->conektaLogger->info('Create Blank Order :: createOrder', [$this->getQuote()->getBillingAddress()->getEmail()]);
 
         \Conekta\Conekta::setApiKey($this->_conektaHelper->getPrivateKey());
         \Conekta\Conekta::setApiVersion("2.0.0");
@@ -134,21 +134,21 @@ class ConektaOrder extends AbstractHelper
             }
 
             //Customer Info for API
-            $shippingAddress = $this->getQuote()->getShippingAddress();
+            $billingAddress = $this->getQuote()->getBillingAddress();
             $customerId = $customer->getId();
             $customerRequest = [];
             if ($customerId) {
                 //name without numbers
                 $customerRequest['name'] = preg_replace('/[0-9]+/', '', $customer->getName());
                 $customerRequest['email'] = $customer->getEmail();
-                $customerRequest['phone'] = $shippingAddress->getTelephone();
+                //$customerRequest['phone'] = $billingAddress->getTelephone();
             } else {
                 //name without numbers
-                $customerRequest['name'] = preg_replace('/[0-9]+/', '', $shippingAddress->getName());
+                $customerRequest['name'] = preg_replace('/[0-9]+/', '', $billingAddress->getName());
                 $customerRequest['email'] = $guestEmail;
-                $customerRequest['phone'] = $shippingAddress->getTelephone();
+                //$customerRequest['phone'] = $billingAddress->getTelephone();
             }
-
+            $this->conektaLogger->error('Create Order. customer_req: ', $customerRequest);
             if (empty($conektaCustomerId)) {
                 try {
                     $conektaAPI = $this->conektaCustomer->create($customerRequest);
@@ -177,8 +177,16 @@ class ConektaOrder extends AbstractHelper
 
         $validOrderWithCheckout = [];
         $validOrderWithCheckout['line_items'] = $this->_conektaHelper->getLineItems($orderItems);
-        $validOrderWithCheckout['shipping_lines'] = $this->getShippingLines();
-        $validOrderWithCheckout['shipping_contact'] = $this->getShippingContact($guestEmail);
+        $validOrderWithCheckout['shipping_lines'] = $this->_conektaHelper->getShippingLines(
+                                                                        $this->getQuote()->getId()
+                                                                    );
+        $needsShippingContact = !$this->getQuote()->getIsVirtual();
+        if($needsShippingContact){
+            $validOrderWithCheckout['shipping_contact'] = $this->_conektaHelper->getShippingContact(
+                $this->getQuote()->getId()
+            );
+        }
+        
         $validOrderWithCheckout['customer_info'] = [
             'customer_id' => $conektaCustomerId
         ];
@@ -186,20 +194,17 @@ class ConektaOrder extends AbstractHelper
         $threeDsEnabled =  $this->_conektaHelper->is3DSEnabled();
         $saveCardEnabled =  $this->_conektaHelper->isSaveCardEnabled();
         $installments = $this->getMonthlyInstallments();
-        $validOrderWithCheckout['checkout']    = [
-            'allowed_payment_methods' => ["card"],//, "cash", "bank_transfer"],
+        $validOrderWithCheckout['checkout'] = [
+            'allowed_payment_methods'      => ["card"],//, "cash", "bank_transfer"],
             'monthly_installments_enabled' => $installments['active_installments'] ? true : false,
             'monthly_installments_options' => $installments['monthly_installments'],
-            'on_demand_enabled' => $saveCardEnabled,
-            'force_3ds_flow' => $threeDsEnabled,
+            'on_demand_enabled'            => $saveCardEnabled,
+            'force_3ds_flow'               => $threeDsEnabled,
+            'expires_at'                   => $this->getExpiredAt(),
+            'needs_shipping_contact'       => $needsShippingContact
         ];
         $validOrderWithCheckout['currency']= self::CURRENCY_CODE;
-        $validOrderWithCheckout['checkout']['expires_at'] = $this->getExpiredAt();
-        $validOrderWithCheckout['metadata'] = array_merge(
-            $this->_conektaHelper->getMagentoMetadata(),
-            ['quote_id' => $this->getQuote()->getId()],
-            $this->_conektaHelper->getMetadataAttributesConketa($orderItems)
-        );
+        $validOrderWithCheckout['metadata'] = $this->getMetadataOrder($orderItems);
         
         $checkoutId = '';
         try {
@@ -298,70 +303,12 @@ class ConektaOrder extends AbstractHelper
         return $response;
     }
 
-    /**
-     * @return array
-     * @throws \Magento\Framework\Exception\LocalizedException
-     * @throws \Magento\Framework\Exception\NoSuchEntityException
-     */
-    public function getShippingLines()
-    {
-        $quote = $this->getQuote();
-        $amount = $quote->getShippingAddress()->getShippingAmount();
 
-        if (!empty($amount)) {
-            $shipping_lines['amount'] = (int)($amount * 100);
-            $request[] = $shipping_lines;
-        } else {
-            $request = [];
-        }
-        return $request;
-    }
-
-    /**
-     * @param $guestEmail
-     * @return array
-     * @throws \Magento\Framework\Exception\LocalizedException
-     * @throws \Magento\Framework\Exception\NoSuchEntityException
-     */
-    public function getShippingContact($guestEmail)
-    {
-        $shipping = $this->getQuote()->getShippingAddress();
-        $request = [];
-        if ($shipping) {
-            $street = $shipping->getStreet();
-            $request = [
-                'receiver' => $this->getCustomerName($shipping),
-                'phone' => $shipping->getTelephone(),
-                'address' => [
-                    'city' => $shipping->getCity(),
-                    'state' => $shipping->getRegionCode(),
-                    'country' => $shipping->getCountryId(),
-                    'postal_code' => $shipping->getPostcode(),
-                    'phone' => $shipping->getTelephone(),
-                    'email' => $shipping->getEmail() ? $shipping->getEmail() : $guestEmail
-                ]
-            ];
-            $request['address']['street1'] = isset($street[0]) ? $street[0] : self::STREET;
-            if (isset($street[1])) {
-                $request['address']['street2'] = $street[1];
-            }
-        }
-        return $request;
-    }
-
-    /**
-     * @param $shipping
-     * @return string
-     */
-    public function getCustomerName($shipping)
-    {
-        $customerName = sprintf(
-            '%s %s %s',
-            $shipping->getFirstname(),
-            $shipping->getMiddlename(),
-            $shipping->getLastname()
+    public function getMetadataOrder($orderItems){
+        return array_merge(
+            $this->_conektaHelper->getMagentoMetadata(),
+            ['quote_id' => $this->getQuote()->getId()],
+            $this->_conektaHelper->getMetadataAttributesConketa($orderItems)
         );
-
-        return $customerName;
     }
 }
