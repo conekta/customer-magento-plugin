@@ -24,26 +24,35 @@ define(
             },
 
             initObservable: function () {
-
+                console.log(this.quote);
+                
                 this._super()
                     .observe([
-                        'ChangeCard',
-                        'SavedCardLater',
+                        //'ChangeCard',
+                        //'SavedCardLater',
                         'isSaveCardEnable',
                         'paymentsShowNewCardSection',
                         'checkoutId',
                         'selectedPaymentId',
                         'isIframeLoaded',
                         'isVisiblePaymentButton',
-                        'iframOrderData'
+                        'iframOrderData',
+                        'isAddressDetailsVisible'
                 ]);
                 this.iframOrderData('');
+                
+                /*
                 if  (this.getCardList().length === 0){
                     this.paymentsShowNewCardSection(false);
                 }
+                */
 
-                this.ChangeCard.subscribe(this.onSelectedCardChanged, this);
-                this.SavedCardLater.subscribe(this.onSavedCardLaterChanged, this);
+                //this.setAddressDetailsVisible();
+
+                quote.billingAddress.subscribe(this.setAddressDetailsVisible, this);
+
+                //this.ChangeCard.subscribe(this.onSelectedCardChanged, this);
+                //this.SavedCardLater.subscribe(this.onSavedCardLaterChanged, this);
 
                 return this;
             },
@@ -51,6 +60,23 @@ define(
             initialize: function() {
                 var self = this;
                 this._super();
+            },
+
+            setAddressDetailsVisible: function(){
+                
+                var isVisible = quote.billingAddress() != null;
+                
+                console.log('setAddressDetailsVisible', isVisible);
+
+                if (isVisible) {
+                    console.log('getIframeFromSet', $('#conektaIframeContainer').length)
+                    
+                    if(!this.checkoutId())
+                        this.loadCheckoutId();
+                        
+                }
+
+                this.isAddressDetailsVisible(isVisible);
             },
 
             loadCheckoutId: function() {
@@ -70,12 +96,14 @@ define(
                     async: false,
                     success: function (response) {
                         self.checkoutId(response.checkout_id);
-
-                        if(!self.checkoutId){
+                        
+                        if (!self.checkoutId) {
                             self.messageContainer.clear();
                             self.messageContainer.addErrorMessage({
                                 message: "El medio de pago seleccionado no puede utilizarse"
                             });
+                        } else {
+                            self.getIframe();
                         }
                         
                     },
@@ -87,10 +115,10 @@ define(
                 });
             },
 
-            getIframe: function() {
+            getIframe: function() {console.log('getIframe', $('#conektaIframeContainer').length)
                 const urlParams = new URLSearchParams(window.location.search);
-                if ($('#conektaIframeContainer').length) {
-                    this.loadCheckoutId();
+                if ($('#conektaIframeContainer').length || true) {
+                    //this.loadCheckoutId();
                     var self = this;
                     var checkout_id = self.checkoutId();
                     if (checkout_id) {
@@ -122,6 +150,7 @@ define(
                 return true;
             },
 
+            /*
             onSavedCardLaterChanged: function(newValue)
             {
                 if(newValue){
@@ -130,9 +159,7 @@ define(
                     this.isSaveCardEnable(false);
                 }
             },
-            /**
-             * @param newValue
-             */
+           
             onSelectedCardChanged: function(newValue)
             {
                 if (newValue === undefined){
@@ -152,6 +179,7 @@ define(
                     this.isVisiblePaymentButton(false);
                 }
             },
+            */
 
             getData: function () {
                 var number = this.creditCardNumber().replace(/\D/g,'');
@@ -401,7 +429,7 @@ define(
                         address.country = addressData.country_id;
                     }
                 }
-
+                
                 return address;
             }
 
