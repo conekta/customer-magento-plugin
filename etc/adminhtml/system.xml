@@ -38,10 +38,6 @@
                             <![CDATA[Default webhook is: <strong>your_magento_host/conekta/webhook/listener</strong>]]>
                         </comment>
                     </field>
-                    <field id="enable_saved_card" translate="label" type="select" sortOrder="65" showInDefault="1" showInWebsite="1" showInStore="0">
-                        <label>Enable Save Card</label>
-                        <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-                    </field>
                     <field id="debug" translate="label" type="select" sortOrder="70" showInDefault="1" showInWebsite="1" showInStore="0">
                         <label>Debug</label>
                         <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
@@ -77,6 +73,11 @@
                     <field id="iframe_enabled" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="0">
                         <label>3D-Secure Enabled</label>
                         <config_path>payment/conekta_cc/iframe_enabled</config_path>
+                        <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    </field>
+                    <field id="enable_saved_card" translate="label" type="select" sortOrder="11" showInDefault="1" showInWebsite="1" showInStore="0">
+                        <label>Enable Save Card</label>
+                        <config_path>payment/conekta_cc/enable_saved_card</config_path>
                         <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     </field>
                     <field id="cctypes" translate="label" type="multiselect" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="0">
