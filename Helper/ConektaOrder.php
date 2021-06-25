@@ -198,7 +198,7 @@ class ConektaOrder extends AbstractHelper
         $validOrderWithCheckout['metadata'] = array_merge(
             $this->_conektaHelper->getMagentoMetadata(),
             ['quote_id' => $this->getQuote()->getId()],
-            $this->_conektaHelper->getMetadataAttributesConketa($orderItems)
+            $this->_conektaHelper->getMetadataAttributesConekta($orderItems)
         );
         
         $checkoutId = '';
