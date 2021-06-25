@@ -263,7 +263,7 @@ class Data extends AbstractHelper
         return $ret;
     }
 
-    public function getMetadataAttributesConketa($items)
+    public function getMetadataAttributesConekta($items)
     {
         $productAttributes = $this->getMetadataAttributes('metadata_additional_products');
         $request = [];
