@@ -65,10 +65,10 @@ class InstallSchema implements InstallSchemaInterface
                 $setup->getIdxName(
                     $installer->getTable('conekta_salesorder'),
                     ['conekta_order_id', 'increment_order_id'],
-                    AdapterInterface::INDEX_TYPE_FULLTEXT
+                    AdapterInterface::INDEX_TYPE_UNIQUE
                 ),
                 ['conekta_order_id', 'increment_order_id'],
-                AdapterInterface::INDEX_TYPE_FULLTEXT
+                AdapterInterface::INDEX_TYPE_UNIQUE
             );
 
         }
