@@ -74,112 +74,28 @@ class TransactionCapture implements ClientInterface
      */
     public function placeRequest(TransferInterface $transferObject)
     {
-        $this->_conektaLogger->info('HTTP Client TransactionCapture :: placeRequest');
         $request = $transferObject->getBody();
-        if ($request['iframe_payment'] == true) {
-            $response = $this->generateResponseForCode(
-                1,
-                $request['txn_id'],
-                $request['order_id']
-            );
-
-            $this->conektaSalesOrderFactory
-                        ->create()
-                        ->setData([
-                            ConektaSalesOrderInterface::CONEKTA_ORDER_ID => $request['order_id'],
-                            ConektaSalesOrderInterface::INCREMENT_ORDER_ID => $request['metadata']['order_id']
-                        ])
-                        ->save();
-
-            $response['error_code'] = '';
-            $response['payment_method_details'] =  $request['payment_method_details'];
-
-            $this->_conektaLogger->info(
-                'HTTP Client TransactionCapture Iframe Payment :: placeRequest',
-                [
-                    'request' => $request,
-                    'response' => $response
-                ]
-            );
-
-            return $response;
-        }
-
-        $customerInfo = $request['customer_info'];
-        if ($request['CONNEKTA_CUSTOMER_ID']) {
-            $customerInfo = $request['CONNEKTA_CUSTOMER_ID'];
-        }
-        $orderParams['currency']         = $request['CURRENCY'];
-        $orderParams['line_items']       = $request['line_items'];
-        $orderParams['tax_lines']        = $request['tax_lines'];
-        $orderParams['customer_info']    = $customerInfo;
-        $orderParams['discount_lines']   = $request['discount_lines'];
-        if (!empty($request['shipping_lines'])) {
-            $orderParams['shipping_lines']   = $request['shipping_lines'];
-        }
-        if (!empty($request['shipping_contact'])) {
-            $orderParams['shipping_contact'] = $request['shipping_contact'];
-        }
-        $chargeParams = $request['payment_method_details'];
-
-        $txn_id = '';
-        $ord_id = '';
-        $error_code = '';
-
-        try {
-            $newOrder = $this->_conektaOrder->create($orderParams);
-            $newCharge = $newOrder->createCharge($chargeParams);
-            if (isset($newCharge->id) || !empty($newCharge->id)) {
-                $result_code = 1;
-                $txn_id = $newCharge->id;
-                $ord_id = $newOrder->id;
-
-                $this->conektaSalesOrderFactory
-                        ->create()
-                        ->setData([
-                            ConektaSalesOrderInterface::CONEKTA_ORDER_ID => $ord_id,
-                            ConektaSalesOrderInterface::INCREMENT_ORDER_ID => $request['metadata']['order_id']
-                        ])
-                        ->save();
-            } else {
-                $result_code = 666;
-            }
-        } catch (\Exception $e) {
-            $this->logger->debug(
-                [
-                    'request' => $request,
-                    'response' => $e->getMessage()
-                ]
-            );
-
-            $this->_conektaHelper->deleteSavedCard($orderParams, $chargeParams);
-
-            $this->_conektaLogger->info(
-                'HTTP Client TransactionCapture :: placeRequest: Payment capturing error ' . $e->getMessage()
-            );
-
-            $error_code = $e->getMessage();
-            $result_code = 666;
-            throw new \Magento\Framework\Exception\LocalizedException(__($error_code));
-        }
-
+        $this->_conektaLogger->info('HTTP Client TransactionCapture :: placeRequest');
+        
         $response = $this->generateResponseForCode(
-            $result_code,
-            $txn_id,
-            $ord_id
+            1,
+            $request['txn_id'],
+            $request['order_id']
         );
-        $response['error_code'] = $error_code;
+
+        $this->conektaSalesOrderFactory
+                    ->create()
+                    ->setData([
+                        ConektaSalesOrderInterface::CONEKTA_ORDER_ID => $request['order_id'],
+                        ConektaSalesOrderInterface::INCREMENT_ORDER_ID => $request['metadata']['order_id']
+                    ])
+                    ->save();
+
+        $response['error_code'] = '';
         $response['payment_method_details'] =  $request['payment_method_details'];
 
-        $this->logger->debug(
-            [
-                'request' => $request,
-                'response' => $response
-            ]
-        );
-
         $this->_conektaLogger->info(
-            'HTTP Client TransactionCapture :: placeRequest',
+            'HTTP Client TransactionCapture Iframe Payment :: placeRequest',
             [
                 'request' => $request,
                 'response' => $response
