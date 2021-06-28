@@ -37,7 +37,7 @@ define(
                         'isIframeLoaded',
                         'isVisiblePaymentButton',
                         'iframOrderData',
-                        'isAddressDetailsVisible'
+                        //'isAddressDetailsVisible'
                 ]);
                 this.iframOrderData('');
                 
@@ -62,6 +62,7 @@ define(
                 this._super();
             },
 
+            /*
             setAddressDetailsVisible: function(){
                 
                 var isVisible = quote.billingAddress() != null;
@@ -78,6 +79,7 @@ define(
 
                 this.isAddressDetailsVisible(isVisible);
             },
+            */
 
             loadCheckoutId: function() {
                 var self = this;
@@ -102,8 +104,6 @@ define(
                             self.messageContainer.addErrorMessage({
                                 message: "El medio de pago seleccionado no puede utilizarse"
                             });
-                        } else {
-                            self.getIframe();
                         }
                         
                     },
@@ -117,7 +117,7 @@ define(
 
             getIframe: function() {
                 const urlParams = new URLSearchParams(window.location.search);
-                if ($('#conektaIframeContainer').length || true) {
+                if ($('#conektaIframeContainer').length) {
                     this.loadCheckoutId();
                     var self = this;
                     var checkout_id = self.checkoutId();
