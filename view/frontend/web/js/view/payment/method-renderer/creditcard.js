@@ -24,7 +24,7 @@ define(
             },
 
             initObservable: function () {
-                console.log(this.quote);
+                //console.log(this.quote);
                 
                 this._super()
                     .observe([
@@ -49,7 +49,7 @@ define(
 
                 //this.setAddressDetailsVisible();
 
-                quote.billingAddress.subscribe(this.setAddressDetailsVisible, this);
+                //quote.billingAddress.subscribe(this.setAddressDetailsVisible, this);
 
                 //this.ChangeCard.subscribe(this.onSelectedCardChanged, this);
                 //this.SavedCardLater.subscribe(this.onSavedCardLaterChanged, this);
@@ -115,10 +115,10 @@ define(
                 });
             },
 
-            getIframe: function() {console.log('getIframe', $('#conektaIframeContainer').length)
+            getIframe: function() {
                 const urlParams = new URLSearchParams(window.location.search);
                 if ($('#conektaIframeContainer').length || true) {
-                    //this.loadCheckoutId();
+                    this.loadCheckoutId();
                     var self = this;
                     var checkout_id = self.checkoutId();
                     if (checkout_id) {
