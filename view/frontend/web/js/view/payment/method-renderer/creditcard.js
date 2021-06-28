@@ -66,10 +66,10 @@ define(
                 
                 var isVisible = quote.billingAddress() != null;
                 
-                console.log('setAddressDetailsVisible', isVisible);
+                //console.log('setAddressDetailsVisible', isVisible);
 
                 if (isVisible) {
-                    console.log('getIframeFromSet', $('#conektaIframeContainer').length)
+                    //console.log('getIframeFromSet', $('#conektaIframeContainer').length)
                     
                     if(!this.checkoutId())
                         this.loadCheckoutId();
