@@ -187,7 +187,7 @@ class ConektaOrder extends AbstractHelper
         $saveCardEnabled =  $this->_conektaHelper->isSaveCardEnabled();
         $installments = $this->getMonthlyInstallments();
         $validOrderWithCheckout['checkout']    = [
-            'allowed_payment_methods' => ["card"],//, "cash", "bank_transfer"],
+            'allowed_payment_methods' => $this->getAllowedPaymentMethods(),
             'monthly_installments_enabled' => $installments['active_installments'] ? true : false,
             'monthly_installments_options' => $installments['monthly_installments'],
             'on_demand_enabled' => $saveCardEnabled,
@@ -258,6 +258,25 @@ class ConektaOrder extends AbstractHelper
             $result['monthly_installments'] = [];
         }
         return $result;
+    }
+
+    public function getAllowedPaymentMethods()
+    {
+        $methods = [];
+
+        if($this->_conektaHelper->isCreditCardEnabled()){
+            $methods[] = 'card';
+        }
+        if($this->_conektaHelper->isOxxoEnabled()){
+            $methods[] = 'cash';
+        }
+        if($this->_conektaHelper->isSpeiEnabled()){
+            $methods[] = 'bank_transfer';
+        }
+
+        
+
+        return $methods;
     }
 
     /**
