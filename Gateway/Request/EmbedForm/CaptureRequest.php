@@ -84,7 +84,7 @@ class CaptureRequest implements BuilderInterface
         $paymentDO = $this->subjectReader->readPayment($buildSubject);
         $payment = $paymentDO->getPayment();
         $order = $paymentDO->getOrder();
-
+        $this->_conektaLogger->info('Request CaptureRequest :: build additional', $payment->getAdditionalInformation());
         $token = $payment->getAdditionalInformation('card_token');
         $savedCard = $payment->getAdditionalInformation('saved_card');
         $enableSavedCard = $payment->getAdditionalInformation('saved_card_later');

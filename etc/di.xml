@@ -33,8 +33,8 @@
         <arguments>
             <argument name="code" xsi:type="const">\Conekta\Payments\Model\Ui\EmbedForm\ConfigProvider::CODE</argument>
             <argument name="formBlockType" xsi:type="string">Magento\Payment\Block\Form</argument>
-            <argument name="infoBlockType" xsi:type="string">Conekta\Payments\Block\CreditCard\CcInfo</argument>
-            <argument name="valueHandlerPool" xsi:type="object">ConektaPaymentsCreditCardValueHandlerPool</argument>
+            <argument name="infoBlockType" xsi:type="string">Conekta\Payments\Block\EmbedForm\EmbedFormInfo</argument>
+            <argument name="valueHandlerPool" xsi:type="object">ConektaPaymentsEmbedFormValueHandlerPool</argument>
             <argument name="commandPool" xsi:type="object">ConektaPaymentsEmbedFormCommandPool</argument>
         </arguments>
     </virtualType>
@@ -98,7 +98,27 @@
         </arguments>
     </virtualType>
 
-
+    <!-- Value handlers infrastructure -->
+    
+    <virtualType name="ConektaPaymentsEmbedFormValueHandlerPool" type="Magento\Payment\Gateway\Config\ValueHandlerPool">
+        <arguments>
+            <argument name="handlers" xsi:type="array">
+                <item name="default" xsi:type="string">ConektaPaymentsEmbedFormConfigValueHandler</item>
+                <item name="payment_action" xsi:type="string">Conekta\Payments\Gateway\Config\EmbedForm\PaymentActionValueHandler</item>
+            </argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="ConektaPaymentsEmbedFormConfigValueHandler" type="Magento\Payment\Gateway\Config\ConfigValueHandler">
+        <arguments>
+            <argument name="configInterface" xsi:type="object">ConektaPaymentsEmbedFormConfig</argument>
+        </arguments>
+    </virtualType>
+    
+    <type name="Conekta\Payments\Block\EmbedForm\EmbedFormInfo">
+        <arguments>
+            <argument name="config" xsi:type="object">ConektaPaymentsEmbedFormConfig</argument>
+        </arguments>
+    </type>
     <!-- **************************************** Embed Form END ******************************************* -->
 
     <!-- ++++++++++++++++++++++++++++++++++++++++++ Credit Card ++++++++++++++++++++++++++++++++++++++++++++++ -->

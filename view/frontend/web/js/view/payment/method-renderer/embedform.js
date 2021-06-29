@@ -23,10 +23,6 @@ define(
                 return 'Conekta_Payments/payment/embedform/form'
             },
 
-            getTitle: function(){
-                return 'Pagos Conekta';
-            },
-
             initObservable: function () {
 
                 this._super()
@@ -164,6 +160,7 @@ define(
                     var data = {
                         'method': this.getCode(),
                         'additional_data': {
+                            'payment_method': params.charge.payment_method.type,
                             'cc_type': params.charge.payment_method.brand,
                             'cc_last_4': params.charge.payment_method.last4,
                             'order_id': params.charge.order_id,
@@ -182,6 +179,7 @@ define(
                 var data = {
                     'method': this.getCode(),
                     'additional_data': {
+                        'payment_method': '',
                         'cc_type': this.creditCardType(),
                         'cc_exp_year': this.creditCardExpYear(),
                         'cc_exp_month': this.creditCardExpMonth(),
