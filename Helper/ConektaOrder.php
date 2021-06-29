@@ -264,18 +264,15 @@ class ConektaOrder extends AbstractHelper
     {
         $methods = [];
 
-        if($this->_conektaHelper->isCreditCardEnabled()){
+        if ($this->_conektaHelper->isCreditCardEnabled()) {
             $methods[] = 'card';
         }
-        if($this->_conektaHelper->isOxxoEnabled()){
+        if ($this->_conektaHelper->isOxxoEnabled()) {
             $methods[] = 'cash';
         }
-        if($this->_conektaHelper->isSpeiEnabled()){
+        if ($this->_conektaHelper->isSpeiEnabled()) {
             $methods[] = 'bank_transfer';
         }
-
-        
-
         return $methods;
     }
 
