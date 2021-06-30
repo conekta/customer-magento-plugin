@@ -105,6 +105,7 @@
             <argument name="handlers" xsi:type="array">
                 <item name="default" xsi:type="string">ConektaPaymentsEmbedFormConfigValueHandler</item>
                 <item name="payment_action" xsi:type="string">Conekta\Payments\Gateway\Config\EmbedForm\PaymentActionValueHandler</item>
+                <item name="active" xsi:type="string">Conekta\Payments\Gateway\Config\EmbedForm\ActiveValueHandler</item>
             </argument>
         </arguments>
     </virtualType>
