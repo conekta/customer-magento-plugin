@@ -16,8 +16,8 @@ class ActiveValueHandler implements ValueHandlerInterface
 
     public function handle(array $subject, $storeId = null)
     {
-        return $this->_conektaHelper->isCreditCardEnabled() 
-               || $this->_conektaHelper->isOxxoEnabled() 
+        return $this->_conektaHelper->isCreditCardEnabled()
+               || $this->_conektaHelper->isOxxoEnabled()
                || $this->_conektaHelper->isSpeiEnabled();
     }
 }
