@@ -380,20 +380,6 @@ class Data extends AbstractHelper
                     ];
 
                 }
-            } elseif ($version > 233) {
-                if ($item->getProductType() != 'bundle' && $item->getProductType() != 'configurable') {
-                    $request[] = [
-                        'name' => $item->getName(),
-                        'sku' => $item->getSku(),
-                        'unit_price' => (int)($item->getPrice() * 100),
-                        'description' => $this->_escaper->escapeHtml($item->getName() . ' - ' . $item->getSku()),
-                        'quantity' => (int)($item->{$quantityMethod}()),
-                        'tags' => [
-                            $item->getProductType()
-                        ]
-                    ];
-
-                }
             } else {
                 if ($item->getProductType() != 'bundle' && $item->getPrice() > 0) {
                     $request[] = [
