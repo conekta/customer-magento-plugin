@@ -1,6 +1,8 @@
 <?php
 namespace Conekta\Payments\Helper;
 
+use Conekta\Customer;
+use Conekta\Payments\Logger\Logger as ConektaLogger;
 use Magento\Framework\App\Helper\AbstractHelper;
 use Magento\Framework\App\Helper\Context;
 use Magento\Framework\App\ProductMetadataInterface;
