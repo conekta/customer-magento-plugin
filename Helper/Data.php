@@ -1,8 +1,6 @@
 <?php
 namespace Conekta\Payments\Helper;
 
-use Conekta\Customer;
-use Conekta\Payments\Logger\Logger as ConektaLogger;
 use Magento\Framework\App\Helper\AbstractHelper;
 use Magento\Framework\App\Helper\Context;
 use Magento\Framework\App\ProductMetadataInterface;
@@ -12,6 +10,7 @@ use Magento\Checkout\Model\Session as CheckoutSession;
 use Magento\Customer\Model\Session as CustomerSession;
 use Magento\Catalog\Model\ProductRepository;
 use Magento\Framework\Escaper;
+use Magento\Store\Model\StoreManagerInterface;
 
 class Data extends AbstractHelper
 {
@@ -36,6 +35,7 @@ class Data extends AbstractHelper
      */
     protected $conektaCustomer;
 
+    private $_storeManager;
     private $checkoutSession;
 
     private $customerSession;
@@ -63,7 +63,8 @@ class Data extends AbstractHelper
         CheckoutSession $checkoutSession,
         CustomerSession $customerSession,
         ProductRepository $productRepository,
-        Escaper $_escaper
+        Escaper $_escaper,
+        StoreManagerInterface $storeManager
     ) {
         parent::__construct($context);
         $this->_moduleList = $moduleList;
@@ -75,6 +76,7 @@ class Data extends AbstractHelper
         $this->customerSession = $customerSession;
         $this->productRepository = $productRepository;
         $this->_escaper = $_escaper;
+        $this->_storeManager = $storeManager;
     }
 
     /**
@@ -406,5 +408,15 @@ class Data extends AbstractHelper
             }
         }
         return $request;
+    }
+
+    public function getUrlWebhookOrDefault()
+    {
+        $urlWebhook = $this->getConfigData('conekta/conekta_global', 'conekta_webhook');
+        if (empty($urlWebhook)) {
+            $baseUrl = $this->_storeManager->getStore()->getBaseUrl();
+            $urlWebhook = $baseUrl . "conekta/webhook/listener";
+        }
+        return $urlWebhook;
     }
 }
