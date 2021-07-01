@@ -358,20 +358,20 @@ class Data extends AbstractHelper
         $request = [];
         $quantityMethod = $isQuoteItem? "getQty":"getQtyOrdered";
         foreach ($items as $itemId => $item) {
-            if ($version > 240) {
+            if ($version > 233) {
                 if ($item->getProductType() != 'bundle' && $item->getProductType() != 'configurable') {
                     
-                    $price = (int) $item->getPrice();
+                    $price = $item->getPrice();
                     $qty= (int)$item->{$quantityMethod}();
-                    if ($price === 0 && !empty($item->getParentItem())) {
-                        $price = (int) $item->getParentItem()->getPrice();
+                    if (!empty($item->getParentItem())) {
+                        $price = $item->getParentItem()->getPrice();
                         $qty = (int)$item->getParentItem()->{$quantityMethod}();
                     }
 
                     $request[] = [
                         'name' => $item->getName(),
                         'sku' => $item->getSku(),
-                        'unit_price' => $price * 100,
+                        'unit_price' => (int)($price * 100),
                         'description' => $this->_escaper->escapeHtml($item->getName() . ' - ' . $item->getSku()),
                         'quantity' => $qty,
                         'tags' => [
