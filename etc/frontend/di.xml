@@ -7,6 +7,8 @@
                 <item name="conekta_global_provider" xsi:type="object">Conekta\Payments\Model\Ui\ConfigProvider</item>
                 <!-- Credit Card -->
                 <item name="conekta_cc_provider" xsi:type="object">Conekta\Payments\Model\Ui\CreditCard\ConfigProvider</item>
+                <!-- Embed Form -->
+                <item name="conekta_ef_provider" xsi:type="object">Conekta\Payments\Model\Ui\EmbedForm\ConfigProvider</item>
             </argument>
         </arguments>
     </type>

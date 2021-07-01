@@ -223,6 +223,21 @@ class Data extends AbstractHelper
         return (boolean)$this->getConfigData('conekta_cc', 'enable_saved_card');
     }
 
+    public function isCreditCardEnabled()
+    {
+        return  (boolean)$this->getConfigData('conekta_cc', 'active');
+    }
+
+    public function isOxxoEnabled()
+    {
+        return  (boolean)$this->getConfigData('conekta_oxxo', 'active');
+    }
+
+    public function isSpeiEnabled()
+    {
+        return  (boolean)$this->getConfigData('conekta_spei', 'active');
+    }
+
     /**
      * @return string
      */
@@ -263,7 +278,7 @@ class Data extends AbstractHelper
         return $ret;
     }
 
-    public function getMetadataAttributesConketa($items)
+    public function getMetadataAttributesConekta($items)
     {
         $productAttributes = $this->getMetadataAttributes('metadata_additional_products');
         $request = [];

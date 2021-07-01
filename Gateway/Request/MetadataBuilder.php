@@ -45,7 +45,7 @@ class MetadataBuilder implements BuilderInterface
         $payment = $this->subjectReader->readPayment($buildSubject);
         $order = $payment->getOrder();
         $items = $order->getItems();
-        $request['metadata'] = $this->_conektaHelper->getMetadataAttributesConketa($items);
+        $request['metadata'] = $this->_conektaHelper->getMetadataAttributesConekta($items);
 
         $this->_conektaLogger->info('Request MetadataBuilder :: build : return request', $request);
 

@@ -8,6 +8,7 @@ use Magento\Checkout\Model\Session;
 
 class DataAssignObserver extends AbstractDataAssignObserver
 {
+    const PAYMENT_METHOD = 'payment_method';
     const CC_TYPE = 'cc_type';
     const CC_EXP_YEAR = 'cc_exp_year';
     const CC_EXP_MONTH = 'cc_exp_month';
@@ -22,6 +23,7 @@ class DataAssignObserver extends AbstractDataAssignObserver
     const TXN_ID = 'txn_id';
 
     protected $additionalInformationList = [
+        self::PAYMENT_METHOD,
         self::CC_TYPE,
         self::CC_EXP_YEAR,
         self::CC_EXP_MONTH,
