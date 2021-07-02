@@ -27,7 +27,7 @@ class ShippingContactBuilder implements BuilderInterface
         $paymentDO = $this->subjectReader->readPayment($buildSubject);
         $order = $paymentDO->getOrder();
 
-        $shipping = $order->getShippingAddress();
+        $shipping = $order->getBillingAddress();
         if ($shipping) {
             $request['shipping_contact'] = [
                 'receiver' => $this->getCustomerName($shipping),

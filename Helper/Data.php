@@ -248,7 +248,9 @@ class Data extends AbstractHelper
     public function getExpiredAt()
     {
         $timeFormat = $this->getConfigData('conekta/conekta_global', 'days_or_hours');
-        if (!$timeFormat) {
+        
+        //hours expiration disabled temporaly
+        if (!$timeFormat && false) {
             $expiryHours = $this->getConfigData('conekta/conekta_global', 'expiry_hours');
             $expiryDate = strtotime("+" . $expiryHours . " hours");
         } else {
