@@ -243,13 +243,20 @@ class Data extends AbstractHelper
     }
 
     /**
-     * @return string
+     * @return int
      */
     public function getExpiredAt()
     {
-        $datetime = new \Datetime();
-        $datetime->add(new \DateInterval('P3D'));
-        return $datetime->format('U');
+        $timeFormat = $this->getConfigData('conekta/conekta_global', 'days_or_hours');
+        if (!$timeFormat) {
+            $expiryHours = $this->getConfigData('conekta/conekta_global', 'expiry_hours');
+            $expiryDate = strtotime("+" . $expiryHours . " hours");
+        } else {
+            $expiryDays = $this->getConfigData('conekta/conekta_global', 'expiry_days');
+            $expiryDate = strtotime("+" . $expiryDays . " days");
+        }
+
+        return $expiryDate;
     }
 
     private function customFormat($array, $glue)
