@@ -60,6 +60,7 @@
 
                     <!-- Expiration config-->
                     
+                    <!--
                     <field id="days_or_hours" translate="label" type="select" sortOrder="90" showInDefault="1" showInWebsite="1" showInStore="0">
                         <depends>
                             <field id="active">1</field>
@@ -67,7 +68,7 @@
                         <label>Expiration Format</label>
                         <source_model>Conekta\Payments\Model\System\Config\Source\TimeFormat</source_model>
                     </field>
-                    <!--
+                    
 	                <field id="expiry_days" translate="label" type="text" sortOrder="91" showInDefault="1" showInWebsite="1" showInStore="0">
 	                    <label>Expiry (# days)</label>
                         <depends>
