@@ -416,4 +416,21 @@ class Data extends AbstractHelper
         }
         return $urlWebhook;
     }
+
+    public function getDiscountLines(){
+        $quote = $this->checkoutSession->getQuote();
+        $totalDiscount = $quote->getSubtotal() - $quote->getSubtotalWithDiscount();
+
+        $discountLines = [];
+        if (!empty($totalDiscount)) {
+            $totalDiscount = abs((int)(round($totalDiscount, 2) * 100));
+            $discountLine["code"] = "Discounts";
+            $discountLine["type"] = "coupon";
+            $discountLine["amount"] = $totalDiscount;
+            $discountLines[] = $discountLine;
+        }
+
+        return $discountLines;
+    }
+
 }
