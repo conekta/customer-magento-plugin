@@ -3,9 +3,9 @@ declare(strict_types=1);
 
 namespace Conekta\Payments\Model\System\Config\Source;
 
-use Magento\Framework\Option\ArrayInterface;
+use Magento\Framework\Data\OptionSourceInterface;
 
-class TimeFormat implements ArrayInterface
+class TimeFormat implements OptionSourceInterface
 {
     /**
      * @return array
