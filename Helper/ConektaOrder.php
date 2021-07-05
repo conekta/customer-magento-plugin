@@ -192,9 +192,9 @@ class ConektaOrder extends AbstractHelper
             'monthly_installments_options' => $installments['monthly_installments'],
             'on_demand_enabled' => $saveCardEnabled,
             'force_3ds_flow' => $threeDsEnabled,
+            'expires_at' => $this->_conektaHelper->getExpiredAt()
         ];
         $validOrderWithCheckout['currency']= self::CURRENCY_CODE;
-        $validOrderWithCheckout['checkout']['expires_at'] = $this->getExpiredAt();
         $validOrderWithCheckout['metadata'] = array_merge(
             $this->_conektaHelper->getMagentoMetadata(),
             ['quote_id' => $this->getQuote()->getId()],
@@ -274,16 +274,6 @@ class ConektaOrder extends AbstractHelper
             $methods[] = 'bank_transfer';
         }
         return $methods;
-    }
-
-    /**
-     * @return string
-     */
-    public function getExpiredAt()
-    {
-        $datetime = new \Datetime();
-        $datetime->add(new \DateInterval('P3D'));
-        return $datetime->format('U');
     }
 
     /**

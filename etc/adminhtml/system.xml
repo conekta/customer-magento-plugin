@@ -50,13 +50,50 @@
                         <source_model>Conekta\Payments\Model\System\Config\Source\MetadataProduct</source_model>
                         <validate>validate-product-attributes</validate>
                     </field>
-                    <field id="metadata_additional_order" translate="label" type="multiselect" sortOrder="90" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <field id="metadata_additional_order" translate="label" type="multiselect" sortOrder="81" showInDefault="1" showInWebsite="1" showInStore="0">
                         <label>Additional order attributes to send in metadata</label>
                         <tooltip>(Ctrl + Click to select more options)</tooltip>
                         <can_be_empty>1</can_be_empty>
                         <source_model>Conekta\Payments\Model\System\Config\Source\MetadataOrder</source_model>
                         <validate>validate-order-attributes</validate>
                     </field>
+
+                    <!-- Expiration config-->
+                    
+                    <field id="days_or_hours" translate="label" type="select" sortOrder="90" showInDefault="1" showInWebsite="1" showInStore="0">
+                        <depends>
+                            <field id="active">1</field>
+                        </depends>
+                        <label>Expiration Format</label>
+                        <source_model>Conekta\Payments\Model\System\Config\Source\TimeFormat</source_model>
+                    </field>
+                    <!--
+	                <field id="expiry_days" translate="label" type="text" sortOrder="91" showInDefault="1" showInWebsite="1" showInStore="0">
+	                    <label>Expiry (# days)</label>
+                        <depends>
+                            <field id="active">1</field>
+                            <field id="days_or_hours">1</field>
+                        </depends>
+                        <validate>required-entry integer no-whitespace validate-expiry-days</validate>
+                        <comment>Allowed days from 3 to 365 days</comment>
+	                </field>
+	                <field id="expiry_hours" translate="label" type="text" sortOrder="92" showInDefault="1" showInWebsite="1" showInStore="0">
+	                    <label>Expiry (# hours)</label>
+                        <depends>
+                            <field id="active">1</field>
+                            <field id="days_or_hours">0</field>
+                        </depends>
+                        <validate>required-entry integer no-whitespace validate-expiry-hours</validate>
+                        <comment>The maximum is 23 hours</comment>
+	                </field>
+                    -->
+                    
+                    <field id="expiry_days" translate="label" type="text" sortOrder="91" showInDefault="1" showInWebsite="1" showInStore="0">
+	                    <label>Expiry (# days)</label>
+                        <validate>required-entry integer no-whitespace validate-expiry-days</validate>
+                        <comment>Allowed days from 3 to 365 days</comment>
+	                </field>
+                    
                 </group>
                 <!--creditcard-->
                 <group id="conekta_creditcard" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="1">
@@ -169,34 +206,6 @@
                         <comment>The maximum amount is $10000 [MXN]</comment>
                         <config_path>payment/conekta_oxxo/max_order_total</config_path>
                     </field>
-	                <field id="days_or_hours" translate="label" type="select" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="0">
-                        <depends>
-                            <field id="active">1</field>
-                        </depends>
-                        <label>Expiration Format</label>
-                        <config_path>payment/conekta_oxxo/days_or_hours</config_path>
-                        <source_model>Conekta\Payments\Model\System\Config\Source\TimeFormat</source_model>
-                    </field>
-	                <field id="expiry_days" translate="label" type="text" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="0">
-	                    <label>Expiry (# days)</label>
-                        <depends>
-                            <field id="active">1</field>
-                            <field id="days_or_hours">1</field>
-                        </depends>
-                        <config_path>payment/conekta_oxxo/expiry_days</config_path>
-                        <validate>validate-expiry-days</validate>
-                        <comment>The maximum is 31 days</comment>
-	                </field>
-	                <field id="expiry_hours" translate="label" type="text" sortOrder="51" showInDefault="1" showInWebsite="1" showInStore="0">
-	                    <label>Expiry (# hours)</label>
-                        <depends>
-                            <field id="active">1</field>
-                            <field id="days_or_hours">0</field>
-                        </depends>
-                        <config_path>payment/conekta_oxxo/expiry_hours</config_path>
-                        <validate>validate-expiry-hours</validate>
-                        <comment>The maximum is 23 hours</comment>
-	                </field>
 	                <field id="instructions" translate="label" type="textarea" sortOrder="52" showInDefault="1" showInWebsite="1" showInStore="1">
 	                    <label>Instructions</label>
                         <depends>
@@ -248,14 +257,7 @@
                         <config_path>payment/conekta_spei/max_order_total</config_path>
                     </field>
 
-                    <field id="expiry_days" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="0">
-                        <label>Expiry (# days)</label>
-                        <depends>
-                            <field id="active">1</field>
-                        </depends>
-                        <config_path>payment/conekta_spei/expiry_days</config_path>
-                        <validate>validate-expiry-days</validate>
-                    </field>
+                    
                     <field id="account_owner" translate="label" type="text" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="0">
                         <label>Account Owner</label>
                         <depends>
