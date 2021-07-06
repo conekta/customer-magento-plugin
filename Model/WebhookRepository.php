@@ -3,7 +3,7 @@
 namespace Conekta\Payments\Model;
 
 use Conekta\Payments\Logger\Logger as ConektaLogger;
-use Conekta\Payments\Model\Api\Data\ConektaSalesOrderInterface;
+use Conekta\Payments\Api\Data\ConektaSalesOrderInterface;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Sales\Api\Data\OrderInterface;
 use Magento\Sales\Model\Order;

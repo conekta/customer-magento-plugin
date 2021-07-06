@@ -1,5 +1,5 @@
 <?php
-namespace Conekta\Payments\Model\Api\Data;
+namespace Conekta\Payments\Api\Data;
 
 interface ConektaSalesOrderInterface
 {
