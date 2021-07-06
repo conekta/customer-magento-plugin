@@ -13,17 +13,20 @@ class EmbedFormRepository implements EmbedFormRepositoryInterface
     private $_conektaLogger;
     private $conektaQuoteInterface;
     protected $conektaOrderApi;
+    private $conektaQuoteFactory;
     private $conektaQuoteRepositoryFactory;
 
     public function __construct(
         ConektaLogger $conektaLogger,
         ConektaQuoteInterface $conektaQuoteInterface,
         ConektaOrderApi $conektaOrderApi,
+        ConektaQuoteFactory $conektaQuoteFactory,
         ConektaQuoteRepositoryFactory $conektaQuoteRepositoryFactory
     ) {
         $this->_conektaLogger = $conektaLogger;
         $this->conektaQuoteInterface = $conektaQuoteInterface;
         $this->conektaQuoteRepositoryFactory = $conektaQuoteRepositoryFactory;
+        $this->conektaQuoteFactory = $conektaQuoteFactory;
         $this->conektaOrderApi = $conektaOrderApi;
     }
 
@@ -39,17 +42,19 @@ class EmbedFormRepository implements EmbedFormRepositoryInterface
 
             //Creates checkout order
             $order = $this->conektaOrderApi->create($orderParams);
-
+            
             //Save map conekta order and quote
-            $conektaQuote = new ConektaQuoteInterface;
+            $conektaQuote = $this->conektaQuoteFactory->create();
             $conektaQuote->setQuoteId($quoteId);
-            $conektaQuote->setConektaOrderId($order->getId());
+            $conektaQuote->setConektaOrderId($order['id']);
             $conektaQuoteRepo->save($conektaQuote);
         } else {
-
+            
             //If map between conekta order and quote exist, then just updated conekta order
             $order = $this->conektaOrderApi->find($conektaQuote->getConektaOrderId());
-
+            
+            //TODO detect if checkout config has been modified
+            unset($orderParams['customer_info']);
             $order->update($orderParams);
         }
 

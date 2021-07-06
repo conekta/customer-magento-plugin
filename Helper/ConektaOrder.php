@@ -202,6 +202,7 @@ class ConektaOrder extends AbstractHelper
             $this->_conektaHelper->getMetadataAttributesConekta($orderItems)
         );
         
+        /*
         $checkoutId = '';
         try {
             $this->conektaLogger->info('Creating Order. Parameters: ', $validOrderWithCheckout);
@@ -217,7 +218,8 @@ class ConektaOrder extends AbstractHelper
         } catch (\Conekta\Handler $error) {
             $this->conektaLogger->error($error->getMessage());
         }
-        return $checkoutId;
+        */
+        return $validOrderWithCheckout;
     }
 
     /**
