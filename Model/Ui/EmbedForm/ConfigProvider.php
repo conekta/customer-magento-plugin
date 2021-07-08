@@ -273,7 +273,8 @@ class ConfigProvider implements ConfigProviderInterface
         return $this->_checkoutSession->getQuote();
     }
 
-    public function getPaymentMethodsActive(){
+    public function getPaymentMethodsActive()
+    {
         $methods = [];
 
         if ($this->_conektaHelper->isCreditCardEnabled()) {

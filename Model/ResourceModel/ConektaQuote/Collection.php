@@ -1,5 +1,5 @@
 <?php
-namespace Conekta\Payments\Model\ResourceModel\ConektaSalesOrder;
+namespace Conekta\Payments\Model\ResourceModel\ConektaQuote;
 
 use Magento\Framework\Model\ResourceModel\Db\Collection\AbstractCollection;
 use Conekta\Payments\Model\ConektaQuote;

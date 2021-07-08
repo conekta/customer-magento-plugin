@@ -417,7 +417,8 @@ class Data extends AbstractHelper
         return $urlWebhook;
     }
 
-    public function getDiscountLines(){
+    public function getDiscountLines()
+    {
         $quote = $this->checkoutSession->getQuote();
         $totalDiscount = $quote->getSubtotal() - $quote->getSubtotalWithDiscount();
 
@@ -433,7 +434,8 @@ class Data extends AbstractHelper
         return $discountLines;
     }
 
-    public function getTaxLines($items){
+    public function getTaxLines($items)
+    {
         $taxLines = [];
         $ctr_amount = 0;
         foreach ($items as $item) {
@@ -449,5 +451,4 @@ class Data extends AbstractHelper
 
         return $taxLines;
     }
-
 }

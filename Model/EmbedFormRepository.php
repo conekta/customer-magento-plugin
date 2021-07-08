@@ -34,11 +34,15 @@ class EmbedFormRepository implements EmbedFormRepositoryInterface
     {
         $conektaQuoteRepo = $this->conektaQuoteRepositoryFactory->create();
 
+        $conektaQuote = null;
         $conektaOrder = null;
         try {
             $conektaQuote = $conektaQuoteRepo->getByid($quoteId);
             $conektaOrder = $this->conektaOrderApi->find($conektaQuote->getConektaOrderId());
-        } catch (NoSuchEntityException $e) {}
+        } catch (NoSuchEntityException $e) {
+            $conektaQuote = null;
+            $conektaOrder = null;
+        }
         
         /**
          * Creates new conekta order-checkout if:

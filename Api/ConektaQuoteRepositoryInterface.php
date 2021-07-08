@@ -7,10 +7,10 @@ interface ConektaQuoteRepositoryInterface
 {
 
      /**
-     * @param int $id
-     * @return ConektaQuoteInterface
-     * @throws \Magento\Framework\Exception\NoSuchEntityException
-     */
+      * @param int $id
+      * @return ConektaQuoteInterface
+      * @throws \Magento\Framework\Exception\NoSuchEntityException
+      */
     public function getById($id);
  
     /**
@@ -18,5 +18,4 @@ interface ConektaQuoteRepositoryInterface
      * @return ConektaQuoteInterface
      */
     public function save(ConektaQuoteInterface $conektaQuote);
-    
 }

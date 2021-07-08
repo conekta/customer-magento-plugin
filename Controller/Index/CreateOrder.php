@@ -80,9 +80,9 @@ class CreateOrder extends \Magento\Framework\App\Action\Action implements HttpPo
 
                 //genrates checkout form
                 $order = (array)$this->embedFormRepository->generate(
-                                        $this->checkoutSession->getQuote()->getId(), 
-                                        $orderParams
-                                    );
+                    $this->checkoutSession->getQuote()->getId(),
+                    $orderParams
+                );
                 
                 $response['checkout_id'] = $order['checkout']['id'];
             } catch (\Exception $e) {

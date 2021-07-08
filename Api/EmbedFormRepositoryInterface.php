@@ -10,5 +10,4 @@ interface EmbedFormRepositoryInterface
      * @return \Conekta\Order
      */
     public function generate($quoteId, $orderParams);
-
 }

@@ -27,6 +27,4 @@ interface ConektaQuoteInterface
      * @return void
      */
     public function setConektaOrderId($value);
-
-    
 }
