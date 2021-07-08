@@ -19,6 +19,8 @@ class UpgradeSchema implements UpgradeSchemaInterface
             if (!$installer->tableExists('conekta_salesorder')) {
                 $this->addConektaSalesOrderTable($setup);
             }
+        }
+        if (version_compare($context->getVersion(), '3.6.1', '<')) {
             if (!$installer->tableExists('conekta_quote')) {
                 $this->addConektaOrderQuote($setup);
             }
