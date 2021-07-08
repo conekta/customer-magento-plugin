@@ -16,9 +16,14 @@ define(
         return Component.extend({
             defaults: {
                 template: 'Conekta_Payments/payment/base-form',
-                transactionResult: ''
+                transactionResult: '',
+                renderProperties: {
+                    shippingMethodCode: '',
+                    quoteBaseGrandTotal: '',
+                    shippingAddress: ''
+                },
             },
-
+            
             getFormTemplate: function(){
                 return 'Conekta_Payments/payment/embedform/form'
             },
@@ -38,21 +43,49 @@ define(
                         'iframOrderData'
                 ]);
                 this.iframOrderData('');
+                this.checkoutId('');
                 if  (this.getCardList().length === 0){
                     this.paymentsShowNewCardSection(false);
                 }
-
-                this.ChangeCard.subscribe(this.onSelectedCardChanged, this);
-                this.SavedCardLater.subscribe(this.onSavedCardLaterChanged, this);
-
+                
+                quote.totals.subscribe(this.reRender, this);
                 return this;
             },
-
+            
             initialize: function() {
                 var self = this;
                 this._super();
             },
+            
+            reRender: function(total){
+                var baseGrandTotal = quote.totals._latestValue.base_grand_total;
+                var shippingMethodCode = quote.shippingMethod._latestValue.method_code;
+                var shippingAddress = quote.shippingAddress._latestValue.getKey();
+                
+                
+                var hasToReRender = false;
+                if (baseGrandTotal !== this.renderProperties.quoteBaseGrandTotal) {
+                    this.renderProperties.quoteBaseGrandTotal = baseGrandTotal;
+                    hasToReRender = true;
+                }
 
+                if (shippingMethodCode !== this.renderProperties.shippingMethod) {
+                    this.renderProperties.shippingMethod = shippingMethodCode;
+                    hasToReRender = true;
+                }
+
+                if (shippingAddress !== this.renderProperties.shippingAddress) {
+                    this.renderProperties.shippingAddress = shippingAddress;
+                    hasToReRender = true;
+                }
+
+                if(hasToReRender && this.checkoutId()){
+                    document.getElementById("conektaIframeContainer").innerHTML="";
+                    this.getIframe();
+                }
+                
+                    
+            },
             loadCheckoutId: function() {
                 var self = this;
                 var guest_email = '';
@@ -67,7 +100,8 @@ define(
                     type: 'POST',
                     url: self.getcreateOrderUrl(),
                     data: params,
-                    async: false,
+                    showLoader: true,
+                    async: true,
                     success: function (response) {
                         self.checkoutId(response.checkout_id);
 
@@ -80,9 +114,7 @@ define(
                         
                     },
                     error: function (res) {
-                        console.error(res);
-
-                        
+                        console.error(res);                        
                     }
                 });
             },
@@ -98,7 +130,7 @@ define(
                             targetIFrame: '#conektaIframeContainer',
                             checkoutRequestId: checkout_id,
                             publicKey: this.getPublicKey(),
-                            paymentMethods: ['Card', 'Cash', 'BankTransfer'],
+                            paymentMethods: this.getPaymenMethods(),//['Card', 'Cash', 'BankTransfer'],
                             options: {
                                 theme: 'default'
                             },
@@ -276,6 +308,10 @@ define(
 
             getPublicKey: function() {
                 return this.getGlobalConfig().publicKey;
+            },
+
+            getPaymenMethods: function() {
+                return this.getMethodConfig().paymentMethods;
             },
 
             getConektaLogo: function() {

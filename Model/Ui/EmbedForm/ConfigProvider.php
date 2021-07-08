@@ -105,7 +105,8 @@ class ConfigProvider implements ConfigProviderInterface
                     'total' => $this->getQuote()->getGrandTotal(),
                     'enable_saved_card' => $savedCardEnable,
                     'saved_card' => $savedCardEnable ? $this->getSavedCard() : [],
-                    'createOrderUrl' => $this->url->getUrl(self::CREATEORDER_URL)
+                    'createOrderUrl' => $this->url->getUrl(self::CREATEORDER_URL),
+                    'paymentMethods' => $this->getPaymentMethodsActive(),
                 ]
             ]
         ];
@@ -270,5 +271,20 @@ class ConfigProvider implements ConfigProviderInterface
     public function getQuote()
     {
         return $this->_checkoutSession->getQuote();
+    }
+
+    public function getPaymentMethodsActive(){
+        $methods = [];
+
+        if ($this->_conektaHelper->isCreditCardEnabled()) {
+            $methods[] = 'Card';
+        }
+        if ($this->_conektaHelper->isOxxoEnabled()) {
+            $methods[] = 'Cash';
+        }
+        if ($this->_conektaHelper->isSpeiEnabled()) {
+            $methods[] = 'BankTransfer';
+        }
+        return $methods;
     }
 }
