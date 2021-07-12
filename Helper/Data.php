@@ -12,6 +12,8 @@ use Magento\Checkout\Model\Session as CheckoutSession;
 use Magento\Customer\Model\Session as CustomerSession;
 use Magento\Catalog\Model\ProductRepository;
 use Magento\Framework\Escaper;
+use Magento\Quote\Api\CartRepositoryInterface;
+use Magento\Quote\Api\Data\CartInterface;
 use Magento\Store\Model\StoreManagerInterface;
 
 class Data extends AbstractHelper
@@ -45,6 +47,8 @@ class Data extends AbstractHelper
     private $productRepository;
 
     private $_escaper;
+    
+    protected $_cartRepository;
 
     /**
      * Data constructor.
@@ -66,6 +70,7 @@ class Data extends AbstractHelper
         CustomerSession $customerSession,
         ProductRepository $productRepository,
         Escaper $_escaper,
+        CartRepositoryInterface $cartRepository,
         StoreManagerInterface $storeManager
     ) {
         parent::__construct($context);
@@ -78,6 +83,7 @@ class Data extends AbstractHelper
         $this->customerSession = $customerSession;
         $this->productRepository = $productRepository;
         $this->_escaper = $_escaper;
+        $this->_cartRepository = $cartRepository;
         $this->_storeManager = $storeManager;
     }
 
@@ -415,5 +421,77 @@ class Data extends AbstractHelper
             $urlWebhook = $baseUrl . "conekta/webhook/listener";
         }
         return $urlWebhook;
+    }
+
+    public function getShippingLines($quoteId, $isCheckout = true)
+    {
+        $quote = $this->_cartRepository->get($quoteId);
+        $shippingAddress = $quote->getShippingAddress();
+        
+        $shippingLines = [];
+        
+        if ($quote->getIsVirtual()) {
+            $shippingLines[] = ['amount' => 0 ];
+        } elseif ($shippingAddress) {
+            $shippingLine['amount'] = (int)($shippingAddress->getShippingAmount() * 100);
+
+            //Chekout orders doesn't allow method and carrier parameters
+            if (!$isCheckout) {
+                $shippingLine['method'] = $shippingAddress->getShippingMethod();
+                $shippingLine['carrier'] = $shippingAddress->getShippingDescription();
+            }
+
+            $shippingLines[] = $shippingLine;
+        }
+
+        return $shippingLines;
+    }
+
+    public function getShippingContact($quoteId)
+    {
+        $quote = $this->_cartRepository->get($quoteId);
+        $address = null;
+        
+        $shippingContact = [];
+        
+        if ($quote->getIsVirtual()) {
+            $address = $quote->getBillingAddress();
+        } else {
+            $address = $quote->getShippingAddress();
+        }
+        
+        if ($address) {
+            $shippingContact = [
+                'receiver' => $this->getCustomerName($address),
+                'phone' => $address->getTelephone(),
+                'address' => [
+                    'city' => $address->getCity(),
+                    'state' => $address->getRegionCode(),
+                    'country' => $address->getCountryId(),
+                    'postal_code' => $address->getPostcode(),
+                    'phone' => $address->getTelephone(),
+                    'email' => $address->getEmail()
+                ]
+            ];
+
+            $street = $address->getStreet();
+            $shippingContact['address']['street1'] = isset($street[0]) ? $street[0] : 'NO STREET';
+            if (isset($street[1])) {
+                $shippingContact['address']['street2'] = $street[1];
+            }
+        }
+        return $shippingContact;
+    }
+
+    public function getCustomerName($shipping)
+    {
+        $customerName = sprintf(
+            '%s %s %s',
+            $shipping->getFirstname(),
+            $shipping->getMiddlename(),
+            $shipping->getLastname()
+        );
+
+        return $customerName;
     }
 }
