@@ -459,7 +459,7 @@ class Data extends AbstractHelper
         } else {
             $address = $quote->getShippingAddress();
         }
-        $this->conektaLogger->info($quoteId.' isVirutal=>'.$quote->getIsVirtual(), $quote->getBillingAddress()->getStreet());
+        
         if ($address){
             $shippingContact = [
                 'receiver' => $this->getCustomerName($address),
