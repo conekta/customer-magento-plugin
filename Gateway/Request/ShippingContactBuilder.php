@@ -34,30 +34,10 @@ class ShippingContactBuilder implements BuilderInterface
         $payment = $paymentDO->getPayment();
         $order = $paymentDO->getOrder();
         $quoteId = $payment->getAdditionalInformation('quote_id');
-        /*
-        $shipping = $order->getShippingAddress();
-        if ($shipping) {
-            $request['shipping_contact'] = [
-                'receiver' => $this->getCustomerName($shipping),
-                'phone' => $shipping->getTelephone(),
-                'address' => [
-                    'street1' => $shipping->getStreetLine1(),
-                    'city' => $shipping->getCity(),
-                    'state' => $shipping->getRegionCode(),
-                    'country' => $shipping->getCountryId(),
-                    'postal_code' => $shipping->getPostcode(),
-                    'phone' => $shipping->getTelephone(),
-                    'email' => $shipping->getEmail()
-                ]
-            ];
-        } else {
-            $request['shipping_contact'] = [];
-        }
-        */
 
         $request['shipping_contact'] = $this->_conektaHelper->getShippingContact($quoteId);
 
-        if(empty($request['shipping_contact'])){
+        if (empty($request['shipping_contact'])) {
             throw new LocalizedException(__('Missing shipping contacta information'));
         }
 
@@ -65,5 +45,4 @@ class ShippingContactBuilder implements BuilderInterface
 
         return $request;
     }
-
 }

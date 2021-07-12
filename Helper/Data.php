@@ -432,7 +432,7 @@ class Data extends AbstractHelper
         
         if ($quote->getIsVirtual()) {
             $shippingLines[] = ['amount' => 0 ];
-        } elseif($shippingAddress) {
+        } elseif ($shippingAddress) {
             $shippingLine['amount'] = (int)($shippingAddress->getShippingAmount() * 100);
 
             //Chekout orders doesn't allow method and carrier parameters
@@ -460,7 +460,7 @@ class Data extends AbstractHelper
             $address = $quote->getShippingAddress();
         }
         
-        if ($address){
+        if ($address) {
             $shippingContact = [
                 'receiver' => $this->getCustomerName($address),
                 'phone' => $address->getTelephone(),
@@ -480,8 +480,6 @@ class Data extends AbstractHelper
                 $shippingContact['address']['street2'] = $street[1];
             }
         }
-        
-
         return $shippingContact;
     }
 

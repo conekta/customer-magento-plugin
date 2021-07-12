@@ -178,10 +178,10 @@ class ConektaOrder extends AbstractHelper
         $validOrderWithCheckout = [];
         $validOrderWithCheckout['line_items'] = $this->_conektaHelper->getLineItems($orderItems);
         $validOrderWithCheckout['shipping_lines'] = $this->_conektaHelper->getShippingLines(
-                                                                        $this->getQuote()->getId()
-                                                                    );
+            $this->getQuote()->getId()
+        );
         $needsShippingContact = !$this->getQuote()->getIsVirtual();
-        if($needsShippingContact){
+        if ($needsShippingContact) {
             $validOrderWithCheckout['shipping_contact'] = $this->_conektaHelper->getShippingContact(
                 $this->getQuote()->getId()
             );
@@ -309,8 +309,8 @@ class ConektaOrder extends AbstractHelper
         return $response;
     }
 
-
-    public function getMetadataOrder($orderItems){
+    public function getMetadataOrder($orderItems)
+    {
         return array_merge(
             $this->_conektaHelper->getMagentoMetadata(),
             ['quote_id' => $this->getQuote()->getId()],
