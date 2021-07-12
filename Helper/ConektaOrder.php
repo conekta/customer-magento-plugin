@@ -117,7 +117,7 @@ class ConektaOrder extends AbstractHelper
      */
     public function createOrder($guestEmail)
     {
-        $this->conektaLogger->info('Create Blank Order :: createOrder', [$this->getQuote()->getBillingAddress()->getEmail()]);
+        $this->conektaLogger->info('Create Blank Order :: createOrder');
 
         \Conekta\Conekta::setApiKey($this->_conektaHelper->getPrivateKey());
         \Conekta\Conekta::setApiVersion("2.0.0");
@@ -148,7 +148,7 @@ class ConektaOrder extends AbstractHelper
                 $customerRequest['email'] = $guestEmail;
                 //$customerRequest['phone'] = $billingAddress->getTelephone();
             }
-            $this->conektaLogger->error('Create Order. customer_req: ', $customerRequest);
+
             if (empty($conektaCustomerId)) {
                 try {
                     $conektaAPI = $this->conektaCustomer->create($customerRequest);
@@ -194,13 +194,13 @@ class ConektaOrder extends AbstractHelper
         $threeDsEnabled =  $this->_conektaHelper->is3DSEnabled();
         $saveCardEnabled =  $this->_conektaHelper->isSaveCardEnabled();
         $installments = $this->getMonthlyInstallments();
-        $validOrderWithCheckout['checkout'] = [
-            'allowed_payment_methods'      => ["card"],//, "cash", "bank_transfer"],
+        $validOrderWithCheckout['checkout']    = [
+            'allowed_payment_methods' => $this->getAllowedPaymentMethods(),
             'monthly_installments_enabled' => $installments['active_installments'] ? true : false,
             'monthly_installments_options' => $installments['monthly_installments'],
             'on_demand_enabled'            => $saveCardEnabled,
             'force_3ds_flow'               => $threeDsEnabled,
-            'expires_at'                   => $this->getExpiredAt(),
+            'expires_at'                   => $this->_conektaHelper->getExpiredAt(),
             'needs_shipping_contact'       => $needsShippingContact
         ];
         $validOrderWithCheckout['currency']= self::CURRENCY_CODE;
@@ -265,14 +265,20 @@ class ConektaOrder extends AbstractHelper
         return $result;
     }
 
-    /**
-     * @return string
-     */
-    public function getExpiredAt()
+    public function getAllowedPaymentMethods()
     {
-        $datetime = new \Datetime();
-        $datetime->add(new \DateInterval('P3D'));
-        return $datetime->format('U');
+        $methods = [];
+
+        if ($this->_conektaHelper->isCreditCardEnabled()) {
+            $methods[] = 'card';
+        }
+        if ($this->_conektaHelper->isOxxoEnabled()) {
+            $methods[] = 'cash';
+        }
+        if ($this->_conektaHelper->isSpeiEnabled()) {
+            $methods[] = 'bank_transfer';
+        }
+        return $methods;
     }
 
     /**
@@ -308,7 +314,7 @@ class ConektaOrder extends AbstractHelper
         return array_merge(
             $this->_conektaHelper->getMagentoMetadata(),
             ['quote_id' => $this->getQuote()->getId()],
-            $this->_conektaHelper->getMetadataAttributesConketa($orderItems)
+            $this->_conektaHelper->getMetadataAttributesConekta($orderItems)
         );
     }
 }

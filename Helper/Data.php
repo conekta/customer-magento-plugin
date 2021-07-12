@@ -14,6 +14,7 @@ use Magento\Catalog\Model\ProductRepository;
 use Magento\Framework\Escaper;
 use Magento\Quote\Api\CartRepositoryInterface;
 use Magento\Quote\Api\Data\CartInterface;
+use Magento\Store\Model\StoreManagerInterface;
 
 class Data extends AbstractHelper
 {
@@ -38,6 +39,7 @@ class Data extends AbstractHelper
      */
     protected $conektaCustomer;
 
+    private $_storeManager;
     private $checkoutSession;
 
     private $customerSession;
@@ -68,7 +70,8 @@ class Data extends AbstractHelper
         CustomerSession $customerSession,
         ProductRepository $productRepository,
         Escaper $_escaper,
-        CartRepositoryInterface $cartRepository
+        CartRepositoryInterface $cartRepository,
+        StoreManagerInterface $storeManager
     ) {
         parent::__construct($context);
         $this->_moduleList = $moduleList;
@@ -81,6 +84,7 @@ class Data extends AbstractHelper
         $this->productRepository = $productRepository;
         $this->_escaper = $_escaper;
         $this->_cartRepository = $cartRepository;
+        $this->_storeManager = $storeManager;
     }
 
     /**
@@ -229,14 +233,38 @@ class Data extends AbstractHelper
         return (boolean)$this->getConfigData('conekta_cc', 'enable_saved_card');
     }
 
+    public function isCreditCardEnabled()
+    {
+        return  (boolean)$this->getConfigData('conekta_cc', 'active');
+    }
+
+    public function isOxxoEnabled()
+    {
+        return  (boolean)$this->getConfigData('conekta_oxxo', 'active');
+    }
+
+    public function isSpeiEnabled()
+    {
+        return  (boolean)$this->getConfigData('conekta_spei', 'active');
+    }
+
     /**
-     * @return string
+     * @return int
      */
     public function getExpiredAt()
     {
-        $datetime = new \Datetime();
-        $datetime->add(new \DateInterval('P3D'));
-        return $datetime->format('U');
+        $timeFormat = $this->getConfigData('conekta/conekta_global', 'days_or_hours');
+        
+        //hours expiration disabled temporaly
+        if (!$timeFormat && false) {
+            $expiryHours = $this->getConfigData('conekta/conekta_global', 'expiry_hours');
+            $expiryDate = strtotime("+" . $expiryHours . " hours");
+        } else {
+            $expiryDays = $this->getConfigData('conekta/conekta_global', 'expiry_days');
+            $expiryDate = strtotime("+" . $expiryDays . " days");
+        }
+
+        return $expiryDate;
     }
 
     private function customFormat($array, $glue)
@@ -269,7 +297,7 @@ class Data extends AbstractHelper
         return $ret;
     }
 
-    public function getMetadataAttributesConketa($items)
+    public function getMetadataAttributesConekta($items)
     {
         $productAttributes = $this->getMetadataAttributes('metadata_additional_products');
         $request = [];
@@ -345,36 +373,22 @@ class Data extends AbstractHelper
         $request = [];
         $quantityMethod = $isQuoteItem? "getQty":"getQtyOrdered";
         foreach ($items as $itemId => $item) {
-            if ($version > 240) {
+            if ($version > 233) {
                 if ($item->getProductType() != 'bundle' && $item->getProductType() != 'configurable') {
                     
-                    $price = (int) $item->getPrice();
+                    $price = $item->getPrice();
                     $qty= (int)$item->{$quantityMethod}();
-                    if ($price === 0 && !empty($item->getParentItem())) {
-                        $price = (int) $item->getParentItem()->getPrice();
+                    if (!empty($item->getParentItem())) {
+                        $price = $item->getParentItem()->getPrice();
                         $qty = (int)$item->getParentItem()->{$quantityMethod}();
                     }
 
                     $request[] = [
                         'name' => $item->getName(),
                         'sku' => $item->getSku(),
-                        'unit_price' => $price * 100,
+                        'unit_price' => (int)($price * 100),
                         'description' => $this->_escaper->escapeHtml($item->getName() . ' - ' . $item->getSku()),
                         'quantity' => $qty,
-                        'tags' => [
-                            $item->getProductType()
-                        ]
-                    ];
-
-                }
-            } elseif ($version > 233) {
-                if ($item->getProductType() != 'bundle' && $item->getProductType() != 'configurable') {
-                    $request[] = [
-                        'name' => $item->getName(),
-                        'sku' => $item->getSku(),
-                        'unit_price' => (int)($item->getPrice() * 100),
-                        'description' => $this->_escaper->escapeHtml($item->getName() . ' - ' . $item->getSku()),
-                        'quantity' => (int)($item->{$quantityMethod}()),
                         'tags' => [
                             $item->getProductType()
                         ]
@@ -397,6 +411,16 @@ class Data extends AbstractHelper
             }
         }
         return $request;
+    }
+
+    public function getUrlWebhookOrDefault()
+    {
+        $urlWebhook = $this->getConfigData('conekta/conekta_global', 'conekta_webhook');
+        if (empty($urlWebhook)) {
+            $baseUrl = $this->_storeManager->getStore()->getBaseUrl();
+            $urlWebhook = $baseUrl . "conekta/webhook/listener";
+        }
+        return $urlWebhook;
     }
 
     public function getShippingLines($quoteId, $isCheckout = true)

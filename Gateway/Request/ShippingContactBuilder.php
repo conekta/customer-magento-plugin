@@ -66,5 +66,4 @@ class ShippingContactBuilder implements BuilderInterface
         return $request;
     }
 
-    
 }
