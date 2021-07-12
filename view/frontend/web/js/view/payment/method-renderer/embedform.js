@@ -20,7 +20,8 @@ define(
                 renderProperties: {
                     shippingMethodCode: '',
                     quoteBaseGrandTotal: '',
-                    shippingAddress: ''
+                    shippingAddress: '',
+                    billingAddress: '',
                 },
             },
             
@@ -48,6 +49,20 @@ define(
                     this.paymentsShowNewCardSection(false);
                 }
                 
+                var baseGrandTotal = quote.totals._latestValue.base_grand_total;
+                var shippingMethodCode = '';
+                if(quote.shippingMethod._latestValue){
+                    shippingMethodCode = quote.shippingMethod._latestValue.method_code;
+                }
+                var shippingAddress = quote.shippingAddress._latestValue?.getKey();
+                var billingAddress = quote.billingAddress._latestValue?.getKey();
+                
+                this.renderProperties.quoteBaseGrandTotal = baseGrandTotal;
+                this.renderProperties.shippingMethod = shippingMethodCode;
+                this.renderProperties.shippingAddress = shippingAddress;
+                this.renderProperties.billingAddress = billingAddress;
+
+                
                 quote.totals.subscribe(this.reRender, this);
                 return this;
             },
@@ -58,9 +73,16 @@ define(
             },
             
             reRender: function(total){
+                
                 var baseGrandTotal = quote.totals._latestValue.base_grand_total;
-                var shippingMethodCode = quote.shippingMethod._latestValue.method_code;
-                var shippingAddress = quote.shippingAddress._latestValue.getKey();
+                
+                var shippingMethodCode = '';
+                if(quote.shippingMethod._latestValue){
+                    shippingMethodCode = quote.shippingMethod._latestValue.method_code;
+                }
+                
+                var shippingAddress = quote.shippingAddress._latestValue?.getKey();
+                var billingAddress = quote.billingAddress._latestValue?.getKey();
                 
                 
                 var hasToReRender = false;
@@ -79,8 +101,13 @@ define(
                     hasToReRender = true;
                 }
 
+                if (billingAddress !== this.renderProperties.billingAddress) {
+                    this.renderProperties.billingAddress = billingAddress;
+                    hasToReRender = true;
+                }
+
                 if(hasToReRender && this.checkoutId()){
-                    document.getElementById("conektaIframeContainer").innerHTML="";
+                    console.log('Re-render triggered');
                     this.getIframe();
                 }
                 
@@ -100,8 +127,7 @@ define(
                     type: 'POST',
                     url: self.getcreateOrderUrl(),
                     data: params,
-                    showLoader: true,
-                    async: true,
+                    async: false,
                     success: function (response) {
                         self.checkoutId(response.checkout_id);
 
@@ -120,27 +146,28 @@ define(
             },
 
             getIframe: function() {
+                console.log('getIframe')
                 const urlParams = new URLSearchParams(window.location.search);
                 if ($('#conektaIframeContainer').length) {
                     this.loadCheckoutId();
                     var self = this;
                     var checkout_id = self.checkoutId();
                     if (checkout_id) {
+                        document.getElementById("conektaIframeContainer").innerHTML="";
                         window.ConektaCheckoutComponents.Integration({
                             targetIFrame: '#conektaIframeContainer',
                             checkoutRequestId: checkout_id,
                             publicKey: this.getPublicKey(),
-                            paymentMethods: this.getPaymenMethods(),//['Card', 'Cash', 'BankTransfer'],
+                            paymentMethods: this.getPaymenMethods(),
                             options: {
                                 theme: 'default'
                             },
                             onCreateTokenSucceeded: function (token) {
                                 console.log('onCreateTokenSucceeded');
-                                console.log(token);
                             },
                             onCreateTokenError: function (error) {
                                 console.log('onCreateTokenError');
-                                console.log(error);
+                                console.error(error);
                             },
                             onFinalizePayment: function (event) {
                                 self.iframOrderData(event);
@@ -152,37 +179,6 @@ define(
                     }
                 }
                 return true;
-            },
-
-            onSavedCardLaterChanged: function(newValue)
-            {
-                if(newValue){
-                    this.isSaveCardEnable(true);
-                }else{
-                    this.isSaveCardEnable(false);
-                }
-            },
-            /**
-             * @param newValue
-             */
-            onSelectedCardChanged: function(newValue)
-            {
-                if (newValue === undefined){
-                    this.paymentsShowNewCardSection('');
-                    this.isVisiblePaymentButton(false);
-                    this.selectedPaymentId('');
-                    return;
-                }
-
-                if(newValue !== 'add_new_card') {
-                    this.paymentsShowNewCardSection(true);
-                    this.selectedPaymentId(newValue);
-                    this.isVisiblePaymentButton(true);
-                } else {
-                    this.paymentsShowNewCardSection(false);
-                    this.selectedPaymentId('');
-                    this.isVisiblePaymentButton(false);
-                }
             },
 
             getData: function () {
@@ -341,23 +337,7 @@ define(
             getcreateOrderUrl: function() {
                 return this.getMethodConfig().createOrderUrl;
             },
-            getSaveCardEnable: function() {
-                return this.getMethodConfig().enable_saved_card;
-            },
-
-            getSavedCards: function() {
-                return this.getMethodConfig().saved_card;
-            },
-
-            getCardList: function() {
-                return _.map(this.getSavedCards(), function(value, key) {
-                    return {
-                        'value': key,
-                        'type': value
-                    }
-                });
-            },
-
+            
             isLoggedIn: function () {
                 return customer.isLoggedIn();
             },
@@ -369,80 +349,6 @@ define(
             getMinimumAmountMonthlyInstallments: function() {
                 return this.getMethodConfig().minimum_amount_monthly_installments;
             },
-
-            getMonthlyInstallments: function() {
-                var months = [];
-                var i = 0;
-                for (i in this.getMethodConfig().monthly_installments){
-                    /*switch (this.getMethodConfig().monthly_installments[i]){
-                        case "6": case "9": case "12":
-                            if (this.getTotal() < 400) {
-                                continue;
-                            }
-                            break;
-                    }*/
-
-                    months.push(this.getMethodConfig().monthly_installments[i]);
-                }
-                return months.sort(function(a,b){ return a - b; });
-            },
-
-            validateMonthlyInstallments: function() {
-                if(this.activeMonthlyInstallments() && isNaN(installments) == false) {
-                    var totalOrder = this.getTotal();
-                    if (totalOrder >= this.getMinimumAmountMonthlyInstallments()) {
-                        var installments = parseInt($('#' + this.getCode() + '_monthly_installments').val());
-                        if (installments == 1) {
-                            return true;
-                        } else {
-
-                            return (installments * 100 < totalOrder);
-                        }
-                    } else {
-
-                        return false;
-                    }
-                }
-
-                return true;
-            },
-
-            getTotal: function(){
-                return parseFloat(this.getMethodConfig().total);
-            },
-
-            getCustomerName: function(){
-                return $("#" + this.getCode() + "_card_holder_name").val();
-            },
-
-            assembleAddress: function() {
-                var address = {};
-                for (var i in window.customerData.addresses) {
-                    if (window.customerData.addresses[i].default_billing) {
-                        var addressData = window.customerData.addresses[i];
-
-                        if(typeof addressData.street[0] !== "undefined"){
-                            if (addressData.street[0] !== null && addressData.street[0] !== ""){
-                                address.street1 = addressData.street[0];
-                            }
-                        }
-
-                        if(typeof addressData.street[1] !== "undefined"){
-                            if (addressData.street[1] !== null && addressData.street[1] !== ""){
-                                address.street2 = addressData.street[0];
-                            }
-                        }
-
-                        address.city = addressData.city;
-                        address.state = addressData.region.region;
-                        address.zip = addressData.postcode;
-                        address.country = addressData.country_id;
-                    }
-                }
-
-                return address;
-            }
-
         });
     }
 );
