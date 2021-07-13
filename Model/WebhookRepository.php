@@ -51,7 +51,7 @@ class WebhookRepository
      */
     public function findByMetadataOrderId($body)
     {
-        $this->_conektaLogger->info('OrderRepository :: findByMetadataOrderId started');
+        $this->_conektaLogger->info('WebhookRepository :: findByMetadataOrderId started');
 
         if (!isset($body['data']['object']) ||
             !isset($body['data']['object']['id'])
@@ -77,7 +77,7 @@ class WebhookRepository
      */
     public function expireOrder($body)
     {
-        $this->_conektaLogger->info('OrderRepository :: expireOrder started');
+        $this->_conektaLogger->info('WebhookRepository :: expireOrder started');
 
         $order = $this->findByMetadataOrderId($body);
 
@@ -98,7 +98,7 @@ class WebhookRepository
             $order->save();
         }
         
-        $this->_conektaLogger->info('OrderRepository :: orderExpiredProcess: Order has been Canceled');
+        $this->_conektaLogger->info('WebhookRepository :: orderExpiredProcess: Order has been Canceled');
     }
 
     public function payOrder($body)
@@ -112,9 +112,9 @@ class WebhookRepository
         }
         
         if (!$order->getId()) {
-            $message = 'The order does not allow an invoice to be created';
+            $message = 'The order does not exists';
             $this->_conektaLogger->error(
-                'OrderRepository :: execute - ' . $message
+                'WebhookRepository :: execute - ' . $message
             );
             throw new LocalizedException(__($message));
         }
@@ -126,7 +126,7 @@ class WebhookRepository
             ->setIsCustomerNotified(true);
 
         $order->save();
-        $this->_conektaLogger->info('OrderRepository :: execute - Order status updated');
+        $this->_conektaLogger->info('WebhookRepository :: execute - Order status updated');
 
         $invoice = $this->invoiceService->prepareInvoice($order);
         $invoice->register();
@@ -137,7 +137,7 @@ class WebhookRepository
             $invoice->getOrder()
         );
         $transactionSave->save();
-        $this->_conektaLogger->info('OrderRepository :: execute - The invoice to be created');
+        $this->_conektaLogger->info('WebhookRepository :: execute - The invoice to be created');
 
         try {
             $this->invoiceSender->send($invoice);
@@ -147,11 +147,11 @@ class WebhookRepository
                 ->setIsCustomerNotified(true)
                 ->save();
             $this->_conektaLogger->info(
-                'OrderRepository :: execute - Notified customer about invoice creation'
+                'WebhookRepository :: execute - Notified customer about invoice creation'
             );
         } catch (\Exception $e) {
             $this->_conektaLogger->error(
-                'OrderRepository :: execute - We can\'t send the invoice email right now.'
+                'WebhookRepository :: execute - We can\'t send the invoice email right now.'
             );
         }
     }
