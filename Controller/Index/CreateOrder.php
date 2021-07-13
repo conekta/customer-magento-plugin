@@ -2,7 +2,9 @@
 
 namespace Conekta\Payments\Controller\Index;
 
+use Conekta\Payments\Api\EmbedFormRepositoryInterface;
 use Magento\Framework\App\Action\HttpPostActionInterface;
+use Magento\Checkout\Model\Session;
 
 class CreateOrder extends \Magento\Framework\App\Action\Action implements HttpPostActionInterface
 {
@@ -27,6 +29,10 @@ class CreateOrder extends \Magento\Framework\App\Action\Action implements HttpPo
      */
     protected $conektaOrderHelper;
 
+    private $embedFormRepository;
+
+    private $checkoutSession;
+
     /**
      * CreateOrder constructor.
      * @param \Magento\Framework\App\Action\Context $context
@@ -40,12 +46,16 @@ class CreateOrder extends \Magento\Framework\App\Action\Action implements HttpPo
         \Magento\Framework\View\Result\PageFactory $resultPageFactory,
         \Magento\Framework\Controller\Result\JsonFactory $jsonFactory,
         \Conekta\Payments\Helper\ConektaOrder $conektaOrderHelper,
-        \Psr\Log\LoggerInterface $logger
+        \Psr\Log\LoggerInterface $logger,
+        EmbedFormRepositoryInterface $embedFormRepository,
+        Session $checkoutSession
     ) {
         $this->resultPageFactory = $resultPageFactory;
         $this->logger = $logger;
         $this->resultJsonFactory = $jsonFactory;
         $this->conektaOrderHelper = $conektaOrderHelper;
+        $this->embedFormRepository = $embedFormRepository;
+        $this->checkoutSession = $checkoutSession;
         parent::__construct($context);
     }
 
@@ -64,8 +74,17 @@ class CreateOrder extends \Magento\Framework\App\Action\Action implements HttpPo
                 /** @var \Magento\Framework\Controller\Result\Json $resultJson */
                 $data = $this->getRequest()->getPostValue();
                 $guestEmail = $data['guestEmail'];
-                $checkoutId = $this->conektaOrderHelper->createOrder($guestEmail);
-                $response['checkout_id'] = $checkoutId;
+                
+                //generate order params
+                $orderParams = $this->conektaOrderHelper->createOrder($guestEmail);
+
+                //genrates checkout form
+                $order = (array)$this->embedFormRepository->generate(
+                    $this->checkoutSession->getQuote()->getId(),
+                    $orderParams
+                );
+                
+                $response['checkout_id'] = $order['checkout']['id'];
             } catch (\Exception $e) {
                 $this->logger->critical($e);
             }

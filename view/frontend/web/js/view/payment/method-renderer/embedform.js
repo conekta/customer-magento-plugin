@@ -16,9 +16,15 @@ define(
         return Component.extend({
             defaults: {
                 template: 'Conekta_Payments/payment/base-form',
-                transactionResult: ''
+                transactionResult: '',
+                renderProperties: {
+                    shippingMethodCode: '',
+                    quoteBaseGrandTotal: '',
+                    shippingAddress: '',
+                    billingAddress: ''
+                },
             },
-
+            
             getFormTemplate: function(){
                 return 'Conekta_Payments/payment/embedform/form'
             },
@@ -27,30 +33,72 @@ define(
 
                 this._super()
                     .observe([
-                        'ChangeCard',
-                        'SavedCardLater',
-                        'isSaveCardEnable',
-                        'paymentsShowNewCardSection',
                         'checkoutId',
-                        'selectedPaymentId',
                         'isIframeLoaded',
                         'isVisiblePaymentButton',
                         'iframOrderData'
                 ]);
                 this.iframOrderData('');
-                if  (this.getCardList().length === 0){
-                    this.paymentsShowNewCardSection(false);
+                this.checkoutId('');
+                
+                var baseGrandTotal = quote.totals._latestValue.base_grand_total;
+                var shippingMethodCode = '';
+                if(quote.shippingMethod._latestValue){
+                    shippingMethodCode = quote.shippingMethod._latestValue.method_code;
                 }
+                var shippingAddress = quote.shippingAddress._latestValue?.getCacheKey();
+                var billingAddress = JSON.stringify(quote.billingAddress());
+                
+                this.renderProperties.quoteBaseGrandTotal = baseGrandTotal;
+                this.renderProperties.shippingMethod = shippingMethodCode;
+                this.renderProperties.shippingAddress = shippingAddress;
+                this.renderProperties.billingAddress = billingAddress;
 
-                this.ChangeCard.subscribe(this.onSelectedCardChanged, this);
-                this.SavedCardLater.subscribe(this.onSavedCardLaterChanged, this);
-
+                quote.totals.subscribe(this.reRender, this);
                 return this;
             },
-
+            
             initialize: function() {
                 var self = this;
                 this._super();
+            },
+            
+            reRender: function(total){
+                
+                var baseGrandTotal = quote.totals._latestValue.base_grand_total;
+                var shippingAddress = quote.shippingAddress._latestValue?.getCacheKey();
+                var shippingMethodCode = '';
+                if(quote.shippingMethod._latestValue){
+                    shippingMethodCode = quote.shippingMethod._latestValue.method_code;
+                }
+                
+                var hasToReRender = false;
+                if (baseGrandTotal !== this.renderProperties.quoteBaseGrandTotal) {
+                    this.renderProperties.quoteBaseGrandTotal = baseGrandTotal;
+                    hasToReRender = true;
+                }
+
+                if (shippingMethodCode !== this.renderProperties.shippingMethod) {
+                    this.renderProperties.shippingMethod = shippingMethodCode;
+                    hasToReRender = true;
+                }
+
+                if (shippingAddress !== this.renderProperties.shippingAddress) {
+                    this.renderProperties.shippingAddress = shippingAddress;
+                    hasToReRender = true;
+                }
+
+                var strBillingAddr = JSON.stringify(quote.billingAddress());
+                if(strBillingAddr !== this.renderProperties.billingAddress ){
+                    hasToReRender = true;
+                }
+                this.renderProperties.billingAddress = strBillingAddr;
+
+                if(hasToReRender){
+                    this.loadCheckoutId();
+                }
+                
+                    
             },
 
             loadCheckoutId: function() {
@@ -67,90 +115,47 @@ define(
                     type: 'POST',
                     url: self.getcreateOrderUrl(),
                     data: params,
-                    async: false,
+                    async: true,
+                    showLoader: true,
                     success: function (response) {
-                        self.checkoutId(response.checkout_id);
-
-                        if(!self.checkoutId){
-                            self.messageContainer.clear();
-                            self.messageContainer.addErrorMessage({
-                                message: "El medio de pago seleccionado no puede utilizarse"
-                            });
-                        }
                         
+                        self.checkoutId(response.checkout_id);
+                        
+                        if(self.checkoutId()){
+                            self.renderizeEmbedForm();
+                        }
                     },
                     error: function (res) {
-                        console.error(res);
-
-                        
+                        console.error(res);                        
                     }
                 });
             },
 
-            getIframe: function() {
-                const urlParams = new URLSearchParams(window.location.search);
-                if ($('#conektaIframeContainer').length) {
-                    this.loadCheckoutId();
-                    var self = this;
-                    var checkout_id = self.checkoutId();
-                    if (checkout_id) {
-                        window.ConektaCheckoutComponents.Integration({
-                            targetIFrame: '#conektaIframeContainer',
-                            checkoutRequestId: checkout_id,
-                            publicKey: this.getPublicKey(),
-                            paymentMethods: ['Card', 'Cash', 'BankTransfer'],
-                            options: {
-                                theme: 'default'
-                            },
-                            onCreateTokenSucceeded: function (token) {
-                                console.log('onCreateTokenSucceeded');
-                                console.log(token);
-                            },
-                            onCreateTokenError: function (error) {
-                                console.log('onCreateTokenError');
-                                console.log(error);
-                            },
-                            onFinalizePayment: function (event) {
-                                self.iframOrderData(event);
-                                self.beforePlaceOrder();
-                                console.log("FinalizePayment payment");
-                            }
-                        });
-                        $('#conektaIframeContainer').find('iframe').attr('data-cy', 'the-frame');
+            renderizeEmbedForm: function(){
+                var self = this;
+                document.getElementById("conektaIframeContainer").innerHTML="";
+                window.ConektaCheckoutComponents.Integration({
+                    targetIFrame: '#conektaIframeContainer',
+                    checkoutRequestId: this.checkoutId(),
+                    publicKey: this.getPublicKey(),
+                    paymentMethods: this.getPaymenMethods(),
+                    options: {
+                        theme: 'default'
+                    },
+                    onCreateTokenSucceeded: function (token) {
+                        console.log('onCreateTokenSucceeded');
+                    },
+                    onCreateTokenError: function (error) {
+                        console.log('onCreateTokenError');
+                        console.error(error);
+                    },
+                    onFinalizePayment: function (event) {
+                        self.iframOrderData(event);
+                        self.beforePlaceOrder();
+                        console.log("FinalizePayment payment");
                     }
-                }
-                return true;
-            },
-
-            onSavedCardLaterChanged: function(newValue)
-            {
-                if(newValue){
-                    this.isSaveCardEnable(true);
-                }else{
-                    this.isSaveCardEnable(false);
-                }
-            },
-            /**
-             * @param newValue
-             */
-            onSelectedCardChanged: function(newValue)
-            {
-                if (newValue === undefined){
-                    this.paymentsShowNewCardSection('');
-                    this.isVisiblePaymentButton(false);
-                    this.selectedPaymentId('');
-                    return;
-                }
-
-                if(newValue !== 'add_new_card') {
-                    this.paymentsShowNewCardSection(true);
-                    this.selectedPaymentId(newValue);
-                    this.isVisiblePaymentButton(true);
-                } else {
-                    this.paymentsShowNewCardSection(false);
-                    this.selectedPaymentId('');
-                    this.isVisiblePaymentButton(false);
-                }
+                });
+                $('#conektaIframeContainer').find('iframe').attr('data-cy', 'the-frame');
             },
 
             getData: function () {
@@ -169,8 +174,8 @@ define(
                             'cc_exp_month': this.creditCardExpMonth(),
                             'cc_bin': number.substring(0, 6),
                             'card_token': $("#" + this.getCode() + "_card_token").val(),
-                            'saved_card': this.selectedPaymentId(),
-                            'saved_card_later': this.isSaveCardEnable(),
+                            //'saved_card': this.selectedPaymentId(),
+                            //'saved_card_later': this.isSaveCardEnable(),
                             'iframe_payment': true,
                         }
                     };
@@ -186,8 +191,8 @@ define(
                         'cc_bin': number.substring(0, 6),
                         'cc_last_4': number.substring(number.length-4, number.length),
                         'card_token': $("#" + this.getCode() + "_card_token").val(),
-                        'saved_card': this.selectedPaymentId(),
-                        'saved_card_later': this.isSaveCardEnable(),
+                        //'saved_card': this.selectedPaymentId(),
+                        //'saved_card_later': this.isSaveCardEnable(),
                         'iframe_payment': false,
                         'order_id': '',
                         'txn_id': '',
@@ -278,6 +283,10 @@ define(
                 return this.getGlobalConfig().publicKey;
             },
 
+            getPaymenMethods: function() {
+                return this.getMethodConfig().paymentMethods;
+            },
+
             getConektaLogo: function() {
                 return this.getGlobalConfig().conekta_logo;
             },
@@ -305,23 +314,7 @@ define(
             getcreateOrderUrl: function() {
                 return this.getMethodConfig().createOrderUrl;
             },
-            getSaveCardEnable: function() {
-                return this.getMethodConfig().enable_saved_card;
-            },
-
-            getSavedCards: function() {
-                return this.getMethodConfig().saved_card;
-            },
-
-            getCardList: function() {
-                return _.map(this.getSavedCards(), function(value, key) {
-                    return {
-                        'value': key,
-                        'type': value
-                    }
-                });
-            },
-
+            
             isLoggedIn: function () {
                 return customer.isLoggedIn();
             },
@@ -333,80 +326,6 @@ define(
             getMinimumAmountMonthlyInstallments: function() {
                 return this.getMethodConfig().minimum_amount_monthly_installments;
             },
-
-            getMonthlyInstallments: function() {
-                var months = [];
-                var i = 0;
-                for (i in this.getMethodConfig().monthly_installments){
-                    /*switch (this.getMethodConfig().monthly_installments[i]){
-                        case "6": case "9": case "12":
-                            if (this.getTotal() < 400) {
-                                continue;
-                            }
-                            break;
-                    }*/
-
-                    months.push(this.getMethodConfig().monthly_installments[i]);
-                }
-                return months.sort(function(a,b){ return a - b; });
-            },
-
-            validateMonthlyInstallments: function() {
-                if(this.activeMonthlyInstallments() && isNaN(installments) == false) {
-                    var totalOrder = this.getTotal();
-                    if (totalOrder >= this.getMinimumAmountMonthlyInstallments()) {
-                        var installments = parseInt($('#' + this.getCode() + '_monthly_installments').val());
-                        if (installments == 1) {
-                            return true;
-                        } else {
-
-                            return (installments * 100 < totalOrder);
-                        }
-                    } else {
-
-                        return false;
-                    }
-                }
-
-                return true;
-            },
-
-            getTotal: function(){
-                return parseFloat(this.getMethodConfig().total);
-            },
-
-            getCustomerName: function(){
-                return $("#" + this.getCode() + "_card_holder_name").val();
-            },
-
-            assembleAddress: function() {
-                var address = {};
-                for (var i in window.customerData.addresses) {
-                    if (window.customerData.addresses[i].default_billing) {
-                        var addressData = window.customerData.addresses[i];
-
-                        if(typeof addressData.street[0] !== "undefined"){
-                            if (addressData.street[0] !== null && addressData.street[0] !== ""){
-                                address.street1 = addressData.street[0];
-                            }
-                        }
-
-                        if(typeof addressData.street[1] !== "undefined"){
-                            if (addressData.street[1] !== null && addressData.street[1] !== ""){
-                                address.street2 = addressData.street[0];
-                            }
-                        }
-
-                        address.city = addressData.city;
-                        address.state = addressData.region.region;
-                        address.zip = addressData.postcode;
-                        address.country = addressData.country_id;
-                    }
-                }
-
-                return address;
-            }
-
         });
     }
 );

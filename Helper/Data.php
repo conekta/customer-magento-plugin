@@ -494,4 +494,39 @@ class Data extends AbstractHelper
 
         return $customerName;
     }
+
+    public function getDiscountLines()
+    {
+        $quote = $this->checkoutSession->getQuote();
+        $totalDiscount = $quote->getSubtotal() - $quote->getSubtotalWithDiscount();
+
+        $discountLines = [];
+        if (!empty($totalDiscount)) {
+            $totalDiscount = abs((int)(round($totalDiscount, 2) * 100));
+            $discountLine["code"] = "Discounts";
+            $discountLine["type"] = "coupon";
+            $discountLine["amount"] = $totalDiscount;
+            $discountLines[] = $discountLine;
+        }
+
+        return $discountLines;
+    }
+
+    public function getTaxLines($items)
+    {
+        $taxLines = [];
+        $ctr_amount = 0;
+        foreach ($items as $item) {
+            if ($item->getProductType() != 'bundle' && $item->getTaxAmount() > 0) {
+                $ctr_amount = $ctr_amount + (int)($item->getTaxAmount() * 100);
+            }
+        }
+
+        $taxLines[] = [
+            'description' => 'Tax',
+            'amount' => $ctr_amount
+        ];
+
+        return $taxLines;
+    }
 }

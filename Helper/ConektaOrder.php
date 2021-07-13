@@ -177,10 +177,14 @@ class ConektaOrder extends AbstractHelper
 
         $validOrderWithCheckout = [];
         $validOrderWithCheckout['line_items'] = $this->_conektaHelper->getLineItems($orderItems);
+        $validOrderWithCheckout['discount_lines'] = $this->_conektaHelper->getDiscountLines();
+        $validOrderWithCheckout['tax_lines'] = $this->_conektaHelper->getTaxLines($orderItems);
         $validOrderWithCheckout['shipping_lines'] = $this->_conektaHelper->getShippingLines(
             $this->getQuote()->getId()
         );
-        $needsShippingContact = !$this->getQuote()->getIsVirtual();
+
+        //always needs shipping until conekta api solve issue
+        $needsShippingContact = !$this->getQuote()->getIsVirtual() || true;
         if ($needsShippingContact) {
             $validOrderWithCheckout['shipping_contact'] = $this->_conektaHelper->getShippingContact(
                 $this->getQuote()->getId()
@@ -195,7 +199,7 @@ class ConektaOrder extends AbstractHelper
         $saveCardEnabled =  $this->_conektaHelper->isSaveCardEnabled();
         $installments = $this->getMonthlyInstallments();
         $validOrderWithCheckout['checkout']    = [
-            'allowed_payment_methods' => $this->getAllowedPaymentMethods(),
+            'allowed_payment_methods'      => $this->getAllowedPaymentMethods(),
             'monthly_installments_enabled' => $installments['active_installments'] ? true : false,
             'monthly_installments_options' => $installments['monthly_installments'],
             'on_demand_enabled'            => $saveCardEnabled,
@@ -206,6 +210,7 @@ class ConektaOrder extends AbstractHelper
         $validOrderWithCheckout['currency']= self::CURRENCY_CODE;
         $validOrderWithCheckout['metadata'] = $this->getMetadataOrder($orderItems);
         
+        /*
         $checkoutId = '';
         try {
             $this->conektaLogger->info('Creating Order. Parameters: ', $validOrderWithCheckout);
@@ -221,7 +226,8 @@ class ConektaOrder extends AbstractHelper
         } catch (\Conekta\Handler $error) {
             $this->conektaLogger->error($error->getMessage());
         }
-        return $checkoutId;
+        */
+        return $validOrderWithCheckout;
     }
 
     /**

@@ -8,7 +8,7 @@ use Magento\Payment\Gateway\Http\ClientInterface;
 use Magento\Payment\Gateway\Http\TransferInterface;
 use Magento\Payment\Model\Method\Logger;
 use Conekta\Order as ConektaOrder;
-use Conekta\Payments\Model\Api\Data\ConektaSalesOrderInterface;
+use Conekta\Payments\Api\Data\ConektaSalesOrderInterface;
 use Conekta\Payments\Model\ConektaSalesOrderFactory;
 
 class TransactionAuthorize implements ClientInterface

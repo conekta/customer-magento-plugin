@@ -1,7 +1,7 @@
 <?php
 namespace Conekta\Payments\Model;
 
-use Conekta\Payments\Model\Api\Data\ConektaSalesOrderInterface;
+use Conekta\Payments\Api\Data\ConektaSalesOrderInterface;
 use Magento\Framework\Model\AbstractModel;
 use Conekta\Payments\Model\ResourceModel\ConektaSalesOrder as ResourceConektaSalesOrder;
 
