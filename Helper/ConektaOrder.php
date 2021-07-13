@@ -178,8 +178,8 @@ class ConektaOrder extends AbstractHelper
         $validOrderWithCheckout = [];
         $validOrderWithCheckout['line_items'] = $this->_conektaHelper->getLineItems($orderItems);
         $validOrderWithCheckout['discount_lines'] = $this->_conektaHelper->getDiscountLines();
-        $validOrderWithCheckout['tax_lines'] = $this->_conektaHelper->getTaxLines($orderItems);        
-	    $validOrderWithCheckout['shipping_lines'] = $this->_conektaHelper->getShippingLines(
+        $validOrderWithCheckout['tax_lines'] = $this->_conektaHelper->getTaxLines($orderItems);
+        $validOrderWithCheckout['shipping_lines'] = $this->_conektaHelper->getShippingLines(
             $this->getQuote()->getId()
         );
 

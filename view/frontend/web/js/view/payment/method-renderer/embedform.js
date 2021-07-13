@@ -95,7 +95,6 @@ define(
                 this.renderProperties.billingAddress = strBillingAddr;
 
                 if(hasToReRender){
-                    console.log('Re-render triggered');
                     this.loadCheckoutId();
                 }
                 
@@ -133,28 +132,6 @@ define(
             },
 
             renderizeEmbedForm: function(){
-                console.log('integration', {
-                    targetIFrame: '#conektaIframeContainer',
-                    checkoutRequestId: this.checkoutId(),
-                    publicKey: this.getPublicKey(),
-                    paymentMethods: this.getPaymenMethods(),
-                    options: {
-                        theme: 'default'
-                    },
-                    onCreateTokenSucceeded: function (token) {
-                        console.log('onCreateTokenSucceeded');
-                    },
-                    onCreateTokenError: function (error) {
-                        console.log('onCreateTokenError');
-                        console.error(error);
-                    },
-                    onFinalizePayment: function (event) {
-                        self.iframOrderData(event);
-                        self.beforePlaceOrder();
-                        console.log("FinalizePayment payment");
-                    }
-                });
-
                 var self = this;
                 document.getElementById("conektaIframeContainer").innerHTML="";
                 window.ConektaCheckoutComponents.Integration({
