@@ -21,7 +21,7 @@ define(
                     shippingMethodCode: '',
                     quoteBaseGrandTotal: '',
                     shippingAddress: '',
-                    billingAddress: '',
+                    billingAddress: ''
                 },
             },
             
@@ -33,36 +33,27 @@ define(
 
                 this._super()
                     .observe([
-                        'ChangeCard',
-                        'SavedCardLater',
-                        'isSaveCardEnable',
-                        'paymentsShowNewCardSection',
                         'checkoutId',
-                        'selectedPaymentId',
                         'isIframeLoaded',
                         'isVisiblePaymentButton',
                         'iframOrderData'
                 ]);
                 this.iframOrderData('');
                 this.checkoutId('');
-                if  (this.getCardList().length === 0){
-                    this.paymentsShowNewCardSection(false);
-                }
                 
                 var baseGrandTotal = quote.totals._latestValue.base_grand_total;
                 var shippingMethodCode = '';
                 if(quote.shippingMethod._latestValue){
                     shippingMethodCode = quote.shippingMethod._latestValue.method_code;
                 }
-                var shippingAddress = quote.shippingAddress._latestValue?.getKey();
-                var billingAddress = quote.billingAddress._latestValue?.getKey();
+                var shippingAddress = quote.shippingAddress._latestValue?.getCacheKey();
+                var billingAddress = JSON.stringify(quote.billingAddress());
                 
                 this.renderProperties.quoteBaseGrandTotal = baseGrandTotal;
                 this.renderProperties.shippingMethod = shippingMethodCode;
                 this.renderProperties.shippingAddress = shippingAddress;
                 this.renderProperties.billingAddress = billingAddress;
 
-                
                 quote.totals.subscribe(this.reRender, this);
                 return this;
             },
@@ -75,15 +66,11 @@ define(
             reRender: function(total){
                 
                 var baseGrandTotal = quote.totals._latestValue.base_grand_total;
-                
+                var shippingAddress = quote.shippingAddress._latestValue?.getCacheKey();
                 var shippingMethodCode = '';
                 if(quote.shippingMethod._latestValue){
                     shippingMethodCode = quote.shippingMethod._latestValue.method_code;
                 }
-                
-                var shippingAddress = quote.shippingAddress._latestValue?.getKey();
-                var billingAddress = quote.billingAddress._latestValue?.getKey();
-                
                 
                 var hasToReRender = false;
                 if (baseGrandTotal !== this.renderProperties.quoteBaseGrandTotal) {
@@ -101,18 +88,20 @@ define(
                     hasToReRender = true;
                 }
 
-                if (billingAddress !== this.renderProperties.billingAddress) {
-                    this.renderProperties.billingAddress = billingAddress;
+                var strBillingAddr = JSON.stringify(quote.billingAddress());
+                if(strBillingAddr !== this.renderProperties.billingAddress ){
                     hasToReRender = true;
                 }
+                this.renderProperties.billingAddress = strBillingAddr;
 
-                if(hasToReRender && this.checkoutId()){
+                if(hasToReRender){
                     console.log('Re-render triggered');
-                    this.getIframe();
+                    this.loadCheckoutId();
                 }
                 
                     
             },
+
             loadCheckoutId: function() {
                 var self = this;
                 var guest_email = '';
@@ -127,17 +116,15 @@ define(
                     type: 'POST',
                     url: self.getcreateOrderUrl(),
                     data: params,
-                    async: false,
+                    async: true,
+                    showLoader: true,
                     success: function (response) {
-                        self.checkoutId(response.checkout_id);
-
-                        if(!self.checkoutId){
-                            self.messageContainer.clear();
-                            self.messageContainer.addErrorMessage({
-                                message: "El medio de pago seleccionado no puede utilizarse"
-                            });
-                        }
                         
+                        self.checkoutId(response.checkout_id);
+                        
+                        if(self.checkoutId()){
+                            self.renderizeEmbedForm();
+                        }
                     },
                     error: function (res) {
                         console.error(res);                        
@@ -145,40 +132,53 @@ define(
                 });
             },
 
-            getIframe: function() {
-                console.log('getIframe')
-                const urlParams = new URLSearchParams(window.location.search);
-                if ($('#conektaIframeContainer').length) {
-                    this.loadCheckoutId();
-                    var self = this;
-                    var checkout_id = self.checkoutId();
-                    if (checkout_id) {
-                        document.getElementById("conektaIframeContainer").innerHTML="";
-                        window.ConektaCheckoutComponents.Integration({
-                            targetIFrame: '#conektaIframeContainer',
-                            checkoutRequestId: checkout_id,
-                            publicKey: this.getPublicKey(),
-                            paymentMethods: this.getPaymenMethods(),
-                            options: {
-                                theme: 'default'
-                            },
-                            onCreateTokenSucceeded: function (token) {
-                                console.log('onCreateTokenSucceeded');
-                            },
-                            onCreateTokenError: function (error) {
-                                console.log('onCreateTokenError');
-                                console.error(error);
-                            },
-                            onFinalizePayment: function (event) {
-                                self.iframOrderData(event);
-                                self.beforePlaceOrder();
-                                console.log("FinalizePayment payment");
-                            }
-                        });
-                        $('#conektaIframeContainer').find('iframe').attr('data-cy', 'the-frame');
+            renderizeEmbedForm: function(){
+                console.log('integration', {
+                    targetIFrame: '#conektaIframeContainer',
+                    checkoutRequestId: this.checkoutId(),
+                    publicKey: this.getPublicKey(),
+                    paymentMethods: this.getPaymenMethods(),
+                    options: {
+                        theme: 'default'
+                    },
+                    onCreateTokenSucceeded: function (token) {
+                        console.log('onCreateTokenSucceeded');
+                    },
+                    onCreateTokenError: function (error) {
+                        console.log('onCreateTokenError');
+                        console.error(error);
+                    },
+                    onFinalizePayment: function (event) {
+                        self.iframOrderData(event);
+                        self.beforePlaceOrder();
+                        console.log("FinalizePayment payment");
                     }
-                }
-                return true;
+                });
+
+                var self = this;
+                document.getElementById("conektaIframeContainer").innerHTML="";
+                window.ConektaCheckoutComponents.Integration({
+                    targetIFrame: '#conektaIframeContainer',
+                    checkoutRequestId: this.checkoutId(),
+                    publicKey: this.getPublicKey(),
+                    paymentMethods: this.getPaymenMethods(),
+                    options: {
+                        theme: 'default'
+                    },
+                    onCreateTokenSucceeded: function (token) {
+                        console.log('onCreateTokenSucceeded');
+                    },
+                    onCreateTokenError: function (error) {
+                        console.log('onCreateTokenError');
+                        console.error(error);
+                    },
+                    onFinalizePayment: function (event) {
+                        self.iframOrderData(event);
+                        self.beforePlaceOrder();
+                        console.log("FinalizePayment payment");
+                    }
+                });
+                $('#conektaIframeContainer').find('iframe').attr('data-cy', 'the-frame');
             },
 
             getData: function () {
@@ -197,8 +197,8 @@ define(
                             'cc_exp_month': this.creditCardExpMonth(),
                             'cc_bin': number.substring(0, 6),
                             'card_token': $("#" + this.getCode() + "_card_token").val(),
-                            'saved_card': this.selectedPaymentId(),
-                            'saved_card_later': this.isSaveCardEnable(),
+                            //'saved_card': this.selectedPaymentId(),
+                            //'saved_card_later': this.isSaveCardEnable(),
                             'iframe_payment': true,
                         }
                     };
@@ -214,8 +214,8 @@ define(
                         'cc_bin': number.substring(0, 6),
                         'cc_last_4': number.substring(number.length-4, number.length),
                         'card_token': $("#" + this.getCode() + "_card_token").val(),
-                        'saved_card': this.selectedPaymentId(),
-                        'saved_card_later': this.isSaveCardEnable(),
+                        //'saved_card': this.selectedPaymentId(),
+                        //'saved_card_later': this.isSaveCardEnable(),
                         'iframe_payment': false,
                         'order_id': '',
                         'txn_id': '',

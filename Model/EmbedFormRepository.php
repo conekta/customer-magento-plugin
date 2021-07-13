@@ -52,7 +52,7 @@ class EmbedFormRepository implements EmbedFormRepositoryInterface
         if (empty($conektaQuote) ||
             (!empty($conektaOrder) && !empty($conektaOrder->payment_status))
         ) {
-            $this->_conektaLogger->info('Creates conekta order');
+            $this->_conektaLogger->info('Creates conekta order', $orderParams);
             //Creates checkout order
             $conektaOrder = $this->conektaOrderApi->create($orderParams);
             
@@ -62,7 +62,7 @@ class EmbedFormRepository implements EmbedFormRepositoryInterface
             $conektaQuote->setConektaOrderId($conektaOrder['id']);
             $conektaQuoteRepo->save($conektaQuote);
         } else {
-            $this->_conektaLogger->info('Updates conekta order');
+            $this->_conektaLogger->info('Updates conekta order', $orderParams);
             //If map between conekta order and quote exist, then just updated conekta order
             $conektaOrder = $this->conektaOrderApi->find($conektaQuote->getConektaOrderId());
             
