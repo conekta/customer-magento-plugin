@@ -36,10 +36,12 @@ define(
                         'checkoutId',
                         'isIframeLoaded',
                         'isVisiblePaymentButton',
-                        'iframOrderData'
+                        'iframOrderData',
+                        'conektaError'
                 ]);
                 this.iframOrderData('');
                 this.checkoutId('');
+                this.conektaError(null);
                 
                 var baseGrandTotal = quote.totals._latestValue.base_grand_total;
                 var shippingAddress = quote.shippingAddress._latestValue?.getCacheKey();
@@ -118,15 +120,16 @@ define(
                     async: true,
                     showLoader: true,
                     success: function (response) {
-                        
+                        self.conektaError(null);
                         self.checkoutId(response.checkout_id);
                         
                         if(self.checkoutId()){
                             self.renderizeEmbedForm();
                         }
                     },
-                    error: function (res) {
-                        console.error(res);                        
+                    error: function (xhr, status, error) {
+                        console.error(status);
+                        self.conektaError(xhr.responseJSON.error_message);
                     }
                 });
             },
