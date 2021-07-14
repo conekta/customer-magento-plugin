@@ -42,12 +42,12 @@ define(
                 this.checkoutId('');
                 
                 var baseGrandTotal = quote.totals._latestValue.base_grand_total;
+                var shippingAddress = quote.shippingAddress._latestValue?.getCacheKey();
+                var billingAddress = JSON.stringify(quote.billingAddress());
                 var shippingMethodCode = '';
                 if(quote.shippingMethod._latestValue){
                     shippingMethodCode = quote.shippingMethod._latestValue.method_code;
                 }
-                var shippingAddress = quote.shippingAddress._latestValue?.getCacheKey();
-                var billingAddress = JSON.stringify(quote.billingAddress());
                 
                 this.renderProperties.quoteBaseGrandTotal = baseGrandTotal;
                 this.renderProperties.shippingMethod = shippingMethodCode;

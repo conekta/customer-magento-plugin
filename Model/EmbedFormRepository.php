@@ -36,22 +36,30 @@ class EmbedFormRepository implements EmbedFormRepositoryInterface
 
         $conektaQuote = null;
         $conektaOrder = null;
+        $hasToCreateNewOrder = false;
         try {
             $conektaQuote = $conektaQuoteRepo->getByid($quoteId);
             $conektaOrder = $this->conektaOrderApi->find($conektaQuote->getConektaOrderId());
+
+            if (!empty($conektaOrder) &&
+                (!empty($conektaOrder->payment_status) || time() >= $conektaOrder->checkout->expires_at)
+            ) {
+                $hasToCreateNewOrder = true;
+            }
         } catch (NoSuchEntityException $e) {
             $conektaQuote = null;
             $conektaOrder = null;
+            $hasToCreateNewOrder = true;
         }
         
         /**
          * Creates new conekta order-checkout if:
          *   1- Not exist row in map table conekta_quote
-         *   2- Exist row in map table and conekta order has payment_status
+         *   2- Exist row in map table and:
+         *      2.1- conekta order has payment_status OR
+         *      2.2- conekta order checkout has expired
          */
-        if (empty($conektaQuote) ||
-            (!empty($conektaOrder) && !empty($conektaOrder->payment_status))
-        ) {
+        if ($hasToCreateNewOrder) {
             $this->_conektaLogger->info('Creates conekta order', $orderParams);
             //Creates checkout order
             $conektaOrder = $this->conektaOrderApi->create($orderParams);
