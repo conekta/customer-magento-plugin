@@ -87,6 +87,11 @@ class Data extends AbstractHelper
         $this->_storeManager = $storeManager;
     }
 
+    public function getCurrencyCode()
+    {
+        return $this->_storeManager->getStore()->getCurrentCurrency()->getCode();
+    }
+
     /**
      * @param $area
      * @param $field
@@ -379,8 +384,16 @@ class Data extends AbstractHelper
                     $price = $item->getPrice();
                     $qty= (int)$item->{$quantityMethod}();
                     if (!empty($item->getParentItem())) {
-                        $price = $item->getParentItem()->getPrice();
-                        $qty = (int)$item->getParentItem()->{$quantityMethod}();
+                        $parent = $item->getParentItem();
+                        
+                        if ($parent->getProductType() == 'configurable') {
+                            $price = $item->getParentItem()->getPrice();
+                            $qty = (int)$item->getParentItem()->{$quantityMethod}();
+                        
+                        } elseif ($parent->getProductType() == 'bundle' && $isQuoteItem) {
+                            //If it is a quote item, then qty of item has not been calculate yet
+                            $qty = $qty * (int)$item->getParentItem()->{$quantityMethod}();
+                        }
                     }
 
                     $request[] = [

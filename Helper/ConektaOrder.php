@@ -115,9 +115,9 @@ class ConektaOrder extends AbstractHelper
      * @throws \Magento\Framework\Exception\NoSuchEntityException
      * @throws \Magento\Framework\Exception\State\InputMismatchException
      */
-    public function createOrder($guestEmail)
+    public function generateOrderParams($guestEmail)
     {
-        $this->conektaLogger->info('Create Blank Order :: createOrder');
+        $this->conektaLogger->info('ConektaOrder.generateOrderParams init');
 
         \Conekta\Conekta::setApiKey($this->_conektaHelper->getPrivateKey());
         \Conekta\Conekta::setApiVersion("2.0.0");
@@ -129,7 +129,7 @@ class ConektaOrder extends AbstractHelper
             try {
                 $customerApi = $this->conektaCustomer->find($conektaCustomerId);
             } catch (Exception $error) {
-                $this->conektaLogger->error('Create Order. Find Customer: ' . $error->getMessage());
+                $this->conektaLogger->info('Create Order. Find Customer: ' . $error->getMessage());
                 $conektaCustomerId = '';
             }
 
@@ -141,13 +141,12 @@ class ConektaOrder extends AbstractHelper
                 //name without numbers
                 $customerRequest['name'] = preg_replace('/[0-9]+/', '', $customer->getName());
                 $customerRequest['email'] = $customer->getEmail();
-                //$customerRequest['phone'] = $billingAddress->getTelephone();
             } else {
                 //name without numbers
                 $customerRequest['name'] = preg_replace('/[0-9]+/', '', $billingAddress->getName());
                 $customerRequest['email'] = $guestEmail;
-                //$customerRequest['phone'] = $billingAddress->getTelephone();
             }
+            $customerRequest['phone'] = $billingAddress->getTelephone();
 
             if (empty($conektaCustomerId)) {
                 try {
@@ -207,26 +206,9 @@ class ConektaOrder extends AbstractHelper
             'expires_at'                   => $this->_conektaHelper->getExpiredAt(),
             'needs_shipping_contact'       => $needsShippingContact
         ];
-        $validOrderWithCheckout['currency']= self::CURRENCY_CODE;
+        $validOrderWithCheckout['currency']= $this->_conektaHelper->getCurrencyCode();
         $validOrderWithCheckout['metadata'] = $this->getMetadataOrder($orderItems);
         
-        /*
-        $checkoutId = '';
-        try {
-            $this->conektaLogger->info('Creating Order. Parameters: ', $validOrderWithCheckout);
-            $order = $this->conektaOrderApi->create($validOrderWithCheckout);
-            $this->conektaLogger->info('The Order has been created');
-            $order = (array) $order;
-            $checkoutId =  $order['checkout']['id'];
-            $this->conektaSession->setConektaCheckoutId($checkoutId);
-        } catch (\Conekta\ProcessingError $error) {
-            $this->conektaLogger->error($error->getMessage());
-        } catch (\Conekta\ParameterValidationError $error) {
-            $this->conektaLogger->error($error->getMessage());
-        } catch (\Conekta\Handler $error) {
-            $this->conektaLogger->error($error->getMessage());
-        }
-        */
         return $validOrderWithCheckout;
     }
 
