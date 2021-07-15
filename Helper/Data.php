@@ -87,6 +87,11 @@ class Data extends AbstractHelper
         $this->_storeManager = $storeManager;
     }
 
+    public function getCurrencyCode()
+    {
+        return $this->_storeManager->getStore()->getCurrentCurrency()->getCode();
+    }
+
     /**
      * @param $area
      * @param $field

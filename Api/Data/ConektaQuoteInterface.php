@@ -5,6 +5,7 @@ interface ConektaQuoteInterface
 {
     public const QUOTE_ID = 'quote_id';
     public const CONEKTA_ORDER_ID = 'conekta_order_id';
+    public const MINIMUM_AMOUNT_PER_QUOTE = 20;
 
     /**
      * @return int

@@ -3,6 +3,7 @@
 namespace Conekta\Payments\Controller\Index;
 
 use Conekta\Payments\Api\EmbedFormRepositoryInterface;
+use Conekta\Payments\Exception\ConektaException;
 use Exception;
 use Magento\Framework\App\Action\HttpPostActionInterface;
 use Magento\Checkout\Model\Session;
@@ -78,7 +79,7 @@ class CreateOrder extends \Magento\Framework\App\Action\Action implements HttpPo
                 $guestEmail = $data['guestEmail'];
                 
                 //generate order params
-                $orderParams = $this->conektaOrderHelper->createOrder($guestEmail);
+                $orderParams = $this->conektaOrderHelper->generateOrderParams($guestEmail);
 
                 //genrates checkout form
                 $order = (array)$this->embedFormRepository->generate(
@@ -89,8 +90,13 @@ class CreateOrder extends \Magento\Framework\App\Action\Action implements HttpPo
                 $response['checkout_id'] = $order['checkout']['id'];
             } catch (\Exception $e) {
                 $this->logger->critical($e);
+                $errorMessage = 'Ha ocurrido un error inesperado. Notifique al dueño de la tienda.';
+                if ($e instanceof ConektaException) {
+                    $errorMessage = $e->getMessage();
+                }
+
                 $resultJson->setHttpResponseCode(\Magento\Framework\Webapi\Exception::HTTP_BAD_REQUEST);
-                $response['error_message'] = $e->getMessage();
+                $response['error_message'] = $errorMessage;
             }
         }
         
