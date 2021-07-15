@@ -390,7 +390,8 @@ class Data extends AbstractHelper
                             $price = $item->getParentItem()->getPrice();
                             $qty = (int)$item->getParentItem()->{$quantityMethod}();
                         
-                        } elseif ($parent->getProductType() == 'bundle') {
+                        } elseif ($parent->getProductType() == 'bundle' && $isQuoteItem) {
+                            //If it is a quote item, then qty of item has not been calculate yet
                             $qty = $qty * (int)$item->getParentItem()->{$quantityMethod}();
                         }
                     }
