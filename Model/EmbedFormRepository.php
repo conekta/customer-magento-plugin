@@ -32,6 +32,11 @@ class EmbedFormRepository implements EmbedFormRepositoryInterface
         $this->conektaOrderApi = $conektaOrderApi;
     }
 
+    /**
+     * @param array $orderParams
+     * @return void
+     * @throws ConektaException
+     */
     private function validateOrderParameters($orderParameters)
     {
         //Currency
@@ -55,6 +60,12 @@ class EmbedFormRepository implements EmbedFormRepositoryInterface
         }
     }
 
+    /**
+     * @param int $quoteId
+     * @param array $orderParams
+     * @return \Conekta\Order
+     * @throws ConektaException
+     */
     public function generate($quoteId, $orderParams)
     {
 
