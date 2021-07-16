@@ -152,10 +152,10 @@ define(
                         console.log('onCreateTokenError');
                         console.error(error);
                     },
-                    onFinalizePayment: function (event) {
+                    onFinalizePayment: function (event) {console.log('event',event);
                         self.iframOrderData(event);
                         self.beforePlaceOrder();
-                        console.log("FinalizePayment payment");
+                        //console.log("FinalizePayment payment");
                     }
                 });
                 $('#conektaIframeContainer').find('iframe').attr('data-cy', 'the-frame');
@@ -171,15 +171,16 @@ define(
                             'payment_method': params.charge.payment_method.type,
                             'cc_type': params.charge.payment_method.brand,
                             'cc_last_4': params.charge.payment_method.last4,
+                            'reference': params.reference,
                             'order_id': params.charge.order_id,
                             'txn_id': params.charge.id,
-                            'cc_exp_year': this.creditCardExpYear(),
-                            'cc_exp_month': this.creditCardExpMonth(),
-                            'cc_bin': number.substring(0, 6),
                             'card_token': $("#" + this.getCode() + "_card_token").val(),
+                            'iframe_payment': true,
+                            //'cc_exp_year': this.creditCardExpYear(),
+                            //'cc_exp_month': this.creditCardExpMonth(),
+                            //'cc_bin': number.substring(0, 6),
                             //'saved_card': this.selectedPaymentId(),
                             //'saved_card_later': this.isSaveCardEnable(),
-                            'iframe_payment': true,
                         }
                     };
                     return data;
@@ -189,16 +190,17 @@ define(
                     'additional_data': {
                         'payment_method': '',
                         'cc_type': this.creditCardType(),
-                        'cc_exp_year': this.creditCardExpYear(),
-                        'cc_exp_month': this.creditCardExpMonth(),
-                        'cc_bin': number.substring(0, 6),
                         'cc_last_4': number.substring(number.length-4, number.length),
                         'card_token': $("#" + this.getCode() + "_card_token").val(),
-                        //'saved_card': this.selectedPaymentId(),
-                        //'saved_card_later': this.isSaveCardEnable(),
+                        'reference': '',                        
                         'iframe_payment': false,
                         'order_id': '',
                         'txn_id': '',
+                        //'cc_exp_year': this.creditCardExpYear(),
+                        //'cc_exp_month': this.creditCardExpMonth(),
+                        //'cc_bin': number.substring(0, 6),
+                        //'saved_card': this.selectedPaymentId(),
+                        //'saved_card_later': this.isSaveCardEnable(),
                     }
                 };
 
@@ -215,43 +217,6 @@ define(
                     self.placeOrder();
                     return;
                 }
-                if (this.paymentsShowNewCardSection() === true) {
-                    self.placeOrder();
-                }
-                var $form = $('#' + this.getCode() + '-form');
-                if($form.validation() && $form.validation('isValid')) {
-                    self.messageContainer.clear();
-
-                    if (!this.validateMonthlyInstallments()) {
-                        self.messageContainer.addErrorMessage({
-                            message: "The amount required for monthly installments is not valid."
-                        });
-                    }
-
-                    Conekta.setPublishableKey(this.getPublicKey());
-
-                    var tokenParams = {
-                        "card": {
-                            "number": this.creditCardNumber(),
-                            "name": this.getCustomerName(),
-                            "exp_year": this.creditCardExpYear().replace(/ /g, ''),
-                            "exp_month": this.creditCardExpMonth(),
-                            "cvc": this.creditCardVerificationNumber(),
-                            "address": this.assembleAddress()
-                        }
-                    };
-
-                    Conekta.token.create(tokenParams, function(token){
-                        $("#" + self.getCode() + "_card_token").val(token.id);
-                        self.placeOrder();
-                    }, function(error){
-                        self.messageContainer.addErrorMessage({
-                            message: error.message
-                        });
-                    });
-                } else {
-                    return $form.validation() && $form.validation('isValid');
-                }
             },
 
             validate: function() {
@@ -259,9 +224,6 @@ define(
                     return true;
                 }
 
-                if (this.paymentsShowNewCardSection() === true) {
-                    return true;
-                }
                 var $form = $('#' + this.getCode() + '-form');
                 return $form.validation() && $form.validation('isValid');
             },
@@ -292,26 +254,6 @@ define(
 
             getConektaLogo: function() {
                 return this.getGlobalConfig().conekta_logo;
-            },
-
-            getCcYears: function () {
-                return this.getMethodConfig().years;
-            },
-
-            getCcMonths: function () {
-                return this.getMethodConfig().months;
-            },
-
-            hasVerification: function () {
-                return this.getMethodConfig().hasVerification;
-            },
-
-            getCvvImageUrl: function () {
-                return this.getMethodConfig().cvvImageUrl;
-            },
-
-            getCcAvailableTypes: function() {
-                return this.getMethodConfig().availableTypes;
             },
 
             getcreateOrderUrl: function() {
