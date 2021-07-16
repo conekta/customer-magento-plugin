@@ -21,6 +21,7 @@ class DataAssignObserver extends AbstractDataAssignObserver
     const IFRAME_PAYMENT = 'iframe_payment';
     const ORDER_ID = 'order_id';
     const TXN_ID = 'txn_id';
+    const REFERENCE = 'reference';
 
     protected $additionalInformationList = [
         self::PAYMENT_METHOD,
@@ -35,7 +36,8 @@ class DataAssignObserver extends AbstractDataAssignObserver
         self::SAVED_CARD_LATER,
         self::IFRAME_PAYMENT,
         self::ORDER_ID,
-        self::TXN_ID
+        self::TXN_ID,
+        self::REFERENCE,
     ];
 
     protected $_checkoutSession;

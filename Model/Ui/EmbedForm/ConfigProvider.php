@@ -3,12 +3,8 @@ namespace Conekta\Payments\Model\Ui\EmbedForm;
 
 use Conekta\Payments\Helper\Data as ConektaHelper;
 use Conekta\Payments\Logger\Logger as ConektaLogger;
-use Conekta\Payments\Model\Config;
 use Magento\Checkout\Model\ConfigProviderInterface;
 use Magento\Checkout\Model\Session;
-use Magento\Customer\Model\Session as CustomerSession;
-use Magento\Framework\View\Asset\Repository;
-use Magento\Payment\Model\CcConfig;
 use Magento\Framework\UrlInterface;
 
 class ConfigProvider implements ConfigProviderInterface
@@ -17,18 +13,13 @@ class ConfigProvider implements ConfigProviderInterface
      * Payment method code
      */
     const CODE = 'conekta_ef';
+    const PAYMENT_METHOD_CREDIT_CARD = 'credit';
+    const PAYMENT_METHOD_OXXO = 'oxxo';
+    const PAYMENT_METHOD_SPEI = 'spei';
     /**
      * Create Order Controller Path
      */
     const CREATEORDER_URL = 'conekta/index/createorder';
-    /**
-     * @var Repository
-     */
-    protected $_assetRepository;
-    /**
-     * @var CcConfig
-     */
-    protected $_ccCongig;
     /**
      * @var ConektaHelper
      */
@@ -37,14 +28,6 @@ class ConfigProvider implements ConfigProviderInterface
      * @var Session
      */
     protected $_checkoutSession;
-    /**
-     * @var CustomerSession
-     */
-    protected $customerSession;
-    /**
-     * @var Config
-     */
-    protected $config;
     /**
      * @var ConektaLogger
      */
@@ -56,31 +39,19 @@ class ConfigProvider implements ConfigProviderInterface
 
     /**
      * ConfigProvider constructor.
-     * @param Repository $assetRepository
-     * @param CcConfig $ccCongig
      * @param ConektaHelper $conektaHelper
      * @param Session $checkoutSession
-     * @param CustomerSession $customerSession
-     * @param Config $config
      * @param ConektaLogger $conektaLogger
      * @param UrlInterface $url
      */
     public function __construct(
-        Repository $assetRepository,
-        CcConfig $ccCongig,
         ConektaHelper $conektaHelper,
         Session $checkoutSession,
-        CustomerSession $customerSession,
-        Config $config,
         ConektaLogger $conektaLogger,
         UrlInterface $url
     ) {
-        $this->_assetRepository = $assetRepository;
-        $this->_ccCongig = $ccCongig;
         $this->_conektaHelper = $conektaHelper;
         $this->_checkoutSession = $checkoutSession;
-        $this->customerSession = $customerSession;
-        $this->config = $config;
         $this->conektaLogger = $conektaLogger;
         $this->url = $url;
     }
@@ -90,7 +61,6 @@ class ConfigProvider implements ConfigProviderInterface
      */
     public function getConfig()
     {
-        $savedCardEnable = $this->getEnableSaveCardConfig() ? true : false;
         return [
             'payment' => [
                 self::CODE => [
@@ -99,8 +69,6 @@ class ConfigProvider implements ConfigProviderInterface
                     'active_monthly_installments' => $this->getMonthlyInstallments(),
                     'minimum_amount_monthly_installments' => $this->getMinimumAmountMonthlyInstallments(),
                     'total' => $this->getQuote()->getGrandTotal(),
-                    //'enable_saved_card' => $savedCardEnable,
-                    //'saved_card' => $savedCardEnable ? $this->getSavedCard() : [],
                     'createOrderUrl' => $this->url->getUrl(self::CREATEORDER_URL),
                     'paymentMethods' => $this->getPaymentMethodsActive(),
                 ]

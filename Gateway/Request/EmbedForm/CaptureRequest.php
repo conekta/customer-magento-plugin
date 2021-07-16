@@ -4,6 +4,7 @@ namespace Conekta\Payments\Gateway\Request\EmbedForm;
 use Conekta\Customer as ConektaCustomer;
 use Conekta\Payments\Helper\Data as ConektaHelper;
 use Conekta\Payments\Logger\Logger as ConektaLogger;
+use Conekta\Payments\Model\Ui\EmbedForm\ConfigProvider;
 use Magento\Customer\Api\CustomerRepositoryInterface;
 use Magento\Customer\Model\Session as CustomerSession;
 use Magento\Payment\Gateway\ConfigInterface;
@@ -92,9 +93,10 @@ class CaptureRequest implements BuilderInterface
         $iframeOrderId = $payment->getAdditionalInformation('order_id');
         $txnId = $payment->getAdditionalInformation('txn_id');
 
+        
         $conektaCustomerId = '';
-
-        if ($this->customerSession->isLoggedIn()) {
+        /*
+        if ($this->customerSession->isLoggedIn() && false) {
             \Conekta\Conekta::setApiKey($this->_conektaHelper->getPrivateKey()); // Yo coloco aqui mi apiKey
             \Conekta\Conekta::setApiVersion("2.0.0");
 
@@ -143,8 +145,7 @@ class CaptureRequest implements BuilderInterface
                 }
             }
         }
-
-        $installments = $payment->getAdditionalInformation('monthly_installments');
+        
         $amount = (int)($order->getGrandTotalAmount() * 100);
         $request = [];
         try {
@@ -167,15 +168,19 @@ class CaptureRequest implements BuilderInterface
                     false
                 );
             }
-
-            if ($this->_validateMonthlyInstallments($amount, $installments)) {
-                $request['payment_method_details']['payment_method']['monthly_installments'] = $installments;
-            }
         } catch (\Exception $e) {
             $this->_conektaLogger->info('Request CaptureRequest :: build Problem', $e->getMessage());
             throw new \Magento\Framework\Validator\Exception(__('Problem Creating Charge'));
         }
-
+        */
+        $amount = (int)($order->getGrandTotalAmount() * 100);
+        $request['metadata'] = [
+            'plugin' => 'Magento',
+            'plugin_version' => $this->_conektaHelper->getMageVersion(),
+            'order_id'       => $order->getOrderIncrementId(),
+            'soft_validations'  => 'true'
+        ];
+        $request['payment_method_details'] = $this->getCharge($payment, $amount);
         $request['CURRENCY'] = $order->getCurrencyCode();
         $request['TXN_TYPE'] = 'A';
         $request['INVOICE'] = $order->getOrderIncrementId();
@@ -193,10 +198,39 @@ class CaptureRequest implements BuilderInterface
         return $request;
     }
 
+    private function getCharge($payment, $orderAmount){
+
+        $paymentMethod = $payment->getAdditionalInformation('payment_method');
+
+        $charge = [
+            'payment_method' => [
+                'type' => $paymentMethod
+            ],
+            'amount' => $orderAmount
+        ];
+        switch ($paymentMethod) {
+            case ConfigProvider::PAYMENT_METHOD_CREDIT_CARD:
+                $token = $payment->getAdditionalInformation('card_token');
+                $charge['payment_method']['token_id'] = $token;
+                break;
+            
+            case ConfigProvider::PAYMENT_METHOD_OXXO:
+            case ConfigProvider::PAYMENT_METHOD_SPEI:
+                $reference = $payment->getAdditionalInformation('reference');
+                $expireAt = $this->_conektaHelper->getExpiredAt();
+                $charge['payment_method']['reference'] = $reference;
+                $charge['payment_method']['expires_at'] = $expireAt;
+                break;
+        }
+
+        return $charge;
+    }
+
     /**
      * @param $customerId
      * @return bool
      */
+    /*
     public function checkCustomerExist($customerId)
     {
         $customerExist = false;
@@ -240,23 +274,5 @@ class CaptureRequest implements BuilderInterface
 
         return $charge;
     }
-
-    private function _validateMonthlyInstallments($amount, $installments)
-    {
-        $active_monthly_installments = $this->_conektaHelper->getConfigData(
-            'conekta/conekta_creditcard',
-            'active_monthly_installments'
-        );
-        if ($active_monthly_installments) {
-            $minimum_amount_monthly_installments = $this->_conektaHelper->getConfigData(
-                'conekta/conekta_creditcard',
-                'minimum_amount_monthly_installments'
-            );
-            if ($amount >= ($minimum_amount_monthly_installments * 100) && $installments > 1) {
-                return true;
-            }
-        }
-
-        return false;
-    }
+    */
 }
