@@ -395,12 +395,18 @@ class Data extends AbstractHelper
                             $qty = $qty * (int)$item->getParentItem()->{$quantityMethod}();
                         }
                     }
-
+                    
+                    $name = Util::removeSpecialCharacter($item->getName());
+                    $description = Util::removeSpecialCharacter(
+                        $this->_escaper->escapeHtml($item->getName() . ' - ' . $item->getSku())
+                    );
+                    $description = substr($description, 0, 250);
+                    
                     $request[] = [
-                        'name' => $item->getName(),
+                        'name' => $name,
                         'sku' => $item->getSku(),
                         'unit_price' => (int)($price * 100),
-                        'description' => $this->_escaper->escapeHtml($item->getName() . ' - ' . $item->getSku()),
+                        'description' => $description,
                         'quantity' => $qty,
                         'tags' => [
                             $item->getProductType()

@@ -4,6 +4,7 @@ namespace Conekta\Payments\Controller\Index;
 
 use Conekta\Payments\Api\EmbedFormRepositoryInterface;
 use Conekta\Payments\Exception\ConektaException;
+use Conekta\Payments\Logger\Logger;
 use Exception;
 use Magento\Framework\App\Action\HttpPostActionInterface;
 use Magento\Checkout\Model\Session;
@@ -23,7 +24,7 @@ class CreateOrder extends \Magento\Framework\App\Action\Action implements HttpPo
      */
     protected $resultJsonFactory;
     /**
-     * @var \Psr\Log\LoggerInterface
+     * @var Logger
      */
     protected $logger;
     /**
@@ -41,14 +42,14 @@ class CreateOrder extends \Magento\Framework\App\Action\Action implements HttpPo
      * @param \Magento\Framework\View\Result\PageFactory $resultPageFactory
      * @param \Magento\Framework\Controller\Result\JsonFactory $jsonFactory
      * @param \Conekta\Payments\Helper\ConektaOrder $conektaOrderHelper
-     * @param \Psr\Log\LoggerInterface $logger
+     * @param Logger $logger
      */
     public function __construct(
         \Magento\Framework\App\Action\Context $context,
         \Magento\Framework\View\Result\PageFactory $resultPageFactory,
         \Magento\Framework\Controller\Result\JsonFactory $jsonFactory,
         \Conekta\Payments\Helper\ConektaOrder $conektaOrderHelper,
-        \Psr\Log\LoggerInterface $logger,
+        Logger $logger,
         EmbedFormRepositoryInterface $embedFormRepository,
         Session $checkoutSession
     ) {
@@ -89,7 +90,7 @@ class CreateOrder extends \Magento\Framework\App\Action\Action implements HttpPo
                 
                 $response['checkout_id'] = $order['checkout']['id'];
             } catch (\Exception $e) {
-                $this->logger->critical($e);
+                $this->logger->critical($e, $orderParams);
                 $errorMessage = 'Ha ocurrido un error inesperado. Notifique al dueño de la tienda.';
                 if ($e instanceof ConektaException) {
                     $errorMessage = $e->getMessage();
