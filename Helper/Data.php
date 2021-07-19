@@ -50,6 +50,8 @@ class Data extends AbstractHelper
     
     protected $_cartRepository;
 
+    private $util;
+
     /**
      * Data constructor.
      * @param Context $context
@@ -71,7 +73,8 @@ class Data extends AbstractHelper
         ProductRepository $productRepository,
         Escaper $_escaper,
         CartRepositoryInterface $cartRepository,
-        StoreManagerInterface $storeManager
+        StoreManagerInterface $storeManager,
+        Util $util
     ) {
         parent::__construct($context);
         $this->_moduleList = $moduleList;
@@ -85,6 +88,7 @@ class Data extends AbstractHelper
         $this->_escaper = $_escaper;
         $this->_cartRepository = $cartRepository;
         $this->_storeManager = $storeManager;
+        $this->util = $util;
     }
 
     public function getCurrencyCode()
@@ -396,8 +400,8 @@ class Data extends AbstractHelper
                         }
                     }
                     
-                    $name = Util::removeSpecialCharacter($item->getName());
-                    $description = Util::removeSpecialCharacter(
+                    $name = $this->util->removeSpecialCharacter($item->getName());
+                    $description = $this->util->removeSpecialCharacter(
                         $this->_escaper->escapeHtml($item->getName() . ' - ' . $item->getSku())
                     );
                     $description = substr($description, 0, 250);

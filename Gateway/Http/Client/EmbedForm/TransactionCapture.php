@@ -102,16 +102,20 @@ class TransactionCapture implements ClientInterface
             try {
                 $conektaOrder = $this->_conektaOrder->find($request['order_id']);
                 $charge = $conektaOrder->charges[0];
+                
                 $response['offline_info'] = [
                     "type" => $charge->payment_method->type,
                     "data" => [
-                        "reference"     => $charge->payment_method->reference,
                         "expires_at"    => $charge->payment_method->expires_at
                     ]
                 ];
 
                 if ($paymentMethod == ConfigProvider::PAYMENT_METHOD_OXXO) {
                     $response['offline_info']['barcode_url'] = $charge->payment_method->barcode_url;
+                    $response['offline_info']['reference'] = $charge->payment_method->reference;
+                } else {
+                    $response['offline_info']['clabe'] = $charge->payment_method->clabe;
+                    $response['offline_info']['bank_name'] = $charge->payment_method->bank;
                 }
             } catch(Exception $e) {
                 $this->_conektaLogger->error(
