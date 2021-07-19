@@ -104,12 +104,15 @@ class TransactionCapture implements ClientInterface
                 $charge = $conektaOrder->charges[0];
                 $response['offline_info'] = [
                     "type" => $charge->payment_method->type,
-                    'barcode_url' => $charge->payment_method->barcode_url,
                     "data" => [
                         "reference"     => $charge->payment_method->reference,
                         "expires_at"    => $charge->payment_method->expires_at
                     ]
                 ];
+
+                if ($paymentMethod == ConfigProvider::PAYMENT_METHOD_OXXO) {
+                    $response['offline_info']['barcode_url'] = $charge->payment_method->barcode_url;
+                }
             } catch(Exception $e) {
                 $this->_conektaLogger->error(
                     'HTTP Client TransactionCapture Iframe Payment :: cannot get offline info. ',
