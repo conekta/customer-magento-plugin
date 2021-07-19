@@ -16,6 +16,6 @@ class PaymentActionValueHandler implements ValueHandlerInterface
 
     public function handle(array $subject, $storeId = null)
     {
-        return 'authorize_capture';
+        return 'authorize';
     }
 }

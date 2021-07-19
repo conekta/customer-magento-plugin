@@ -146,16 +146,14 @@ define(
                         theme: 'default'
                     },
                     onCreateTokenSucceeded: function (token) {
-                        console.log('onCreateTokenSucceeded');
+                        
                     },
                     onCreateTokenError: function (error) {
-                        console.log('onCreateTokenError');
                         console.error(error);
                     },
-                    onFinalizePayment: function (event) {console.log('event',event);
+                    onFinalizePayment: function (event) {
                         self.iframOrderData(event);
                         self.beforePlaceOrder();
-                        //console.log("FinalizePayment payment");
                     }
                 });
                 $('#conektaIframeContainer').find('iframe').attr('data-cy', 'the-frame');

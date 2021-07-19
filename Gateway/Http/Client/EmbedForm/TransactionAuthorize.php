@@ -13,7 +13,7 @@ use Magento\Payment\Model\Method\Logger;
 use Conekta\Order as ConektaOrder;
 use Exception;
 
-class TransactionCapture implements ClientInterface
+class TransactionAuthorize implements ClientInterface
 {
     const SUCCESS = 1;
     const FAILURE = 0;
@@ -76,13 +76,9 @@ class TransactionCapture implements ClientInterface
     {
         $request = $transferObject->getBody();
         $this->_conektaLogger->info('HTTP Client TransactionCapture :: placeRequest', $request);
-        
-        $response = $this->generateResponseForCode(
-            1,
-            $request['txn_id'],
-            $request['order_id']
-        );
 
+        $txnId = $request['txn_id'];
+        
         $this->conektaSalesOrderFactory
                     ->create()
                     ->setData([
@@ -92,7 +88,7 @@ class TransactionCapture implements ClientInterface
                     ->save();
         
         $paymentMethod = $request['payment_method_details']['payment_method']['type'];
-        
+        $response = [];
         //If is offline payment, added extra info needed
         if ($paymentMethod == ConfigProvider::PAYMENT_METHOD_OXXO ||
             $paymentMethod == ConfigProvider::PAYMENT_METHOD_SPEI
@@ -102,7 +98,7 @@ class TransactionCapture implements ClientInterface
             try {
                 $conektaOrder = $this->_conektaOrder->find($request['order_id']);
                 $charge = $conektaOrder->charges[0];
-                
+                $txnId = $charge->id;
                 $response['offline_info'] = [
                     "type" => $charge->payment_method->type,
                     "data" => [
@@ -111,21 +107,26 @@ class TransactionCapture implements ClientInterface
                 ];
 
                 if ($paymentMethod == ConfigProvider::PAYMENT_METHOD_OXXO) {
-                    $response['offline_info']['barcode_url'] = $charge->payment_method->barcode_url;
-                    $response['offline_info']['reference'] = $charge->payment_method->reference;
+                    $response['offline_info']['data']['barcode_url'] = $charge->payment_method->barcode_url;
+                    $response['offline_info']['data']['reference'] = $charge->payment_method->reference;
                 } else {
-                    $response['offline_info']['clabe'] = $charge->payment_method->clabe;
-                    $response['offline_info']['bank_name'] = $charge->payment_method->bank;
+                    $response['offline_info']['data']['clabe'] = $charge->payment_method->clabe;
+                    $response['offline_info']['data']['bank_name'] = $charge->payment_method->bank;
                 }
             } catch(Exception $e) {
                 $this->_conektaLogger->error(
-                    'HTTP Client TransactionCapture Iframe Payment :: cannot get offline info. ',
+                    'EmbedForm :: HTTP Client TransactionCapture :: cannot get offline info. ',
                     [ 'exception' => $e ]
                 );
             }
                 
         }
-
+        $response = $this->generateResponseForCode(
+            $response,
+            1,
+            $txnId,
+            $request['order_id']
+        );
         $response['error_code'] = '';
         $response['payment_method_details'] =  $request['payment_method_details'];
 
@@ -140,7 +141,7 @@ class TransactionCapture implements ClientInterface
         return $response;
     }
 
-    protected function generateResponseForCode($resultCode, $txn_id, $ord_id)
+    protected function generateResponseForCode($response, $resultCode, $txn_id, $ord_id)
     {
         $this->_conektaLogger->info('HTTP Client TransactionCapture :: generateResponseForCode');
         
@@ -148,6 +149,7 @@ class TransactionCapture implements ClientInterface
             $txn_id = $this->generateTxnId();
         }
         return array_merge(
+            $response,
             [
                 'RESULT_CODE' => $resultCode,
                 'TXN_ID' => $txn_id,
