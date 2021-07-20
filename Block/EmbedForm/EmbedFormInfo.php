@@ -46,11 +46,13 @@ class EmbedFormInfo extends Info
         return false;
     }
 
-    public function getPaymentMethodType(){
+    public function getPaymentMethodType()
+    {
         return $this->getInfo()->getAdditionalInformation('payment_method');
     }
 
-    public function getPaymentMethodTitle(){
+    public function getPaymentMethodTitle()
+    {
         $methodType = $this->getPaymentMethodType();
         $title = '';
 

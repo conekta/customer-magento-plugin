@@ -92,88 +92,9 @@ class CaptureRequest implements BuilderInterface
         $iframePayment = $payment->getAdditionalInformation('iframe_payment');
         $iframeOrderId = $payment->getAdditionalInformation('order_id');
         $txnId = $payment->getAdditionalInformation('txn_id');
-
-        
         $conektaCustomerId = '';
-        /*
-        if ($this->customerSession->isLoggedIn() && false) {
-            \Conekta\Conekta::setApiKey($this->_conektaHelper->getPrivateKey()); // Yo coloco aqui mi apiKey
-            \Conekta\Conekta::setApiVersion("2.0.0");
-
-            $customer = $this->customerSession->getCustomer();
-            $conektaCustomerId = $customer->getConektaCustomerId();
-
-            if ($conektaCustomerId) {
-                $customerExist = $this->checkCustomerExist($conektaCustomerId);
-                if ($customerExist == false) {
-                    $conektaCustomerId = '';
-                }
-            }
-
-            if ($conektaCustomerId && empty($savedCard) && $enableSavedCard) {
-                try {
-                    $customerApi = $this->conektaCustomer->find($conektaCustomerId);
-                    $source = $customerApi->createPaymentSource([
-                                'token_id' => $token,
-                                'type' => 'card'
-                            ]);
-                    $savedCard = $source->id;
-                } catch (\Conekta\Handler $error) {
-                    $this->_conektaLogger->info($error->getMessage());
-                }
-            } elseif (empty($conektaCustomerId)) {
-                try {
-                    $request = [];
-                    $request['name'] = $customer->getName();
-                    $request['email'] = $customer->getEmail();
-                    $request['phone'] = $order->getBillingAddress()->getTelephone();
-                    if ($enableSavedCard) {
-                        $request['payment_sources'] = $this->getCard($token);
-                    }
-                    $conektaAPI = $this->conektaCustomer->create($request);
-
-                    if ($enableSavedCard) {
-                        $conektaCustomerId = $conektaAPI->id;
-                        $savedCard = $conektaAPI->payment_sources[0]->id;
-                    }
-                    $customerId = $customer->getId();
-                    $customer = $this->customerRepository->getById($customerId);
-                    $customer->setCustomAttribute('conekta_customer_id', $conektaCustomerId);
-                    $this->customerRepository->save($customer);
-                } catch (\Conekta\Handler $error) {
-                    $this->_conektaLogger->info($error->getMessage());
-                }
-            }
-        }
-        
         $amount = (int)($order->getGrandTotalAmount() * 100);
-        $request = [];
-        try {
-            $request['metadata'] = [
-                'plugin' => 'Magento',
-                'plugin_version' => $this->_conektaHelper->getMageVersion(),
-                'order_id'       => $order->getOrderIncrementId(),
-                'soft_validations'  => 'true'
-            ];
-            if ($conektaCustomerId && $savedCard) {
-                $request['payment_method_details'] = $this->getChargeCard(
-                    $amount,
-                    $token,
-                    $savedCard
-                );
-            } else {
-                $request['payment_method_details'] = $this->getChargeCard(
-                    $amount,
-                    $token,
-                    false
-                );
-            }
-        } catch (\Exception $e) {
-            $this->_conektaLogger->info('Request CaptureRequest :: build Problem', $e->getMessage());
-            throw new \Magento\Framework\Validator\Exception(__('Problem Creating Charge'));
-        }
-        */
-        $amount = (int)($order->getGrandTotalAmount() * 100);
+
         $request['metadata'] = [
             'plugin' => 'Magento',
             'plugin_version' => $this->_conektaHelper->getMageVersion(),
@@ -198,7 +119,8 @@ class CaptureRequest implements BuilderInterface
         return $request;
     }
 
-    private function getCharge($payment, $orderAmount){
+    private function getCharge($payment, $orderAmount)
+    {
 
         $paymentMethod = $payment->getAdditionalInformation('payment_method');
 
@@ -225,54 +147,4 @@ class CaptureRequest implements BuilderInterface
 
         return $charge;
     }
-
-    /**
-     * @param $customerId
-     * @return bool
-     */
-    /*
-    public function checkCustomerExist($customerId)
-    {
-        $customerExist = false;
-        try {
-            $customerApi = $this->conektaCustomer->find($customerId);
-            if ($customerApi->id) {
-                $customerExist = true;
-            }
-        } catch (\Conekta\Handler $error) {
-            $customerExist = false;
-        }
-        return $customerExist;
-    }
-
-    public function getCard($tokenId)
-    {
-        $charge = [
-            [
-                "type" => "card",
-                "token_id" => $tokenId
-            ]
-        ];
-
-        return $charge;
-    }
-
-    public function getChargeCard($amount, $tokenId, $savedCard)
-    {
-        $charge = [
-            'payment_method' => [
-                'type'     => 'card'
-            ],
-            'amount' => $amount
-        ];
-
-        if ($savedCard != false) {
-            $charge['payment_method']['payment_source_id'] = $savedCard;
-        } else {
-            $charge['payment_method']['token_id'] = $tokenId;
-        }
-
-        return $charge;
-    }
-    */
 }

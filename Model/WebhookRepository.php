@@ -59,7 +59,7 @@ class WebhookRepository
         $conektaOrderId = $body['data']['object']['id'];
         
         $this->_conektaLogger->info('WebhookRepository :: findByMetadataOrderId started', [
-            'order_id' => $conektaOrderId 
+            'order_id' => $conektaOrderId
         ]);
 
         $conetakSalesOrder = $this->conektaOrderSalesInterface->loadByConektaOrderId($conektaOrderId);

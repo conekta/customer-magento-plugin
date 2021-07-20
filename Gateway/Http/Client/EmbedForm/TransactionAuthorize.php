@@ -92,7 +92,7 @@ class TransactionAuthorize implements ClientInterface
         //If is offline payment, added extra info needed
         if ($paymentMethod == ConfigProvider::PAYMENT_METHOD_OXXO ||
             $paymentMethod == ConfigProvider::PAYMENT_METHOD_SPEI
-        ){
+        ) {
             $response['offline_info'] = [];
 
             try {
@@ -113,14 +113,14 @@ class TransactionAuthorize implements ClientInterface
                     $response['offline_info']['data']['clabe'] = $charge->payment_method->clabe;
                     $response['offline_info']['data']['bank_name'] = $charge->payment_method->bank;
                 }
-            } catch(Exception $e) {
+            } catch (Exception $e) {
                 $this->_conektaLogger->error(
                     'EmbedForm :: HTTP Client TransactionCapture :: cannot get offline info. ',
                     [ 'exception' => $e ]
                 );
             }
-                
         }
+        
         $response = $this->generateResponseForCode(
             $response,
             1,

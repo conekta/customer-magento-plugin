@@ -59,8 +59,8 @@ class TxnIdHandler implements HandlerInterface
         }
     }
 
-    private function handleCreditCard($payment, $response){
-
+    private function handleCreditCard($payment, $response)
+    {
         $order = $payment->getOrder();
 
         $order->setExtOrderId($response[self::ORD_ID]);
@@ -96,10 +96,10 @@ class TxnIdHandler implements HandlerInterface
         $payment->setTransactionId($response[self::TXN_ID]);
         $payment->setIsTransactionClosed(true);
         $payment->setShouldCloseParentTransaction(true);
-
     }
 
-    private function handleOffline($payment, $response){
+    private function handleOffline($payment, $response)
+    {
         $order = $payment->getOrder();
 
         $payment->setTransactionId($response[self::TXN_ID]);
@@ -111,5 +111,4 @@ class TxnIdHandler implements HandlerInterface
         $payment->setIsTransactionClosed(false);
         $payment->setShouldCloseParentTransaction(false);
     }
-
 }
