@@ -238,7 +238,7 @@ class ConektaOrder extends AbstractHelper
                         $months[$k] = (int) $months[$k];
                     }
                 }
-                $result['active_installments'] = (int)true;
+                $result['active_installments'] = (int)!empty($months);
                 $result['monthly_installments'] = $months;
             } else {
                 $isInstallmentsAvilable = (int)false;
