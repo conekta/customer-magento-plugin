@@ -4,6 +4,7 @@ namespace Conekta\Payments\Gateway\Response\EmbedForm;
 use Conekta\Payments\Logger\Logger as ConektaLogger;
 use Magento\Payment\Gateway\Helper\SubjectReader;
 use Magento\Payment\Gateway\Response\HandlerInterface;
+use Conekta\Payments\Model\Ui\EmbedForm\ConfigProvider;
 
 class TxnIdHandler implements HandlerInterface
 {
@@ -41,10 +42,25 @@ class TxnIdHandler implements HandlerInterface
      */
     public function handle(array $handlingSubject, array $response)
     {
-        $this->_conektaLogger->info('Response TxnIdHandler :: handle');
+        $this->_conektaLogger->info('Response TxnIdHandler :: handle', $response);
 
         $paymentDO = $this->subjectReader->readPayment($handlingSubject);
         $payment = $paymentDO->getPayment();
+        $paymentMethod = $payment->getAdditionalInformation('payment_method');
+        switch ($paymentMethod) {
+            case ConfigProvider::PAYMENT_METHOD_CREDIT_CARD:
+                $this->handleCreditCard($payment, $response);
+                break;
+            
+            case ConfigProvider::PAYMENT_METHOD_OXXO:
+            case ConfigProvider::PAYMENT_METHOD_SPEI:
+                $this->handleOffline($payment, $response);
+                break;
+        }
+    }
+
+    private function handleCreditCard($payment, $response)
+    {
         $order = $payment->getOrder();
 
         $order->setExtOrderId($response[self::ORD_ID]);
@@ -80,5 +96,19 @@ class TxnIdHandler implements HandlerInterface
         $payment->setTransactionId($response[self::TXN_ID]);
         $payment->setIsTransactionClosed(true);
         $payment->setShouldCloseParentTransaction(true);
+    }
+
+    private function handleOffline($payment, $response)
+    {
+        $order = $payment->getOrder();
+
+        $payment->setTransactionId($response[self::TXN_ID]);
+        $payment->setAdditionalInformation('offline_info', $response['offline_info']);
+
+        $order->setExtOrderId($response[self::ORD_ID]);
+
+        $payment->setIsTransactionPending(true);
+        $payment->setIsTransactionClosed(false);
+        $payment->setShouldCloseParentTransaction(false);
     }
 }

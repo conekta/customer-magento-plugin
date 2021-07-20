@@ -51,15 +51,18 @@ class WebhookRepository
      */
     public function findByMetadataOrderId($body)
     {
-        $this->_conektaLogger->info('WebhookRepository :: findByMetadataOrderId started');
-
         if (!isset($body['data']['object']) ||
             !isset($body['data']['object']['id'])
         ) {
             throw new LocalizedException(__('Missing order information'));
         }
+        $conektaOrderId = $body['data']['object']['id'];
+        
+        $this->_conektaLogger->info('WebhookRepository :: findByMetadataOrderId started', [
+            'order_id' => $conektaOrderId
+        ]);
 
-        $conetakSalesOrder = $this->conektaOrderSalesInterface->loadByConektaOrderId($body['data']['object']['id']);
+        $conetakSalesOrder = $this->conektaOrderSalesInterface->loadByConektaOrderId($conektaOrderId);
         
         $order = $this->orderInterface->loadByIncrementId($conetakSalesOrder->getIncrementOrderId());
         
