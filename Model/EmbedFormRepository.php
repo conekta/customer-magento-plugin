@@ -32,6 +32,10 @@ class EmbedFormRepository implements EmbedFormRepositoryInterface
         $this->conektaOrderApi = $conektaOrderApi;
     }
 
+    private function identicalArrays($a, $b){
+
+    }
+
     /**
      * @param array $orderParams
      * @return void
@@ -81,10 +85,24 @@ class EmbedFormRepository implements EmbedFormRepositoryInterface
             $conektaQuote = $conektaQuoteRepo->getByid($quoteId);
             $conektaOrder = $this->conektaOrderApi->find($conektaQuote->getConektaOrderId());
 
-            if (!empty($conektaOrder) &&
-                (!empty($conektaOrder->payment_status) || time() >= $conektaOrder->checkout->expires_at)
-            ) {
-                $hasToCreateNewOrder = true;
+            if (!empty($conektaOrder)) {
+
+                $chekoutParams = $orderParams['checkout'];
+                $conektaChekout = $conektaOrder->checkout;
+
+                if (!empty($conektaOrder->payment_status) ||
+                    time() >= $conektaOrder->checkout->expires_at ||
+                    
+                    //detect changes in checkout params
+                    $chekoutParams['allowed_payment_methods'] != (array)$conektaChekout->allowed_payment_methods ||
+                    $chekoutParams['monthly_installments_enabled'] != $conektaChekout->monthly_installments_enabled ||
+                    $chekoutParams['monthly_installments_options'] != (array)$conektaChekout->monthly_installments_options ||
+                    $chekoutParams['on_demand_enabled'] != $conektaChekout->on_demand_enabled ||
+                    $chekoutParams['force_3ds_flow'] != $conektaChekout->force_3ds_flow
+                ) {
+                    $hasToCreateNewOrder = true;
+                }
+                
             }
         } catch (NoSuchEntityException $e) {
             $conektaQuote = null;
@@ -99,6 +117,7 @@ class EmbedFormRepository implements EmbedFormRepositoryInterface
              *   2- Exist row in map table and:
              *      2.1- conekta order has payment_status OR
              *      2.2- conekta order checkout has expired
+             *      2.3- checkout parameters has changed
              */
             if ($hasToCreateNewOrder) {
                 $this->_conektaLogger->info('EmbedFormRepository::generate Creates conekta order', $orderParams);
