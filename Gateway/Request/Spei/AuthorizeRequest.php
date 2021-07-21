@@ -38,7 +38,7 @@ class AuthorizeRequest implements BuilderInterface
         $paymentDO = $this->subjectReader->readPayment($buildSubject);
         $payment = $paymentDO->getPayment();
         $order = $paymentDO->getOrder();
-        $expiry_date = strtotime("+" . $this->_conektaHelper->getConfigData('conekta_spei', 'expiry_days') . " days");
+        $expiry_date = $this->_conektaHelper->getExpiredAt();
         $amount = (int)$order->getGrandTotalAmount();
 
         $request['metadata'] = [

@@ -41,70 +41,8 @@ class LineItemsBuilder implements BuilderInterface
 
         $payment = $buildSubject['payment'];
         $order = $payment->getOrder();
-        $version = (int)str_replace('.', '', $this->_conektaHelper->getMageVersion());
-        $request = [];
         $items = $order->getItems();
-        foreach ($items as $itemId => $item) {
-            
-            if ($version > 240) {
-                if ($item->getProductType() != 'bundle' && $item->getProductType() != 'configurable') {
-                    
-                    $price = $item->getPrice();
-                    if ($price == 0 && !empty($item->getParentItem())) {
-                        $price = $item->getParentItem()->getPrice();
-                    }
-
-                    $request['line_items'][] = [
-                        'name' => $item->getName(),
-                        'sku' => $item->getSku(),
-                        'unit_price' => (int)($price * 100),
-                        'description' => $this->_escaper->escapeHtml($item->getName() . ' - ' . $item->getSku()),
-                        'quantity' => (int)($item->getQtyOrdered()),
-                        'tags' => [
-                            $item->getProductType()
-                        ]
-                    ];
-
-                    $this->_conektaLogger->info('Request LineItemsBuilder :: build', [
-                        'name' => $item->getName(),
-                        'sku' => $item->getSku(),
-                        'unit_price' => $price * 100,
-                        'quantity' => (int)($item->getQtyOrdered()),
-                        'tags' => [
-                            $item->getProductType()
-                        ]
-                    ]);
-
-                }
-            } elseif ($version > 233) {
-                
-                if ($item->getProductType() != 'bundle' && $item->getProductType() != 'configurable') {
-                    $request['line_items'][] = [
-                        'name' => $item->getName(),
-                        'sku' => $item->getSku(),
-                        'unit_price' => (int)($item->getPrice() * 100),
-                        'description' => $this->_escaper->escapeHtml($item->getName() . ' - ' . $item->getSku()),
-                        'quantity' => (int)($item->getQtyOrdered()),
-                        'tags' => [
-                            $item->getProductType()
-                        ]
-                    ];
-                }
-            } else {
-                if ($item->getProductType() != 'bundle' && $item->getPrice() > 0) {
-                    $request['line_items'][] = [
-                        'name' => $item->getName(),
-                        'sku' => $item->getSku(),
-                        'unit_price' => (int)($item->getPrice() * 100),
-                        'description' => $this->_escaper->escapeHtml($item->getName() . ' - ' . $item->getSku()),
-                        'quantity' => (int)($item->getQtyOrdered()),
-                        'tags' => [
-                            $item->getProductType()
-                        ]
-                    ];
-                }
-            }
-        }
+        $request['line_items'] = $this->_conektaHelper->getLineItems($items, false);
 
         $this->_conektaLogger->info('Request LineItemsBuilder :: build : return request', $request);
 

@@ -1,5 +1,9 @@
 <?xml version="1.0"?>
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <preference for="Conekta\Payments\Api\Data\ConektaSalesOrderInterface" type="Conekta\Payments\Model\ConektaSalesOrder"/>
+    <preference for="Conekta\Payments\Api\Data\ConektaQuoteInterface" type="Conekta\Payments\Model\ConektaQuote"/>
+    <preference for="Conekta\Payments\Api\EmbedFormRepositoryInterface" type="Conekta\Payments\Model\EmbedFormRepository"/>
+    
     <type name="Magento\Checkout\Model\CompositeConfigProvider">
         <arguments>
             <argument name="configProviders" xsi:type="array">
@@ -24,6 +28,100 @@
             </argument>
         </arguments>
     </type>
+
+    <!-- ++++++++++++++++++++++++++++++++++++++++++ Embed Form ++++++++++++++++++++++++++++++++++++++++++++++ -->
+    <!-- Payment Method Facade configuration -->
+    <virtualType name="ConektaPaymentsEmbedFormFacade" type="Magento\Payment\Model\Method\Adapter">
+        <arguments>
+            <argument name="code" xsi:type="const">\Conekta\Payments\Model\Ui\EmbedForm\ConfigProvider::CODE</argument>
+            <argument name="formBlockType" xsi:type="string">Magento\Payment\Block\Form</argument>
+            <argument name="infoBlockType" xsi:type="string">Conekta\Payments\Block\EmbedForm\EmbedFormInfo</argument>
+            <argument name="valueHandlerPool" xsi:type="object">ConektaPaymentsEmbedFormValueHandlerPool</argument>
+            <argument name="commandPool" xsi:type="object">ConektaPaymentsEmbedFormCommandPool</argument>
+        </arguments>
+    </virtualType>
+
+    <!-- Configuration reader -->
+    <virtualType name="ConektaPaymentsEmbedFormConfig" type="Magento\Payment\Gateway\Config\Config">
+        <arguments>
+            <argument name="methodCode" xsi:type="const">\Conekta\Payments\Model\Ui\EmbedForm\ConfigProvider::CODE</argument>
+        </arguments>
+    </virtualType>
+
+    <!-- Commands infrastructure -->
+    <virtualType name="ConektaPaymentsEmbedFormCommandPool" type="Magento\Payment\Gateway\Command\CommandPool">
+        <arguments>
+            <argument name="commands" xsi:type="array">
+                <item name="authorize" xsi:type="string">ConektaPaymentsEmbedFormAuthorizeCommand</item>
+            </argument>
+        </arguments>
+    </virtualType>
+
+   <!-- Capture command -->
+    <virtualType name="ConektaPaymentsEmbedFormAuthorizeCommand" type="Magento\Payment\Gateway\Command\GatewayCommand">
+        <arguments>
+            <argument name="requestBuilder" xsi:type="object">ConektaPaymentsEmbedFormCaptureRequest</argument>
+            <argument name="handler" xsi:type="object">ConektaPaymentsEmbedFormResponseHandlerComposite</argument>
+            <argument name="transferFactory" xsi:type="object">Conekta\Payments\Gateway\Http\TransferFactory</argument>
+            <!--<argument name="validator" xsi:type="object">Conekta\Payments\Gateway\Validator\CreditCard\ResponseCodeValidator</argument>-->
+            <argument name="client" xsi:type="object">Conekta\Payments\Gateway\Http\Client\EmbedForm\TransactionAuthorize</argument>
+        </arguments>
+    </virtualType>
+
+    <!-- Capture Request -->
+    <virtualType name="ConektaPaymentsEmbedFormCaptureRequest" type="Magento\Payment\Gateway\Request\BuilderComposite">
+        <arguments>
+            <argument name="builders" xsi:type="array">
+                <item name="requestBuilder" xsi:type="string">Conekta\Payments\Gateway\Request\EmbedForm\CaptureRequest</item>
+                <item name="lineItems" xsi:type="string">Conekta\Payments\Gateway\Request\LineItemsBuilder</item>
+                <item name="metadata" xsi:type="string">Conekta\Payments\Gateway\Request\MetadataBuilder</item>
+                <item name="taxLines" xsi:type="string">Conekta\Payments\Gateway\Request\TaxLinesBuilder</item>
+                <item name="customerInfo" xsi:type="string">Conekta\Payments\Gateway\Request\CustomerInfoBuilder</item>
+                <item name="shippingLines" xsi:type="string">Conekta\Payments\Gateway\Request\ShippingLinesBuilder</item>
+                <item name="discountLines" xsi:type="string">Conekta\Payments\Gateway\Request\DiscountLinesBuilder</item>
+                <item name="shippingContact" xsi:type="string">Conekta\Payments\Gateway\Request\ShippingContactBuilder</item>
+            </argument>
+        </arguments>
+    </virtualType>
+    <type name="Conekta\Payments\Gateway\Request\EmbedForm\CaptureRequest">
+        <arguments>
+            <argument name="config" xsi:type="object">ConektaPaymentsEmbedFormConfig</argument>
+        </arguments>
+    </type>
+
+    <!-- Response handlers -->
+    <virtualType name="ConektaPaymentsEmbedFormResponseHandlerComposite" type="Magento\Payment\Gateway\Response\HandlerChain">
+        <arguments>
+            <argument name="handlers" xsi:type="array">
+                <item name="txnid" xsi:type="string">Conekta\Payments\Gateway\Response\EmbedForm\TxnIdHandler</item>
+                <!--<item name="fraud" xsi:type="string">Conekta\Payments\Gateway\Response\CreditCard\FraudHandler</item>-->
+            </argument>
+        </arguments>
+    </virtualType>
+
+    <!-- Value handlers infrastructure -->
+    
+    <virtualType name="ConektaPaymentsEmbedFormValueHandlerPool" type="Magento\Payment\Gateway\Config\ValueHandlerPool">
+        <arguments>
+            <argument name="handlers" xsi:type="array">
+                <item name="default" xsi:type="string">ConektaPaymentsEmbedFormConfigValueHandler</item>
+                <!--<item name="payment_action" xsi:type="string">Conekta\Payments\Gateway\Config\EmbedForm\PaymentActionValueHandler</item>-->
+                <item name="active" xsi:type="string">Conekta\Payments\Gateway\Config\EmbedForm\ActiveValueHandler</item>
+            </argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="ConektaPaymentsEmbedFormConfigValueHandler" type="Magento\Payment\Gateway\Config\ConfigValueHandler">
+        <arguments>
+            <argument name="configInterface" xsi:type="object">ConektaPaymentsEmbedFormConfig</argument>
+        </arguments>
+    </virtualType>
+    
+    <type name="Conekta\Payments\Block\EmbedForm\EmbedFormInfo">
+        <arguments>
+            <argument name="config" xsi:type="object">ConektaPaymentsEmbedFormConfig</argument>
+        </arguments>
+    </type>
+    <!-- **************************************** Embed Form END ******************************************* -->
 
     <!-- ++++++++++++++++++++++++++++++++++++++++++ Credit Card ++++++++++++++++++++++++++++++++++++++++++++++ -->
     <!-- Payment Method Facade configuration -->

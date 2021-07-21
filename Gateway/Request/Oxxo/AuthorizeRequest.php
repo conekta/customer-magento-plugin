@@ -34,18 +34,12 @@ class AuthorizeRequest implements BuilderInterface
     public function build(array $buildSubject)
     {
         $this->_conektaLogger->info('Request Oxxo AuthorizeRequest :: build');
+
         $paymentDO = $this->subjectReader->readPayment($buildSubject);
         $payment = $paymentDO->getPayment();
         $order = $paymentDO->getOrder();
         
-        $timeFormat = $this->_conektaHelper->getConfigData('conekta_oxxo', 'days_or_hours');
-        if (!$timeFormat) {
-            $expiryHours = $this->_conektaHelper->getConfigData('conekta_oxxo', 'expiry_hours');
-            $expiry_date = strtotime("+" . $expiryHours . " hours");
-        } else {
-            $expiryDays = $this->_conektaHelper->getConfigData('conekta_oxxo', 'expiry_days');
-            $expiry_date = strtotime("+" . $expiryDays . " days");
-        }
+        $expiry_date = $this->_conektaHelper->getExpiredAt();
         $amount = (int)$order->getGrandTotalAmount();
 
         $request['metadata'] = [
