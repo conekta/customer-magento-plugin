@@ -2,8 +2,9 @@
 
 namespace Conekta\Payments\Controller;
 
-use Magento\Framework\App\Action\Forward;
 use Magento\Framework\App\RouterInterface;
+use Conekta\Payments\Helper\Data as ConektaHelper;
+use Conekta\Payments\Logger\Logger as ConektaLogger;
 
 class Router implements RouterInterface
 {
@@ -21,15 +22,29 @@ class Router implements RouterInterface
     protected $_response;
 
     /**
+     * @var \Conekta\Payments\Helper\Data
+     */
+    private $_conektaHelper;
+
+    /**
+     * @var ConektaLogger
+     */
+    private $_conektaLogger;
+
+    /**
      * @param \Magento\Framework\App\ActionFactory $actionFactory
      * @param \Magento\Framework\App\ResponseInterface $response
      */
     public function __construct(
         \Magento\Framework\App\ActionFactory $actionFactory,
-        \Magento\Framework\App\ResponseInterface $response
+        \Magento\Framework\App\ResponseInterface $response,
+        ConektaHelper $conektaHelper,
+        ConektaLogger $conektaLogger
     ) {
         $this->actionFactory = $actionFactory;
         $this->_response = $response;
+        $this->_conektaHelper = $conektaHelper;
+        $this->_conektaLogger = $conektaLogger;
     }
 
     /**
@@ -40,25 +55,23 @@ class Router implements RouterInterface
      */
     public function match(\Magento\Framework\App\RequestInterface $request)
     {
+
         if ($request->getModuleName() === 'conekta') {
             return;
         }
+        
+        $pathRequest = trim($request->getPathInfo(), '/');
 
-        $_identifier = trim($request->getPathInfo(), '/');
-        $pathInfo = explode('/', $_identifier);
-        $identifier = implode('/', $pathInfo);
-        $info = explode('/', $identifier);
-        if (count($info) < 3) {
-            return;
-        }
+        $urlWebhook = $this->_conektaHelper->getUrlWebhookOrDefault();
+        $urlWebhook = trim($urlWebhook, '/');
+        $pathWebhook = substr($urlWebhook, -strlen($pathRequest));
 
-        if ($info[0] === "conekta" && $info[1] === "webhook" && $info[2] === "listener") {
+        //If paths are identical, then redirects to webhook controller
+        if ($pathRequest === $pathWebhook) {
             $request->setModuleName('conekta')->setControllerName('webhook')->setActionName('index');
-            $request->setAlias(\Magento\Framework\Url::REWRITE_REQUEST_PATH_ALIAS, $_identifier);
+            $request->setAlias(\Magento\Framework\Url::REWRITE_REQUEST_PATH_ALIAS, $pathRequest);
         } else {
             return;
         }
-
-        //return $this->actionFactory->create(Forward::class);
     }
 }
