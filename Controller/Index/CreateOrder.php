@@ -73,6 +73,7 @@ class CreateOrder extends \Magento\Framework\App\Action\Action implements HttpPo
         $response = [];
         
         $resultJson = $this->resultJsonFactory->create();
+        $orderParams = [];
         if ($isAjax) {
             try {
                 /** @var \Magento\Framework\Controller\Result\Json $resultJson */
