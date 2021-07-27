@@ -55,7 +55,9 @@ define(
                 this.renderProperties.shippingMethod = shippingMethodCode;
                 this.renderProperties.shippingAddress = shippingAddress;
                 this.renderProperties.billingAddress = billingAddress;
-
+                console.log('customer',customer);
+                console.log('customer.data',customer.customerData);
+                console.log('customer.details',customer.customerDetails);
                 quote.totals.subscribe(this.reRender, this);
                 return this;
             },
@@ -67,6 +69,8 @@ define(
             
             reRender: function(total){
                 
+                console.log('actual',this.renderProperties)
+                //TODO agregar observer customer
                 var baseGrandTotal = quote.totals._latestValue.base_grand_total;
                 var shippingAddress = quote.shippingAddress._latestValue?.getCacheKey();
                 var shippingMethodCode = '';
@@ -90,17 +94,55 @@ define(
                     hasToReRender = true;
                 }
 
-                var strBillingAddr = JSON.stringify(quote.billingAddress());
+                var quoteBilling = quote.billingAddress();
+                var strBillingAddr = quoteBilling? JSON.stringify(quote.billingAddress()) : '';
                 if(strBillingAddr !== this.renderProperties.billingAddress ){
                     hasToReRender = true;
                 }
                 this.renderProperties.billingAddress = strBillingAddr;
-
+                console.log('nuevo',this.renderProperties)
+                console.log('hasToReRender',hasToReRender)
                 if(hasToReRender){
                     this.loadCheckoutId();
                 }
                 
                     
+            },
+
+            validateRenderEmbedForm: function(){
+                
+                var isValid = true;
+                if (this.renderProperties.billingAddress) {
+                    isValid = true;
+                    this.conektaError('');
+                } else {
+                    isValid = false;
+                    this.conektaError('Complete todos los campos requeridos para continuar');
+                }
+                
+                var emailValidationResult = customer.isLoggedIn(),
+                loginFormSelector = 'form[data-role=email-with-possible-login]';
+                if (!customer.isLoggedIn()) {
+                    $(loginFormSelector).validation();
+                    emailValidationResult = Boolean($(loginFormSelector + ' input[name=username]').valid());
+                }
+                console.log(emailValidationResult);
+
+                var formConekta = $('#conekta_ef-form');
+                console.log(formConekta)
+                console.log('valid-conekta',formConekta.valid())
+                //console.log(formConekta.validation())
+                //console.log(formConekta.validation('isValid'))
+
+                /*
+                var formLogin = $('#checkout-step-payment form.form.form-login');
+                console.log(formLogin)
+                console.log('valid-login',formLogin.valid())
+                */
+                //console.log(formLogin.validation())
+                //console.log(formLogin.validation('isValid'))
+
+                return isValid;
             },
 
             loadCheckoutId: function() {
@@ -112,26 +154,29 @@ define(
                 var params = {
                     'guestEmail': guest_email
                 };
-
-               return  $.ajax({
-                    type: 'POST',
-                    url: self.getcreateOrderUrl(),
-                    data: params,
-                    async: true,
-                    showLoader: true,
-                    success: function (response) {
-                        self.conektaError(null);
-                        self.checkoutId(response.checkout_id);
-                        
-                        if(self.checkoutId()){
-                            self.renderizeEmbedForm();
+                
+                if(this.validateRenderEmbedForm()){
+                    return  $.ajax({
+                        type: 'POST',
+                        url: self.getcreateOrderUrl(),
+                        data: params,
+                        async: true,
+                        showLoader: true,
+                        success: function (response) {
+                            self.conektaError(null);
+                            self.checkoutId(response.checkout_id);
+                            
+                            if(self.checkoutId()){
+                                self.renderizeEmbedForm();
+                            }
+                        },
+                        error: function (xhr, status, error) {
+                            console.error(status);
+                            self.conektaError(xhr.responseJSON.error_message);
                         }
-                    },
-                    error: function (xhr, status, error) {
-                        console.error(status);
-                        self.conektaError(xhr.responseJSON.error_message);
-                    }
-                });
+                    });
+                }
+                
             },
 
             renderizeEmbedForm: function(){
@@ -156,6 +201,7 @@ define(
                         self.beforePlaceOrder();
                     }
                 });
+                console.log(window.ConektaCheckoutComponents);
                 $('#conektaIframeContainer').find('iframe').attr('data-cy', 'the-frame');
             },
 
@@ -173,12 +219,7 @@ define(
                             'order_id': params.charge.order_id,
                             'txn_id': params.charge.id,
                             'card_token': $("#" + this.getCode() + "_card_token").val(),
-                            'iframe_payment': true,
-                            //'cc_exp_year': this.creditCardExpYear(),
-                            //'cc_exp_month': this.creditCardExpMonth(),
-                            //'cc_bin': number.substring(0, 6),
-                            //'saved_card': this.selectedPaymentId(),
-                            //'saved_card_later': this.isSaveCardEnable(),
+                            'iframe_payment': true
                         }
                     };
                     return data;
@@ -193,12 +234,7 @@ define(
                         'reference': '',                        
                         'iframe_payment': false,
                         'order_id': '',
-                        'txn_id': '',
-                        //'cc_exp_year': this.creditCardExpYear(),
-                        //'cc_exp_month': this.creditCardExpMonth(),
-                        //'cc_bin': number.substring(0, 6),
-                        //'saved_card': this.selectedPaymentId(),
-                        //'saved_card_later': this.isSaveCardEnable(),
+                        'txn_id': ''
                     }
                 };
 
