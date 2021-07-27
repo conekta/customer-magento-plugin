@@ -263,15 +263,23 @@ class Data extends AbstractHelper
     public function getExpiredAt()
     {
         $timeFormat = $this->getConfigData('conekta/conekta_global', 'days_or_hours');
-        
+        $expirationValue = null;
+        $expirationUnit = null;
+
         //hours expiration disabled temporaly
         if (!$timeFormat && false) {
-            $expiryHours = $this->getConfigData('conekta/conekta_global', 'expiry_hours');
-            $expiryDate = strtotime("+" . $expiryHours . " hours");
+            $expirationValue = $this->getConfigData('conekta/conekta_global', 'expiry_hours');
+            $expirationUnit = "hours";
         } else {
-            $expiryDays = $this->getConfigData('conekta/conekta_global', 'expiry_days');
-            $expiryDate = strtotime("+" . $expiryDays . " days");
+            $expirationValue = $this->getConfigData('conekta/conekta_global', 'expiry_days');
+            $expirationUnit = "days";
         }
+
+        if(empty($expirationValue)){
+            $expirationValue = 3;
+        }
+
+        $expiryDate = strtotime("+" . $expirationValue . " " . $expirationUnit);
 
         return $expiryDate;
     }
@@ -310,7 +318,7 @@ class Data extends AbstractHelper
     {
         $productAttributes = $this->getMetadataAttributes('metadata_additional_products');
         $request = [];
-        if (count($productAttributes) > 0) {
+        if (count($productAttributes) > 0 && !empty($productAttributes[0])) {
             foreach ($items as $item) {
                 if ($item->getProductType() != 'configurable') {
                     $productValues = [];
@@ -324,7 +332,7 @@ class Data extends AbstractHelper
             }
         }
         $orderAttributes = $this->getMetadataAttributes('metadata_additional_order');
-        if (count($orderAttributes) > 0) {
+        if (count($orderAttributes) > 0 && !empty($orderAttributes[0])) {
             foreach ($orderAttributes as $attr) {
                 $quoteValue = $this->checkoutSession->getQuote()->getData($attr);
                 if ($quoteValue == null) {
