@@ -8,9 +8,10 @@ define(
         'Magento_Checkout/js/model/quote',
         'Magento_Customer/js/model/customer',
         'Magento_Payment/js/model/credit-card-validation/validator',
-        'mage/storage'
+        'mage/storage',
+        'Magento_Checkout/js/model/customer-email-validator'
     ],
-    function (ko, CONEKTA, conektaCheckout, Component, $, quote, customer, validator, storage) {
+    function (ko, CONEKTA, conektaCheckout, Component, $, quote, customer, validator, storage, emailValidator) {
         'use strict';
 
         return Component.extend({
@@ -42,7 +43,7 @@ define(
                 this.iframOrderData('');
                 this.checkoutId('');
                 this.conektaError(null);
-                
+                console.log('emailValidator', emailValidator)
                 var baseGrandTotal = quote.totals._latestValue.base_grand_total;
                 var shippingAddress = quote.shippingAddress._latestValue?.getCacheKey();
                 var billingAddress = JSON.stringify(quote.billingAddress());
@@ -55,10 +56,11 @@ define(
                 this.renderProperties.shippingMethod = shippingMethodCode;
                 this.renderProperties.shippingAddress = shippingAddress;
                 this.renderProperties.billingAddress = billingAddress;
-                console.log('customer',customer);
-                console.log('customer.data',customer.customerData);
-                console.log('customer.details',customer.customerDetails);
                 quote.totals.subscribe(this.reRender, this);
+                quote.billingAddress.subscribe(function(){
+                    console.log('this', this)
+                    console.log('billing', quote.billingAddress)
+                })
                 return this;
             },
             
@@ -68,9 +70,7 @@ define(
             },
             
             reRender: function(total){
-                
-                console.log('actual',this.renderProperties)
-                //TODO agregar observer customer
+
                 var baseGrandTotal = quote.totals._latestValue.base_grand_total;
                 var shippingAddress = quote.shippingAddress._latestValue?.getCacheKey();
                 var shippingMethodCode = '';
@@ -100,8 +100,6 @@ define(
                     hasToReRender = true;
                 }
                 this.renderProperties.billingAddress = strBillingAddr;
-                console.log('nuevo',this.renderProperties)
-                console.log('hasToReRender',hasToReRender)
                 if(hasToReRender){
                     this.loadCheckoutId();
                 }
@@ -112,25 +110,23 @@ define(
             validateRenderEmbedForm: function(){
                 
                 var isValid = true;
-                if (this.renderProperties.billingAddress) {
+
+                if (this.renderProperties.billingAddress &&
+                    //emailValidator.validate() &&
+                    $('#conekta_ef-form').valid()
+                ) {
                     isValid = true;
-                    this.conektaError('');
+                    this.conektaError(null);
                 } else {
                     isValid = false;
                     this.conektaError('Complete todos los campos requeridos para continuar');
                 }
                 
-                var emailValidationResult = customer.isLoggedIn(),
-                loginFormSelector = 'form[data-role=email-with-possible-login]';
-                if (!customer.isLoggedIn()) {
-                    $(loginFormSelector).validation();
-                    emailValidationResult = Boolean($(loginFormSelector + ' input[name=username]').valid());
-                }
-                console.log(emailValidationResult);
-
+                /*
                 var formConekta = $('#conekta_ef-form');
                 console.log(formConekta)
                 console.log('valid-conekta',formConekta.valid())
+                */
                 //console.log(formConekta.validation())
                 //console.log(formConekta.validation('isValid'))
 
@@ -201,7 +197,7 @@ define(
                         self.beforePlaceOrder();
                     }
                 });
-                console.log(window.ConektaCheckoutComponents);
+                console.log(window.ConektaCheckoutComponents.Integration);
                 $('#conektaIframeContainer').find('iframe').attr('data-cy', 'the-frame');
             },
 
