@@ -28,12 +28,13 @@ class ShippingContactBuilder implements BuilderInterface
         $order = $paymentDO->getOrder();
 
         $shipping = $order->getShippingAddress();
+        
         if ($shipping) {
             $request['shipping_contact'] = [
                 'receiver' => $this->getCustomerName($shipping),
                 'phone' => $shipping->getTelephone(),
                 'address' => [
-                    'street1' => $shipping->getStreetLine1(),
+                    'street1' => $shipping->getStreet()[0],
                     'city' => $shipping->getCity(),
                     'state' => $shipping->getRegionCode(),
                     'country' => $shipping->getCountryId(),
