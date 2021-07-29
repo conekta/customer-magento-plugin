@@ -4,6 +4,7 @@ namespace Conekta\Payments\Gateway\Request;
 use Conekta\Payments\Logger\Logger as ConektaLogger;
 use Magento\Payment\Gateway\Helper\SubjectReader;
 use Magento\Payment\Gateway\Request\BuilderInterface;
+use Conekta\Payments\Helper\Data as ConektaHelper;
 
 class ShippingContactBuilder implements BuilderInterface
 {
@@ -13,11 +14,13 @@ class ShippingContactBuilder implements BuilderInterface
 
     public function __construct(
         SubjectReader $subjectReader,
-        ConektaLogger $conektaLogger
+        ConektaLogger $conektaLogger,
+        ConektaHelper $conektaHelper
     ) {
         $this->_conektaLogger = $conektaLogger;
         $this->_conektaLogger->info('Request ShippingContactBuilder :: __construct');
         $this->subjectReader = $subjectReader;
+        $this->_conektaHelper = $conektaHelper;
     }
 
     public function build(array $buildSubject)
@@ -30,11 +33,19 @@ class ShippingContactBuilder implements BuilderInterface
         $shipping = $order->getShippingAddress();
         
         if ($shipping) {
+            $version = (int)str_replace('.', '', $this->_conektaHelper->getMageVersion());
+            $street = "";
+            if ($version >= 243) {
+                $street = $shipping->getStreet()[0];
+            } else {
+                $street = $shipping->getStreetLine1();
+            }
+
             $request['shipping_contact'] = [
                 'receiver' => $this->getCustomerName($shipping),
                 'phone' => $shipping->getTelephone(),
                 'address' => [
-                    'street1' => $shipping->getStreet()[0],
+                    'street1' => $street,
                     'city' => $shipping->getCity(),
                     'state' => $shipping->getRegionCode(),
                     'country' => $shipping->getCountryId(),
