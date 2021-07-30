@@ -75,7 +75,6 @@ define(
             },
 
             reRender: function(total){
-
                 var baseGrandTotal = quote.totals._latestValue.base_grand_total;
                 var shippingAddress = quote.shippingAddress._latestValue?.getCacheKey();
                 var shippingMethodCode = '';
@@ -112,13 +111,14 @@ define(
                 this.renderProperties.billingAddress = strBillingAddr;
                 
                 //check for guest email changes on virtual cart
+                var actuaGuestEmail = uiRegistry.get('checkout.steps.billing-step.payment.customer-email').email();
                 if (!customer.isLoggedIn() && 
                     quote.isVirtual && 
-                    quote.guestEmail !== this.renderProperties.guestEmail
+                    actuaGuestEmail !== this.renderProperties.guestEmail
                 ) {
                     hasToReRender = true;
                 }
-                this.renderProperties.guestEmail = quote.guestEmail;
+                this.renderProperties.guestEmail = actuaGuestEmail;
 
                 if(hasToReRender){
                     this.loadCheckoutId();
@@ -126,7 +126,6 @@ define(
             },
 
             validateRenderEmbedForm: function(){
-                
                 var isValid = true;
 
                 /**
@@ -140,7 +139,7 @@ define(
                     (
                         !customer.isLoggedIn() && 
                         quote.isVirtual && 
-                        quote.guestEmail
+                        this.renderProperties.guestEmail
                     )
                    )
                 ) {
