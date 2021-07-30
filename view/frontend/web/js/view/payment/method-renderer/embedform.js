@@ -9,11 +9,11 @@ define(
         'Magento_Customer/js/model/customer',
         'Magento_Payment/js/model/credit-card-validation/validator',
         'mage/storage',
-        'Magento_Checkout/js/model/customer-email-validator'
+        'uiRegistry'
     ],
-    function (ko, CONEKTA, conektaCheckout, Component, $, quote, customer, validator, storage, emailValidator) {
+    function (ko, CONEKTA, conektaCheckout, Component, $, quote, customer, validator, storage, uiRegistry) {
         'use strict';
-
+        
         return Component.extend({
             defaults: {
                 template: 'Conekta_Payments/payment/base-form',
@@ -22,14 +22,15 @@ define(
                     shippingMethodCode: '',
                     quoteBaseGrandTotal: '',
                     shippingAddress: '',
-                    billingAddress: ''
-                },
+                    billingAddress: '',
+                    guestEmail: ''
+                }
             },
             
             getFormTemplate: function(){
                 return 'Conekta_Payments/payment/embedform/form'
             },
-
+            
             initObservable: function () {
 
                 this._super()
@@ -43,7 +44,7 @@ define(
                 this.iframOrderData('');
                 this.checkoutId('');
                 this.conektaError(null);
-                console.log('emailValidator', emailValidator)
+                
                 var baseGrandTotal = quote.totals._latestValue.base_grand_total;
                 var shippingAddress = quote.shippingAddress._latestValue?.getCacheKey();
                 var billingAddress = JSON.stringify(quote.billingAddress());
@@ -56,11 +57,15 @@ define(
                 this.renderProperties.shippingMethod = shippingMethodCode;
                 this.renderProperties.shippingAddress = shippingAddress;
                 this.renderProperties.billingAddress = billingAddress;
+                this.renderProperties.guestEmail = quote.guestEmail;
+                
+                //Suscriptions to re-render
                 quote.totals.subscribe(this.reRender, this);
-                quote.billingAddress.subscribe(function(){
-                    console.log('this', this)
-                    console.log('billing', quote.billingAddress)
-                })
+                uiRegistry
+                    .get('checkout.steps.billing-step.payment.customer-email')
+                    .email
+                    .subscribe(this.reRender, this);
+
                 return this;
             },
             
@@ -68,7 +73,7 @@ define(
                 var self = this;
                 this._super();
             },
-            
+
             reRender: function(total){
 
                 var baseGrandTotal = quote.totals._latestValue.base_grand_total;
@@ -79,41 +84,65 @@ define(
                 }
                 
                 var hasToReRender = false;
+
+                //check for total changes
                 if (baseGrandTotal !== this.renderProperties.quoteBaseGrandTotal) {
                     this.renderProperties.quoteBaseGrandTotal = baseGrandTotal;
                     hasToReRender = true;
                 }
 
+                //check for shipping methods changes
                 if (shippingMethodCode !== this.renderProperties.shippingMethod) {
                     this.renderProperties.shippingMethod = shippingMethodCode;
                     hasToReRender = true;
                 }
 
+                //check for shipping changes
                 if (shippingAddress !== this.renderProperties.shippingAddress) {
                     this.renderProperties.shippingAddress = shippingAddress;
                     hasToReRender = true;
                 }
 
+                //check for billing changes
                 var quoteBilling = quote.billingAddress();
                 var strBillingAddr = quoteBilling? JSON.stringify(quote.billingAddress()) : '';
                 if(strBillingAddr !== this.renderProperties.billingAddress ){
                     hasToReRender = true;
                 }
                 this.renderProperties.billingAddress = strBillingAddr;
+                
+                //check for guest email changes on virtual cart
+                if (!customer.isLoggedIn() && 
+                    quote.isVirtual && 
+                    quote.guestEmail !== this.renderProperties.guestEmail
+                ) {
+                    hasToReRender = true;
+                }
+                this.renderProperties.guestEmail = quote.guestEmail;
+
                 if(hasToReRender){
                     this.loadCheckoutId();
-                }
-                
-                    
+                }    
             },
 
             validateRenderEmbedForm: function(){
                 
                 var isValid = true;
 
-                if (this.renderProperties.billingAddress &&
-                    //emailValidator.validate() &&
-                    $('#conekta_ef-form').valid()
+                /**
+                 * Allow render if:
+                 *  - Billing addres has been set
+                 *  - Customer is logged in. In case is not, check if
+                 *    cart is virtual and guest email has been set
+                 */
+                if (this.renderProperties.billingAddress && 
+                    (customer.isLoggedIn() ||
+                    (
+                        !customer.isLoggedIn() && 
+                        quote.isVirtual && 
+                        quote.guestEmail
+                    )
+                   )
                 ) {
                     isValid = true;
                     this.conektaError(null);
@@ -122,22 +151,6 @@ define(
                     this.conektaError('Complete todos los campos requeridos para continuar');
                 }
                 
-                /*
-                var formConekta = $('#conekta_ef-form');
-                console.log(formConekta)
-                console.log('valid-conekta',formConekta.valid())
-                */
-                //console.log(formConekta.validation())
-                //console.log(formConekta.validation('isValid'))
-
-                /*
-                var formLogin = $('#checkout-step-payment form.form.form-login');
-                console.log(formLogin)
-                console.log('valid-login',formLogin.valid())
-                */
-                //console.log(formLogin.validation())
-                //console.log(formLogin.validation('isValid'))
-
                 return isValid;
             },
 
@@ -197,7 +210,7 @@ define(
                         self.beforePlaceOrder();
                     }
                 });
-                console.log(window.ConektaCheckoutComponents.Integration);
+                
                 $('#conektaIframeContainer').find('iframe').attr('data-cy', 'the-frame');
             },
 

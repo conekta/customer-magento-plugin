@@ -91,10 +91,12 @@ class CreateOrder extends \Magento\Framework\App\Action\Action implements HttpPo
                 
                 $response['checkout_id'] = $order['checkout']['id'];
             } catch (\Exception $e) {
-                $this->logger->critical($e, $orderParams);
+                
                 $errorMessage = 'Ha ocurrido un error inesperado. Notifique al dueño de la tienda.';
                 if ($e instanceof ConektaException) {
                     $errorMessage = $e->getMessage();
+                } else {
+                    $this->logger->critical($e, $orderParams);
                 }
 
                 $resultJson->setHttpResponseCode(\Magento\Framework\Webapi\Exception::HTTP_BAD_REQUEST);
