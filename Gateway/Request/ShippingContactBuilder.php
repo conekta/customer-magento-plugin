@@ -5,7 +5,6 @@ use Conekta\Payments\Logger\Logger as ConektaLogger;
 use Magento\Payment\Gateway\Helper\SubjectReader;
 use Magento\Payment\Gateway\Request\BuilderInterface;
 use Conekta\Payments\Helper\Data as ConektaHelper;
-use Magento\Framework\Exception\LocalizedException;
 
 class ShippingContactBuilder implements BuilderInterface
 {
@@ -18,12 +17,12 @@ class ShippingContactBuilder implements BuilderInterface
     public function __construct(
         SubjectReader $subjectReader,
         ConektaLogger $conektaLogger,
-        ConektaHelper $_conektaHelper
+        ConektaHelper $conektaHelper
     ) {
         $this->_conektaLogger = $conektaLogger;
         $this->_conektaLogger->info('Request ShippingContactBuilder :: __construct');
         $this->subjectReader = $subjectReader;
-        $this->_conektaHelper = $_conektaHelper;
+        $this->_conektaHelper = $conektaHelper;
     }
 
     public function build(array $buildSubject)
