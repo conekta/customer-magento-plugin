@@ -275,7 +275,7 @@ class Data extends AbstractHelper
             $expirationUnit = "days";
         }
 
-        if(empty($expirationValue)){
+        if (empty($expirationValue)) {
             $expirationValue = 3;
         }
 

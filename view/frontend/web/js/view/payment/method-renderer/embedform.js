@@ -7,12 +7,14 @@ define(
         'jquery',
         'Magento_Checkout/js/model/quote',
         'Magento_Customer/js/model/customer',
-        'Magento_Payment/js/model/credit-card-validation/validator',
-        'mage/storage'
+        'Magento_Checkout/js/checkout-data',
+        'mage/storage',
+        'uiRegistry',
+        'domReady!'
     ],
-    function (ko, CONEKTA, conektaCheckout, Component, $, quote, customer, validator, storage) {
+    function (ko, CONEKTA, conektaCheckout, Component, $, quote, customer, validator, storage, uiRegistry) {
         'use strict';
-
+        
         return Component.extend({
             defaults: {
                 template: 'Conekta_Payments/payment/base-form',
@@ -21,14 +23,16 @@ define(
                     shippingMethodCode: '',
                     quoteBaseGrandTotal: '',
                     shippingAddress: '',
-                    billingAddress: ''
-                },
+                    billingAddress: '',
+                    guestEmail: '',
+                    isLoggedIn: '',
+                }
             },
             
             getFormTemplate: function(){
                 return 'Conekta_Payments/payment/embedform/form'
             },
-
+            
             initObservable: function () {
 
                 this._super()
@@ -37,15 +41,24 @@ define(
                         'isIframeLoaded',
                         'isVisiblePaymentButton',
                         'iframOrderData',
-                        'conektaError'
+                        'conektaError',
+                        'isFormLoading'
                 ]);
                 this.iframOrderData('');
                 this.checkoutId('');
                 this.conektaError(null);
+                this.isFormLoading(false);
                 
                 var baseGrandTotal = quote.totals._latestValue.base_grand_total;
-                var shippingAddress = quote.shippingAddress._latestValue?.getCacheKey();
-                var billingAddress = JSON.stringify(quote.billingAddress());
+                
+                var shippingAddress = '';
+                if(quote.shippingAddress())
+                    shippingAddress = JSON.stringify(quote.shippingAddress());
+
+                var billingAddress = '';
+                if(quote.billingAddress())
+                    billingAddress = JSON.stringify(quote.billingAddress());
+
                 var shippingMethodCode = '';
                 if(quote.shippingMethod._latestValue){
                     shippingMethodCode = quote.shippingMethod._latestValue.method_code;
@@ -55,83 +68,175 @@ define(
                 this.renderProperties.shippingMethod = shippingMethodCode;
                 this.renderProperties.shippingAddress = shippingAddress;
                 this.renderProperties.billingAddress = billingAddress;
-
+                this.renderProperties.guestEmail = quote.guestEmail;
+                this.renderProperties.isLoggedIn = customer.isLoggedIn();
+                
+                //Suscriptions to re-render
                 quote.totals.subscribe(this.reRender, this);
+                quote.billingAddress.subscribe(this.reRender, this);
+                customer.isLoggedIn.subscribe(this.reRender, this);
+                uiRegistry
+                    .get('checkout.steps.billing-step.payment.customer-email')
+                    .email
+                    .subscribe(this.reRender, this);
+
                 return this;
             },
             
             initialize: function() {
                 var self = this;
                 this._super();
+                this.initializeForm();
             },
-            
+
+            initializeForm: function(){
+                //if doesn't rendered yet, then tries to render
+                if(!this.reRender()){
+                    
+                    this.isFormLoading(true);
+                    this.loadCheckoutId();
+                }
+            },
+
             reRender: function(total){
                 
+                if(this.isFormLoading())
+                    return;
+
+                this.isFormLoading(true);
+
                 var baseGrandTotal = quote.totals._latestValue.base_grand_total;
-                var shippingAddress = quote.shippingAddress._latestValue?.getCacheKey();
+                
                 var shippingMethodCode = '';
                 if(quote.shippingMethod._latestValue){
                     shippingMethodCode = quote.shippingMethod._latestValue.method_code;
                 }
                 
                 var hasToReRender = false;
+
+                //check for total changes
                 if (baseGrandTotal !== this.renderProperties.quoteBaseGrandTotal) {
                     this.renderProperties.quoteBaseGrandTotal = baseGrandTotal;
                     hasToReRender = true;
                 }
 
+                //check for shipping methods changes
                 if (shippingMethodCode !== this.renderProperties.shippingMethod) {
                     this.renderProperties.shippingMethod = shippingMethodCode;
                     hasToReRender = true;
                 }
 
+                //check for shipping changes
+                var shippingAddress = '';
+                if(quote.shippingAddress()) shippingAddress = JSON.stringify(quote.shippingAddress());
                 if (shippingAddress !== this.renderProperties.shippingAddress) {
-                    this.renderProperties.shippingAddress = shippingAddress;
                     hasToReRender = true;
                 }
+                this.renderProperties.shippingAddress = shippingAddress;
 
-                var strBillingAddr = JSON.stringify(quote.billingAddress());
+                //check for billing changes
+                var quoteBilling = quote.billingAddress();
+                var strBillingAddr = quoteBilling? JSON.stringify(quote.billingAddress()) : '';
                 if(strBillingAddr !== this.renderProperties.billingAddress ){
                     hasToReRender = true;
                 }
                 this.renderProperties.billingAddress = strBillingAddr;
+                                
+                var actuaGuestEmail = quote.guestEmail;
+                if (!customer.isLoggedIn() && 
+                    quote.isVirtual()
+                ){
+                
+                    //If is virtual, guest mail guets from uiregistry
+                    actuaGuestEmail = uiRegistry.get('checkout.steps.billing-step.payment.customer-email').email();
+                    
+                    //check for guest email changes on virtual cart
+                    if(actuaGuestEmail !== this.renderProperties.guestEmail) {
+                        hasToReRender = true;
+                    }
+                }
+                this.renderProperties.guestEmail = actuaGuestEmail;
 
-                if(hasToReRender){
+                //Check if customer is logged in changes
+                if(customer.isLoggedIn() !== this.renderProperties.isLoggedIn){
+                    hasToReRender = true;
+                }
+                this.renderProperties.isLoggedIn = customer.isLoggedIn();
+
+                if (hasToReRender) {
                     this.loadCheckoutId();
+                } else {
+                    this.isFormLoading(false);
+                }
+
+                return hasToReRender;
+            },
+
+            validateRenderEmbedForm: function(){
+                var isValid = true;
+
+                if (!this.renderProperties.billingAddress) {
+                    this.conektaError('Información de Facturación: Complete todos los campos requeridos de para continuar');
+                    return false;
+                }
+
+                if (!customer.isLoggedIn() && 
+                    quote.isVirtual() && 
+                    this.renderProperties.guestEmail &&
+                    this.renderProperties.guestEmail !== quote.guestEmail
+                ) {
+                    this.conektaError('Ingrese un email válido para continuar');
+                    return false;
+                }
+
+                if (!customer.isLoggedIn() && 
+                    !quote.isVirtual() && 
+                    !quote.guestEmail
+                ) {
+                    this.conektaError('Ingrese un email válido para continuar');
+                    return false;
                 }
                 
-                    
+                return true;
             },
 
             loadCheckoutId: function() {
                 var self = this;
                 var guest_email = '';
                 if (this.isLoggedIn() === false) {
-                    guest_email = quote.guestEmail;
+                    guest_email = this.renderProperties.guestEmail;
                 }
                 var params = {
                     'guestEmail': guest_email
                 };
-
-               return  $.ajax({
-                    type: 'POST',
-                    url: self.getcreateOrderUrl(),
-                    data: params,
-                    async: true,
-                    showLoader: true,
-                    success: function (response) {
-                        self.conektaError(null);
-                        self.checkoutId(response.checkout_id);
-                        
-                        if(self.checkoutId()){
-                            self.renderizeEmbedForm();
+                
+                if(this.validateRenderEmbedForm()){
+                    $.ajax({
+                        type: 'POST',
+                        url: self.getcreateOrderUrl(),
+                        data: params,
+                        async: true,
+                        showLoader: true,
+                        success: function (response) {
+                            self.conektaError(null);
+                            self.checkoutId(response.checkout_id);
+                            
+                            if(self.checkoutId()){
+                                self.renderizeEmbedForm();
+                            }else{
+                                self.isFormLoading(false);
+                            }
+                        },
+                        error: function (xhr, status, error) {
+                            console.error(status);
+                            self.conektaError(xhr.responseJSON.error_message);
+                            self.isFormLoading(false);
                         }
-                    },
-                    error: function (xhr, status, error) {
-                        console.error(status);
-                        self.conektaError(xhr.responseJSON.error_message);
-                    }
-                });
+                    })
+                }else{
+                    this.isFormLoading(false);
+                }
+                
             },
 
             renderizeEmbedForm: function(){
@@ -156,7 +261,9 @@ define(
                         self.beforePlaceOrder();
                     }
                 });
+                
                 $('#conektaIframeContainer').find('iframe').attr('data-cy', 'the-frame');
+                self.isFormLoading(false);
             },
 
             getData: function () {
@@ -173,12 +280,7 @@ define(
                             'order_id': params.charge.order_id,
                             'txn_id': params.charge.id,
                             'card_token': $("#" + this.getCode() + "_card_token").val(),
-                            'iframe_payment': true,
-                            //'cc_exp_year': this.creditCardExpYear(),
-                            //'cc_exp_month': this.creditCardExpMonth(),
-                            //'cc_bin': number.substring(0, 6),
-                            //'saved_card': this.selectedPaymentId(),
-                            //'saved_card_later': this.isSaveCardEnable(),
+                            'iframe_payment': true
                         }
                     };
                     return data;
@@ -193,12 +295,7 @@ define(
                         'reference': '',                        
                         'iframe_payment': false,
                         'order_id': '',
-                        'txn_id': '',
-                        //'cc_exp_year': this.creditCardExpYear(),
-                        //'cc_exp_month': this.creditCardExpMonth(),
-                        //'cc_bin': number.substring(0, 6),
-                        //'saved_card': this.selectedPaymentId(),
-                        //'saved_card_later': this.isSaveCardEnable(),
+                        'txn_id': ''
                     }
                 };
 
