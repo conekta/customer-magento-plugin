@@ -175,7 +175,7 @@ define(
                     quote.isVirtual() && 
                     this.renderProperties.guestEmail &&
                     this.renderProperties.guestEmail !== quote.guestEmail
-                ) {console.log('quoteVirtual', quote)
+                ) {
                     this.conektaError('Ingrese un email válido para continuar');
                     return false;
                 }
@@ -183,7 +183,7 @@ define(
                 if (!customer.isLoggedIn() && 
                     !quote.isVirtual() && 
                     !quote.guestEmail
-                ) { console.log('quote', quote)
+                ) {
                     this.conektaError('Ingrese un email válido para continuar');
                     return false;
                 }
