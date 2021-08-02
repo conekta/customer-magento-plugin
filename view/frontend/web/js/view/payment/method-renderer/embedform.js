@@ -50,8 +50,15 @@ define(
                 this.isFormLoading(false);
                 
                 var baseGrandTotal = quote.totals._latestValue.base_grand_total;
-                var shippingAddress = quote.shippingAddress._latestValue?.getCacheKey();
-                var billingAddress = JSON.stringify(quote.billingAddress());
+                
+                var shippingAddress = '';
+                if(quote.shippingAddress())
+                    shippingAddress = JSON.stringify(quote.shippingAddress());
+
+                var billingAddress = '';
+                if(quote.billingAddress())
+                    billingAddress = JSON.stringify(quote.billingAddress());
+
                 var shippingMethodCode = '';
                 if(quote.shippingMethod._latestValue){
                     shippingMethodCode = quote.shippingMethod._latestValue.method_code;
@@ -92,14 +99,15 @@ define(
             },
 
             reRender: function(total){
-                
+                console.log('billing', quote.billingAddress())
+                console.log('shipping', quote.shippingAddress())
                 if(this.isFormLoading())
                     return;
 
                 this.isFormLoading(true);
 
                 var baseGrandTotal = quote.totals._latestValue.base_grand_total;
-                var shippingAddress = quote.shippingAddress._latestValue?.getCacheKey();
+                
                 var shippingMethodCode = '';
                 if(quote.shippingMethod._latestValue){
                     shippingMethodCode = quote.shippingMethod._latestValue.method_code;
@@ -120,10 +128,12 @@ define(
                 }
 
                 //check for shipping changes
+                var shippingAddress = '';
+                if(quote.shippingAddress()) shippingAddress = JSON.stringify(quote.shippingAddress());
                 if (shippingAddress !== this.renderProperties.shippingAddress) {
-                    this.renderProperties.shippingAddress = shippingAddress;
                     hasToReRender = true;
                 }
+                this.renderProperties.shippingAddress = shippingAddress;
 
                 //check for billing changes
                 var quoteBilling = quote.billingAddress();
