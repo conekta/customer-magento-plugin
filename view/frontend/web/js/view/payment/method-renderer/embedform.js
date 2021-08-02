@@ -99,8 +99,7 @@ define(
             },
 
             reRender: function(total){
-                console.log('billing', quote.billingAddress())
-                console.log('shipping', quote.shippingAddress())
+                
                 if(this.isFormLoading())
                     return;
 
