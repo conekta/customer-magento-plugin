@@ -9,7 +9,8 @@ define(
         'Magento_Customer/js/model/customer',
         'Magento_Checkout/js/checkout-data',
         'mage/storage',
-        'uiRegistry'
+        'uiRegistry',
+        'domReady!'
     ],
     function (ko, CONEKTA, conektaCheckout, Component, $, quote, customer, validator, storage, uiRegistry) {
         'use strict';
@@ -23,7 +24,8 @@ define(
                     quoteBaseGrandTotal: '',
                     shippingAddress: '',
                     billingAddress: '',
-                    guestEmail: ''
+                    guestEmail: '',
+                    isLoggedIn: '',
                 }
             },
             
@@ -60,10 +62,12 @@ define(
                 this.renderProperties.shippingAddress = shippingAddress;
                 this.renderProperties.billingAddress = billingAddress;
                 this.renderProperties.guestEmail = quote.guestEmail;
+                this.renderProperties.isLoggedIn = customer.isLoggedIn();
                 
                 //Suscriptions to re-render
                 quote.totals.subscribe(this.reRender, this);
                 quote.billingAddress.subscribe(this.reRender, this);
+                customer.isLoggedIn.subscribe(this.reRender, this);
                 uiRegistry
                     .get('checkout.steps.billing-step.payment.customer-email')
                     .email
@@ -75,11 +79,14 @@ define(
             initialize: function() {
                 var self = this;
                 this._super();
+                this.initializeForm();
             },
 
             initializeForm: function(){
                 //if doesn't rendered yet, then tries to render
                 if(!this.reRender()){
+                    
+                    this.isFormLoading(true);
                     this.loadCheckoutId();
                 }
             },
@@ -125,11 +132,10 @@ define(
                     hasToReRender = true;
                 }
                 this.renderProperties.billingAddress = strBillingAddr;
-                
-                
+                                
                 var actuaGuestEmail = quote.guestEmail;
                 if (!customer.isLoggedIn() && 
-                    quote.isVirtual 
+                    quote.isVirtual()
                 ){
                 
                     //If is virtual, guest mail guets from uiregistry
@@ -141,6 +147,12 @@ define(
                     }
                 }
                 this.renderProperties.guestEmail = actuaGuestEmail;
+
+                //Check if customer is logged in changes
+                if(customer.isLoggedIn() !== this.renderProperties.isLoggedIn){
+                    hasToReRender = true;
+                }
+                this.renderProperties.isLoggedIn = customer.isLoggedIn();
 
                 if (hasToReRender) {
                     this.loadCheckoutId();
@@ -160,18 +172,18 @@ define(
                 }
 
                 if (!customer.isLoggedIn() && 
-                    quote.isVirtual && 
+                    quote.isVirtual() && 
                     this.renderProperties.guestEmail &&
                     this.renderProperties.guestEmail !== quote.guestEmail
-                ) {
+                ) {console.log('quoteVirtual', quote)
                     this.conektaError('Ingrese un email válido para continuar');
                     return false;
                 }
 
                 if (!customer.isLoggedIn() && 
-                    !quote.isVirtual && 
-                    quote.guestEmail
-                ) {
+                    !quote.isVirtual() && 
+                    !quote.guestEmail
+                ) { console.log('quote', quote)
                     this.conektaError('Ingrese un email válido para continuar');
                     return false;
                 }
@@ -199,9 +211,11 @@ define(
                         success: function (response) {
                             self.conektaError(null);
                             self.checkoutId(response.checkout_id);
-                            self.isFormLoading(false);
+                            
                             if(self.checkoutId()){
                                 self.renderizeEmbedForm();
+                            }else{
+                                self.isFormLoading(false);
                             }
                         },
                         error: function (xhr, status, error) {
@@ -240,6 +254,7 @@ define(
                 });
                 
                 $('#conektaIframeContainer').find('iframe').attr('data-cy', 'the-frame');
+                self.isFormLoading(false);
             },
 
             getData: function () {
