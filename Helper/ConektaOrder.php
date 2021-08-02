@@ -190,7 +190,7 @@ class ConektaOrder extends AbstractHelper
         ];
         
         $threeDsEnabled =  $this->_conektaHelper->is3DSEnabled();
-        $saveCardEnabled =  $this->_conektaHelper->isSaveCardEnabled() && 
+        $saveCardEnabled = $this->_conektaHelper->isSaveCardEnabled() &&
             $customerId;
         $installments = $this->getMonthlyInstallments();
         $validOrderWithCheckout['checkout']    = [
