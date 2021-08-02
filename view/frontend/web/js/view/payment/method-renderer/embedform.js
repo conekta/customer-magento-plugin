@@ -7,7 +7,7 @@ define(
         'jquery',
         'Magento_Checkout/js/model/quote',
         'Magento_Customer/js/model/customer',
-        'Magento_Payment/js/model/credit-card-validation/validator',
+        'Magento_Checkout/js/checkout-data',
         'mage/storage',
         'uiRegistry'
     ],
@@ -39,11 +39,13 @@ define(
                         'isIframeLoaded',
                         'isVisiblePaymentButton',
                         'iframOrderData',
-                        'conektaError'
+                        'conektaError',
+                        'isFormLoading'
                 ]);
                 this.iframOrderData('');
                 this.checkoutId('');
                 this.conektaError(null);
+                this.isFormLoading(false);
                 
                 var baseGrandTotal = quote.totals._latestValue.base_grand_total;
                 var shippingAddress = quote.shippingAddress._latestValue?.getCacheKey();
@@ -61,6 +63,7 @@ define(
                 
                 //Suscriptions to re-render
                 quote.totals.subscribe(this.reRender, this);
+                quote.billingAddress.subscribe(this.reRender, this);
                 uiRegistry
                     .get('checkout.steps.billing-step.payment.customer-email')
                     .email
@@ -75,6 +78,12 @@ define(
             },
 
             reRender: function(total){
+                
+                if(this.isFormLoading())
+                    return;
+
+                this.isFormLoading(true);
+
                 var baseGrandTotal = quote.totals._latestValue.base_grand_total;
                 var shippingAddress = quote.shippingAddress._latestValue?.getCacheKey();
                 var shippingMethodCode = '';
@@ -120,9 +129,11 @@ define(
                 }
                 this.renderProperties.guestEmail = actuaGuestEmail;
 
-                if(hasToReRender){
+                if (hasToReRender) {
                     this.loadCheckoutId();
-                }    
+                } else {
+                    this.isFormLoading(false);
+                }
             },
 
             validateRenderEmbedForm: function(){
@@ -131,7 +142,8 @@ define(
                 /**
                  * Allow render if:
                  *  - Billing addres has been set
-                 *  - Customer is logged in. In case is not, check if
+                 *  - Customer is logged in. 
+                 *  - Customer is not logged in and
                  *    cart is virtual and guest email has been set
                  */
                 if (this.renderProperties.billingAddress && 
@@ -139,7 +151,8 @@ define(
                     (
                         !customer.isLoggedIn() && 
                         quote.isVirtual && 
-                        this.renderProperties.guestEmail
+                        this.renderProperties.guestEmail &&
+                        this.renderProperties.guestEmail === quote.guestEmail
                     )
                    )
                 ) {
@@ -157,14 +170,14 @@ define(
                 var self = this;
                 var guest_email = '';
                 if (this.isLoggedIn() === false) {
-                    guest_email = quote.guestEmail;
+                    guest_email = this.renderProperties.guestEmail;
                 }
                 var params = {
                     'guestEmail': guest_email
                 };
                 
                 if(this.validateRenderEmbedForm()){
-                    return  $.ajax({
+                    $.ajax({
                         type: 'POST',
                         url: self.getcreateOrderUrl(),
                         data: params,
@@ -173,7 +186,7 @@ define(
                         success: function (response) {
                             self.conektaError(null);
                             self.checkoutId(response.checkout_id);
-                            
+                            self.isFormLoading(false);
                             if(self.checkoutId()){
                                 self.renderizeEmbedForm();
                             }
@@ -181,8 +194,11 @@ define(
                         error: function (xhr, status, error) {
                             console.error(status);
                             self.conektaError(xhr.responseJSON.error_message);
+                            self.isFormLoading(false);
                         }
-                    });
+                    })
+                }else{
+                    this.isFormLoading(false);
                 }
                 
             },
