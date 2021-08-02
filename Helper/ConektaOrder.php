@@ -148,7 +148,7 @@ class ConektaOrder extends AbstractHelper
                 $customerRequest['email'] = $guestEmail;
             }
             $customerRequest['phone'] = $billingAddress->getTelephone();
-            $this->conektaLogger->info('CUSTOMER INFO', $customerRequest);
+            
             if (empty($conektaCustomerId)) {
                 $conektaAPI = $this->conektaCustomer->create($customerRequest);
                 $conektaCustomerId = $conektaAPI->id;
