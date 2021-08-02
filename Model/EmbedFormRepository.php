@@ -130,7 +130,6 @@ class EmbedFormRepository implements EmbedFormRepositoryInterface
                 //If map between conekta order and quote exist, then just updated conekta order
                 $conektaOrder = $this->conektaOrderApi->find($conektaQuote->getConektaOrderId());
                 
-                //TODO detect if checkout config has been modified
                 unset($orderParams['customer_info']);
                 $conektaOrder->update($orderParams);
             }

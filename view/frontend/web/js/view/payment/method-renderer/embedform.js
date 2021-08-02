@@ -77,6 +77,13 @@ define(
                 this._super();
             },
 
+            initializeForm: function(){
+                //if doesn't rendered yet, then tries to render
+                if(!this.reRender()){
+                    this.loadCheckoutId();
+                }
+            },
+
             reRender: function(total){
                 
                 if(this.isFormLoading())
@@ -119,13 +126,19 @@ define(
                 }
                 this.renderProperties.billingAddress = strBillingAddr;
                 
-                //check for guest email changes on virtual cart
-                var actuaGuestEmail = uiRegistry.get('checkout.steps.billing-step.payment.customer-email').email();
+                
+                var actuaGuestEmail = quote.guestEmail;
                 if (!customer.isLoggedIn() && 
-                    quote.isVirtual && 
-                    actuaGuestEmail !== this.renderProperties.guestEmail
-                ) {
-                    hasToReRender = true;
+                    quote.isVirtual 
+                ){
+                
+                    //If is virtual, guest mail guets from uiregistry
+                    actuaGuestEmail = uiRegistry.get('checkout.steps.billing-step.payment.customer-email').email();
+                    
+                    //check for guest email changes on virtual cart
+                    if(actuaGuestEmail !== this.renderProperties.guestEmail) {
+                        hasToReRender = true;
+                    }
                 }
                 this.renderProperties.guestEmail = actuaGuestEmail;
 
@@ -134,36 +147,36 @@ define(
                 } else {
                     this.isFormLoading(false);
                 }
+
+                return hasToReRender;
             },
 
             validateRenderEmbedForm: function(){
                 var isValid = true;
 
-                /**
-                 * Allow render if:
-                 *  - Billing addres has been set
-                 *  - Customer is logged in. 
-                 *  - Customer is not logged in and
-                 *    cart is virtual and guest email has been set
-                 */
-                if (this.renderProperties.billingAddress && 
-                    (customer.isLoggedIn() ||
-                    (
-                        !customer.isLoggedIn() && 
-                        quote.isVirtual && 
-                        this.renderProperties.guestEmail &&
-                        this.renderProperties.guestEmail === quote.guestEmail
-                    )
-                   )
+                if (!this.renderProperties.billingAddress) {
+                    this.conektaError('Información de Facturación: Complete todos los campos requeridos de para continuar');
+                    return false;
+                }
+
+                if (!customer.isLoggedIn() && 
+                    quote.isVirtual && 
+                    this.renderProperties.guestEmail &&
+                    this.renderProperties.guestEmail !== quote.guestEmail
                 ) {
-                    isValid = true;
-                    this.conektaError(null);
-                } else {
-                    isValid = false;
-                    this.conektaError('Complete todos los campos requeridos para continuar');
+                    this.conektaError('Ingrese un email válido para continuar');
+                    return false;
+                }
+
+                if (!customer.isLoggedIn() && 
+                    !quote.isVirtual && 
+                    quote.guestEmail
+                ) {
+                    this.conektaError('Ingrese un email válido para continuar');
+                    return false;
                 }
                 
-                return isValid;
+                return true;
             },
 
             loadCheckoutId: function() {

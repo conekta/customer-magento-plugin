@@ -4,6 +4,7 @@ namespace Conekta\Payments\Helper;
 
 use Conekta\Customer as ConektaCustomer;
 use Conekta\Order as ConektaOrderApi;
+use Conekta\Payments\Exception\ConektaException;
 use Conekta\Payments\Helper\Data as ConektaHelper;
 use Conekta\Payments\Logger\Logger as ConektaLogger;
 use Conekta\Payments\Model\Ui\CreditCard\ConfigProvider;
@@ -149,27 +150,21 @@ class ConektaOrder extends AbstractHelper
             $customerRequest['phone'] = $billingAddress->getTelephone();
 
             if (empty($conektaCustomerId)) {
-                try {
-                    $conektaAPI = $this->conektaCustomer->create($customerRequest);
-                    $conektaCustomerId = $conektaAPI->id;
-                    if ($customerId) {
-                        $customer = $this->customerRepository->getById($customerId);
-                        $customer->setCustomAttribute('conekta_customer_id', $conektaCustomerId);
-                        $this->customerRepository->save($customer);
-                    }
-                } catch (\Conekta\Handler $error) {
-                    $this->conektaLogger->info('Create Order. Create Customer: ' .$error->getMessage());
+                $conektaAPI = $this->conektaCustomer->create($customerRequest);
+                $conektaCustomerId = $conektaAPI->id;
+                if ($customerId) {
+                    $customer = $this->customerRepository->getById($customerId);
+                    $customer->setCustomAttribute('conekta_customer_id', $conektaCustomerId);
+                    $this->customerRepository->save($customer);
                 }
+                
             } else {
                 //If cutomer API exists, always update error
                 $customerApi->update($customerRequest);
             }
-        } catch (\Conekta\ProcessingError $error) {
-            $this->conektaLogger->info($error->getMessage());
-        } catch (\Conekta\ParameterValidationError $error) {
-            $this->conektaLogger->info($error->getMessage());
         } catch (\Conekta\Handler $error) {
             $this->conektaLogger->info($error->getMessage());
+            throw new ConektaException(__($error->getMessage()));
         }
 
         $orderItems = $this->getQuote()->getAllItems();
@@ -195,7 +190,8 @@ class ConektaOrder extends AbstractHelper
         ];
         
         $threeDsEnabled =  $this->_conektaHelper->is3DSEnabled();
-        $saveCardEnabled =  $this->_conektaHelper->isSaveCardEnabled();
+        $saveCardEnabled =  $this->_conektaHelper->isSaveCardEnabled() && 
+            $customerId;
         $installments = $this->getMonthlyInstallments();
         $validOrderWithCheckout['checkout']    = [
             'allowed_payment_methods'      => $this->getAllowedPaymentMethods(),
