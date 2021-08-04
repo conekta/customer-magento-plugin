@@ -107,7 +107,7 @@ class Index extends Action implements CsrfAwareActionInterface
                         );
                         return;
                     }
-                    $order->setSate(Order::STATE_PROCESSING);
+                    $order->setState(Order::STATE_PROCESSING);
                     $order->setStatus(Order::STATE_PROCESSING);
 
                     $order->addStatusHistoryComment("Payment received successfully")
