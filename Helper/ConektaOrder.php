@@ -15,9 +15,8 @@ use Magento\Customer\Model\Session as CustomerSession;
 use Magento\Framework\App\Helper\AbstractHelper;
 use Magento\Framework\App\Helper\Context;
 use Magento\Framework\Escaper;
-use Magento\Framework\Exception\LocalizedException;
 
-class ConektaOrder extends AbstractHelper
+class ConektaOrder extends util
 {
     const CURRENCY_CODE = 'mxn';
     const STREET = 'Conekta Street';
@@ -69,7 +68,7 @@ class ConektaOrder extends AbstractHelper
     /**
      * ConektaOrder constructor.
      * @param Context $context
-     * @param Data $conektaHelper
+     * @param ConektaHelper $conektaHelper
      * @param ConektaLogger $conektaLogger
      * @param ConektaCustomer $conektaCustomer
      * @param ConektaOrderApi $conektaOrderApi
@@ -78,7 +77,7 @@ class ConektaOrder extends AbstractHelper
      * @param CustomerRepositoryInterface $customerRepository
      * @param Escaper $_escaper
      * @param \Conekta\Payments\Model\Session $conektaSession
-     * @param array $data
+     * @param \ConfigProvider $conektaConfigProvider
      */
     public function __construct(
         Context $context,
@@ -91,8 +90,7 @@ class ConektaOrder extends AbstractHelper
         CustomerRepositoryInterface $customerRepository,
         Escaper $_escaper,
         \Conekta\Payments\Model\Session $conektaSession,
-        ConfigProvider $conektaConfigProvider,
-        array $data = []
+        ConfigProvider $conektaConfigProvider
     ) {
         parent::__construct($context);
         $this->conektaLogger = $conektaLogger;
@@ -122,6 +120,7 @@ class ConektaOrder extends AbstractHelper
 
         \Conekta\Conekta::setApiKey($this->_conektaHelper->getPrivateKey());
         \Conekta\Conekta::setApiVersion("2.0.0");
+        $customerRequest = [];
         try {
             $customer = $this->customerSession->getCustomer();
             $customerApi = null;
@@ -140,14 +139,24 @@ class ConektaOrder extends AbstractHelper
             $customerRequest = [];
             if ($customerId) {
                 //name without numbers
-                $customerRequest['name'] = preg_replace('/[0-9]+/', '', $customer->getName());
+                $customerRequest['name'] = $customer->getName();
                 $customerRequest['email'] = $customer->getEmail();
             } else {
                 //name without numbers
-                $customerRequest['name'] = preg_replace('/[0-9]+/', '', $billingAddress->getName());
+                $customerRequest['name'] = $billingAddress->getName();
                 $customerRequest['email'] = $guestEmail;
             }
-            $customerRequest['phone'] = $billingAddress->getTelephone();
+            $customerRequest['name'] = $this->removeNameSpecialCharacter($customerRequest['name']);
+            $customerRequest['phone'] = $this->removePhoneSpecialCharacter(
+                $billingAddress->getTelephone()
+            );
+
+            if (strlen($customerRequest['phone']) < 10) {
+                throw new ConektaException(__('Télefono no válido. 
+                    El télefono debe tener al menos 10 carácteres. 
+                    Los caracteres especiales se desestimaran, solo se puede ingresar como 
+                    primer carácter especial: +'));
+            }
             
             if (empty($conektaCustomerId)) {
                 $conektaAPI = $this->conektaCustomer->create($customerRequest);
@@ -163,7 +172,7 @@ class ConektaOrder extends AbstractHelper
                 $customerApi->update($customerRequest);
             }
         } catch (\Conekta\Handler $error) {
-            $this->conektaLogger->info($error->getMessage());
+            $this->conektaLogger->info($error->getMessage(), $customerRequest);
             throw new ConektaException(__($error->getMessage()));
         }
         
@@ -177,7 +186,7 @@ class ConektaOrder extends AbstractHelper
             $this->getQuote()->getId()
         );
 
-        //always needs shipping until conekta api solve issue
+        //always needs shipping due to api does not provide info about merchant type (dropshipping, virtual)
         $needsShippingContact = !$this->getQuote()->getIsVirtual() || true;
         if ($needsShippingContact) {
             $validOrderWithCheckout['shipping_contact'] = $this->_conektaHelper->getShippingContact(
