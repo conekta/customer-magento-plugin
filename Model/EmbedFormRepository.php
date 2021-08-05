@@ -58,6 +58,20 @@ class EmbedFormRepository implements EmbedFormRepositoryInterface
                 debe ingresar una compra superior a $'.ConektaQuoteInterface::MINIMUM_AMOUNT_PER_QUOTE)
             );
         }
+
+        //Shipping contact validations
+        if (strlen($orderParameters["shipping_contact"]["phone"]) < 10 ||
+            strlen($orderParameters["shipping_contact"]["address"]["phone"]) < 10
+        ) {
+            throw new ConektaException(__('Télefono no válido. 
+                El télefono debe tener al menos 10 carácteres. 
+                Los caracteres especiales se desestimaran, solo se puede ingresar como 
+                primer carácter especial: +'));
+        }
+
+        if (strlen($orderParameters["shipping_contact"]["address"]["postal_code"]) !== 5) {
+            throw new ConektaException(__("Código Postal invalido. Debe tener 5 dígitos"));
+        }
     }
 
     /**

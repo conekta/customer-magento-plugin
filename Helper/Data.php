@@ -3,7 +3,6 @@ namespace Conekta\Payments\Helper;
 
 use Conekta\Customer;
 use Conekta\Payments\Logger\Logger as ConektaLogger;
-use Magento\Framework\App\Helper\AbstractHelper;
 use Magento\Framework\App\Helper\Context;
 use Magento\Framework\App\ProductMetadataInterface;
 use Magento\Framework\Encryption\EncryptorInterface;
@@ -13,10 +12,9 @@ use Magento\Customer\Model\Session as CustomerSession;
 use Magento\Catalog\Model\ProductRepository;
 use Magento\Framework\Escaper;
 use Magento\Quote\Api\CartRepositoryInterface;
-use Magento\Quote\Api\Data\CartInterface;
 use Magento\Store\Model\StoreManagerInterface;
 
-class Data extends AbstractHelper
+class Data extends Util
 {
     /**
      * @var ModuleListInterface
@@ -50,8 +48,6 @@ class Data extends AbstractHelper
     
     protected $_cartRepository;
 
-    private $util;
-
     /**
      * Data constructor.
      * @param Context $context
@@ -73,8 +69,7 @@ class Data extends AbstractHelper
         ProductRepository $productRepository,
         Escaper $_escaper,
         CartRepositoryInterface $cartRepository,
-        StoreManagerInterface $storeManager,
-        Util $util
+        StoreManagerInterface $storeManager
     ) {
         parent::__construct($context);
         $this->_moduleList = $moduleList;
@@ -88,7 +83,6 @@ class Data extends AbstractHelper
         $this->_escaper = $_escaper;
         $this->_cartRepository = $cartRepository;
         $this->_storeManager = $storeManager;
-        $this->util = $util;
     }
 
     public function getCurrencyCode()
@@ -408,8 +402,8 @@ class Data extends AbstractHelper
                         }
                     }
                     
-                    $name = $this->util->removeSpecialCharacter($item->getName());
-                    $description = $this->util->removeSpecialCharacter(
+                    $name = $this->removeSpecialCharacter($item->getName());
+                    $description = $this->removeSpecialCharacter(
                         $this->_escaper->escapeHtml($item->getName() . ' - ' . $item->getSku())
                     );
                     $description = substr($description, 0, 250);
@@ -492,23 +486,26 @@ class Data extends AbstractHelper
         }
         
         if ($address) {
+            $phone = $this->removePhoneSpecialCharacter($address->getTelephone());
+
             $shippingContact = [
                 'receiver' => $this->getCustomerName($address),
-                'phone' => $address->getTelephone(),
+                'phone' => $phone,
                 'address' => [
                     'city' => $address->getCity(),
                     'state' => $address->getRegionCode(),
                     'country' => $address->getCountryId(),
-                    'postal_code' => $address->getPostcode(),
-                    'phone' => $address->getTelephone(),
+                    'postal_code' => $this->onlyNumbers($address->getPostcode()),
+                    'phone' => $phone,
                     'email' => $address->getEmail()
                 ]
             ];
 
             $street = $address->getStreet();
-            $shippingContact['address']['street1'] = isset($street[0]) ? $street[0] : 'NO STREET';
+            $streetStr = isset($street[0]) ? $street[0] : 'NO STREET';
+            $shippingContact['address']['street1'] = $this->removeSpecialCharacter($streetStr);
             if (isset($street[1])) {
-                $shippingContact['address']['street2'] = $street[1];
+                $shippingContact['address']['street2'] = $this->removeSpecialCharacter($street[1]);
             }
         }
         return $shippingContact;
@@ -523,7 +520,7 @@ class Data extends AbstractHelper
             $shipping->getLastname()
         );
 
-        return $customerName;
+        return $this->removeNameSpecialCharacter($customerName);
     }
 
     public function getDiscountLines()
