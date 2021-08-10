@@ -37,7 +37,7 @@ class EmbedFormRepository implements EmbedFormRepositoryInterface
      * @return void
      * @throws ConektaException
      */
-    private function validateOrderParameters($orderParameters)
+    private function validateOrderParameters($orderParameters, $orderTotal)
     {
         //Currency
         if (strtoupper($orderParameters['currency']) !== 'MXN') {
@@ -72,19 +72,27 @@ class EmbedFormRepository implements EmbedFormRepositoryInterface
         if (strlen($orderParameters["shipping_contact"]["address"]["postal_code"]) !== 5) {
             throw new ConektaException(__("Código Postal invalido. Debe tener 5 dígitos"));
         }
+
+        //Oxxo validations
+        if (in_array('cash', $orderParameters["checkout"]["allowed_payment_methods"]) &&
+            $orderTotal > 10000
+        ) {
+            throw new ConektaException(__('El monto máximo para pagos con Oxxo es de $10.000'));
+        }
     }
 
     /**
      * @param int $quoteId
      * @param array $orderParams
+     * @param float $orderTotal
      * @return \Conekta\Order
      * @throws ConektaException
      */
-    public function generate($quoteId, $orderParams)
+    public function generate($quoteId, $orderParams, $orderTotal)
     {
 
         //Validate params
-        $this->validateOrderParameters($orderParams);
+        $this->validateOrderParameters($orderParams, $orderTotal);
 
         $conektaQuoteRepo = $this->conektaQuoteRepositoryFactory->create();
 

@@ -83,10 +83,13 @@ class CreateOrder extends \Magento\Framework\App\Action\Action implements HttpPo
                 //generate order params
                 $orderParams = $this->conektaOrderHelper->generateOrderParams($guestEmail);
 
+                $quoteSession = $this->checkoutSession->getQuote();
+
                 //genrates checkout form
                 $order = (array)$this->embedFormRepository->generate(
-                    $this->checkoutSession->getQuote()->getId(),
-                    $orderParams
+                    $quoteSession->getId(),
+                    $orderParams,
+                    $quoteSession->getGrandTotal()
                 );
                 
                 $response['checkout_id'] = $order['checkout']['id'];
