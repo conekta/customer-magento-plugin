@@ -14,7 +14,7 @@ use Magento\Customer\Api\CustomerRepositoryInterface;
 use Magento\Customer\Model\Session as CustomerSession;
 use Magento\Framework\App\Helper\Context;
 
-class ConektaOrder extends util
+class ConektaOrder extends Util
 {
     const CURRENCY_CODE = 'mxn';
     const STREET = 'Conekta Street';
