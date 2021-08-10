@@ -249,7 +249,11 @@ class ConektaOrder extends Util
         if ($this->_conektaHelper->isCreditCardEnabled()) {
             $methods[] = 'card';
         }
-        if ($this->_conektaHelper->isOxxoEnabled()) {
+
+        $total = $this->getQuote()->getGrandTotal();
+        if ($this->_conektaHelper->isOxxoEnabled() &&
+            $total <= 10000
+        ) {
             $methods[] = 'cash';
         }
         if ($this->_conektaHelper->isSpeiEnabled()) {
@@ -267,9 +271,6 @@ class ConektaOrder extends Util
      */
     public function getQuote()
     {
-        if (null === $this->quote) {
-            $this->quote = $this->_checkoutSession->getQuote();
-        }
         return $this->_checkoutSession->getQuote();
     }
 
