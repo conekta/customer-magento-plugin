@@ -10,9 +10,10 @@ define(
         'Magento_Checkout/js/checkout-data',
         'mage/storage',
         'uiRegistry',
-        'domReady!'
+        'domReady!',
+        'Magento_Checkout/js/model/shipping-save-processor'
     ],
-    function (ko, CONEKTA, conektaCheckout, Component, $, quote, customer, validator, storage, uiRegistry) {
+    function (ko, CONEKTA, conektaCheckout, Component, $, quote, customer, validator, storage, uiRegistry, domRe, shSP) {
         'use strict';
         
         return Component.extend({
@@ -73,13 +74,13 @@ define(
                 
                 //Suscriptions to re-render
                 quote.totals.subscribe(this.reRender, this);
-                quote.billingAddress.subscribe(this.reRender, this);
+                quote.billingAddress.subscribe(this.billingAddressChanges, this);
                 customer.isLoggedIn.subscribe(this.reRender, this);
                 uiRegistry
                     .get('checkout.steps.billing-step.payment.customer-email')
                     .email
                     .subscribe(this.reRender, this);
-
+                
                 return this;
             },
             
@@ -98,13 +99,30 @@ define(
                 }
             },
 
+            billingAddressChanges: function() {
+                var self = this;
+                
+                //if no billing info, then form is editing
+                if(!quote.billingAddress()){
+                    self.reRender();
+                    
+                } else if (!quote.isVirtual()) {
+                    self.isFormLoading(false);
+                    shSP.saveShippingInformation()
+                        .done(function(){
+                            self.reRender();
+                        });
+                }
+                
+            },
+
             reRender: function(total){
                 
                 if(this.isFormLoading())
                     return;
 
                 this.isFormLoading(true);
-
+                
                 var baseGrandTotal = quote.totals._latestValue.base_grand_total;
                 
                 var shippingMethodCode = '';
@@ -162,9 +180,10 @@ define(
                     hasToReRender = true;
                 }
                 this.renderProperties.isLoggedIn = customer.isLoggedIn();
-
+                
                 if (hasToReRender) {
-                    this.loadCheckoutId();
+                    this.loadCheckoutId()
+
                 } else {
                     this.isFormLoading(false);
                 }
@@ -182,8 +201,11 @@ define(
 
                 if (!customer.isLoggedIn() && 
                     quote.isVirtual() && 
-                    this.renderProperties.guestEmail &&
-                    this.renderProperties.guestEmail !== quote.guestEmail
+                    (!quote.guestEmail || (
+                        this.renderProperties.guestEmail &&
+                        this.renderProperties.guestEmail !== quote.guestEmail
+                        )
+                    )
                 ) {
                     this.conektaError('Ingrese un email válido para continuar');
                     return false;
@@ -204,12 +226,12 @@ define(
                 var self = this;
                 var guest_email = '';
                 if (this.isLoggedIn() === false) {
-                    guest_email = this.renderProperties.guestEmail;
+                    guest_email = quote.guestEmail;
                 }
                 var params = {
                     'guestEmail': guest_email
                 };
-                
+                console.log('properties', this.renderProperties);
                 if(this.validateRenderEmbedForm()){
                     $.ajax({
                         type: 'POST',

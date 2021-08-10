@@ -12,9 +12,7 @@ use Exception;
 use Magento\Checkout\Model\Session;
 use Magento\Customer\Api\CustomerRepositoryInterface;
 use Magento\Customer\Model\Session as CustomerSession;
-use Magento\Framework\App\Helper\AbstractHelper;
 use Magento\Framework\App\Helper\Context;
-use Magento\Framework\Escaper;
 
 class ConektaOrder extends util
 {
@@ -53,14 +51,6 @@ class ConektaOrder extends util
      */
     protected $customerRepository;
     /**
-     * @var Escaper
-     */
-    protected $_escaper;
-    /**
-     * @var \Conekta\Payments\Model\Session
-     */
-    protected $conektaSession;
-    /**
      * @var ConfigProvider
      */
     protected $conektaConfigProvider;
@@ -75,8 +65,6 @@ class ConektaOrder extends util
      * @param CustomerSession $customerSession
      * @param Session $_checkoutSession
      * @param CustomerRepositoryInterface $customerRepository
-     * @param Escaper $_escaper
-     * @param \Conekta\Payments\Model\Session $conektaSession
      * @param \ConfigProvider $conektaConfigProvider
      */
     public function __construct(
@@ -88,8 +76,6 @@ class ConektaOrder extends util
         CustomerSession $customerSession,
         Session $_checkoutSession,
         CustomerRepositoryInterface $customerRepository,
-        Escaper $_escaper,
-        \Conekta\Payments\Model\Session $conektaSession,
         ConfigProvider $conektaConfigProvider
     ) {
         parent::__construct($context);
@@ -100,8 +86,6 @@ class ConektaOrder extends util
         $this->_conektaHelper = $conektaHelper;
         $this->_checkoutSession = $_checkoutSession;
         $this->customerRepository = $customerRepository;
-        $this->_escaper = $_escaper;
-        $this->conektaSession = $conektaSession;
         $this->conektaConfigProvider = $conektaConfigProvider;
     }
 
@@ -150,7 +134,7 @@ class ConektaOrder extends util
             $customerRequest['phone'] = $this->removePhoneSpecialCharacter(
                 $billingAddress->getTelephone()
             );
-
+            
             if (strlen($customerRequest['phone']) < 10) {
                 throw new ConektaException(__('Télefono no válido. 
                     El télefono debe tener al menos 10 carácteres. 
@@ -175,7 +159,6 @@ class ConektaOrder extends util
             $this->conektaLogger->info($error->getMessage(), $customerRequest);
             throw new ConektaException(__($error->getMessage()));
         }
-        
         $orderItems = $this->getQuote()->getAllItems();
 
         $validOrderWithCheckout = [];
@@ -286,7 +269,7 @@ class ConektaOrder extends util
         if (null === $this->quote) {
             $this->quote = $this->_checkoutSession->getQuote();
         }
-        return $this->quote;
+        return $this->_checkoutSession->getQuote();
     }
 
     /**
