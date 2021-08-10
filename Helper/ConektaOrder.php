@@ -136,6 +136,7 @@ class ConektaOrder extends util
             );
             
             if (strlen($customerRequest['phone']) < 10) {
+                $this->conektaLogger->info('Helper.CreateOrder phone validation error', $customerRequest);
                 throw new ConektaException(__('Télefono no válido. 
                     El télefono debe tener al menos 10 carácteres. 
                     Los caracteres especiales se desestimaran, solo se puede ingresar como 

@@ -11,9 +11,10 @@ define(
         'mage/storage',
         'uiRegistry',
         'domReady!',
-        'Magento_Checkout/js/model/shipping-save-processor'
+        'Magento_Checkout/js/model/shipping-save-processor',
+        'Magento_Checkout/js/action/set-billing-address',
     ],
-    function (ko, CONEKTA, conektaCheckout, Component, $, quote, customer, validator, storage, uiRegistry, domRe, shSP) {
+    function (ko, CONEKTA, conektaCheckout, Component, $, quote, customer, validator, storage, uiRegistry, domRe, shSP, sBA) {
         'use strict';
         
         return Component.extend({
@@ -87,10 +88,16 @@ define(
             initialize: function() {
                 var self = this;
                 this._super();
-                this.initializeForm();
+                if(customer.isLoggedIn() && quote.isVirtual()){
+                    $.when(sBA()).then(this.initializeForm());    
+                } else {
+                    this.initializeForm();
+                } 
+                
             },
 
             initializeForm: function(){
+
                 //if doesn't rendered yet, then tries to render
                 if(!this.reRender()){
                     
@@ -231,7 +238,7 @@ define(
                 var params = {
                     'guestEmail': guest_email
                 };
-                console.log('properties', this.renderProperties);
+                
                 if(this.validateRenderEmbedForm()){
                     $.ajax({
                         type: 'POST',
