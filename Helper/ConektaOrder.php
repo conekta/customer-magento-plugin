@@ -250,7 +250,7 @@ class ConektaOrder extends Util
             $methods[] = 'card';
         }
 
-        $total = $this->getQuote()->getGrandTotal();
+        $total = $this->getQuote()->getSubtotal();
         if ($this->_conektaHelper->isOxxoEnabled() &&
             $total <= 10000
         ) {

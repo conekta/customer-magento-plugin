@@ -89,7 +89,7 @@ class CreateOrder extends \Magento\Framework\App\Action\Action implements HttpPo
                 $order = (array)$this->embedFormRepository->generate(
                     $quoteSession->getId(),
                     $orderParams,
-                    $quoteSession->getGrandTotal()
+                    $quoteSession->getSubtotal()
                 );
                 
                 $response['checkout_id'] = $order['checkout']['id'];
