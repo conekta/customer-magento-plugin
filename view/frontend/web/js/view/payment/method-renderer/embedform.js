@@ -88,7 +88,10 @@ define(
             initialize: function() {
                 var self = this;
                 this._super();
-                if(customer.isLoggedIn() && quote.isVirtual()){
+                if (customer.isLoggedIn() && 
+                    quote.isVirtual() && 
+                    quote.billingAddress()
+                ){
                     $.when(sBA()).then(this.initializeForm());    
                 } else {
                     this.initializeForm();
