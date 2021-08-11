@@ -1,6 +1,7 @@
 <?php
 namespace Conekta\Payments\Gateway\Request;
 
+use Conekta\Payments\Helper\Data as ConektaHelper;
 use Conekta\Payments\Logger\Logger as ConektaLogger;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Payment\Gateway\Data\PaymentDataObjectInterface;
@@ -16,15 +17,19 @@ class ShippingLinesBuilder implements BuilderInterface
 
     protected $_cartRepository;
 
+    private $_conektaHelper;
+
     public function __construct(
         SubjectReader $subjectReader,
         CartRepositoryInterface $cartRepository,
-        ConektaLogger $conektaLogger
+        ConektaLogger $conektaLogger,
+        ConektaHelper $conektaHelper
     ) {
         $this->_conektaLogger = $conektaLogger;
         $this->_conektaLogger->info('Request ShippingLinesBuilder :: __construct');
         $this->subjectReader = $subjectReader;
         $this->_cartRepository = $cartRepository;
+        $this->_conektaHelper = $conektaHelper;
     }
 
     public function build(array $buildSubject)
@@ -39,7 +44,7 @@ class ShippingLinesBuilder implements BuilderInterface
         $amount = $quote->getShippingAddress()->getShippingAmount();
         
         if (isset($amount) && $amount >= 0) {
-            $shipping_lines['amount'] = (int)($amount * 100);
+            $shipping_lines['amount'] = $this->_conektaHelper->convertToApiPrice($amount);
             $shipping_lines['method'] = $quote->getShippingAddress()->getShippingMethod();
             $shipping_lines['carrier'] = $quote->getShippingAddress()->getShippingDescription();
             $request['shipping_lines'][] = $shipping_lines;
