@@ -124,6 +124,6 @@ class Data extends AbstractHelper
 
     public function convertToApiPrice($value)
     {
-        return (int)(round($value * 100));
+        return (int)number_format($value*100, 0, '.', '');
     }
 }
