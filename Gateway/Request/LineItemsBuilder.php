@@ -57,24 +57,13 @@ class LineItemsBuilder implements BuilderInterface
                     $request['line_items'][] = [
                         'name' => $item->getName(),
                         'sku' => $item->getSku(),
-                        'unit_price' => (int)($price * 100),
+                        'unit_price' => $this->_conektaHelper->convertToApiPrice($price),
                         'description' => $this->_escaper->escapeHtml($item->getName() . ' - ' . $item->getSku()),
                         'quantity' => (int)($item->getQtyOrdered()),
                         'tags' => [
                             $item->getProductType()
                         ]
                     ];
-
-                    $this->_conektaLogger->info('Request LineItemsBuilder :: build', [
-                        'name' => $item->getName(),
-                        'sku' => $item->getSku(),
-                        'unit_price' => $price * 100,
-                        'quantity' => (int)($item->getQtyOrdered()),
-                        'tags' => [
-                            $item->getProductType()
-                        ]
-                    ]);
-
                 }
             } elseif ($version > 233) {
                 
@@ -82,7 +71,7 @@ class LineItemsBuilder implements BuilderInterface
                     $request['line_items'][] = [
                         'name' => $item->getName(),
                         'sku' => $item->getSku(),
-                        'unit_price' => (int)($item->getPrice() * 100),
+                        'unit_price' => $this->_conektaHelper->convertToApiPrice($item->getPrice()),
                         'description' => $this->_escaper->escapeHtml($item->getName() . ' - ' . $item->getSku()),
                         'quantity' => (int)($item->getQtyOrdered()),
                         'tags' => [
@@ -95,7 +84,7 @@ class LineItemsBuilder implements BuilderInterface
                     $request['line_items'][] = [
                         'name' => $item->getName(),
                         'sku' => $item->getSku(),
-                        'unit_price' => (int)($item->getPrice() * 100),
+                        'unit_price' => $this->_conektaHelper->convertToApiPrice($item->getPrice()),
                         'description' => $this->_escaper->escapeHtml($item->getName() . ' - ' . $item->getSku()),
                         'quantity' => (int)($item->getQtyOrdered()),
                         'tags' => [

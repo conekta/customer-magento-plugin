@@ -121,4 +121,9 @@ class Data extends AbstractHelper
         }
         return $urlWebhook;
     }
+
+    public function convertToApiPrice($value)
+    {
+        return (int)number_format($value*100, 0, '.', '');
+    }
 }
