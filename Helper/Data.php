@@ -411,7 +411,7 @@ class Data extends Util
                     $request[] = [
                         'name' => $name,
                         'sku' => $item->getSku(),
-                        'unit_price' => (int)($price * 100),
+                        'unit_price' => $this->convertToApiPrice($price),
                         'description' => $description,
                         'quantity' => $qty,
                         'tags' => [
@@ -425,7 +425,7 @@ class Data extends Util
                     $request[] = [
                         'name' => $item->getName(),
                         'sku' => $item->getSku(),
-                        'unit_price' => (int)($item->getPrice() * 100),
+                        'unit_price' => $this->convertToApiPrice($item->getPrice()),
                         'description' => $this->_escaper->escapeHtml($item->getName() . ' - ' . $item->getSku()),
                         'quantity' => (int)($item->{$quantityMethod}()),
                         'tags' => [
@@ -458,7 +458,7 @@ class Data extends Util
         if ($quote->getIsVirtual()) {
             $shippingLines[] = ['amount' => 0 ];
         } elseif ($shippingAddress) {
-            $shippingLine['amount'] = (int)($shippingAddress->getShippingAmount() * 100);
+            $shippingLine['amount'] = $this->convertToApiPrice($shippingAddress->getShippingAmount());
 
             //Chekout orders doesn't allow method and carrier parameters
             if (!$isCheckout) {
@@ -527,10 +527,11 @@ class Data extends Util
     {
         $quote = $this->checkoutSession->getQuote();
         $totalDiscount = $quote->getSubtotal() - $quote->getSubtotalWithDiscount();
+        $totalDiscount = abs(round($totalDiscount, 2));
 
         $discountLines = [];
         if (!empty($totalDiscount)) {
-            $totalDiscount = abs((int)(round($totalDiscount, 2) * 100));
+            $totalDiscount = $this->convertToApiPrice($totalDiscount);
             $discountLine["code"] = "Discounts";
             $discountLine["type"] = "coupon";
             $discountLine["amount"] = $totalDiscount;
@@ -546,7 +547,7 @@ class Data extends Util
         $ctr_amount = 0;
         foreach ($items as $item) {
             if ($item->getProductType() != 'bundle' && $item->getTaxAmount() > 0) {
-                $ctr_amount = $ctr_amount + (int)($item->getTaxAmount() * 100);
+                $ctr_amount += $this->convertToApiPrice($item->getTaxAmount());
             }
         }
 

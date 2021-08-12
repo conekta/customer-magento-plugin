@@ -39,4 +39,14 @@ abstract class Util extends \Magento\Framework\App\Helper\AbstractHelper
     {
         return preg_replace("/[^0-9]/", "", $param);
     }
+
+    /**
+     * Convert $value into price for api (e.g: 40.8 => 4080)
+     * avoiding float cast to int error
+     * https://www.php.net/manual/es/language.types.float.php
+     */
+    public function convertToApiPrice($value)
+    {
+        return (int)number_format($value*100, 0, '.', '');
+    }
 }
