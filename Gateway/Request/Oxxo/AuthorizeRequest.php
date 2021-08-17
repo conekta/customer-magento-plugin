@@ -46,7 +46,7 @@ class AuthorizeRequest implements BuilderInterface
             $expiryDays = $this->_conektaHelper->getConfigData('conekta_oxxo', 'expiry_days');
             $expiry_date = strtotime("+" . $expiryDays . " days");
         }
-        $amount = (int)$order->getGrandTotalAmount();
+        $amount = $this->_conektaHelper->convertToApiPrice($order->getGrandTotalAmount());
 
         $request['metadata'] = [
             'plugin' => 'Magento',
@@ -65,7 +65,6 @@ class AuthorizeRequest implements BuilderInterface
 
     public function getChargeOxxo($amount, $expiry_date)
     {
-        $amount = $amount * 100;
         $charge = [
             'payment_method' => [
                 'type' => 'oxxo_cash',

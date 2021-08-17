@@ -42,7 +42,7 @@ class CaptureRequest implements BuilderInterface
         $token = $payment->getAdditionalInformation('card_token');
         $installments = $payment->getAdditionalInformation('monthly_installments');
 
-        $amount = (int)($order->getGrandTotalAmount() * 100);
+        $amount = $this->_conektaHelper->convertToApiPrice($order->getGrandTotalAmount());
 
         $request = [];
         try {

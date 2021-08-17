@@ -39,7 +39,7 @@ class AuthorizeRequest implements BuilderInterface
         $payment = $paymentDO->getPayment();
         $order = $paymentDO->getOrder();
         $expiry_date = strtotime("+" . $this->_conektaHelper->getConfigData('conekta_spei', 'expiry_days') . " days");
-        $amount = (int)$order->getGrandTotalAmount();
+        $amount = $this->_conektaHelper->convertToApiPrice($order->getGrandTotalAmount());
 
         $request['metadata'] = [
             'plugin' => 'Magento',

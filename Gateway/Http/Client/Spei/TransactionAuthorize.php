@@ -92,7 +92,7 @@ class TransactionAuthorize implements ClientInterface
 
         try {
             $conektaOrder= $this->_conektaOrder->create($orderParams);
-            $chargeParams['amount'] = $chargeParams['amount'] * 100;
+            
             $charge = $conektaOrder->createCharge($chargeParams);
 
             if (isset($charge->id) && isset($conektaOrder->id)) {
