@@ -40,11 +40,12 @@ class AuthorizeRequest implements BuilderInterface
         $order = $paymentDO->getOrder();
         
         $expiry_date = $this->_conektaHelper->getExpiredAt();
-        $amount = (int)$order->getGrandTotalAmount();
+        $amount = $this->_conektaHelper->convertToApiPrice($order->getGrandTotalAmount());
 
         $request['metadata'] = [
             'plugin' => 'Magento',
             'plugin_version' => $this->_conektaHelper->getMageVersion(),
+            'plugin_conekta_version' => $this->_conektaHelper->pluginVersion(),
             'order_id'       => $order->getOrderIncrementId(),
             'soft_validations'  => 'true'
         ];
@@ -58,7 +59,6 @@ class AuthorizeRequest implements BuilderInterface
 
     public function getChargeOxxo($amount, $expiry_date)
     {
-        $amount = $amount * 100;
         $charge = [
             'payment_method' => [
                 'type' => 'oxxo_cash',

@@ -374,7 +374,8 @@ class Data extends Util
     {
         return [
             'plugin' => 'Magento',
-            'plugin_version' => $this->getMageVersion()
+            'plugin_version' => $this->getMageVersion(),
+            'plugin_conekta_version' => $this->pluginVersion()
         ];
     }
 

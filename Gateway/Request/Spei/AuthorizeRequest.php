@@ -38,12 +38,13 @@ class AuthorizeRequest implements BuilderInterface
         $paymentDO = $this->subjectReader->readPayment($buildSubject);
         $payment = $paymentDO->getPayment();
         $order = $paymentDO->getOrder();
-        $expiry_date = $this->_conektaHelper->getExpiredAt();
-        $amount = (int)$order->getGrandTotalAmount();
+        $expiry_date = strtotime("+" . $this->_conektaHelper->getConfigData('conekta_spei', 'expiry_days') . " days");
+        $amount = $this->_conektaHelper->convertToApiPrice($order->getGrandTotalAmount());
 
         $request['metadata'] = [
             'plugin' => 'Magento',
             'plugin_version' => $this->_conektaHelper->getMageVersion(),
+            'plugin_conekta_version' => $this->_conektaHelper->pluginVersion(),
             'order_id'       => $order->getOrderIncrementId(),
             'soft_validations'  => 'true'
         ];
