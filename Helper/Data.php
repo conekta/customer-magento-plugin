@@ -411,7 +411,7 @@ class Data extends Util
                     
                     $request[] = [
                         'name' => $name,
-                        'sku' => $item->getSku(),
+                        'sku' => $this->removeSpecialCharacter($item->getSku()),
                         'unit_price' => $this->convertToApiPrice($price),
                         'description' => $description,
                         'quantity' => $qty,
