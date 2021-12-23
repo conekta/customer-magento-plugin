@@ -20,6 +20,10 @@ define(
                 this._super();
             },
 
+            isVisiblePaymentButton: function () {
+                return true;
+            },
+
             getCode: function () {
                 return 'conekta_spei';
             },

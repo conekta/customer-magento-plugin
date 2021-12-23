@@ -2,7 +2,7 @@
 <page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
     <head>
         <css src="Conekta_Payments::css/styles.css"/>
-        <link src="Conekta_Payments::js/validation-expiry-days.js"/>
+        <link src="Conekta_Payments::js/validation-expiry.js"/>
         <link src="Conekta_Payments::js/validation-expiry-hours.js"/>
         <link src="Conekta_Payments::js/validate-max-attributes.js"/>
     </head>

@@ -1,0 +1,63 @@
+<?php
+$title = $block->escapeHtml($block->getMethod()->getTitle());
+$offlineInfo = $block->getOfflineInfo();
+?>
+<dl class="payment-method">
+    <dt class="title"><?= /* @noEscape */ $title; ?></dt>
+    <dd style="margin: 0 !important; -webkit-margin-start: 0 !important;">
+        <table class="data-table admin__table-secondary">
+            <tbody>
+                <tr>
+                    <th><strong><?= /* @noEscape */ __('Payment Method:'); ?></strong></th>
+                    <td>
+                        <?= $block->escapeHtml($block->getPaymentMethodTitle()); ?>
+                    </td>
+                </tr>
+
+                <?php if ($block->isCreditCardPaymentMethod()) {?>
+                <tr>
+                    <th><strong><?= /* @noEscape */ __('Credit Card Type:'); ?></strong></th>
+                    <td>
+                        <?= $block->escapeHtml($block->getCcTypeName()); ?>
+                    </td>
+                </tr>
+
+                <?php } elseif ($block->isOxxoPaymentMethod()) { ?>
+                <tr>
+                    <th><strong><?= /* @noEscape */ __('Reference Number:'); ?></strong></th>
+                    <td>
+                        <?= $block->escapeHtml($offlineInfo['reference']); ?>
+                    </td>
+                </tr>
+                <tr>
+                    <th><strong><?= /* @noEscape */ __('Expires at:'); ?></strong></th>
+                    <td>
+                        <?= $block->escapeHtml(date("Y-m-d", (integer) $offlineInfo["expires_at"])); ?>
+                    </td>
+                </tr>
+
+                <?php } elseif ($block->isSpeiPaymentMethod()) { ?>
+                <tr>
+                    <th><strong><?= /* @noEscape */ __('CLABE:'); ?></strong></th>
+                    <td>
+                        <?= $block->escapeHtml($offlineInfo["clabe"]); ?>
+                    </td>
+                </tr>
+                <tr>
+                    <th><strong><?= /* @noEscape */ __('Bank Name:'); ?></strong></th>
+                    <td>
+                        <?= $block->escapeHtml($offlineInfo["bank_name"]); ?>
+                    </td>
+                </tr>
+                <tr>
+                    <th><strong><?= /* @noEscape */ __('Expires at:'); ?></strong></th>
+                    <td>
+                        <?= $block->escapeHtml(date("Y-m-d", (integer) $offlineInfo["expires_at"])) ?>
+                    </td>
+                </tr>
+                <?php } ?>                    
+            </tbody>
+        </table>
+    </dd>
+</dl>
+<?= $block->getChildHtml(); ?>

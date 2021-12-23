@@ -25,6 +25,10 @@ define(
                 this._super();
             },
 
+            isVisiblePaymentButton: function () {
+                return true;
+            },
+            
             getData: function () {
                 var number = this.creditCardNumber().replace(/\D/g,'');
                 var data = {

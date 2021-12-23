@@ -7,6 +7,8 @@
                 <item name="conekta_global_provider" xsi:type="object">Conekta\Payments\Model\Ui\ConfigProvider</item>
                 <!-- Credit Card -->
                 <item name="conekta_cc_provider" xsi:type="object">Conekta\Payments\Model\Ui\CreditCard\ConfigProvider</item>
+                <!-- Embed Form -->
+                <item name="conekta_ef_provider" xsi:type="object">Conekta\Payments\Model\Ui\EmbedForm\ConfigProvider</item>
             </argument>
         </arguments>
     </type>
@@ -30,6 +32,18 @@
             <argument name="data" xsi:type="array">
                 <item xsi:type="string" name="is_secure_mode">1</item>
             </argument>
+        </arguments>
+    </type>
+
+    <!-- // Conekta Checkout Variables // -->
+    <virtualType name="Conekta\Payments\Model\Session\Storage" type="Magento\Framework\Session\Storage">
+        <arguments>
+            <argument name="namespace" xsi:type="string">conektacheckoutconfig</argument>
+        </arguments>
+    </virtualType>
+    <type name="Conekta\Payments\Model\Session">
+        <arguments>
+            <argument name="storage" xsi:type="object">Conekta\Payments\Model\Session\Storage</argument>
         </arguments>
     </type>
 </config>

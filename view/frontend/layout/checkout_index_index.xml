@@ -20,13 +20,7 @@
                                                                 <item name="conekta" xsi:type="array">
                                                                     <item name="component" xsi:type="string">Conekta_Payments/js/view/payment/methods</item>
                                                                     <item name="methods" xsi:type="array">
-                                                                        <item name="conekta_cc" xsi:type="array">
-                                                                            <item name="isBillingAddressRequired" xsi:type="boolean">true</item>
-                                                                        </item>
-                                                                        <item name="conekta_oxxo" xsi:type="array">
-                                                                            <item name="isBillingAddressRequired" xsi:type="boolean">true</item>
-                                                                        </item>
-                                                                        <item name="conekta_spei" xsi:type="array">
+                                                                        <item name="conekta_ef" xsi:type="array">
                                                                             <item name="isBillingAddressRequired" xsi:type="boolean">true</item>
                                                                         </item>
                                                                     </item>
