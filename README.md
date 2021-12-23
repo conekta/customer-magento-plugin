@@ -69,9 +69,6 @@ php bin/magento module:enable Conekta_Payments
 bin/magento c:f
 ```
 
-Updates
------------
-
 Plugin updates
 -----------
 
