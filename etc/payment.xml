@@ -15,5 +15,8 @@
         <method name="conekta_spei">
             <allow_multiple_address>0</allow_multiple_address>
         </method>
+        <method name="conekta_ef">
+            <allow_multiple_address>0</allow_multiple_address>
+        </method>
     </methods>
 </payment>

@@ -1,13 +1,15 @@
 <?php
 namespace Conekta\Payments\Gateway\Http\Client\Oxxo;
 
+use Conekta\Order as ConektaOrder;
 use Conekta\Payments\Gateway\Http\Util\HttpUtil;
 use Conekta\Payments\Helper\Data as ConektaHelper;
 use Conekta\Payments\Logger\Logger as ConektaLogger;
+use Conekta\Payments\Api\Data\ConektaSalesOrderInterface;
+use Conekta\Payments\Model\ConektaSalesOrderFactory;
 use Magento\Payment\Gateway\Http\ClientInterface;
 use Magento\Payment\Gateway\Http\TransferInterface;
 use Magento\Payment\Model\Method\Logger;
-use Conekta\Order as ConektaOrder;
 
 class TransactionAuthorize implements ClientInterface
 {
@@ -35,6 +37,8 @@ class TransactionAuthorize implements ClientInterface
 
     protected $_httpUtil;
 
+    protected $conektaSalesOrderFactory;
+
     /**
      * @param Logger $logger
      * @param ConektaHelper $conektaHelper
@@ -45,7 +49,8 @@ class TransactionAuthorize implements ClientInterface
         ConektaHelper $conektaHelper,
         ConektaLogger $conektaLogger,
         ConektaOrder $conektaOrder,
-        HttpUtil $httpUtil
+        HttpUtil $httpUtil,
+        ConektaSalesOrderFactory $conektaSalesOrderFactory
     ) {
         $this->_conektaHelper = $conektaHelper;
         $this->_conektaLogger = $conektaLogger;
@@ -53,7 +58,7 @@ class TransactionAuthorize implements ClientInterface
         $this->_httpUtil = $httpUtil;
         $this->_conektaLogger->info('HTTP Client Oxxo TransactionAuthorize :: __construct');
         $this->logger = $logger;
-
+        $this->conektaSalesOrderFactory = $conektaSalesOrderFactory;
         $config = [
             'locale' => 'es'
         ];
@@ -70,6 +75,7 @@ class TransactionAuthorize implements ClientInterface
     {
         $this->_conektaLogger->info('HTTP Client Oxxo TransactionAuthorize :: placeRequest');
         $request = $transferObject->getBody();
+
         $orderParams['currency']         = $request['CURRENCY'];
         $orderParams['line_items']       = $request['line_items'];
         $orderParams['tax_lines']        = $request['tax_lines'];
@@ -97,6 +103,14 @@ class TransactionAuthorize implements ClientInterface
                 $result_code = 1;
                 $txn_id = $charge->id;
                 $ord_id = $conektaOrder->id;
+
+                $this->conektaSalesOrderFactory
+                        ->create()
+                        ->setData([
+                            ConektaSalesOrderInterface::CONEKTA_ORDER_ID => $ord_id,
+                            ConektaSalesOrderInterface::INCREMENT_ORDER_ID => $orderParams['metadata']['order_id']
+                        ])
+                        ->save();
             } else {
                 $result_code = 666;
             }
@@ -104,6 +118,7 @@ class TransactionAuthorize implements ClientInterface
             $error_code = $e->getMessage();
             $result_code = 666;
             $this->logger->error(__('[Conekta]: Payment capturing error.'));
+            $this->_conektaHelper->deleteSavedCard($orderParams, $chargeParams);
             $this->logger->debug(
                 [
                     'request' => $request,

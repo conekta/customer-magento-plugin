@@ -34,23 +34,18 @@ class AuthorizeRequest implements BuilderInterface
     public function build(array $buildSubject)
     {
         $this->_conektaLogger->info('Request Oxxo AuthorizeRequest :: build');
+
         $paymentDO = $this->subjectReader->readPayment($buildSubject);
         $payment = $paymentDO->getPayment();
         $order = $paymentDO->getOrder();
         
-        $timeFormat = $this->_conektaHelper->getConfigData('conekta_oxxo', 'days_or_hours');
-        if (!$timeFormat) {
-            $expiryHours = $this->_conektaHelper->getConfigData('conekta_oxxo', 'expiry_hours');
-            $expiry_date = strtotime("+" . $expiryHours . " hours");
-        } else {
-            $expiryDays = $this->_conektaHelper->getConfigData('conekta_oxxo', 'expiry_days');
-            $expiry_date = strtotime("+" . $expiryDays . " days");
-        }
-        $amount = (int)$order->getGrandTotalAmount();
+        $expiry_date = $this->_conektaHelper->getExpiredAt();
+        $amount = $this->_conektaHelper->convertToApiPrice($order->getGrandTotalAmount());
 
         $request['metadata'] = [
             'plugin' => 'Magento',
             'plugin_version' => $this->_conektaHelper->getMageVersion(),
+            'plugin_conekta_version' => $this->_conektaHelper->pluginVersion(),
             'order_id'       => $order->getOrderIncrementId(),
             'soft_validations'  => 'true'
         ];
@@ -64,7 +59,6 @@ class AuthorizeRequest implements BuilderInterface
 
     public function getChargeOxxo($amount, $expiry_date)
     {
-        $amount = $amount * 100;
         $charge = [
             'payment_method' => [
                 'type' => 'oxxo_cash',

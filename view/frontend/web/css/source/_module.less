@@ -13,6 +13,46 @@
             }
         }
         .payment-method-content {
+            
+            .conekta-message {
+                border-radius: 4px 4px 0 0;
+                box-shadow:0 0 0 1px rgba(0,0,0,0.15),0 1px 4px 0 rgba(0,0,0,0.15);
+                margin: 1px;
+                border-radius:4px 4px 0 0;
+                width: 80%;
+                
+                .conekta-message-header {
+                    display: flex;
+                    justify-content: space-between;
+                    padding: 0px 20px;
+                    font-size: 16px;
+                    align-items: center;
+                    box-shadow:0 1px 2px 0 rgba(0,0,0,0.16);
+                    height: 80px;
+
+                    .conekta-message-title {
+                        color: rgba(0, 0, 0, 0.7);
+                        font-weight: bold;
+                    }
+
+                    .conekta-payment-logo {
+                        background: url("../Conekta_Payments/images/conekta.svg") no-repeat;
+                        height: 25px; 
+                        width: auto; 
+                        padding-left: 20rem; 
+                        display:inline-block; 
+                        vertical-align: middle;
+                    }
+                }
+
+                .conekta-message-content {
+                    color: #e40595;
+                    font-size: 16px;
+                    padding: 20px;
+                    font-weight: bold;
+                }
+            }
+            
         }
         .payment-method-footer {
             display: none;

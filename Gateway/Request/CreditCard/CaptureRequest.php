@@ -42,7 +42,7 @@ class CaptureRequest implements BuilderInterface
         $token = $payment->getAdditionalInformation('card_token');
         $installments = $payment->getAdditionalInformation('monthly_installments');
 
-        $amount = (int)($order->getGrandTotalAmount() * 100);
+        $amount = $this->_conektaHelper->convertToApiPrice($order->getGrandTotalAmount());
 
         $request = [];
         try {
@@ -53,6 +53,7 @@ class CaptureRequest implements BuilderInterface
             $request['metadata'] = [
                 'plugin' => 'Magento',
                 'plugin_version' => $this->_conektaHelper->getMageVersion(),
+                'plugin_conekta_version' => $this->_conektaHelper->pluginVersion(),
                 'order_id'       => $order->getOrderIncrementId(),
                 'soft_validations'  => 'true'
             ];
