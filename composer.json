@@ -10,6 +10,7 @@
     },
     "type": "magento2-module",
     "version": "3.6.4",
+    "version": "3.5.0",
     "license": [
         "OSL-3.0",
         "AFL-3.0"
