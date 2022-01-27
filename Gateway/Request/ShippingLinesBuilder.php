@@ -39,6 +39,7 @@ class ShippingLinesBuilder implements BuilderInterface
         $shippingLines = $this->_conektaHelper->getShippingLines($quote_id);
 
         if (empty($shippingLines)) {
+
             throw new LocalizedException(__('Shippment information should be provided'));
         }
 
