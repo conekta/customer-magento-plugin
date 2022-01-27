@@ -1,4 +1,4 @@
-![alt tag](https://raw.github.com/conekta/conekta-magento/master/readme_files/cover.png)
+![alt tag](https://conekta.com/static/assets/Home/conekta-logo-blue-full.svg)
 
 Magento 2 Plugin v.4.1.0 (Stable)
 ========================
@@ -13,7 +13,7 @@ composer config repositories.conekta git https://github.com/conekta/customer-mag
 
 2. Add composer dependency
 ```bash
-composer require conekta/conekta_payments dev-master
+composer require conekta/conekta_payments master
 ```
 
 3. Update Magento
@@ -28,7 +28,7 @@ php bin/magento setup:di:compile
 
 5. Enable plugin
 ```bash
-php bin/magento module:enable Conekta_Payments 
+php bin/magento module:enable conekta_payments 
 ```
 
 6. Update and/or enable cache
@@ -46,7 +46,7 @@ composer config repositories.conekta git https://github.com/conekta/customer-mag
 
 2. Add composer dependency
 ```bash
-composer require conekta/conekta_payments dev-master
+composer require conekta/conekta_payments master
 ```
 
 3. Update Magento
@@ -61,7 +61,7 @@ php bin/magento setup:di:compile
 
 5. Enable plugin
 ```bash
-php bin/magento module:enable Conekta_Payments 
+php bin/magento module:enable conekta_payments 
 ```
 
 6. Update and/or enable cache
@@ -80,14 +80,14 @@ php bin/magento module:status
 
 3. Disable the module
 ```bash
-php bin/magento module:disable conekta_payments --clear-static-content
+php bin/magento module:disable Conekta_Payments --clear-static-content
 ```
 
-4. Delete the files generated in the folder ```<path_magento>/generated/code/Conekta/```
+4. If it exists, delete the generated files in the folder ```<path_magento>/generated/code/Conekta/```
 
 5. Add composer dependency
 ```bash
-composer require conekta/conekta_payments dev-master
+composer require conekta/conekta_payments master
 ```
 
 6. Update Magento
