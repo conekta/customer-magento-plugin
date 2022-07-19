@@ -10,6 +10,7 @@ use Magento\Framework\App\CsrfAwareActionInterface;
 use Magento\Framework\App\RequestInterface;
 use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Framework\Controller\Result\RawFactory;
+
 use Magento\Framework\Json\Helper\Data;
 use Magento\Payment\Model\Method\Logger;
 
@@ -112,7 +113,7 @@ class Index extends Action implements CsrfAwareActionInterface
                 
                 default:
                     //If the event not exist, response Bad Request
-                    $response = self::HTTP_BAD_REQUEST_CODE;
+                    $response = self::HTTP_OK_REQUEST_CODE;
             }
 
         } catch (Exception $e) {
