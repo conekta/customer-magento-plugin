@@ -1,6 +1,8 @@
-Magento 4.1.1, 2022-07-19
--------------------------------------
-- Set 200 in webhook when event was not required
+### 4.1.1 - 2022/07/19 18:02
+
+[Full Changelog](https://github.com/conekta/customer-magento-plugin/compare/4.1.0...4.1.1)
+* Fix:
+  -  Set 200 in webhook when event was not required by @elvisheredia [#21](https://github.com/conekta/customer-magento-plugin/pull/21)
 
 Magento 4.1.0, 2021-12-23
 -------------------------------------
