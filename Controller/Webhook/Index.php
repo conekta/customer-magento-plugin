@@ -69,7 +69,7 @@ class Index extends Action implements CsrfAwareActionInterface
     {
         $this->_conektaLogger->info('Controller Index :: execute');
 
-        $response = Response::STATUS_CODE_400;
+        $response = Response::STATUS_CODE_200;
         
         try {
             $resultRaw = $this->resultRawFactory->create();
@@ -77,14 +77,13 @@ class Index extends Action implements CsrfAwareActionInterface
             $body = $this->helper->jsonDecode($this->getRequest()->getContent());
 
             if (!$body || $this->getRequest()->getMethod() !== 'POST') {
-                return $response;
+                return Response::STATUS_CODE_400;;
             }
 
             $event = $body['type'];
 
             $this->_conektaLogger->info('Controller Index :: execute body json ', ['event' => $event]);
 
-            $response = Response::STATUS_CODE_200;
             switch ($event) {
                 case self::EVENT_WEBHOOK_PING:
                     break;
