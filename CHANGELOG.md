@@ -1,3 +1,10 @@
+### 4.1.1 - 2022/07/25 18:02
+
+[Full Changelog](https://github.com/conekta/customer-magento-plugin/compare/4.1.0...4.1.1)
+* Fix:
+  -  Set 200 in webhook when event was not required by @elvisheredia [#21](https://github.com/conekta/customer-magento-plugin/pull/21)
+  -  Update plugin name by @elvisheredia [#22](https://github.com/conekta/customer-magento-plugin/pull/22)
+
 Magento 4.1.0, 2021-12-23
 -------------------------------------
 - Fix in OXXO order date format in magento admin.
