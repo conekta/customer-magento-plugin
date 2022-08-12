@@ -10,7 +10,7 @@
         "conekta/conekta-php": "*"
     },
     "type": "magento2-module",
-    "version": "4.1.0",
+    "version": "4.1.2",
     "license": [
         "OSL-3.0",
         "AFL-3.0"
@@ -20,5 +20,22 @@
         "psr-4": {
             "Conekta\\Payments\\": ""
         }
+    },
+    "repositories": [
+        {
+            "type": "composer",
+            "url": "https://repo.magento.com/"
+        }
+    ],
+    "extra": {
+        "magento-force": "override"
+    },
+    "config": {
+        "allow-plugins": {
+            "magento/composer-dependency-version-audit-plugin": true
+        }
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9.5"
     }
 }
