@@ -76,7 +76,7 @@
             <!-- Conekta EMBED FORM -->
             <conekta_ef>
                 <active>1</active>
-                <title>Pagos Conekta</title>
+                <title>Conekta - Paga con tarjeta, efectivo o SPEI</title>
                 <group>conekta</group>
                 <model>ConektaPaymentsEmbedFormFacade</model>
                 <iframe_enabled>0</iframe_enabled>
@@ -100,7 +100,7 @@
             <global>
                 <api_version><![CDATA[2.0.0]]></api_version>
                 <plugin_type><![CDATA[Magento 2]]></plugin_type>
-                <plugin_version><![CDATA[3.6.4]]></plugin_version>
+                <plugin_version><![CDATA[4.1.2]]></plugin_version>
             </global>
         </conekta>
     </default>
