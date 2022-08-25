@@ -3,27 +3,39 @@ declare(strict_types=1);
 
 namespace Conekta\Payments\Model\System\Config\Source;
 
+use Magento\Catalog\Api\Data\ProductAttributeInterface;
+use Magento\Eav\Api\AttributeRepositoryInterface;
+use Magento\Framework\Api\SearchCriteriaBuilder;
 use Magento\Framework\Option\ArrayInterface;
 
 class MetadataProduct implements ArrayInterface
 {
     /**
-     * @var \Magento\Framework\Api\SearchCriteriaBuilder
+     * @var SearchCriteriaBuilder
      */
     protected $searchCriteriaBuilder;
     /**
-     * @var \Magento\Eav\Api\AttributeRepositoryInterface
+     * @var AttributeRepositoryInterface
      */
     protected $attributeRepository;
 
+    /**
+     * @param SearchCriteriaBuilder $searchCriteriaBuilder
+     * @param AttributeRepositoryInterface $attributeRepository
+     */
     public function __construct(
-        \Magento\Framework\Api\SearchCriteriaBuilder $searchCriteriaBuilder,
-        \Magento\Eav\Api\AttributeRepositoryInterface $attributeRepository
+        SearchCriteriaBuilder $searchCriteriaBuilder,
+        AttributeRepositoryInterface $attributeRepository
     ) {
             $this->searchCriteriaBuilder = $searchCriteriaBuilder;
             $this->attributeRepository = $attributeRepository;
     }
-    
+
+    /**
+     * To option array
+     *
+     * @return array
+     */
     public function toOptionArray()
     {
         $result = [];
@@ -36,11 +48,16 @@ class MetadataProduct implements ArrayInterface
         return $result;
     }
 
+    /**
+     * Get options
+     *
+     * @return array
+     */
     public function getOptions()
     {
         $searchCriteria = $this->searchCriteriaBuilder->create();
         $attributeRepository = $this->attributeRepository->getList(
-            \Magento\Catalog\Api\Data\ProductAttributeInterface::ENTITY_TYPE_CODE,
+            ProductAttributeInterface::ENTITY_TYPE_CODE,
             $searchCriteria
         );
 

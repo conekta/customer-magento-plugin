@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+    <table name="conekta_salesorder" resource="default" engine="innodb" comment="Conekta payments orders">
+        <column xsi:type="int" name="id" nullable="false" unsigned="true" identity="true"
+                comment="Conekta Sales Orders ID"/>
+        <column xsi:type="varchar" name="conekta_order_id" nullable="false" length="255" comment="Conekta Order"/>
+        <column xsi:type="varchar" name="increment_order_id" nullable="false" length="255"
+                comment="Sales Order Increment Id"/>
+        <column xsi:type="timestamp" name="created_at" on_update="false" nullable="false" default="CURRENT_TIMESTAMP"
+                comment="Date of Template Creation"/>
+        <column xsi:type="timestamp" name="updated_at" on_update="true" nullable="false" default="CURRENT_TIMESTAMP"
+                comment="Date of Template Update"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="id" />
+        </constraint>
+        <constraint xsi:type="unique" referenceId="CONEKTA_ORDER_ID_INCREMENT_ID">
+            <column name="conekta_order_id"/>
+            <column name="increment_order_id"/>
+        </constraint>
+    </table>
+    <table name="conekta_quote" resource="default" engine="innodb" comment="Map Table Conekta Orders and Quotes">
+        <column xsi:type="int" name="quote_id" padding="10" unsigned="true" nullable="false" identity="true"
+                comment="Conekta Quote ID"/>
+        <column xsi:type="varchar" name="conekta_order_id" nullable="false" length="255" comment="Conekta Order"/>
+        <column xsi:type="timestamp" name="created_at" on_update="false" nullable="false" default="CURRENT_TIMESTAMP"
+                comment="Date of Template Creation"/>
+        <column xsi:type="timestamp" name="updated_at" on_update="true" nullable="false" default="CURRENT_TIMESTAMP"
+                comment="Date of Template Update"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="quote_id" />
+        </constraint>
+        <constraint xsi:type="unique" referenceId="UN_CONEKTA_ORDER_ID_QUOTE">
+            <column name="conekta_order_id"/>
+        </constraint>
+        <constraint xsi:type="foreign" referenceId="FK_CONEKTA_QUOTE_QUOTE"
+                    table="conekta_quote" column="quote_id" referenceTable="quote"
+                    referenceColumn="entity_id" onDelete="CASCADE"/>
+    </table>
+</schema>

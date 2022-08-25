@@ -5,21 +5,25 @@ use Conekta\Payments\Helper\Data as ConektaHelper;
 use Conekta\Payments\Logger\Logger as ConektaLogger;
 use Magento\Checkout\Model\ConfigProviderInterface;
 use Magento\Checkout\Model\Session;
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\UrlInterface;
+use Magento\Quote\Api\Data\CartInterface;
+use Magento\Quote\Model\Quote;
 
 class ConfigProvider implements ConfigProviderInterface
 {
     /**
      * Payment method code
      */
-    const CODE = 'conekta_ef';
-    const PAYMENT_METHOD_CREDIT_CARD = 'credit';
-    const PAYMENT_METHOD_OXXO = 'oxxo';
-    const PAYMENT_METHOD_SPEI = 'spei';
+    public const CODE = 'conekta_ef';
+    public const PAYMENT_METHOD_CREDIT_CARD = 'credit';
+    public const PAYMENT_METHOD_OXXO = 'oxxo';
+    public const PAYMENT_METHOD_SPEI = 'spei';
     /**
      * Create Order Controller Path
      */
-    const CREATEORDER_URL = 'conekta/index/createorder';
+    public const CREATEORDER_URL = 'conekta/index/createorder';
     /**
      * @var ConektaHelper
      */
@@ -39,6 +43,7 @@ class ConfigProvider implements ConfigProviderInterface
 
     /**
      * ConfigProvider constructor.
+     *
      * @param ConektaHelper $conektaHelper
      * @param Session $checkoutSession
      * @param ConektaLogger $conektaLogger
@@ -57,6 +62,8 @@ class ConfigProvider implements ConfigProviderInterface
     }
 
     /**
+     * Get config
+     *
      * @return array|\array[][]
      */
     public function getConfig()
@@ -77,6 +84,8 @@ class ConfigProvider implements ConfigProviderInterface
     }
 
     /**
+     * Get Enable Save Card Config
+     *
      * @return mixed
      */
     public function getEnableSaveCardConfig()
@@ -85,7 +94,11 @@ class ConfigProvider implements ConfigProviderInterface
     }
 
     /**
+     * Get montly installments
+     *
      * @return false|int[]|string[]
+     * @throws LocalizedException
+     * @throws NoSuchEntityException
      */
     public function getMonthlyInstallments()
     {
@@ -107,6 +120,8 @@ class ConfigProvider implements ConfigProviderInterface
     }
 
     /**
+     * Get Minimun amount montly installments
+     *
      * @return mixed
      */
     public function getMinimumAmountMonthlyInstallments()
@@ -115,15 +130,22 @@ class ConfigProvider implements ConfigProviderInterface
     }
 
     /**
-     * @return \Magento\Quote\Api\Data\CartInterface|\Magento\Quote\Model\Quote
-     * @throws \Magento\Framework\Exception\LocalizedException
-     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     * Get Quote
+     *
+     * @return CartInterface|Quote
+     * @throws LocalizedException
+     * @throws NoSuchEntityException
      */
     public function getQuote()
     {
         return $this->_checkoutSession->getQuote();
     }
 
+    /**
+     * Get active payment methods
+     *
+     * @return array
+     */
     public function getPaymentMethodsActive()
     {
         $methods = [];

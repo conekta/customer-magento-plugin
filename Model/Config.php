@@ -1,24 +1,44 @@
 <?php
 namespace Conekta\Payments\Model;
 
+use Conekta\Conekta;
 use Conekta\Payments\Helper\Data as ConektaHelper;
 use Conekta\Payments\Logger\Logger as ConektaLogger;
 use Conekta\Webhook;
 use Magento\Framework\Encryption\EncryptorInterface;
 use Magento\Framework\Locale\Resolver;
+use Magento\Framework\Validator\Exception;
 
 class Config
 {
+    /**
+     * @var EncryptorInterface
+     */
     protected $_encryptor;
-
+    /**
+     * @var ConektaHelper
+     */
     protected $_conektaHelper;
-
+    /**
+     * @var ConektaLogger
+     */
     private $_conektaLogger;
-
+    /**
+     * @var Resolver
+     */
     protected $_resolver;
-
+    /**
+     * @var Webhook
+     */
     protected $_conektaWebhook;
 
+    /**
+     * @param EncryptorInterface $encryptor
+     * @param ConektaHelper $conektaHelper
+     * @param Resolver $resolver
+     * @param ConektaLogger $conektaLogger
+     * @param Webhook $conektaWebhook
+     */
     public function __construct(
         EncryptorInterface $encryptor,
         ConektaHelper $conektaHelper,
@@ -33,6 +53,12 @@ class Config
         $this->_conektaWebhook = $conektaWebhook;
     }
 
+    /**
+     * Create Webhook
+     *
+     * @return void
+     * @throws Exception
+     */
     public function createWebhook()
     {
         
@@ -69,7 +95,7 @@ class Config
             } else {
                 $this->_conektaLogger->info('[Conekta]: El webhook ' . $urlWebhook . ' ya se encuentra en Conekta!');
             }
-        } catch (\Magento\Framework\Validator\Exception $e) {
+        } catch (Exception $e) {
             $errorMessage = $e->getMessage();
             $this->_conektaLogger->info('[Conekta]: CreateWebhook error, Message: ' . $errorMessage);
 
@@ -77,13 +103,19 @@ class Config
             $errorMessage = $e->getMessage();
             $this->_conektaLogger->info('[Conekta]: Webhook error, Message: ' . $errorMessage . ' URL: ' . $urlWebhook);
 
-            throw new \Magento\Framework\Validator\Exception(
+            throw new Exception(
                 __('Can not register this webhook ' . $urlWebhook . '<br>'
                     . 'Message: ' . (string) $errorMessage)
             );
         }
     }
 
+    /**
+     * Initialize conekta library
+     *
+     * @return void
+     * @throws Exception
+     */
     public function initializeConektaLibrary()
     {
         try {
@@ -95,18 +127,18 @@ class Config
             $pluginVersion = $this->_conektaHelper->pluginVersion();
 
             if (empty($privateKey)) {
-                throw new \Magento\Framework\Validator\Exception(
+                throw new Exception(
                     __("Please check your conekta config.")
                 );
             }
 
-            \Conekta\Conekta::setApiKey($privateKey);
-            \Conekta\Conekta::setApiVersion($apiVersion);
-            \Conekta\Conekta::setPlugin($pluginType);
-            \Conekta\Conekta::setPluginVersion($pluginVersion);
-            \Conekta\Conekta::setLocale($locale);
+            Conekta::setApiKey($privateKey);
+            Conekta::setApiVersion($apiVersion);
+            Conekta::setPlugin($pluginType);
+            Conekta::setPluginVersion($pluginVersion);
+            Conekta::setLocale($locale);
         } catch (\Exception $e) {
-            throw new \Magento\Framework\Validator\Exception(
+            throw new Exception(
                 __($e->getMessage())
             );
         }

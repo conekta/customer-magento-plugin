@@ -2,7 +2,9 @@
 
 namespace Conekta\Payments\Helper;
 
+use Conekta\Conekta;
 use Conekta\Customer as ConektaCustomer;
+use Conekta\Handler;
 use Conekta\Order as ConektaOrderApi;
 use Conekta\Payments\Exception\ConektaException;
 use Conekta\Payments\Helper\Data as ConektaHelper;
@@ -13,11 +15,16 @@ use Magento\Checkout\Model\Session;
 use Magento\Customer\Api\CustomerRepositoryInterface;
 use Magento\Customer\Model\Session as CustomerSession;
 use Magento\Framework\App\Helper\Context;
+use Magento\Framework\Exception\InputException;
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Exception\NoSuchEntityException;
+use Magento\Framework\Exception\State\InputMismatchException;
+use Magento\Quote\Model\Quote;
 
 class ConektaOrder extends Util
 {
-    const CURRENCY_CODE = 'mxn';
-    const STREET = 'Conekta Street';
+    public const CURRENCY_CODE = 'mxn';
+    public const STREET = 'Conekta Street';
     /**
      * @var ConektaLogger
      */
@@ -43,7 +50,7 @@ class ConektaOrder extends Util
      */
     protected $_checkoutSession;
     /**
-     * @var \Magento\Quote\Model\Quote|null
+     * @var Quote|null
      */
     protected $quote = null;
     /**
@@ -57,6 +64,7 @@ class ConektaOrder extends Util
 
     /**
      * ConektaOrder constructor.
+     *
      * @param Context $context
      * @param ConektaHelper $conektaHelper
      * @param ConektaLogger $conektaLogger
@@ -65,7 +73,7 @@ class ConektaOrder extends Util
      * @param CustomerSession $customerSession
      * @param Session $_checkoutSession
      * @param CustomerRepositoryInterface $customerRepository
-     * @param \ConfigProvider $conektaConfigProvider
+     * @param ConfigProvider $conektaConfigProvider
      */
     public function __construct(
         Context $context,
@@ -90,20 +98,22 @@ class ConektaOrder extends Util
     }
 
     /**
-     * @param $isLoggedInFlag
-     * @param $guestEmail
+     * Generate Order Params
+     *
+     * @param mixed $guestEmail
      * @return mixed|string
-     * @throws \Magento\Framework\Exception\InputException
-     * @throws \Magento\Framework\Exception\LocalizedException
-     * @throws \Magento\Framework\Exception\NoSuchEntityException
-     * @throws \Magento\Framework\Exception\State\InputMismatchException
+     * @throws ConektaException
+     * @throws InputException
+     * @throws LocalizedException
+     * @throws NoSuchEntityException
+     * @throws InputMismatchException
      */
     public function generateOrderParams($guestEmail)
     {
         $this->conektaLogger->info('ConektaOrder.generateOrderParams init');
 
-        \Conekta\Conekta::setApiKey($this->_conektaHelper->getPrivateKey());
-        \Conekta\Conekta::setApiVersion("2.0.0");
+        Conekta::setApiKey($this->_conektaHelper->getPrivateKey());
+        Conekta::setApiVersion("2.0.0");
         $customerRequest = [];
         try {
             $customer = $this->customerSession->getCustomer();
@@ -151,12 +161,11 @@ class ConektaOrder extends Util
                     $customer->setCustomAttribute('conekta_customer_id', $conektaCustomerId);
                     $this->customerRepository->save($customer);
                 }
-                
             } else {
                 //If cutomer API exists, always update error
                 $customerApi->update($customerRequest);
             }
-        } catch (\Conekta\Handler $error) {
+        } catch (Handler $error) {
             $this->conektaLogger->info($error->getMessage(), $customerRequest);
             throw new ConektaException(__($error->getMessage()));
         }
@@ -202,9 +211,11 @@ class ConektaOrder extends Util
     }
 
     /**
+     * Get montly installments
+     *
      * @return array
-     * @throws \Magento\Framework\Exception\LocalizedException
-     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     * @throws LocalizedException
+     * @throws NoSuchEntityException
      */
     public function getMonthlyInstallments()
     {
@@ -242,6 +253,13 @@ class ConektaOrder extends Util
         return $result;
     }
 
+    /**
+     * Get allowed payments methods
+     *
+     * @return array
+     * @throws LocalizedException
+     * @throws NoSuchEntityException
+     */
     public function getAllowedPaymentMethods()
     {
         $methods = [];
@@ -265,9 +283,9 @@ class ConektaOrder extends Util
     /**
      * Get active quote
      *
-     * @return \Magento\Quote\Model\Quote
-     * @throws \Magento\Framework\Exception\LocalizedException
-     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     * @return Quote
+     * @throws LocalizedException
+     * @throws NoSuchEntityException
      */
     public function getQuote()
     {
@@ -275,9 +293,11 @@ class ConektaOrder extends Util
     }
 
     /**
+     * Get quote ID
+     *
      * @return array
-     * @throws \Magento\Framework\Exception\LocalizedException
-     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     * @throws LocalizedException
+     * @throws NoSuchEntityException
      */
     public function getQuoteId()
     {
@@ -287,6 +307,14 @@ class ConektaOrder extends Util
         return $response;
     }
 
+    /**
+     * Get Metadata Order
+     *
+     * @param mixed $orderItems
+     * @return array
+     * @throws LocalizedException
+     * @throws NoSuchEntityException
+     */
     public function getMetadataOrder($orderItems)
     {
         return array_merge(

@@ -12,12 +12,34 @@ use Conekta\Payments\Exception\ConektaException;
 
 class EmbedFormRepository implements EmbedFormRepositoryInterface
 {
+    /**
+     * @var ConektaLogger
+     */
     private $_conektaLogger;
+    /**
+     * @var ConektaQuoteInterface
+     */
     private $conektaQuoteInterface;
+    /**
+     * @var ConektaOrderApi
+     */
     protected $conektaOrderApi;
+    /**
+     * @var ConektaQuoteFactory
+     */
     private $conektaQuoteFactory;
+    /**
+     * @var ConektaQuoteRepositoryFactory
+     */
     private $conektaQuoteRepositoryFactory;
 
+    /**
+     * @param ConektaLogger $conektaLogger
+     * @param ConektaQuoteInterface $conektaQuoteInterface
+     * @param ConektaOrderApi $conektaOrderApi
+     * @param ConektaQuoteFactory $conektaQuoteFactory
+     * @param ConektaQuoteRepositoryFactory $conektaQuoteRepositoryFactory
+     */
     public function __construct(
         ConektaLogger $conektaLogger,
         ConektaQuoteInterface $conektaQuoteInterface,
@@ -33,7 +55,10 @@ class EmbedFormRepository implements EmbedFormRepositoryInterface
     }
 
     /**
-     * @param array $orderParams
+     * ValidateOrderParameters
+     *
+     * @param mixed $orderParameters
+     * @param mixed $orderTotal
      * @return void
      * @throws ConektaException
      */
@@ -82,15 +107,16 @@ class EmbedFormRepository implements EmbedFormRepositoryInterface
     }
 
     /**
+     * Generate
+     *
      * @param int $quoteId
      * @param array $orderParams
      * @param float $orderTotal
-     * @return \Conekta\Order
+     * @return ConektaOrderApi
      * @throws ConektaException
      */
     public function generate($quoteId, $orderParams, $orderTotal)
     {
-
         //Validate params
         $this->validateOrderParameters($orderParams, $orderTotal);
 
@@ -104,7 +130,6 @@ class EmbedFormRepository implements EmbedFormRepositoryInterface
             $conektaOrder = $this->conektaOrderApi->find($conektaQuote->getConektaOrderId());
 
             if (!empty($conektaOrder)) {
-
                 $chekoutParams = $orderParams['checkout'];
                 $conektaChekout = $conektaOrder->checkout;
                 $conektaCheckoutMonthlyInstallmentsOptions = (array)$conektaChekout->monthly_installments_options;
@@ -120,7 +145,6 @@ class EmbedFormRepository implements EmbedFormRepositoryInterface
                 ) {
                     $hasToCreateNewOrder = true;
                 }
-                
             }
         } catch (NoSuchEntityException $e) {
             $conektaQuote = null;

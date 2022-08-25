@@ -2,7 +2,7 @@
     "name": "conekta/conekta_payments",
     "description": "Conekta payment gateway",
     "require": {
-        "php": "~7.3.0||~7.4.0",
+        "php": ">=7.3",
         "magento/module-sales": "^101.0.0|^102.0.0|^103.0.2",
         "magento/module-checkout": "^100.2.0|^100.3.0|^100.4.2",
         "magento/module-payment": "^100.2.0|^100.3.0|^100.4.2",
@@ -10,7 +10,7 @@
         "conekta/conekta-php": "*"
     },
     "type": "magento2-module",
-    "version": "4.1.2",
+    "version": "4.1.3",
     "license": [
         "OSL-3.0",
         "AFL-3.0"
@@ -36,6 +36,16 @@
         }
     },
     "require-dev": {
-        "phpunit/phpunit": "^9.5"
+        "phpunit/phpunit": "^9.5",
+        "squizlabs/php_codesniffer": "^3.7",
+        "magento/magento-coding-standard": "^25.0"
+    },
+    "scripts": {
+        "post-install-cmd": [
+            "([ $COMPOSER_DEV_MODE -eq 0 ] || vendor/bin/phpcs --config-set installed_paths ../../magento/magento-coding-standard/,../../phpcompatibility/php-compatibility)"
+        ],
+        "post-update-cmd": [
+            "([ $COMPOSER_DEV_MODE -eq 0 ] || vendor/bin/phpcs --config-set installed_paths ../../magento/magento-coding-standard/,../../phpcompatibility/php-compatibility)"
+        ]
     }
 }

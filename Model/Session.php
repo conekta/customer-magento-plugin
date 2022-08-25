@@ -12,10 +12,14 @@ use Magento\Framework\Session\ValidatorInterface;
 
 class Session extends SessionManager
 {
-
+    /**
+     * @var StorageInterface
+     */
     protected $storage;
+
     /**
      * Session constructor.
+     *
      * @param StorageInterface $storage
      */
     public function __construct(
@@ -27,7 +31,7 @@ class Session extends SessionManager
     /**
      * Set Promotion Code
      *
-     * @param string|null
+     * @param string|null $url
      * @return $this
      */
     public function setConektaCheckoutId($url)
