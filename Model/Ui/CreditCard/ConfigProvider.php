@@ -4,21 +4,39 @@ namespace Conekta\Payments\Model\Ui\CreditCard;
 use Conekta\Payments\Helper\Data as ConektaHelper;
 use Magento\Checkout\Model\ConfigProviderInterface;
 use Magento\Checkout\Model\Session;
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\View\Asset\Repository;
 use Magento\Payment\Model\CcConfig;
+use Magento\Quote\Api\Data\CartInterface;
+use Magento\Quote\Model\Quote;
 
 class ConfigProvider implements ConfigProviderInterface
 {
-    const CODE = 'conekta_cc';
-
+    public const CODE = 'conekta_cc';
+    /**
+     * @var Repository
+     */
     protected $_assetRepository;
-
+    /**
+     * @var CcConfig
+     */
     protected $_ccCongig;
-
+    /**
+     * @var ConektaHelper
+     */
     protected $_conektaHelper;
-
+    /**
+     * @var Session
+     */
     protected $_checkoutSession;
 
+    /**
+     * @param Repository $assetRepository
+     * @param CcConfig $ccCongig
+     * @param ConektaHelper $conektaHelper
+     * @param Session $checkoutSession
+     */
     public function __construct(
         Repository $assetRepository,
         CcConfig $ccCongig,
@@ -31,6 +49,11 @@ class ConfigProvider implements ConfigProviderInterface
         $this->_checkoutSession = $checkoutSession;
     }
 
+    /**
+     * Get config
+     *
+     * @return \array[][]
+     */
     public function getConfig()
     {
         return [
@@ -50,6 +73,11 @@ class ConfigProvider implements ConfigProviderInterface
         ];
     }
 
+    /**
+     * Get CC avaliable types
+     *
+     * @return array
+     */
     public function getCcAvalaibleTypes()
     {
         $result = [];
@@ -65,16 +93,27 @@ class ConfigProvider implements ConfigProviderInterface
         return $result;
     }
 
+    /**
+     * Get monthly installments
+     *
+     * @return false|int[]|string[]
+     */
     public function getMonthlyInstallments()
     {
         $total = $this->getQuote()->getGrandTotal();
         $months = [1];
         if ((int)$this->getMinimumAmountMonthlyInstallments() < (int)$total) {
-            $months = explode(',', $this->_conektaHelper->getConfigData('conekta_cc', 'monthly_installments'));
+            $months = explode(
+                ',',
+                $this->_conektaHelper->getConfigData('conekta_cc', 'monthly_installments')
+            );
+
             if (!in_array("1", $months)) {
                 array_push($months, "1");
             }
+
             asort($months);
+
             foreach ($months as $k => $v) {
                 if ((int)$total < ($v * 100)) {
                     unset($months[$k]);
@@ -84,11 +123,21 @@ class ConfigProvider implements ConfigProviderInterface
         return $months;
     }
 
+    /**
+     * Get minimum amount monthly installments
+     *
+     * @return mixed
+     */
     public function getMinimumAmountMonthlyInstallments()
     {
         return $this->_conektaHelper->getConfigData('conekta_cc', 'minimum_amount_monthly_installments');
     }
 
+    /**
+     * Get active monthly installments
+     *
+     * @return bool
+     */
     public function getActiveMonthlyInstallments()
     {
         $isActive = $this->_conektaHelper->getConfigData('conekta/conekta_creditcard', 'active_monthly_installments');
@@ -99,11 +148,21 @@ class ConfigProvider implements ConfigProviderInterface
         }
     }
 
+    /**
+     * Get cvv image url
+     *
+     * @return string
+     */
     public function getCvvImageUrl()
     {
         return $this->_assetRepository->getUrl('Conekta_Payments::images/cvv.png');
     }
 
+    /**
+     * Get months
+     *
+     * @return string[]
+     */
     private function _getMonths()
     {
         return [
@@ -122,6 +181,11 @@ class ConfigProvider implements ConfigProviderInterface
         ];
     }
 
+    /**
+     * Get Years
+     *
+     * @return array
+     */
     private function _getYears()
     {
         $years = [];
@@ -135,6 +199,11 @@ class ConfigProvider implements ConfigProviderInterface
         return $years;
     }
 
+    /**
+     * Get start years
+     *
+     * @return array
+     */
     private function _getStartYears()
     {
         $years = [];
@@ -148,6 +217,13 @@ class ConfigProvider implements ConfigProviderInterface
         return $years;
     }
 
+    /**
+     * Get quote
+     *
+     * @return CartInterface|Quote
+     * @throws LocalizedException
+     * @throws NoSuchEntityException
+     */
     public function getQuote()
     {
         return $this->_checkoutSession->getQuote();

@@ -6,7 +6,9 @@ use Magento\Checkout\Block\Onepage\Success as CompleteCheckout;
 class Success extends CompleteCheckout
 {
     /**
-     * getInstructions getter
+     * GetInstructions getter
+     *
+     * @param mixed $type
      * @return Order Object
      */
     public function getInstructions($type)
@@ -23,16 +25,20 @@ class Success extends CompleteCheckout
             );
         }
     }
+
     /**
-     * getMethod getter
+     * GetMethod getter
+     *
      * @return Order Object
      */
     public function getMethod()
     {
         return $this->getOrder()->getPayment()->getMethod();
     }
+
     /**
-     *  getOfflineInfo getter
+     * GetOfflineInfo getter
+     *
      * @return Order Object
      */
     public function getOfflineInfo()
@@ -45,16 +51,20 @@ class Success extends CompleteCheckout
 
         return $offline_info;
     }
+
     /**
-     * getOrder getter
+     * GetOrder getter
+     *
      * @return Order Object
      */
     public function getOrder()
     {
         return $this->_checkoutSession->getLastRealOrder();
     }
+
     /**
-     * getAccountOwner getter
+     * GeetAccountOwner getter
+     *
      * @return Store Instance
      */
     public function getAccountOwner()

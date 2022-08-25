@@ -1,17 +1,24 @@
 <?php
+
 namespace Conekta\Payments\Helper;
 
 use Conekta\Customer;
+use Conekta\Handler;
+use Conekta\ParameterValidationError;
 use Conekta\Payments\Logger\Logger as ConektaLogger;
+use Conekta\ProcessingError;
 use Magento\Framework\App\Helper\Context;
 use Magento\Framework\App\ProductMetadataInterface;
 use Magento\Framework\Encryption\EncryptorInterface;
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Module\ModuleListInterface;
 use Magento\Checkout\Model\Session as CheckoutSession;
 use Magento\Customer\Model\Session as CustomerSession;
 use Magento\Catalog\Model\ProductRepository;
 use Magento\Framework\Escaper;
 use Magento\Quote\Api\CartRepositoryInterface;
+use Magento\Store\Model\ScopeInterface;
 use Magento\Store\Model\StoreManagerInterface;
 
 class Data extends Util
@@ -36,28 +43,48 @@ class Data extends Util
      * @var Customer
      */
     protected $conektaCustomer;
-
+    /**
+     * @var StoreManagerInterface
+     */
     private $_storeManager;
+    /**
+     * @var CheckoutSession
+     */
     private $checkoutSession;
-
+    /**
+     * @var CustomerSession
+     */
     private $customerSession;
-
+    /**
+     * @var ProductRepository
+     */
     private $productRepository;
-
+    /**
+     * @var Escaper
+     */
     private $_escaper;
-    
+    /**
+     * @var CartRepositoryInterface
+     */
     protected $_cartRepository;
 
     /**
      * Data constructor.
+     *
      * @param Context $context
      * @param ModuleListInterface $moduleList
      * @param EncryptorInterface $encryptor
      * @param ProductMetadataInterface $productMetadata
      * @param ConektaLogger $conektaLogger
      * @param Customer $conektaCustomer
+     * @param CheckoutSession $checkoutSession
+     * @param CustomerSession $customerSession
+     * @param ProductRepository $productRepository
+     * @param Escaper $_escaper
+     * @param CartRepositoryInterface $cartRepository
+     * @param StoreManagerInterface $storeManager
      */
-  
+
     public function __construct(
         Context $context,
         ModuleListInterface $moduleList,
@@ -86,27 +113,38 @@ class Data extends Util
         $this->_storeManager = $storeManager;
     }
 
+    /**
+     * Get currency code
+     *
+     * @return string
+     * @throws LocalizedException
+     * @throws NoSuchEntityException
+     */
     public function getCurrencyCode()
     {
         return $this->_storeManager->getStore()->getCurrentCurrency()->getCode();
     }
 
     /**
-     * @param $area
-     * @param $field
-     * @param null $storeId
+     * Get Config Data
+     *
+     * @param string $area
+     * @param string $field
+     * @param mixed $storeId
      * @return mixed
      */
     public function getConfigData($area, $field, $storeId = null)
     {
         return $this->scopeConfig->getValue(
             'payment/' . $area . '/' . $field,
-            \Magento\Store\Model\ScopeInterface::SCOPE_STORE,
+            ScopeInterface::SCOPE_STORE,
             $storeId
         );
     }
 
     /**
+     * Get Module Version
+     *
      * @return mixed
      */
     public function getModuleVersion()
@@ -115,6 +153,8 @@ class Data extends Util
     }
 
     /**
+     * Get private key
+     *
      * @return string
      */
     public function getPrivateKey()
@@ -122,20 +162,26 @@ class Data extends Util
         $sandboxMode = $this->getConfigData('conekta/conekta_global', 'sandbox_mode');
 
         if ($sandboxMode) {
-            $privateKey = $this->_encryptor->decrypt($this->getConfigData(
-                'conekta/conekta_global',
-                'test_private_api_key'
-            ));
+            $privateKey = $this->_encryptor->decrypt(
+                $this->getConfigData(
+                    'conekta/conekta_global',
+                    'test_private_api_key'
+                )
+            );
         } else {
-            $privateKey = $this->_encryptor->decrypt($this->getConfigData(
-                'conekta/conekta_global',
-                'live_private_api_key'
-            ));
+            $privateKey = $this->_encryptor->decrypt(
+                $this->getConfigData(
+                    'conekta/conekta_global',
+                    'live_private_api_key'
+                )
+            );
         }
         return $privateKey;
     }
 
     /**
+     * Get Public key
+     *
      * @return mixed
      */
     public function getPublicKey()
@@ -150,36 +196,47 @@ class Data extends Util
     }
 
     /**
+     * Get Api version
+     *
      * @return mixed
      */
     public function getApiVersion()
     {
         return $this->scopeConfig->getValue(
             'conekta/global/api_version',
-            \Magento\Store\Model\ScopeInterface::SCOPE_STORE
-        );
-    }
-
-    public function pluginType()
-    {
-        return $this->scopeConfig->getValue(
-            'conekta/global/plugin_type',
-            \Magento\Store\Model\ScopeInterface::SCOPE_STORE
+            ScopeInterface::SCOPE_STORE
         );
     }
 
     /**
+     * Public type
+     *
+     * @return mixed
+     */
+    public function pluginType()
+    {
+        return $this->scopeConfig->getValue(
+            'conekta/global/plugin_type',
+            ScopeInterface::SCOPE_STORE
+        );
+    }
+
+    /**
+     * Plugin version
+     *
      * @return mixed
      */
     public function pluginVersion()
     {
         return $this->scopeConfig->getValue(
             'conekta/global/plugin_version',
-            \Magento\Store\Model\ScopeInterface::SCOPE_STORE
+            ScopeInterface::SCOPE_STORE
         );
     }
 
     /**
+     * Get Mage version
+     *
      * @return string
      */
     public function getMageVersion()
@@ -188,8 +245,10 @@ class Data extends Util
     }
 
     /**
-     * @param $orderParams
-     * @param $chargeParams
+     * Delete Save Card
+     *
+     * @param mixed $orderParams
+     * @param mixed $chargeParams
      */
     public function deleteSavedCard($orderParams, $chargeParams)
     {
@@ -210,49 +269,78 @@ class Data extends Util
                 $customer = $this->conektaCustomer->find($customerId);
                 $customer->deletePaymentSourceById($paymentSourceId);
             }
-        } catch (\Conekta\ProcessingError $error) {
-            $this->conektaLogger->info($error->getMessage());
-        } catch (\Conekta\ParameterValidationError $error) {
-            $this->conektaLogger->info($error->getMessage());
-        } catch (\Conekta\Handler $error) {
+        } catch (ProcessingError|ParameterValidationError|Handler $error) {
             $this->conektaLogger->info($error->getMessage());
         }
     }
 
+    /**
+     * Get metadata attributes
+     *
+     * @param mixed $metadataPath
+     * @return false|string[]
+     */
     public function getMetadataAttributes($metadataPath)
     {
         $attributes = $this->getConfigData('conekta/conekta_global', $metadataPath);
         $attributesArray = explode(",", $attributes);
-        
+
         return $attributesArray;
     }
 
+    /**
+     * Is 3D enable
+     *
+     * @return bool
+     */
     public function is3DSEnabled()
     {
         return (boolean)$this->getConfigData('conekta_cc', 'iframe_enabled');
     }
-    
+
+    /**
+     * Is save card enabled
+     *
+     * @return bool
+     */
     public function isSaveCardEnabled()
     {
         return (boolean)$this->getConfigData('conekta_cc', 'enable_saved_card');
     }
 
+    /**
+     * Is credit card enabled
+     *
+     * @return bool
+     */
     public function isCreditCardEnabled()
     {
-        return  (boolean)$this->getConfigData('conekta_cc', 'active');
-    }
-
-    public function isOxxoEnabled()
-    {
-        return  (boolean)$this->getConfigData('conekta_oxxo', 'active');
-    }
-
-    public function isSpeiEnabled()
-    {
-        return  (boolean)$this->getConfigData('conekta_spei', 'active');
+        return (boolean)$this->getConfigData('conekta_cc', 'active');
     }
 
     /**
+     * Is Oxxo enabled
+     *
+     * @return bool
+     */
+    public function isOxxoEnabled()
+    {
+        return (boolean)$this->getConfigData('conekta_oxxo', 'active');
+    }
+
+    /**
+     * Is Spei enabled
+     *
+     * @return bool
+     */
+    public function isSpeiEnabled()
+    {
+        return (boolean)$this->getConfigData('conekta_spei', 'active');
+    }
+
+    /**
+     * Get expired At
+     *
      * @return int
      */
     public function getExpiredAt()
@@ -262,7 +350,7 @@ class Data extends Util
         $expirationUnit = null;
 
         //hours expiration disabled temporaly
-        if (!$timeFormat && false) {
+        if (! $timeFormat && false) {
             $expirationValue = $this->getConfigData('conekta/conekta_global', 'expiry_hours');
             $expirationUnit = "hours";
         } else {
@@ -279,6 +367,13 @@ class Data extends Util
         return $expiryDate;
     }
 
+    /**
+     * Custom format
+     *
+     * @param mixed $array
+     * @param mixed $glue
+     * @return false|string
+     */
     private function customFormat($array, $glue)
     {
         $ret = '';
@@ -286,11 +381,11 @@ class Data extends Util
             if (is_array($item)) {
                 if (count($item) == 0) {
                     $item = 'null';
-                    $ret .=  $key . ' : ' . $item . $glue;
+                    $ret .= $key . ' : ' . $item . $glue;
                     continue;
                 }
                 foreach ($item as $k => $i) {
-                    $ret .=  $key . '_' . $k . ' : ' . $i  . $glue;
+                    $ret .= $key . '_' . $k . ' : ' . $i . $glue;
                 }
             } else {
                 if ($item == '') {
@@ -302,18 +397,26 @@ class Data extends Util
                         $item = 'yes';
                     }
                 }
-                $ret .=  $key . ' : ' . $item . $glue;
+                $ret .= $key . ' : ' . $item . $glue;
             }
         }
-        $ret = substr($ret, 0, 0-strlen($glue));
+        $ret = substr($ret, 0, 0 - strlen($glue));
         return $ret;
     }
 
+    /**
+     * Get Metadata Attributes conekta
+     *
+     * @param mixed $items
+     * @return array
+     * @throws LocalizedException
+     * @throws NoSuchEntityException
+     */
     public function getMetadataAttributesConekta($items)
     {
         $productAttributes = $this->getMetadataAttributes('metadata_additional_products');
         $request = [];
-        if (count($productAttributes) > 0 && !empty($productAttributes[0])) {
+        if (count($productAttributes) > 0 && ! empty($productAttributes[0])) {
             foreach ($items as $item) {
                 if ($item->getProductType() != 'configurable') {
                     $productValues = [];
@@ -327,23 +430,23 @@ class Data extends Util
             }
         }
         $orderAttributes = $this->getMetadataAttributes('metadata_additional_order');
-        if (count($orderAttributes) > 0 && !empty($orderAttributes[0])) {
+        if (count($orderAttributes) > 0 && ! empty($orderAttributes[0])) {
             foreach ($orderAttributes as $attr) {
                 $quoteValue = $this->checkoutSession->getQuote()->getData($attr);
                 if ($quoteValue == null) {
                     $request[$attr] = 'null';
                 } elseif (is_array($quoteValue)) {
                     $request[$attr] = $this->customFormat($quoteValue, ' | ');
-                } elseif (!is_string($quoteValue)) {
+                } elseif (! is_string($quoteValue)) {
                     if ($attr == 'customer_gender') {
                         $customer = $this->customerSession->getCustomer();
                         $customerDataGender = $customer->getData('gender');
                         $gender = $customer->getAttribute('gender')->getSource()->getOptionText($customerDataGender);
                         $request[$attr] = strtolower($gender);
                     } elseif ($attr == 'is_changed') {
-                        if ($quoteValue  == 0) {
+                        if ($quoteValue == 0) {
                             $request[$attr] = 'no';
-                        } elseif ($quoteValue  == 1) {
+                        } elseif ($quoteValue == 1) {
                             $request[$attr] = 'yes';
                         }
                     } else {
@@ -356,81 +459,89 @@ class Data extends Util
                         $attr == 'customer_is_guest' ||
                         $attr == 'is_persistent'
                     ) {
-                        if ($quoteValue  == '0') {
+                        if ($quoteValue == '0') {
                             $request[$attr] = 'no';
-                        } elseif ($quoteValue  == '1') {
+                        } elseif ($quoteValue == '1') {
                             $request[$attr] = 'yes';
                         }
                     } else {
                         $request[$attr] = $quoteValue;
                     }
                 }
-                
             }
         }
         return $request;
     }
 
+    /**
+     * Get magento metadata
+     *
+     * @return array
+     */
     public function getMagentoMetadata()
     {
         return [
-            'plugin' => 'Magento',
-            'plugin_version' => $this->getMageVersion(),
+            'plugin'                 => 'Magento',
+            'plugin_version'         => $this->getMageVersion(),
             'plugin_conekta_version' => $this->pluginVersion()
         ];
     }
 
+    /**
+     * Get line items
+     *
+     * @param mixed $items
+     * @param mixed $isQuoteItem
+     * @return array
+     */
     public function getLineItems($items, $isQuoteItem = true)
     {
         $version = (int)str_replace('.', '', $this->getMageVersion());
         $request = [];
-        $quantityMethod = $isQuoteItem? "getQty":"getQtyOrdered";
+        $quantityMethod = $isQuoteItem ? "getQty" : "getQtyOrdered";
         foreach ($items as $itemId => $item) {
             if ($version > 233) {
                 if ($item->getProductType() != 'bundle' && $item->getProductType() != 'configurable') {
-                    
                     $price = $item->getPrice();
-                    $qty= (int)$item->{$quantityMethod}();
-                    if (!empty($item->getParentItem())) {
+                    $qty = (int)$item->{$quantityMethod}();
+                    if (! empty($item->getParentItem())) {
                         $parent = $item->getParentItem();
-                        
+
                         if ($parent->getProductType() == 'configurable') {
                             $price = $item->getParentItem()->getPrice();
                             $qty = (int)$item->getParentItem()->{$quantityMethod}();
-                        
                         } elseif ($parent->getProductType() == 'bundle' && $isQuoteItem) {
                             //If it is a quote item, then qty of item has not been calculate yet
                             $qty = $qty * (int)$item->getParentItem()->{$quantityMethod}();
                         }
                     }
-                    
+
                     $name = $this->removeSpecialCharacter($item->getName());
                     $description = $this->removeSpecialCharacter(
                         $this->_escaper->escapeHtml($item->getName() . ' - ' . $item->getSku())
                     );
                     $description = substr($description, 0, 250);
-                    
+
                     $request[] = [
-                        'name' => $name,
-                        'sku' => $this->removeSpecialCharacter($item->getSku()),
-                        'unit_price' => $this->convertToApiPrice($price),
+                        'name'        => $name,
+                        'sku'         => $this->removeSpecialCharacter($item->getSku()),
+                        'unit_price'  => $this->convertToApiPrice($price),
                         'description' => $description,
-                        'quantity' => $qty,
-                        'tags' => [
+                        'quantity'    => $qty,
+                        'tags'        => [
                             $item->getProductType()
                         ]
                     ];
-
                 }
             } else {
                 if ($item->getProductType() != 'bundle' && $item->getPrice() > 0) {
                     $request[] = [
-                        'name' => $item->getName(),
-                        'sku' => $item->getSku(),
-                        'unit_price' => $this->convertToApiPrice($item->getPrice()),
+                        'name'        => $item->getName(),
+                        'sku'         => $item->getSku(),
+                        'unit_price'  => $this->convertToApiPrice($item->getPrice()),
                         'description' => $this->_escaper->escapeHtml($item->getName() . ' - ' . $item->getSku()),
-                        'quantity' => (int)($item->{$quantityMethod}()),
-                        'tags' => [
+                        'quantity'    => (int)($item->{$quantityMethod}()),
+                        'tags'        => [
                             $item->getProductType()
                         ]
                     ];
@@ -440,6 +551,12 @@ class Data extends Util
         return $request;
     }
 
+    /**
+     * Get Url webhook or default
+     *
+     * @return mixed|string
+     * @throws NoSuchEntityException
+     */
     public function getUrlWebhookOrDefault()
     {
         $urlWebhook = $this->getConfigData('conekta/conekta_global', 'conekta_webhook');
@@ -450,20 +567,28 @@ class Data extends Util
         return $urlWebhook;
     }
 
+    /**
+     * Get shipping lines
+     *
+     * @param mixed $quoteId
+     * @param mixed $isCheckout
+     * @return array
+     * @throws NoSuchEntityException
+     */
     public function getShippingLines($quoteId, $isCheckout = true)
     {
         $quote = $this->_cartRepository->get($quoteId);
         $shippingAddress = $quote->getShippingAddress();
-        
+
         $shippingLines = [];
-        
+
         if ($quote->getIsVirtual()) {
-            $shippingLines[] = ['amount' => 0 ];
+            $shippingLines[] = ['amount' => 0];
         } elseif ($shippingAddress) {
             $shippingLine['amount'] = $this->convertToApiPrice($shippingAddress->getShippingAmount());
 
             //Chekout orders doesn't allow method and carrier parameters
-            if (!$isCheckout) {
+            if (! $isCheckout) {
                 $shippingLine['method'] = $shippingAddress->getShippingMethod();
                 $shippingLine['carrier'] = $shippingAddress->getShippingDescription();
             }
@@ -474,32 +599,39 @@ class Data extends Util
         return $shippingLines;
     }
 
+    /**
+     * Get shipping contact
+     *
+     * @param mixed $quoteId
+     * @return array
+     * @throws NoSuchEntityException
+     */
     public function getShippingContact($quoteId)
     {
         $quote = $this->_cartRepository->get($quoteId);
         $address = null;
-        
+
         $shippingContact = [];
-        
+
         if ($quote->getIsVirtual()) {
             $address = $quote->getBillingAddress();
         } else {
             $address = $quote->getShippingAddress();
         }
-        
+
         if ($address) {
             $phone = $this->removePhoneSpecialCharacter($address->getTelephone());
 
             $shippingContact = [
                 'receiver' => $this->getCustomerName($address),
-                'phone' => $phone,
-                'address' => [
-                    'city' => $address->getCity(),
-                    'state' => $address->getRegionCode(),
-                    'country' => $address->getCountryId(),
+                'phone'    => $phone,
+                'address'  => [
+                    'city'        => $address->getCity(),
+                    'state'       => $address->getRegionCode(),
+                    'country'     => $address->getCountryId(),
                     'postal_code' => $this->onlyNumbers($address->getPostcode()),
-                    'phone' => $phone,
-                    'email' => $address->getEmail()
+                    'phone'       => $phone,
+                    'email'       => $address->getEmail()
                 ]
             ];
 
@@ -513,6 +645,12 @@ class Data extends Util
         return $shippingContact;
     }
 
+    /**
+     * Get customer name
+     *
+     * @param mixed $shipping
+     * @return array|string|string[]|null
+     */
     public function getCustomerName($shipping)
     {
         $customerName = sprintf(
@@ -525,6 +663,13 @@ class Data extends Util
         return $this->removeNameSpecialCharacter($customerName);
     }
 
+    /**
+     * Get discount lines
+     *
+     * @return array
+     * @throws LocalizedException
+     * @throws NoSuchEntityException
+     */
     public function getDiscountLines()
     {
         $quote = $this->checkoutSession->getQuote();
@@ -532,7 +677,7 @@ class Data extends Util
         $totalDiscount = abs(round($totalDiscount, 2));
 
         $discountLines = [];
-        if (!empty($totalDiscount)) {
+        if (! empty($totalDiscount)) {
             $totalDiscount = $this->convertToApiPrice($totalDiscount);
             $discountLine["code"] = "Discounts";
             $discountLine["type"] = "coupon";
@@ -543,6 +688,12 @@ class Data extends Util
         return $discountLines;
     }
 
+    /**
+     * Get Tax lines
+     *
+     * @param mixed $items
+     * @return array
+     */
     public function getTaxLines($items)
     {
         $taxLines = [];
@@ -555,7 +706,7 @@ class Data extends Util
 
         $taxLines[] = [
             'description' => 'Tax',
-            'amount' => $ctr_amount
+            'amount'      => $ctr_amount
         ];
 
         return $taxLines;

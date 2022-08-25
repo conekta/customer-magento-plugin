@@ -1,11 +1,16 @@
 <?php
+
 namespace Conekta\Payments\Helper;
 
-abstract class Util extends \Magento\Framework\App\Helper\AbstractHelper
+use Magento\Framework\App\Helper\AbstractHelper;
+
+abstract class Util extends AbstractHelper
 {
     /**
-     * Function that sanitizes a string, leaving it free
-     * of unwanted characteres.
+     * Function that sanitizes a string, leaving it free of unwanted characteres.
+     *
+     * @param mixed $param
+     * @return string
      */
     public function removeSpecialCharacter($param)
     {
@@ -13,8 +18,10 @@ abstract class Util extends \Magento\Framework\App\Helper\AbstractHelper
     }
 
     /**
-     * Function that sanitizes a phone string, leaving it free
-     * of unwanted characteres
+     * Function that sanitizes a phone string, leaving it fre of unwanted characteres
+     *
+     * @param mixed $param
+     * @return string
      */
     public function removePhoneSpecialCharacter($param)
     {
@@ -24,8 +31,10 @@ abstract class Util extends \Magento\Framework\App\Helper\AbstractHelper
     }
 
     /**
-     * Function that sanitizes a phone string, leaving it free
-     * of unwanted characteres
+     * Function that sanitizes a phone string, leaving it free of unwanted characteres
+     *
+     * @param mixed $param
+     * @return array|string|string[]|null
      */
     public function removeNameSpecialCharacter($param)
     {
@@ -34,6 +43,9 @@ abstract class Util extends \Magento\Framework\App\Helper\AbstractHelper
 
     /**
      * Function that sanitizes a string, leaving it just with numbers
+     *
+     * @param mixed $param
+     * @return array|string|string[]|null
      */
     public function onlyNumbers($param)
     {
@@ -41,9 +53,10 @@ abstract class Util extends \Magento\Framework\App\Helper\AbstractHelper
     }
 
     /**
-     * Convert $value into price for api (e.g: 40.8 => 4080)
-     * avoiding float cast to int error
-     * https://www.php.net/manual/es/language.types.float.php
+     * Convert $value into price for api (e.g: 40.8 => 4080) avoiding float cast to int error
+     *
+     * @param mixed $value
+     * @return int
      */
     public function convertToApiPrice($value)
     {

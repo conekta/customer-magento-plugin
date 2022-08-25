@@ -2,19 +2,26 @@
 
 namespace Conekta\Payments\Block\Adminhtml;
 
-class ExplanationLabel extends \Magento\Framework\Data\Form\Element\AbstractElement
+use Magento\Framework\Escaper;
+use Magento\Framework\Data\Form\Element\Factory;
+use Magento\Framework\Data\Form\Element\AbstractElement;
+use Magento\Framework\Data\Form\Element\CollectionFactory;
+
+class ExplanationLabel extends AbstractElement
 {
 
     public function __construct( // phpcs:ignore
-        \Magento\Framework\Data\Form\Element\Factory $factoryElement,
-        \Magento\Framework\Data\Form\Element\CollectionFactory $factoryCollection,
-        \Magento\Framework\Escaper $escaper,
+        Factory $factoryElement,
+        CollectionFactory $factoryCollection,
+        Escaper $escaper,
         array $data = []
     ) {
         parent::__construct($factoryElement, $factoryCollection, $escaper, $data);
     }
 
     /**
+     * Get Html element
+     *
      * @return string
      */
     public function getElementHtml()

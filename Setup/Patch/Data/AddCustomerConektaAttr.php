@@ -4,6 +4,8 @@ namespace Conekta\Payments\Setup\Patch\Data;
 
 use Magento\Customer\Model\Customer;
 use Magento\Customer\Setup\CustomerSetupFactory;
+use Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface;
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Setup\ModuleDataSetupInterface;
 use Magento\Framework\Setup\Patch\DataPatchInterface;
 use Magento\Framework\Setup\Patch\PatchInterface;
@@ -21,6 +23,7 @@ class AddCustomerConektaAttr implements DataPatchInterface
 
     /**
      * AddCustomerErpCustomerIdAttribute constructor.
+     *
      * @param ModuleDataSetupInterface $moduleDataSetup
      * @param CustomerSetupFactory $customerSetupFactory
      */
@@ -34,6 +37,7 @@ class AddCustomerConektaAttr implements DataPatchInterface
 
     /**
      * Get array of patches that have to be executed prior to this.
+     *
      * @return string[]
      */
     public static function getDependencies()
@@ -52,14 +56,10 @@ class AddCustomerConektaAttr implements DataPatchInterface
     }
 
     /**
-     * Run code inside patch
-     * If code fails, patch must be reverted, in case when we are speaking about schema - than under revert
-     * means run PatchInterface::revert()
-     *
-     * If we speak about data, under revert means: $transaction->rollback()
+     * Run code inside patch If code fails, PatchInterface::revert() If we speak about data, $transaction->rollback()
      *
      * @return void
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws LocalizedException
      */
     public function apply()
     {
@@ -74,7 +74,7 @@ class AddCustomerConektaAttr implements DataPatchInterface
                 'required' => false,
                 'sort_order' => 87,
                 'visible' => true,
-                'global' => \Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface::SCOPE_STORE,
+                'global' => ScopedAttributeInterface::SCOPE_STORE,
                 'system' => 0
             ]
         );

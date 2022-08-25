@@ -7,6 +7,11 @@ use Conekta\Payments\Model\ResourceModel\ConektaSalesOrder as ResourceConektaSal
 
 class Collection extends AbstractCollection
 {
+    /**
+     * Construct
+     *
+     * @return void
+     */
     protected function _construct()
     {
         $this->_init(

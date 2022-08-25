@@ -6,6 +6,7 @@ use Magento\Framework\Event\ObserverInterface;
 use Magento\Framework\Message\ManagerInterface;
 use Conekta\Payments\Model\Config;
 use Magento\Framework\Event\Observer;
+use Magento\Framework\Validator\Exception;
 
 /**
  * Class CreateWebhook
@@ -31,10 +32,12 @@ class Webhook implements ObserverInterface
         $this->config = $config;
         $this->messageManager = $messageManager;
     }
+
     /**
      * Create Webhook
      *
      * @param Observer $observer
+     * @throws Exception
      */
     public function execute(Observer $observer)
     {

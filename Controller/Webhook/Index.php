@@ -9,8 +9,10 @@ use Magento\Framework\App\Action\Action;
 use Magento\Framework\App\Action\Context;
 use Magento\Framework\App\CsrfAwareActionInterface;
 use Magento\Framework\App\RequestInterface;
+use Magento\Framework\App\ResponseInterface;
 use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Framework\Controller\Result\RawFactory;
+use Magento\Framework\Controller\ResultInterface;
 use Magento\Framework\Json\Helper\Data;
 use Magento\Payment\Model\Method\Logger;
 
@@ -23,19 +25,40 @@ class Index extends Action implements CsrfAwareActionInterface
     private const EVENT_ORDER_PENDING_PAYMENT = 'order.pending_payment';
     private const EVENT_ORDER_PAID = 'order.paid';
     private const EVENT_ORDER_EXPIRED = 'order.expired';
-
+    /**
+     * @var JsonFactory
+     */
     protected $resultJsonFactory;
-
+    /**
+     * @var RawFactory
+     */
     protected $resultRawFactory;
-
+    /**
+     * @var Data
+     */
     protected $helper;
-
+    /**
+     * @var Logger
+     */
     private $logger;
-
+    /**
+     * @var ConektaLogger
+     */
     private $_conektaLogger;
-
+    /**
+     * @var WebhookRepository
+     */
     private $webhookRepository;
 
+    /**
+     * @param Context $context
+     * @param JsonFactory $resultJsonFactory
+     * @param RawFactory $resultRawFactory
+     * @param Data $helper
+     * @param Logger $logger
+     * @param ConektaLogger $conektaLogger
+     * @param WebhookRepository $webhookRepository
+     */
     public function __construct(
         Context $context,
         JsonFactory $resultJsonFactory,
@@ -54,17 +77,33 @@ class Index extends Action implements CsrfAwareActionInterface
         $this->webhookRepository = $webhookRepository;
     }
 
-    /** * @inheritDoc */
-    public function createCsrfValidationException(RequestInterface $request): ?       InvalidRequestException
+    /**
+     * Create CSRF Validation Exception
+     *
+     * @param RequestInterface $request
+     * @return InvalidRequestException|null
+     */
+    public function createCsrfValidationException(RequestInterface $request): ?InvalidRequestException
     {
         return null;
     }
-    /** * @inheritDoc */
+
+    /**
+     * CSRF Validation
+     *
+     * @param RequestInterface $request
+     * @return bool|null
+     */
     public function validateForCsrf(RequestInterface $request): ?bool
     {
         return true;
     }
 
+    /**
+     * Execute
+     *
+     * @return int|ResponseInterface|ResultInterface
+     */
     public function execute()
     {
         $this->_conektaLogger->info('Controller Index :: execute');
@@ -77,7 +116,7 @@ class Index extends Action implements CsrfAwareActionInterface
             $body = $this->helper->jsonDecode($this->getRequest()->getContent());
 
             if (!$body || $this->getRequest()->getMethod() !== 'POST') {
-                return Response::STATUS_CODE_400;;
+                return Response::STATUS_CODE_400;
             }
 
             $event = $body['type'];

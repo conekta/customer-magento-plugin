@@ -4,14 +4,24 @@ namespace Conekta\Payments\Model;
 use Conekta\Payments\Api\ConektaQuoteRepositoryInterface;
 use Conekta\Payments\Api\Data\ConektaQuoteInterface;
 use Conekta\Payments\Model\ResourceModel\ConektaQuote as ConektaQuoteResource;
+use Magento\Framework\Exception\AlreadyExistsException;
 use Magento\Framework\Exception\NoSuchEntityException;
 
 class ConektaQuoteRepository implements ConektaQuoteRepositoryInterface
 {
-
+    /**
+     * @var ConektaQuoteFactory
+     */
     private $conektaQuoteFactory;
+    /**
+     * @var ConektaQuoteResource
+     */
     private $conektaQuoteResource;
 
+    /**
+     * @param ConektaQuoteFactory $conektaQuoteFactory
+     * @param ConektaQuoteResource $conektaQuoteResource
+     */
     public function __construct(
         ConektaQuoteFactory $conektaQuoteFactory,
         ConektaQuoteResource $conektaQuoteResource
@@ -19,7 +29,14 @@ class ConektaQuoteRepository implements ConektaQuoteRepositoryInterface
         $this->conektaQuoteFactory = $conektaQuoteFactory;
         $this->conektaQuoteResource = $conektaQuoteResource;
     }
- 
+
+    /**
+     * Get by ID
+     *
+     * @param mixed $id
+     * @return ConektaQuoteInterface
+     * @throws NoSuchEntityException
+     */
     public function getById($id)
     {
         $conektaQuote = $this->conektaQuoteFactory->create();
@@ -29,7 +46,14 @@ class ConektaQuoteRepository implements ConektaQuoteRepositoryInterface
         }
         return $conektaQuote;
     }
-    
+
+    /**
+     * Save quote
+     *
+     * @param ConektaQuoteInterface $conektaQuote
+     * @return ConektaQuoteInterface
+     * @throws AlreadyExistsException
+     */
     public function save(ConektaQuoteInterface $conektaQuote)
     {
         $this->conektaQuoteResource->save($conektaQuote);
