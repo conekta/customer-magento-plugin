@@ -1,0 +1,28 @@
+{
+  "conekta_salesorder": {
+    "column": {
+      "id": true,
+      "conekta_order_id": true,
+      "increment_order_id": true,
+      "created_at": true,
+      "updated_at": true
+    },
+    "constraint": {
+      "PRIMARY": true,
+      "CONEKTA_SALESORDER_CONEKTA_ORDER_ID_INCREMENT_ORDER_ID": true
+    }
+  },
+  "conekta_quote": {
+    "column": {
+      "quote_id": true,
+      "conekta_order_id": true,
+      "created_at": true,
+      "updated_at": true
+    },
+    "constraint": {
+      "PRIMARY": true,
+      "CONEKTA_QUOTE_CONEKTA_ORDER_ID": true,
+      "CONEKTA_QUOTE_QUOTE_ID_QUOTE_ENTITY_ID": true
+    }
+  }
+}
