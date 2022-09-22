@@ -1,4 +1,7 @@
-### 4.1.3 - 2022/08/16 12:12
+### 4.1.4 - 2022/09/28 16:36
+[Full Changelog](https://github.com/conekta/customer-magento-plugin/compare/4.1.4...4.1.3)
+* Feat:
+  - Update Conekta logo by @elvisheredia [#31](https://github.com/conekta/customer-magento-plugin/pull/31)
 
 [Full Changelog](https://github.com/conekta/customer-magento-plugin/compare/4.1.2...4.1.1)
 * Fix:
