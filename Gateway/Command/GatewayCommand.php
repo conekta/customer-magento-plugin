@@ -4,8 +4,11 @@ namespace Conekta\Payments\Gateway\Command;
 use Conekta\Payments\Logger\Logger as ConektaLogger;
 use Magento\Framework\Phrase;
 use Magento\Payment\Gateway\Command\CommandException;
+use Magento\Payment\Gateway\Command\ResultInterface;
 use Magento\Payment\Gateway\CommandInterface;
+use Magento\Payment\Gateway\Http\ClientException;
 use Magento\Payment\Gateway\Http\ClientInterface;
+use Magento\Payment\Gateway\Http\ConverterException;
 use Magento\Payment\Gateway\Http\TransferFactoryInterface;
 use Magento\Payment\Gateway\Request\BuilderInterface;
 use Magento\Payment\Gateway\Response\HandlerInterface;
@@ -38,15 +41,18 @@ class GatewayCommand implements CommandInterface
      */
     private $validator;
 
+    /**
+     * @var ConektaLogger
+     */
     private $_conektaLogger;
 
     /**
      * @param BuilderInterface $requestBuilder
      * @param TransferFactoryInterface $transferFactory
      * @param ClientInterface $client
-     * @param \Conekta\Payments\Logger\Logger $logger
-     * @param HandlerInterface $handler
-     * @param ValidatorInterface $validator
+     * @param ConektaLogger $conektaLogger
+     * @param HandlerInterface|null $handler
+     * @param ValidatorInterface|null $validator
      */
     public function __construct(
         BuilderInterface $requestBuilder,
@@ -65,6 +71,15 @@ class GatewayCommand implements CommandInterface
         $this->_conektaLogger->info('Command GatewayCommand :: __construct');
     }
 
+    /**
+     * Execute
+     *
+     * @param array $commandSubject
+     * @return void
+     * @throws CommandException
+     * @throws ClientException
+     * @throws ConverterException
+     */
     public function execute(array $commandSubject)
     {
         $this->_conektaLogger->info('Command GatewayCommand :: execute');
@@ -101,6 +116,8 @@ class GatewayCommand implements CommandInterface
     }
 
     /**
+     * Log Exceptions
+     *
      * @param Phrase[] $fails
      * @return void
      */

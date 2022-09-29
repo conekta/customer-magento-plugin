@@ -7,12 +7,20 @@ use Magento\Framework\View\Asset\Repository as AssetRepository;
 
 class ConfigProvider implements ConfigProviderInterface
 {
-    const CODE = 'conekta_global';
-
+    public const CODE = 'conekta_global';
+    /**
+     * @var ConektaHelper
+     */
     protected $_conektaHelper;
-
+    /**
+     * @var mixed
+     */
     private $assetRepository;
 
+    /**
+     * @param ConektaHelper $conektaHelper
+     * @param AssetRepository $assetRepository
+     */
     public function __construct(
         ConektaHelper $conektaHelper,
         AssetRepository $assetRepository
@@ -32,7 +40,7 @@ class ConfigProvider implements ConfigProviderInterface
             'payment' => [
                 self::CODE => [
                     'publicKey' => $this->_conektaHelper->getPublicKey(),
-                    'conekta_logo' => $this->_assetRepository->getUrl('Conekta_Payments::images/conekta.svg')
+                    'conekta_logo' => $this->_assetRepository->getUrl('Conekta_Payments::images/conekta.png')
                 ]
             ]
         ];

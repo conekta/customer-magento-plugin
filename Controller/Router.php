@@ -2,27 +2,29 @@
 
 namespace Conekta\Payments\Controller;
 
+use Magento\Framework\App\ActionFactory;
+use Magento\Framework\App\ActionInterface;
+use Magento\Framework\App\RequestInterface;
+use Magento\Framework\App\ResponseInterface;
 use Magento\Framework\App\RouterInterface;
 use Conekta\Payments\Helper\Data as ConektaHelper;
 use Conekta\Payments\Logger\Logger as ConektaLogger;
+use Magento\Framework\Url;
 
 class Router implements RouterInterface
 {
-
     /**
-     * @var \Magento\Framework\App\ActionFactory
+     * @var ActionFactory
      */
     protected $actionFactory;
 
     /**
-     * Response
-     *
-     * @var \Magento\Framework\App\ResponseInterface
+     * @var ResponseInterface
      */
     protected $_response;
 
     /**
-     * @var \Conekta\Payments\Helper\Data
+     * @var ConektaHelper
      */
     private $_conektaHelper;
 
@@ -32,12 +34,14 @@ class Router implements RouterInterface
     private $_conektaLogger;
 
     /**
-     * @param \Magento\Framework\App\ActionFactory $actionFactory
-     * @param \Magento\Framework\App\ResponseInterface $response
+     * @param ActionFactory $actionFactory
+     * @param ResponseInterface $response
+     * @param ConektaHelper $conektaHelper
+     * @param ConektaLogger $conektaLogger
      */
     public function __construct(
-        \Magento\Framework\App\ActionFactory $actionFactory,
-        \Magento\Framework\App\ResponseInterface $response,
+        ActionFactory $actionFactory,
+        ResponseInterface $response,
         ConektaHelper $conektaHelper,
         ConektaLogger $conektaLogger
     ) {
@@ -50,12 +54,11 @@ class Router implements RouterInterface
     /**
      * Validate and Match
      *
-     * @param \Magento\Framework\App\RequestInterface $request
-     * @return \Magento\Framework\App\ActionInterface
+     * @param RequestInterface $request
+     * @return ActionInterface
      */
-    public function match(\Magento\Framework\App\RequestInterface $request)
+    public function match(RequestInterface $request)
     {
-
         if ($request->getModuleName() === 'conekta') {
             return;
         }
@@ -69,7 +72,7 @@ class Router implements RouterInterface
         //If paths are identical, then redirects to webhook controller
         if ($pathRequest === $pathWebhook) {
             $request->setModuleName('conekta')->setControllerName('webhook')->setActionName('index');
-            $request->setAlias(\Magento\Framework\Url::REWRITE_REQUEST_PATH_ALIAS, $pathRequest);
+            $request->setAlias(Url::REWRITE_REQUEST_PATH_ALIAS, $pathRequest);
         } else {
             return;
         }

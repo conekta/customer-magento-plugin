@@ -7,6 +7,11 @@ use Conekta\Payments\Model\ResourceModel\ConektaQuote as ResourceConektaQuote;
 
 class Collection extends AbstractCollection
 {
+    /**
+     * Construct
+     *
+     * @return void
+     */
     protected function _construct()
     {
         $this->_init(

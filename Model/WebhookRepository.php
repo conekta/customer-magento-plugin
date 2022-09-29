@@ -13,18 +13,39 @@ use Magento\Framework\DB\Transaction;
 
 class WebhookRepository
 {
+    /**
+     * @var OrderInterface
+     */
     protected $orderInterface;
-
+    /**
+     * @var InvoiceService
+     */
     protected $invoiceService;
-
+    /**
+     * @var InvoiceSender
+     */
     protected $invoiceSender;
-
+    /**
+     * @var Transaction
+     */
     protected $transaction;
-
+    /**
+     * @var ConektaLogger
+     */
     private $_conektaLogger;
-
+    /**
+     * @var ConektaSalesOrderInterface
+     */
     private $conektaOrderSalesInterface;
 
+    /**
+     * @param OrderInterface $orderInterface
+     * @param InvoiceService $invoiceService
+     * @param InvoiceSender $invoiceSender
+     * @param Transaction $transaction
+     * @param ConektaLogger $conektaLogger
+     * @param ConektaSalesOrderInterface $conektaOrderSalesInterface
+     */
     public function __construct(
         OrderInterface $orderInterface,
         InvoiceService $invoiceService,
@@ -42,9 +63,8 @@ class WebhookRepository
     }
 
     /**
-     * Find store order in request body.
-     * If the keys['data']['object']['metadata']['order_id'] does not exist
-     * in $body, throws an Exception
+     * Find store order in body. If keys['data']['object']['metadata']['order_id'] does not exist, throws an Exception
+     *
      * @param array $body
      * @return Order
      * @throws LocalizedException
@@ -70,10 +90,8 @@ class WebhookRepository
     }
 
     /**
-     * Finds order by metadata id passed in $body.
-     * If the state of store order is Pending, set as CANCELED.
+     * Finds order by metadata id in $body If state == Pending, set as CANCELED If order not exists, throws exception
      *
-     * If order not exists, throws an exception
      * @param array $body
      * @return void
      * @throws LocalizedException
@@ -104,6 +122,13 @@ class WebhookRepository
         $this->_conektaLogger->info('WebhookRepository :: orderExpiredProcess: Order has been Canceled');
     }
 
+    /**
+     * Pay Order
+     *
+     * @param mixed $body
+     * @return void
+     * @throws LocalizedException
+     */
     public function payOrder($body)
     {
 
