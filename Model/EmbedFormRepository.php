@@ -80,7 +80,7 @@ class EmbedFormRepository implements EmbedFormRepositoryInterface
         if ($total < ConektaQuoteInterface::MINIMUM_AMOUNT_PER_QUOTE*100) {
             throw new ConektaException(
                 __('Para utilizar este medio de pago
-                debe ingresar una compra superior a $'.ConektaQuoteInterface::MINIMUM_AMOUNT_PER_QUOTE)
+                debe ingresar una compra superior a $'.ConektaQuoteInterface::MINIMUM_AMOUNT_PER_QUOTE. ':::'. $total. '::::'. json_encode($orderParameters))
             );
         }
 
