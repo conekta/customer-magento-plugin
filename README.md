@@ -13,7 +13,7 @@ composer config repositories.conekta git https://github.com/conekta/customer-mag
 
 2. Add composer dependency
 ```bash
-composer require conekta/conekta_payments 4.1.4
+composer require conekta/conekta_payments 4.1.5
 ```
 
 3. Update Magento
