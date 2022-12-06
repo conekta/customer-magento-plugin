@@ -405,6 +405,33 @@ class Data extends Util
     }
 
     /**
+     * @param $productAttributes
+     * @param $product
+     * @return array
+     */
+    private function processProductAttributes($productAttributes, $product)
+    {
+        $productValues = [];
+
+        foreach ($productAttributes as $attribute) {
+            $attributeValue = $product->getData($attribute);
+
+            if(!array($attributeValue)){
+                $productValues[$attribute] = $this->removeSpecialCharacter($attributeValue);
+            }
+
+            if (is_array($attributeValue)){
+                foreach ($attributeValue as $subAttrName => $subAttrValue) {
+                    $subAttrKey = sprintf("%s_%s", $attribute, $subAttrName);
+                    $productValues[$subAttrKey] = $this->removeSpecialCharacter($subAttrValue);
+                }
+            }
+        }
+
+        return $productValues;
+    }
+
+    /**
      * Get Metadata Attributes conekta
      *
      * @param mixed $items
@@ -415,16 +442,15 @@ class Data extends Util
     public function getMetadataAttributesConekta($items)
     {
         $productAttributes = $this->getMetadataAttributes('metadata_additional_products');
+
         $request = [];
         if (count($productAttributes) > 0 && ! empty($productAttributes[0])) {
             foreach ($items as $item) {
                 if ($item->getProductType() != 'configurable') {
-                    $productValues = [];
                     $productId = $item->getProductId();
                     $product = $this->productRepository->getById($productId);
-                    foreach ($productAttributes as $attr) {
-                        $productValues[$attr] = $this->removeSpecialCharacter($product->getData($attr));
-                    }
+                    $productValues = $this->processProductAttributes($productAttributes, $product);
+
                     $request['Product-' . $productId] = $this->customFormat($productValues, ' | ');
                 }
             }

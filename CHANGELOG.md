@@ -1,3 +1,9 @@
+### 4.1.5 - 2022/12/05 10:37
+[Full Changelog](https://github.com/conekta/customer-magento-plugin/compare/4.1.5...4.1.4)
+* Feat:
+  - Fix error when array attribute by @elvisheredia [#32](https://github.com/conekta/customer-magento-plugin/pull/32)
+  - Fix versions by @elvisheredia [#33](https://github.com/conekta/customer-magento-plugin/pull/33)
+
 ### 4.1.4 - 2022/09/28 16:36
 [Full Changelog](https://github.com/conekta/customer-magento-plugin/compare/4.1.4...4.1.3)
 * Feat:
