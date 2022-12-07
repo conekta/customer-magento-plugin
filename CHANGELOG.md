@@ -1,3 +1,8 @@
+### 4.1.6 - 2022/12/07 12:34
+[Full Changelog](https://github.com/conekta/customer-magento-plugin/compare/4.1.6...4.1.5)
+* Feat:
+  - Fix error when phone is empty @elvisheredia [#34](https://github.com/conekta/customer-magento-plugin/pull/34)
+
 ### 4.1.5 - 2022/12/05 10:37
 [Full Changelog](https://github.com/conekta/customer-magento-plugin/compare/4.1.5...4.1.4)
 * Feat:
