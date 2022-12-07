@@ -25,9 +25,13 @@ abstract class Util extends AbstractHelper
      */
     public function removePhoneSpecialCharacter($param)
     {
-        $firstChar = preg_match("/^([+]).*$/", $param)? '+' : '';
+        if (!empty($param)) {
+            $firstChar = preg_match("/^([+]).*$/", $param)? '+' : '';
 
-        return $firstChar . preg_replace("/[^0-9]/", "", $param);
+            return $firstChar . preg_replace("/[^0-9]/", "", $param);
+        }
+
+        return $param;
     }
 
     /**
