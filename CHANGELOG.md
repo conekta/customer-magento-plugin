@@ -1,3 +1,8 @@
+### 4.1.6 - 2022/12/07 12:34
+[Full Changelog](https://github.com/conekta/customer-magento-plugin/compare/4.1.6...4.1.5)
+* Feat:
+  - Fix error when phone is empty @elvisheredia [#34](https://github.com/conekta/customer-magento-plugin/pull/34)
+
 ### 4.1.5 - 2022/12/05 10:37
 [Full Changelog](https://github.com/conekta/customer-magento-plugin/compare/4.1.5...4.1.4)
 * Feat:
@@ -15,14 +20,13 @@
   - Update plugin name by @elvisheredia [#22](https://github.com/conekta/customer-magento-plugin/pull/22)
 
 ### 4.1.2 - 2022/08/12 17:25
-  - Update readme & remove monolog by @agatto-conekta [#26](https://github.com/conekta/customer-magento-plugin/pull/26)
+* Update readme & remove monolog by @agatto-conekta [#26](https://github.com/conekta/customer-magento-plugin/pull/26)
 
 ### 4.1.1 - 2022/07/25 18:02
 
 [Full Changelog](https://github.com/conekta/customer-magento-plugin/compare/4.1.0...4.1.1)
 * Fix:
   -  Set 200 in webhook when event was not required by @elvisheredia [#21](https://github.com/conekta/customer-magento-plugin/pull/21)
-  -  Update plugin name by @elvisheredia [#22](https://github.com/conekta/customer-magento-plugin/pull/22)
 
 Magento 4.1.0, 2021-12-23
 -------------------------------------
