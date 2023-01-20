@@ -16,7 +16,7 @@ define(
     ],
     function (ko, CONEKTA, conektaCheckout, Component, $, quote, customer, validator, storage, uiRegistry, domRe, shSP, sBA) {
         'use strict';
-        
+
         return Component.extend({
             defaults: {
                 template: 'Conekta_Payments/payment/base-form',
@@ -30,11 +30,11 @@ define(
                     isLoggedIn: '',
                 }
             },
-            
-            getFormTemplate: function(){
+
+            getFormTemplate: function () {
                 return 'Conekta_Payments/payment/embedform/form'
             },
-            
+
             initObservable: function () {
 
                 this._super()
@@ -45,34 +45,34 @@ define(
                         'iframOrderData',
                         'conektaError',
                         'isFormLoading'
-                ]);
+                    ]);
                 this.iframOrderData('');
                 this.checkoutId('');
                 this.conektaError(null);
                 this.isFormLoading(false);
-                
+
                 var baseGrandTotal = quote.totals._latestValue.base_grand_total;
-                
+
                 var shippingAddress = '';
-                if(quote.shippingAddress())
+                if (quote.shippingAddress())
                     shippingAddress = JSON.stringify(quote.shippingAddress());
 
                 var billingAddress = '';
-                if(quote.billingAddress())
+                if (quote.billingAddress())
                     billingAddress = JSON.stringify(quote.billingAddress());
 
                 var shippingMethodCode = '';
-                if(quote.shippingMethod._latestValue){
+                if (quote.shippingMethod._latestValue) {
                     shippingMethodCode = quote.shippingMethod._latestValue.method_code;
                 }
-                
+
                 this.renderProperties.quoteBaseGrandTotal = baseGrandTotal;
                 this.renderProperties.shippingMethod = shippingMethodCode;
                 this.renderProperties.shippingAddress = shippingAddress;
                 this.renderProperties.billingAddress = billingAddress;
                 this.renderProperties.guestEmail = quote.guestEmail;
                 this.renderProperties.isLoggedIn = customer.isLoggedIn();
-                
+
                 //Suscriptions to re-render
                 quote.totals.subscribe(this.reRender, this);
                 quote.billingAddress.subscribe(this.billingAddressChanges, this);
@@ -81,65 +81,65 @@ define(
                     .get('checkout.steps.billing-step.payment.customer-email')
                     .email
                     .subscribe(this.reRender, this);
-                
+
                 return this;
             },
-            
-            initialize: function() {
+
+            initialize: function () {
                 var self = this;
                 this._super();
-                if (customer.isLoggedIn() && 
-                    quote.isVirtual() && 
+                if (customer.isLoggedIn() &&
+                    quote.isVirtual() &&
                     quote.billingAddress()
-                ){
-                    $.when(sBA()).then(this.initializeForm());    
+                ) {
+                    $.when(sBA()).then(this.initializeForm());
                 } else {
                     this.initializeForm();
-                } 
-                
+                }
+
             },
 
-            initializeForm: function(){
+            initializeForm: function () {
 
                 //if doesn't rendered yet, then tries to render
-                if(!this.reRender()){
-                    
+                if (!this.reRender()) {
+
                     this.isFormLoading(true);
                     this.loadCheckoutId();
                 }
             },
 
-            billingAddressChanges: function() {
+            billingAddressChanges: function () {
                 var self = this;
-                
+
                 //if no billing info, then form is editing
-                if(!quote.billingAddress()){
+                if (!quote.billingAddress()) {
                     self.reRender();
-                    
+
                 } else if (!quote.isVirtual()) {
                     self.isFormLoading(false);
                     shSP.saveShippingInformation()
-                        .done(function(){
+                        .done(function () {
                             self.reRender();
                         });
                 }
-                
+
             },
 
-            reRender: function(total){
-                
-                if(this.isFormLoading())
+            reRender: function (total) {
+
+                if (this.isFormLoading())
                     return;
 
                 this.isFormLoading(true);
-                
+
                 var baseGrandTotal = quote.totals._latestValue.base_grand_total;
-                
+
                 var shippingMethodCode = '';
-                if(quote.shippingMethod._latestValue){
+                if (quote.shippingMethod._latestValue) {
                     shippingMethodCode = quote.shippingMethod._latestValue.method_code;
                 }
-                
+
                 var hasToReRender = false;
 
                 //check for total changes
@@ -156,7 +156,7 @@ define(
 
                 //check for shipping changes
                 var shippingAddress = '';
-                if(quote.shippingAddress()) shippingAddress = JSON.stringify(quote.shippingAddress());
+                if (quote.shippingAddress()) shippingAddress = JSON.stringify(quote.shippingAddress());
                 if (shippingAddress !== this.renderProperties.shippingAddress) {
                     hasToReRender = true;
                 }
@@ -164,33 +164,33 @@ define(
 
                 //check for billing changes
                 var quoteBilling = quote.billingAddress();
-                var strBillingAddr = quoteBilling? JSON.stringify(quote.billingAddress()) : '';
-                if(strBillingAddr !== this.renderProperties.billingAddress ){
+                var strBillingAddr = quoteBilling ? JSON.stringify(quote.billingAddress()) : '';
+                if (strBillingAddr !== this.renderProperties.billingAddress) {
                     hasToReRender = true;
                 }
                 this.renderProperties.billingAddress = strBillingAddr;
-                                
+
                 var actuaGuestEmail = quote.guestEmail;
-                if (!customer.isLoggedIn() && 
+                if (!customer.isLoggedIn() &&
                     quote.isVirtual()
-                ){
-                
+                ) {
+
                     //If is virtual, guest mail guets from uiregistry
                     actuaGuestEmail = uiRegistry.get('checkout.steps.billing-step.payment.customer-email').email();
-                    
+
                     //check for guest email changes on virtual cart
-                    if(actuaGuestEmail !== this.renderProperties.guestEmail) {
+                    if (actuaGuestEmail !== this.renderProperties.guestEmail) {
                         hasToReRender = true;
                     }
                 }
                 this.renderProperties.guestEmail = actuaGuestEmail;
 
                 //Check if customer is logged in changes
-                if(customer.isLoggedIn() !== this.renderProperties.isLoggedIn){
+                if (customer.isLoggedIn() !== this.renderProperties.isLoggedIn) {
                     hasToReRender = true;
                 }
                 this.renderProperties.isLoggedIn = customer.isLoggedIn();
-                
+
                 if (hasToReRender) {
                     this.loadCheckoutId()
 
@@ -201,7 +201,7 @@ define(
                 return hasToReRender;
             },
 
-            validateRenderEmbedForm: function(){
+            validateRenderEmbedForm: function () {
                 var isValid = true;
 
                 if (!this.renderProperties.billingAddress) {
@@ -209,11 +209,11 @@ define(
                     return false;
                 }
 
-                if (!customer.isLoggedIn() && 
-                    quote.isVirtual() && 
+                if (!customer.isLoggedIn() &&
+                    quote.isVirtual() &&
                     (!quote.guestEmail || (
-                        this.renderProperties.guestEmail &&
-                        this.renderProperties.guestEmail !== quote.guestEmail
+                            this.renderProperties.guestEmail &&
+                            this.renderProperties.guestEmail !== quote.guestEmail
                         )
                     )
                 ) {
@@ -221,18 +221,18 @@ define(
                     return false;
                 }
 
-                if (!customer.isLoggedIn() && 
-                    !quote.isVirtual() && 
+                if (!customer.isLoggedIn() &&
+                    !quote.isVirtual() &&
                     !quote.guestEmail
                 ) {
                     this.conektaError('Ingrese un email válido para continuar');
                     return false;
                 }
-                
+
                 return true;
             },
 
-            loadCheckoutId: function() {
+            loadCheckoutId: function () {
                 var self = this;
                 var guest_email = '';
                 if (this.isLoggedIn() === false) {
@@ -241,8 +241,9 @@ define(
                 var params = {
                     'guestEmail': guest_email
                 };
-                
-                if(this.validateRenderEmbedForm()){
+
+                if (this.validateRenderEmbedForm()) {
+                    this.validateCheckoutSession()
                     $.ajax({
                         type: 'POST',
                         url: self.getcreateOrderUrl(),
@@ -252,10 +253,10 @@ define(
                         success: function (response) {
                             self.conektaError(null);
                             self.checkoutId(response.checkout_id);
-                            
-                            if(self.checkoutId()){
+
+                            if (self.checkoutId()) {
                                 self.renderizeEmbedForm();
-                            }else{
+                            } else {
                                 self.isFormLoading(false);
                             }
                         },
@@ -265,15 +266,15 @@ define(
                             self.isFormLoading(false);
                         }
                     })
-                }else{
+                } else {
                     this.isFormLoading(false);
                 }
-                
+
             },
 
-            renderizeEmbedForm: function(){
+            renderizeEmbedForm: function () {
                 var self = this;
-                document.getElementById("conektaIframeContainer").innerHTML="";
+                document.getElementById("conektaIframeContainer").innerHTML = "";
                 window.ConektaCheckoutComponents.Integration({
                     targetIFrame: '#conektaIframeContainer',
                     checkoutRequestId: this.checkoutId(),
@@ -283,7 +284,7 @@ define(
                         theme: 'default'
                     },
                     onCreateTokenSucceeded: function (token) {
-                        
+                        console.log("Token:::", token)
                     },
                     onCreateTokenError: function (error) {
                         console.error(error);
@@ -293,14 +294,14 @@ define(
                         self.beforePlaceOrder();
                     }
                 });
-                
+
                 $('#conektaIframeContainer').find('iframe').attr('data-cy', 'the-frame');
                 self.isFormLoading(false);
             },
 
             getData: function () {
-                var number = this.creditCardNumber().replace(/\D/g,'');
-                if(this.iframOrderData() !== '') {
+                var number = this.creditCardNumber().replace(/\D/g, '');
+                if (this.iframOrderData() !== '') {
                     var params = this.iframOrderData();
                     var data = {
                         'method': this.getCode(),
@@ -322,9 +323,9 @@ define(
                     'additional_data': {
                         'payment_method': '',
                         'cc_type': this.creditCardType(),
-                        'cc_last_4': number.substring(number.length-4, number.length),
+                        'cc_last_4': number.substring(number.length - 4, number.length),
                         'card_token': $("#" + this.getCode() + "_card_token").val(),
-                        'reference': '',                        
+                        'reference': '',
                         'iframe_payment': false,
                         'order_id': '',
                         'txn_id': ''
@@ -340,14 +341,14 @@ define(
 
             beforePlaceOrder: function () {
                 var self = this;
-                if(this.iframOrderData() !== ''){
+                if (this.iframOrderData() !== '') {
                     self.placeOrder();
                     return;
                 }
             },
 
-            validate: function() {
-                if(this.iframOrderData() !== '') {
+            validate: function () {
+                if (this.iframOrderData() !== '') {
                     return true;
                 }
 
@@ -355,49 +356,58 @@ define(
                 return $form.validation() && $form.validation('isValid');
             },
 
-            getCode: function() {
+            getCode: function () {
                 return 'conekta_ef';
             },
 
-            isActive: function() {
+            isActive: function () {
                 return true;
             },
 
-            getGlobalConfig: function() {
+            getGlobalConfig: function () {
                 return window.checkoutConfig.payment.conekta_global
             },
 
-            getMethodConfig: function() {
+            getMethodConfig: function () {
                 return window.checkoutConfig.payment.conekta_ef
             },
 
-            getPublicKey: function() {
+            getPublicKey: function () {
                 return this.getGlobalConfig().publicKey;
             },
 
-            getPaymenMethods: function() {
+            getPaymenMethods: function () {
                 return this.getMethodConfig().paymentMethods;
             },
 
-            getConektaLogo: function() {
+            getConektaLogo: function () {
                 return this.getGlobalConfig().conekta_logo;
             },
 
-            getcreateOrderUrl: function() {
+            getcreateOrderUrl: function () {
                 return this.getMethodConfig().createOrderUrl;
             },
-            
+
             isLoggedIn: function () {
                 return customer.isLoggedIn();
             },
 
-            activeMonthlyInstallments: function() {
+            activeMonthlyInstallments: function () {
                 return this.getMethodConfig().active_monthly_installments;
             },
 
-            getMinimumAmountMonthlyInstallments: function() {
+            getMinimumAmountMonthlyInstallments: function () {
                 return this.getMethodConfig().minimum_amount_monthly_installments;
             },
+
+            validateCheckoutSession: function() {
+                const lifeTime = parseInt(this.getMethodConfig().sessionExpirationTime)
+                const timeToExpire = lifeTime * 1000
+
+                setTimeout(()=> {
+                    location.reload()
+                }, timeToExpire)
+            }
         });
     }
 );
