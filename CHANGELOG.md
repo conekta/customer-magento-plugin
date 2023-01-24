@@ -1,3 +1,8 @@
+### 4.1.7 - 2023/01/07 12:34
+[Full Changelog](https://github.com/conekta/customer-magento-plugin/compare/4.1.7...4.1.6)
+* Feat:
+  - [CHLP-830] Plugins - Magento - Órdenes Perdidas @elvisheredia [#35](https://github.com/conekta/customer-magento-plugin/pull/35)
+
 ### 4.1.6 - 2022/12/07 12:34
 [Full Changelog](https://github.com/conekta/customer-magento-plugin/compare/4.1.6...4.1.5)
 * Feat:

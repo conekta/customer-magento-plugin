@@ -78,6 +78,7 @@ class ConfigProvider implements ConfigProviderInterface
                     'total' => $this->getQuote()->getGrandTotal(),
                     'createOrderUrl' => $this->url->getUrl(self::CREATEORDER_URL),
                     'paymentMethods' => $this->getPaymentMethodsActive(),
+                    'sessionExpirationTime' => $this->_checkoutSession->getCookieLifetime()
                 ]
             ]
         ];
