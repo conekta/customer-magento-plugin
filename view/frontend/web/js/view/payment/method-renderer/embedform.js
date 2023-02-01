@@ -13,8 +13,10 @@ define(
         'domReady!',
         'Magento_Checkout/js/model/shipping-save-processor',
         'Magento_Checkout/js/action/set-billing-address',
+        'Magento_Checkout/js/model/cart/totals-processor/default',
+        'Magento_Checkout/js/model/cart/cache'
     ],
-    function (ko, CONEKTA, conektaCheckout, Component, $, quote, customer, validator, storage, uiRegistry, domRe, shSP, sBA) {
+    function (ko, CONEKTA, conektaCheckout, Component, $, quote, customer, validator, storage, uiRegistry, domRe, shSP, sBA, totalsProcessor, cartCache) {
         'use strict';
 
         return Component.extend({
@@ -243,6 +245,7 @@ define(
                 };
 
                 if (this.validateRenderEmbedForm()) {
+                    console.log('before render iframe')
                     this.validateCheckoutSession()
                     $.ajax({
                         type: 'POST',
@@ -402,10 +405,11 @@ define(
 
             validateCheckoutSession: function() {
                 const lifeTime = parseInt(this.getMethodConfig().sessionExpirationTime)
-                const timeToExpire = lifeTime * 1000
-
+                const timeToExpire = (lifeTime - 5) * 1000
                 setTimeout(()=> {
-                    location.reload()
+                    document.getElementById("conektaIframeContainer").innerHTML = `<div style="width: 100%; text-align: center;"><p>La sesión a finalizado por 
+                    favor actualice la pagina</p> <button onclick="window.location.reload()" class="button action continue primary">Actualizar</button></body></div>`;
+                    console.log("Reload sessión")
                 }, timeToExpire)
             }
         });
