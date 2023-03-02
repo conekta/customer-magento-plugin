@@ -10,7 +10,7 @@
         "conekta/conekta-php": "*"
     },
     "type": "magento2-module",
-    "version": "4.1.8",
+    "version": "4.1.8-beta",
     "license": [
         "OSL-3.0",
         "AFL-3.0"
