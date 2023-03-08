@@ -247,6 +247,7 @@ define(
                 };
 
                 if (this.validateRenderEmbedForm()) {
+                    console.log('before render iframe')
                     this.validateCheckoutSession()
                     $.ajax({
                         type: 'POST',
@@ -406,7 +407,7 @@ define(
             validateCheckoutSession: function () {
                 const lifeTime = parseInt(this.getMethodConfig().sessionExpirationTime)
                 const timeToExpire = (lifeTime - 5) * 1000
-                setTimeout(() => {
+                setTimeout(()=> {
                     document.getElementById("conektaIframeContainer").innerHTML = `<div style="width: 100%; text-align: center;"><p>La sesión a finalizado por 
                     favor actualice la pagina</p> <button onclick="window.location.reload()" class="button action continue primary">Actualizar</button></body></div>`;
                 }, timeToExpire)
