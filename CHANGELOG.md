@@ -1,3 +1,8 @@
+### 4.1.8 - 2023/03/08 16:34
+[Full Changelog](https://github.com/conekta/customer-magento-plugin/compare/4.1.9...4.1.8)
+* Feat:
+  - [CHLP-1076] Plugins - Magento - resolve error when fail update address in one sigle page checkout @elvisheredia [#37](https://github.com/conekta/customer-magento-plugin/pull/37)
+
 ### 4.1.7 - 2023/01/07 12:34
 [Full Changelog](https://github.com/conekta/customer-magento-plugin/compare/4.1.7...4.1.6)
 * Feat:
