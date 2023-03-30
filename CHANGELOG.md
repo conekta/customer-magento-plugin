@@ -1,12 +1,17 @@
-### 4.1.8 - 2023/03/08 16:34
-[Full Changelog](https://github.com/conekta/customer-magento-plugin/compare/4.1.9...4.1.8)
+### 4.1.9 - 2023/03/15 16:34
+[Full Changelog](https://github.com/conekta/customer-magento-plugin/compare/4.1.8...4.1.9)
 * Feat:
-  - [CHLP-1076] Plugins - Magento - resolve error when fail update address in one sigle page checkout @elvisheredia [#37](https://github.com/conekta/customer-magento-plugin/pull/37)
+  - [CHLP-1076] Resolve error when fail update address in one sigle page checkout @elvisheredia [#37](https://github.com/conekta/customer-magento-plugin/pull/37)
+
+### 4.1.8 - 2023/03/08 16:34
+[Full Changelog](https://github.com/conekta/customer-magento-plugin/compare/4.1.7...4.1.8)
+* Feat:
+  - [CHLP-830] Add session control, to prevent errors when session was expire @elvisheredia [#36](https://github.com/conekta/customer-magento-plugin/pull/36)
 
 ### 4.1.7 - 2023/01/07 12:34
-[Full Changelog](https://github.com/conekta/customer-magento-plugin/compare/4.1.7...4.1.6)
+[Full Changelog](https://github.com/conekta/customer-magento-plugin/compare/4.1.6...4.1.7)
 * Feat:
-  - [CHLP-830] Plugins - Magento - Órdenes Perdidas @elvisheredia [#35](https://github.com/conekta/customer-magento-plugin/pull/35)
+  - [CHLP-830] Órdenes Perdidas @elvisheredia [#35](https://github.com/conekta/customer-magento-plugin/pull/35)
 
 ### 4.1.6 - 2022/12/07 12:34
 [Full Changelog](https://github.com/conekta/customer-magento-plugin/compare/4.1.6...4.1.5)
