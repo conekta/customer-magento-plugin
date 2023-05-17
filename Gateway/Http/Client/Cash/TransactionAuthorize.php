@@ -1,15 +1,15 @@
 <?php
-namespace Conekta\Payments\Gateway\Http\Client\Spei;
+namespace Conekta\Payments\Gateway\Http\Client\Cash;
 
+use Conekta\Order as ConektaOrder;
 use Conekta\Payments\Gateway\Http\Util\HttpUtil;
 use Conekta\Payments\Helper\Data as ConektaHelper;
 use Conekta\Payments\Logger\Logger as ConektaLogger;
+use Conekta\Payments\Api\Data\ConektaSalesOrderInterface;
+use Conekta\Payments\Model\ConektaSalesOrderFactory;
 use Magento\Payment\Gateway\Http\ClientInterface;
 use Magento\Payment\Gateway\Http\TransferInterface;
 use Magento\Payment\Model\Method\Logger;
-use Conekta\Order as ConektaOrder;
-use Conekta\Payments\Api\Data\ConektaSalesOrderInterface;
-use Conekta\Payments\Model\ConektaSalesOrderFactory;
 
 class TransactionAuthorize implements ClientInterface
 {
@@ -56,10 +56,9 @@ class TransactionAuthorize implements ClientInterface
         $this->_conektaLogger = $conektaLogger;
         $this->_conektaOrder = $conektaOrder;
         $this->_httpUtil = $httpUtil;
-        $this->_conektaLogger->info('HTTP Client Spei TransactionAuthorize :: __construct');
+        $this->_conektaLogger->info('HTTP Client Cash TransactionAuthorize :: __construct');
         $this->logger = $logger;
         $this->conektaSalesOrderFactory = $conektaSalesOrderFactory;
-
         $config = [
             'locale' => 'es'
         ];
@@ -74,7 +73,7 @@ class TransactionAuthorize implements ClientInterface
      */
     public function placeRequest(TransferInterface $transferObject)
     {
-        $this->_conektaLogger->info('HTTP Client Spei TransactionAuthorize :: placeRequest');
+        $this->_conektaLogger->info('HTTP Client Cash TransactionAuthorize :: placeRequest');
         $request = $transferObject->getBody();
 
         $orderParams['currency']         = $request['CURRENCY'];
@@ -98,7 +97,6 @@ class TransactionAuthorize implements ClientInterface
 
         try {
             $conektaOrder= $this->_conektaOrder->create($orderParams);
-            
             $charge = $conektaOrder->createCharge($chargeParams);
 
             if (isset($charge->id) && isset($conektaOrder->id)) {
@@ -113,7 +111,6 @@ class TransactionAuthorize implements ClientInterface
                             ConektaSalesOrderInterface::INCREMENT_ORDER_ID => $orderParams['metadata']['order_id']
                         ])
                         ->save();
-
             } else {
                 $result_code = 666;
             }
@@ -129,7 +126,7 @@ class TransactionAuthorize implements ClientInterface
                 ]
             );
             $this->_conektaLogger->info(
-                'HTTP Client Spei TransactionAuthorize :: placeRequest: Payment authorize error ' . $e->getMessage()
+                'HTTP Client Cash TransactionAuthorize :: placeRequest: Payment authorize error ' . $e->getMessage()
             );
             throw new ValidatorException(__($e->getMessage()));
         }
@@ -142,9 +139,9 @@ class TransactionAuthorize implements ClientInterface
 
         $response['offline_info'] = [
             "type" => $charge->payment_method->type,
+            'barcode_url' => $charge->payment_method->barcode_url,
             "data" => [
-                "clabe"         => $charge->payment_method->clabe,
-                "bank_name"     => $charge->payment_method->bank,
+                "reference"     => $charge->payment_method->reference,
                 "expires_at"    => $charge->payment_method->expires_at
             ]
         ];
@@ -159,7 +156,7 @@ class TransactionAuthorize implements ClientInterface
         );
 
         $this->_conektaLogger->info(
-            'HTTP Client Spei TransactionAuthorize :: placeRequest',
+            'HTTP Client Cash TransactionAuthorize :: placeRequest',
             [
                 'request' => $request,
                 'response' => $response
@@ -173,7 +170,7 @@ class TransactionAuthorize implements ClientInterface
 
     protected function generateResponseForCode($resultCode, $txn_id, $ord_id)
     {
-        $this->_conektaLogger->info('HTTP Client Spei TransactionAuthorize :: generateResponseForCode');
+        $this->_conektaLogger->info('HTTP Client Cash TransactionAuthorize :: generateResponseForCode');
 
         return array_merge(
             [

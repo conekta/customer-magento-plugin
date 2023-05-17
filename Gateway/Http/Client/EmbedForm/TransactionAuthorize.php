@@ -90,8 +90,8 @@ class TransactionAuthorize implements ClientInterface
         $paymentMethod = $request['payment_method_details']['payment_method']['type'];
         $response = [];
         //If is offline payment, added extra info needed
-        if ($paymentMethod == ConfigProvider::PAYMENT_METHOD_OXXO ||
-            $paymentMethod == ConfigProvider::PAYMENT_METHOD_SPEI
+        if ($paymentMethod == ConfigProvider::PAYMENT_METHOD_CASH ||
+            $paymentMethod == ConfigProvider::PAYMENT_METHOD_BANK_TRANSFER
         ) {
             $response['offline_info'] = [];
 
@@ -106,7 +106,7 @@ class TransactionAuthorize implements ClientInterface
                     ]
                 ];
 
-                if ($paymentMethod == ConfigProvider::PAYMENT_METHOD_OXXO) {
+                if ($paymentMethod == ConfigProvider::PAYMENT_METHOD_CASH) {
                     $response['offline_info']['data']['barcode_url'] = $charge->payment_method->barcode_url;
                     $response['offline_info']['data']['reference'] = $charge->payment_method->reference;
                 } else {

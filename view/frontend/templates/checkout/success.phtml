@@ -1,62 +1,70 @@
-<?php /** @var $block \Conekta\Payments\Block\Info\Success*/ ?>
+<?php /** @var $block \Conekta\Payments\Block\Info\Success */ ?>
 
 <div class="checkout-success">
+
     <?php
-    if (in_array($block->getMethod(), ["conekta_oxxo", "conekta_spei"])):
+    if (in_array($block->getMethod(), ["conekta_ef"])):
         $data = $block->getOfflineInfo();
         ?>
 
-        <h5><?= /* @noEscape */ __('Instructions:'); ?></h5>
-        <p><?= /* @noEscape */ __($block->getInstructions($data["type"])); ?></p>
+        <h5><?= /* @noEscape */
+            __('Instructions:'); ?></h5>
+        <p><?= /* @noEscape */
+            __($block->getInstructions($data["type"])); ?></p>
 
-        <table class="data" style="margin: 0; -webkit-margin-start: 0;">
+        <table class="data" style="margin: 20px; -webkit-margin-start: 0;">
             <tbody>
             <?php
             switch ($data["type"]):
                 case "oxxo":
+                case "cash":
                     ?>
                     <tr>
                         <td>
-                            <strong><?= /* @noEscape */ __('Reference Number:'); ?></strong>
-                            <br>
-                            <?= $block->escapeHtml($data["data"]["reference"]); ?>
+                            <strong><?= /* @noEscape */
+                                __('Reference Number:'); ?></strong>
+                            <span
+                                class="conekta_payment_reference"><?= $block->escapeHtml($data["data"]["reference"]); ?></span>
                         </td>
                     </tr>
                     <tr>
                         <td>
-                            <strong><?= /* @noEscape */ __('Expires at:'); ?></strong>
-                            <br>
-                            <?= $block->escapeHtml(date("Y-m-d", (integer) $data["data"]["expires_at"])); ?>
+                            <strong><?= /* @noEscape */
+                                __('Expires at:'); ?></strong>
+                            <?= $block->escapeHtml(date("Y-m-d", (integer)$data["data"]["expires_at"])); ?>
                         </td>
                     </tr>
                     <?php
                     break;
                 case "spei":
+                case "bankTransfer":
                     ?>
                     <tr>
                         <td>
-                            <strong><?= /* @noEscape */ __('CLABE:'); ?></strong>
-                            <br>
-                            <?= $block->escapeHtml($data["data"]["clabe"]); ?>
+                            <strong><?= /* @noEscape */
+                                __('CLABE:'); ?></strong>
+                            <span
+                                class="conekta_payment_reference"><?= $block->escapeHtml($data["data"]["clabe"]); ?></span>
                         </td>
                     </tr>
                     <tr>
                         <td>
-                            <strong><?= /* @noEscape */ __('Bank Name:'); ?></strong>
-                            <br>
+                            <strong><?= /* @noEscape */
+                                __('Bank Name:'); ?></strong>
                             <?= $block->escapeHtml($data["data"]["bank_name"]); ?></td>
                     </tr>
                     <tr>
                         <td>
-                            <strong><?= /* @noEscape */ __('Expires at:'); ?></strong>
-                            <br>
-                            <?= $block->escapeHtml(date("Y-m-d", (integer) $data["data"]["expires_at"])); ?>
+                            <strong><?= /* @noEscape */
+                                __('Expires at:'); ?></strong>
+                            <?= $block->escapeHtml(date("Y-m-d", (integer)$data["data"]["expires_at"])); ?>
                         </td>
                     </tr>
                     <tr>
                         <td>
-                            <strong><?= /* @noEscape */ __('Account owner:'); ?></strong>
-                            <br><?= $block->escapeHtml($block->getAccountOwner()); ?>
+                            <strong><?= /* @noEscape */
+                                __('Account owner:'); ?></strong>
+                            <?= $block->escapeHtml($block->getAccountOwner()); ?>
                         </td>
                     </tr>
                     <?php
@@ -66,6 +74,7 @@
         </table>
     <?php endif; ?>
     <p>
-        <?=/* @noEscape */ __('We\'ll email you an order confirmation with details and tracking info.')?>
+        <?= /* @noEscape */
+        __('We\'ll email you an order confirmation with details and tracking info.') ?>
     </p>
 </div>

@@ -1,12 +1,12 @@
 <?php
-namespace Conekta\Payments\Block\Oxxo;
+namespace Conekta\Payments\Block\BankTransfer;
 
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\View\Element\Template\Context;
 use Magento\Payment\Block\Info;
 use Magento\Payment\Model\Config;
 
-class OxxoInfo extends Info
+class BankTransferInfo extends Info
 {
     /**
      * @var Config
@@ -16,7 +16,7 @@ class OxxoInfo extends Info
     /**
      * @var string
      */
-    protected $_template = 'Conekta_Payments::info/oxxo.phtml';
+    protected $_template = 'Conekta_Payments::info/bankTransfer.phtml';
 
     /**
      * @param Context $context
@@ -33,12 +33,11 @@ class OxxoInfo extends Info
     }
 
     /**
-     * Get Oxxo data
+     * Get data BankTransfer
      *
      * @return false|mixed
-     * @throws LocalizedException
      */
-    public function getDataOxxo()
+    public function getDataBankTransfer()
     {
         $additional_data = $this->getAdditionalData();
         if (isset($additional_data['offline_info']['data'])) {
@@ -49,7 +48,7 @@ class OxxoInfo extends Info
     }
 
     /**
-     * Get additional data
+     * Get additional
      *
      * @return mixed
      * @throws LocalizedException

@@ -9,10 +9,10 @@
         <method name="conekta_cc">
             <allow_multiple_address>0</allow_multiple_address>
         </method>
-        <method name="conekta_oxxo">
+        <method name="conekta_cash">
             <allow_multiple_address>0</allow_multiple_address>
         </method>
-        <method name="conekta_spei">
+        <method name="conekta_bank_transfer">
             <allow_multiple_address>0</allow_multiple_address>
         </method>
         <method name="conekta_ef">

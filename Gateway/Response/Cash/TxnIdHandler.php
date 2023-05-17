@@ -1,5 +1,5 @@
 <?php
-namespace Conekta\Payments\Gateway\Response\Oxxo;
+namespace Conekta\Payments\Gateway\Response\Cash;
 
 use Conekta\Payments\Logger\Logger as ConektaLogger;
 use Magento\Payment\Gateway\Helper\SubjectReader;
@@ -27,7 +27,7 @@ class TxnIdHandler implements HandlerInterface
         SubjectReader $subjectReader
     ) {
         $this->_conektaLogger = $conektaLogger;
-        $this->_conektaLogger->info('Response Oxxo TxnIdHandler :: __construct');
+        $this->_conektaLogger->info('Response Cash TxnIdHandler :: __construct');
 
         $this->subjectReader = $subjectReader;
     }
@@ -41,7 +41,7 @@ class TxnIdHandler implements HandlerInterface
      */
     public function handle(array $handlingSubject, array $response)
     {
-        $this->_conektaLogger->info('Response Oxxo TxnIdHandler :: handle');
+        $this->_conektaLogger->info('Response cash TxnIdHandler :: handle');
 
         $paymentDO = $this->subjectReader->readPayment($handlingSubject);
         $payment = $paymentDO->getPayment();
