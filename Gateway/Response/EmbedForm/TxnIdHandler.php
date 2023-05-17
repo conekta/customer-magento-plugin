@@ -52,7 +52,7 @@ class TxnIdHandler implements HandlerInterface
                 $this->handleCreditCard($payment, $response);
                 break;
             
-            case ConfigProvider::PAYMENT_METHOD_OXXO:
+            case ConfigProvider::PAYMENT_METHOD_CASH:
             case ConfigProvider::PAYMENT_METHOD_SPEI:
                 $this->handleOffline($payment, $response);
                 break;

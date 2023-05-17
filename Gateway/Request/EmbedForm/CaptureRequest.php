@@ -136,7 +136,7 @@ class CaptureRequest implements BuilderInterface
                 $charge['payment_method']['token_id'] = $token;
                 break;
             
-            case ConfigProvider::PAYMENT_METHOD_OXXO:
+            case ConfigProvider::PAYMENT_METHOD_CASH:
             case ConfigProvider::PAYMENT_METHOD_SPEI:
                 $reference = $payment->getAdditionalInformation('reference');
                 $expireAt = $this->_conektaHelper->getExpiredAt();

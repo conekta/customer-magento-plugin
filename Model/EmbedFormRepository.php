@@ -98,11 +98,11 @@ class EmbedFormRepository implements EmbedFormRepositoryInterface
             throw new ConektaException(__("Código Postal invalido. Debe tener 5 dígitos"));
         }
 
-        //Oxxo validations
+        //cash validations
         if (in_array('cash', $orderParameters["checkout"]["allowed_payment_methods"]) &&
             $orderTotal > 10000
         ) {
-            throw new ConektaException(__('El monto máximo para pagos con Oxxo es de $10.000'));
+            throw new ConektaException(__('El monto máximo para pagos con Efectivo es de $10.000'));
         }
     }
 

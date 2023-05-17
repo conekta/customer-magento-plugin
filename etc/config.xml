@@ -27,11 +27,11 @@
                 <privateInfoKeys>FRAUD_MSG_LIST</privateInfoKeys>
             </conekta_cc>
 
-            <!-- Conekta OXXO -->
-            <conekta_oxxo>
+            <!-- Conekta Cash -->
+            <conekta_cash>
                 <active>0</active>
-                <title>Pago en Efectivo con Oxxo</title>
-                <model>ConektaPaymentsOxxoFacade</model>
+                <title>Pago en Efectivo</title>
+                <model>ConektaPaymentsCashFacade</model>
                 <payment_action>authorize</payment_action>
                 <order_status>pending_payment</order_status>
                 <group>offline</group>
@@ -47,8 +47,8 @@
                 <can_void>0</can_void>
                 <can_cancel>1</can_cancel>
                 <can_edit>1</can_edit>
-            </conekta_oxxo>
-            <!-- // Conekta OXXO // -->
+            </conekta_cash>
+            <!-- // Conekta Cash // -->
 
             <!-- Conekta SPEI -->
             <conekta_spei>

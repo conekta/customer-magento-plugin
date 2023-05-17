@@ -1,5 +1,5 @@
 <?php
-namespace Conekta\Payments\Gateway\Request\Oxxo;
+namespace Conekta\Payments\Gateway\Request\Cash;
 
 use Conekta\Payments\Helper\Data as ConektaHelper;
 use Conekta\Payments\Logger\Logger as ConektaLogger;
@@ -25,7 +25,7 @@ class AuthorizeRequest implements BuilderInterface
     ) {
         $this->_conektaHelper = $conektaHelper;
         $this->_conektaLogger = $conektaLogger;
-        $this->_conektaLogger->info('Request Oxxo AuthorizeRequest :: __construct');
+        $this->_conektaLogger->info('Request Cash AuthorizeRequest :: __construct');
 
         $this->config = $config;
         $this->subjectReader = $subjectReader;
@@ -33,7 +33,7 @@ class AuthorizeRequest implements BuilderInterface
 
     public function build(array $buildSubject)
     {
-        $this->_conektaLogger->info('Request Oxxo AuthorizeRequest :: build');
+        $this->_conektaLogger->info('Request Cash AuthorizeRequest :: build');
 
         $paymentDO = $this->subjectReader->readPayment($buildSubject);
         $payment = $paymentDO->getPayment();
@@ -50,18 +50,18 @@ class AuthorizeRequest implements BuilderInterface
             'soft_validations'  => 'true'
         ];
 
-        $request['payment_method_details'] = $this->getChargeOxxo($amount, $expiry_date);
+        $request['payment_method_details'] = $this->getChargeCash($amount, $expiry_date);
         $request['CURRENCY'] = $order->getCurrencyCode();
         $request['TXN_TYPE'] = 'A';
 
         return $request;
     }
 
-    public function getChargeOxxo($amount, $expiry_date)
+    public function getChargeCash($amount, $expiry_date)
     {
         $charge = [
             'payment_method' => [
-                'type' => 'oxxo_cash',
+                'type' => 'cash',
                 'expires_at' => $expiry_date
             ],
             'amount' => $amount

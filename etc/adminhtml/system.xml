@@ -181,12 +181,12 @@
                         <config_path>payment/conekta_cc/sort_order</config_path>
                     </field>
                 </group>
-                <!-- Conekta OXXO -->
-                <group id="conekta_oxxo" translate="label" type="text" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>OXXO</label>
+                <!-- Conekta Cash -->
+                <group id="conekta_cash" translate="label" type="text" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Cash</label>
                     <field id="active" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="0">
                         <label>Enabled</label>
-                        <config_path>payment/conekta_oxxo/active</config_path>
+                        <config_path>payment/conekta_cash/active</config_path>
                         <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     </field>
                     <field id="min_order_total" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="0">
@@ -196,7 +196,7 @@
                         </depends>
                         <validate>validate-number validate-number-range number-range-10-10000</validate>
                         <comment>The minimum amount is $10 [MXN]</comment>
-                        <config_path>payment/conekta_oxxo/min_order_total</config_path>
+                        <config_path>payment/conekta_cash/min_order_total</config_path>
                     </field>
                     <field id="max_order_total" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="0">
                         <label>Maximum Order Total</label>
@@ -205,14 +205,14 @@
                         </depends>
                         <validate>validate-number validate-number-range number-range-10-10000</validate>
                         <comment>The maximum amount is $10000 [MXN]</comment>
-                        <config_path>payment/conekta_oxxo/max_order_total</config_path>
+                        <config_path>payment/conekta_cash/max_order_total</config_path>
                     </field>
 	                <field id="instructions" translate="label" type="textarea" sortOrder="52" showInDefault="1" showInWebsite="1" showInStore="1">
 	                    <label>Instructions</label>
                         <depends>
                             <field id="active">1</field>
                         </depends>
-	                    <config_path>payment/conekta_oxxo/instructions</config_path>
+	                    <config_path>payment/conekta_cash/instructions</config_path>
 	                </field>
                     <field id="order_status" translate="label" type="select" sortOrder="60" showInDefault="1" showInWebsite="1" showInStore="0">
                         <label>New Order Status</label>
@@ -220,7 +220,7 @@
                         <depends>
                             <field id="active">1</field>
                         </depends>
-                        <config_path>payment/conekta_oxxo/order_status</config_path>
+                        <config_path>payment/conekta_cash/order_status</config_path>
                     </field>
                     <field id="sort_order" translate="label" type="text" sortOrder="100" showInDefault="1" showInWebsite="1" showInStore="0">
                         <label>Sort Order</label>
@@ -228,10 +228,10 @@
                             <field id="active">1</field>
                         </depends>
                         <frontend_class>validate-number</frontend_class>
-                        <config_path>payment/conekta_oxxo/sort_order</config_path>
+                        <config_path>payment/conekta_cash/sort_order</config_path>
                     </field>
                 </group>
-                <!-- // Conekta OXXO // -->
+                <!-- // Conekta CASH // -->
 
                 <!-- Conekta SPEI -->
                 <group id="conekta_spei" translate="label" type="text" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="1">

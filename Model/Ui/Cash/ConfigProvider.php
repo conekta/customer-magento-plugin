@@ -1,5 +1,5 @@
 <?php
-namespace Conekta\Payments\Model\Ui\Oxxo;
+namespace Conekta\Payments\Model\Ui\Cash;
 
 use Conekta\Payments\Helper\Data as ConektaHelper;
 use Magento\Checkout\Model\Session;
@@ -12,7 +12,7 @@ use Magento\Quote\Model\Quote;
 
 class ConfigProvider implements ConfigProviderInterface
 {
-    public const CODE = 'conekta_oxxo';
+    public const CODE = 'conekta_cash';
     /**
      * @var Session
      */

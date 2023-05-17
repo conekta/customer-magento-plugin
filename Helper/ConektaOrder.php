@@ -269,7 +269,7 @@ class ConektaOrder extends Util
         }
 
         $total = $this->getQuote()->getSubtotal();
-        if ($this->_conektaHelper->isOxxoEnabled() &&
+        if ($this->_conektaHelper->isCashEnabled() &&
             $total <= 10000
         ) {
             $methods[] = 'cash';

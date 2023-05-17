@@ -319,13 +319,13 @@ class Data extends Util
     }
 
     /**
-     * Is Oxxo enabled
+     * Is cash enabled
      *
      * @return bool
      */
-    public function isOxxoEnabled()
+    public function isCashEnabled()
     {
-        return (boolean)$this->getConfigData('conekta_oxxo', 'active');
+        return (boolean)$this->getConfigData('conekta_cash', 'active');
     }
 
     /**

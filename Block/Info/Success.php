@@ -13,9 +13,9 @@ class Success extends CompleteCheckout
      */
     public function getInstructions($type)
     {
-        if ($type == 'oxxo') {
+        if ($type == 'cash') {
             return $this->_scopeConfig->getValue(
-                'payment/conekta_oxxo/instructions',
+                'payment/conekta_cash/instructions',
                 \Magento\Store\Model\ScopeInterface::SCOPE_STORE
             );
         } elseif ($type == 'spei') {

@@ -104,8 +104,8 @@ class EmbedFormInfo extends Info
                 $title = 'Tarjeta de Crédito';
                 break;
             
-            case ConfigProvider::PAYMENT_METHOD_OXXO:
-                $title = 'Pago en Efectivo con Oxxo';
+            case ConfigProvider::PAYMENT_METHOD_CASH:
+                $title = 'Pago en Efectivo';
                 break;
             case ConfigProvider::PAYMENT_METHOD_SPEI:
                 $title = 'Transferencia SPEI';
@@ -127,14 +127,14 @@ class EmbedFormInfo extends Info
     }
 
     /**
-     * Is oxxo payment method
+     * Is cash payment method
      *
      * @return bool
      * @throws LocalizedException
      */
-    public function isOxxoPaymentMethod()
+    public function isCashPaymentMethod()
     {
-        return $this->getPaymentMethodType() === ConfigProvider::PAYMENT_METHOD_OXXO;
+        return $this->getPaymentMethodType() === ConfigProvider::PAYMENT_METHOD_CASH;
     }
 
     /**

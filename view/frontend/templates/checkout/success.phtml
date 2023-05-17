@@ -2,7 +2,7 @@
 
 <div class="checkout-success">
     <?php
-    if (in_array($block->getMethod(), ["conekta_oxxo", "conekta_spei"])):
+    if (in_array($block->getMethod(), ["conekta_cash", "conekta_spei"])):
         $data = $block->getOfflineInfo();
         ?>
 
@@ -13,7 +13,7 @@
             <tbody>
             <?php
             switch ($data["type"]):
-                case "oxxo":
+                case "cash":
                     ?>
                     <tr>
                         <td>

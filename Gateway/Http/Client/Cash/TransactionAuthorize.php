@@ -1,5 +1,5 @@
 <?php
-namespace Conekta\Payments\Gateway\Http\Client\Oxxo;
+namespace Conekta\Payments\Gateway\Http\Client\Cash;
 
 use Conekta\Order as ConektaOrder;
 use Conekta\Payments\Gateway\Http\Util\HttpUtil;
@@ -56,7 +56,7 @@ class TransactionAuthorize implements ClientInterface
         $this->_conektaLogger = $conektaLogger;
         $this->_conektaOrder = $conektaOrder;
         $this->_httpUtil = $httpUtil;
-        $this->_conektaLogger->info('HTTP Client Oxxo TransactionAuthorize :: __construct');
+        $this->_conektaLogger->info('HTTP Client Cash TransactionAuthorize :: __construct');
         $this->logger = $logger;
         $this->conektaSalesOrderFactory = $conektaSalesOrderFactory;
         $config = [
@@ -73,7 +73,7 @@ class TransactionAuthorize implements ClientInterface
      */
     public function placeRequest(TransferInterface $transferObject)
     {
-        $this->_conektaLogger->info('HTTP Client Oxxo TransactionAuthorize :: placeRequest');
+        $this->_conektaLogger->info('HTTP Client Cash TransactionAuthorize :: placeRequest');
         $request = $transferObject->getBody();
 
         $orderParams['currency']         = $request['CURRENCY'];
@@ -126,7 +126,7 @@ class TransactionAuthorize implements ClientInterface
                 ]
             );
             $this->_conektaLogger->info(
-                'HTTP Client Oxxo TransactionAuthorize :: placeRequest: Payment authorize error ' . $e->getMessage()
+                'HTTP Client Cash TransactionAuthorize :: placeRequest: Payment authorize error ' . $e->getMessage()
             );
             throw new ValidatorException(__($e->getMessage()));
         }
@@ -156,7 +156,7 @@ class TransactionAuthorize implements ClientInterface
         );
 
         $this->_conektaLogger->info(
-            'HTTP Client Oxxo TransactionAuthorize :: placeRequest',
+            'HTTP Client Cash TransactionAuthorize :: placeRequest',
             [
                 'request' => $request,
                 'response' => $response
@@ -170,7 +170,7 @@ class TransactionAuthorize implements ClientInterface
 
     protected function generateResponseForCode($resultCode, $txn_id, $ord_id)
     {
-        $this->_conektaLogger->info('HTTP Client Oxxo TransactionAuthorize :: generateResponseForCode');
+        $this->_conektaLogger->info('HTTP Client Cash TransactionAuthorize :: generateResponseForCode');
 
         return array_merge(
             [
