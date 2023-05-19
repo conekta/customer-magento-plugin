@@ -329,13 +329,13 @@ class Data extends Util
     }
 
     /**
-     * Is Spei enabled
+     * Is Bank Transfer enabled
      *
      * @return bool
      */
-    public function isSpeiEnabled()
+    public function isBankTransferEnabled()
     {
-        return (boolean)$this->getConfigData('conekta_spei', 'active');
+        return (boolean)$this->getConfigData('conekta_bank_transfer', 'active');
     }
 
     /**
@@ -588,7 +588,7 @@ class Data extends Util
         $urlWebhook = $this->getConfigData('conekta/conekta_global', 'conekta_webhook');
         if (empty($urlWebhook)) {
             $baseUrl = $this->_storeManager->getStore()->getBaseUrl();
-            $urlWebhook = $baseUrl . "conekta/webhook/listener";
+            $urlWebhook = $baseUrl . "conekta/webhook/index";
         }
         return $urlWebhook;
     }

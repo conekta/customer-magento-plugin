@@ -1,0 +1,14 @@
+[user]
+	name = Elvis Heredia
+	email = elvis.heredia@conekta.com
+	signingkey = 81F20CAEB7C142FF
+[url "ssh://git@github.com/conekta"]
+	insteadOf = https://github.com/conekta
+[init]
+	defaultBranch = master
+[pull]
+	rebase = false
+[commit]
+	gpgsign = true
+[gpg]
+	program = gpg

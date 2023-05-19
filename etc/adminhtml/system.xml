@@ -35,7 +35,7 @@
                     <field id="conekta_webhook" translate="label" type="text" sortOrder="60" showInDefault="1" showInWebsite="0" showInStore="0" canRestore="1">
                         <label>Webhook</label>
                         <comment>
-                            <![CDATA[Default webhook is: <strong>your_magento_host/conekta/webhook/listener</strong>]]>
+                            <![CDATA[Default webhook is: <strong>your_magento_host/conekta/webhook/index</strong>]]>
                         </comment>
                     </field>
                     <field id="debug" translate="label" type="select" sortOrder="70" showInDefault="1" showInWebsite="1" showInStore="0" >
@@ -233,12 +233,12 @@
                 </group>
                 <!-- // Conekta CASH // -->
 
-                <!-- Conekta SPEI -->
-                <group id="conekta_spei" translate="label" type="text" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>SPEI</label>
+                <!-- Conekta Bank Transfer -->
+                <group id="conekta_bank_transfer" translate="label" type="text" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Bank Transfer</label>
                     <field id="active" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="0">
                         <label>Enabled</label>
-                        <config_path>payment/conekta_spei/active</config_path>
+                        <config_path>payment/conekta_bank_transfer/active</config_path>
                         <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     </field>
                     <field id="min_order_total" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="0">
@@ -248,14 +248,14 @@
                         </depends>
                         <validate>validate-number validate-number-range number-range-15-10000000000000000000</validate>
                         <comment>The minimum amount is $15 [MXN]</comment>
-                        <config_path>payment/conekta_spei/min_order_total</config_path>
+                        <config_path>payment/conekta_bank_transfer/min_order_total</config_path>
                     </field>
                     <field id="max_order_total" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="0">
                         <label>Maximum Order Total</label>
                         <depends>
                             <field id="active">1</field>
                         </depends>
-                        <config_path>payment/conekta_spei/max_order_total</config_path>
+                        <config_path>payment/conekta_bank_transfer/max_order_total</config_path>
                     </field>
 
                     
@@ -264,14 +264,14 @@
                         <depends>
                             <field id="active">1</field>
                         </depends>
-                        <config_path>payment/conekta_spei/account_owner</config_path>
+                        <config_path>payment/conekta_bank_transfer/account_owner</config_path>
                     </field>
                     <field id="instructions" translate="label" type="textarea" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
                         <label>Instructions</label>
                         <depends>
                             <field id="active">1</field>
                         </depends>
-                        <config_path>payment/conekta_spei/instructions</config_path>
+                        <config_path>payment/conekta_bank_transfer/instructions</config_path>
                     </field>
                     <field id="order_status" translate="label" type="select" sortOrder="60" showInDefault="1" showInWebsite="1" showInStore="0">
                         <label>New Order Status</label>
@@ -279,7 +279,7 @@
                         <depends>
                             <field id="active">1</field>
                         </depends>
-                        <config_path>payment/conekta_spei/order_status</config_path>
+                        <config_path>payment/conekta_bank_transfer/order_status</config_path>
                     </field>
                     <field id="sort_order" translate="label" type="text" sortOrder="100" showInDefault="1" showInWebsite="1" showInStore="0">
                         <label>Sort Order</label>
@@ -287,10 +287,10 @@
                             <field id="active">1</field>
                         </depends>
                         <frontend_class>validate-number</frontend_class>
-                        <config_path>payment/conekta_spei/sort_order</config_path>
+                        <config_path>payment/conekta_bank_transfer/sort_order</config_path>
                     </field>
                 </group>
-                <!-- // Conekta SPEI // -->
+                <!-- // Conekta Bank Transfer // -->
             </group>
         </section>
     </system>

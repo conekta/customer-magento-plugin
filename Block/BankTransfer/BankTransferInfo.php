@@ -1,12 +1,12 @@
 <?php
-namespace Conekta\Payments\Block\Spei;
+namespace Conekta\Payments\Block\BankTransfer;
 
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\View\Element\Template\Context;
 use Magento\Payment\Block\Info;
 use Magento\Payment\Model\Config;
 
-class SpeiInfo extends Info
+class BankTransferInfo extends Info
 {
     /**
      * @var Config
@@ -16,7 +16,7 @@ class SpeiInfo extends Info
     /**
      * @var string
      */
-    protected $_template = 'Conekta_Payments::info/spei.phtml';
+    protected $_template = 'Conekta_Payments::info/bankTransfer.phtml';
 
     /**
      * @param Context $context
@@ -33,11 +33,11 @@ class SpeiInfo extends Info
     }
 
     /**
-     * Get data spei
+     * Get data BankTransfer
      *
      * @return false|mixed
      */
-    public function getDataSpei()
+    public function getDataBankTransfer()
     {
         $additional_data = $this->getAdditionalData();
         if (isset($additional_data['offline_info']['data'])) {

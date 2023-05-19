@@ -107,8 +107,8 @@ class EmbedFormInfo extends Info
             case ConfigProvider::PAYMENT_METHOD_CASH:
                 $title = 'Pago en Efectivo';
                 break;
-            case ConfigProvider::PAYMENT_METHOD_SPEI:
-                $title = 'Transferencia SPEI';
+            case ConfigProvider::PAYMENT_METHOD_BANK_TRANSFER:
+                $title = 'Transferencia Bancaria';
                 break;
         }
 
@@ -138,13 +138,13 @@ class EmbedFormInfo extends Info
     }
 
     /**
-     * Is Spei payment method
+     * Is BankTransfer payment method
      *
      * @return bool
      * @throws LocalizedException
      */
-    public function isSpeiPaymentMethod()
+    public function isBankTransferPaymentMethod()
     {
-        return $this->getPaymentMethodType() === ConfigProvider::PAYMENT_METHOD_SPEI;
+        return $this->getPaymentMethodType() === ConfigProvider::PAYMENT_METHOD_BANK_TRANSFER;
     }
 }

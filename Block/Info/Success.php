@@ -18,9 +18,9 @@ class Success extends CompleteCheckout
                 'payment/conekta_cash/instructions',
                 \Magento\Store\Model\ScopeInterface::SCOPE_STORE
             );
-        } elseif ($type == 'spei') {
+        } elseif ($type == 'bankTransfer') {
             return $this->_scopeConfig->getValue(
-                'payment/conekta_spei/instructions',
+                'payment/conekta_bank_transfer/instructions',
                 \Magento\Store\Model\ScopeInterface::SCOPE_STORE
             );
         }
@@ -70,7 +70,7 @@ class Success extends CompleteCheckout
     public function getAccountOwner()
     {
         return $this->_scopeConfig->getValue(
-            'payment/conekta_spei/account_owner',
+            'payment/conekta_bank_transfer/account_owner',
             \Magento\Store\Model\ScopeInterface::SCOPE_STORE
         );
     }

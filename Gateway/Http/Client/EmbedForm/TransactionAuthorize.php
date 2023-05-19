@@ -91,7 +91,7 @@ class TransactionAuthorize implements ClientInterface
         $response = [];
         //If is offline payment, added extra info needed
         if ($paymentMethod == ConfigProvider::PAYMENT_METHOD_CASH ||
-            $paymentMethod == ConfigProvider::PAYMENT_METHOD_SPEI
+            $paymentMethod == ConfigProvider::PAYMENT_METHOD_BANK_TRANSFER
         ) {
             $response['offline_info'] = [];
 

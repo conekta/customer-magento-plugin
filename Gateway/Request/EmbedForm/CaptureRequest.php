@@ -137,7 +137,7 @@ class CaptureRequest implements BuilderInterface
                 break;
             
             case ConfigProvider::PAYMENT_METHOD_CASH:
-            case ConfigProvider::PAYMENT_METHOD_SPEI:
+            case ConfigProvider::PAYMENT_METHOD_BANK_TRANSFER:
                 $reference = $payment->getAdditionalInformation('reference');
                 $expireAt = $this->_conektaHelper->getExpiredAt();
                 $charge['payment_method']['reference'] = $reference;

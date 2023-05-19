@@ -36,7 +36,7 @@ $offlineInfo = $block->getOfflineInfo();
                     </td>
                 </tr>
 
-                <?php } elseif ($block->isSpeiPaymentMethod()) { ?>
+                <?php } elseif ($block->isBankTransferPaymentMethod()) { ?>
                 <tr>
                     <th><strong><?= /* @noEscape */ __('CLABE:'); ?></strong></th>
                     <td>

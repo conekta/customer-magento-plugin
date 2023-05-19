@@ -1,5 +1,5 @@
 <?php
-namespace Conekta\Payments\Gateway\Http\Client\Spei;
+namespace Conekta\Payments\Gateway\Http\Client\BankTransfer;
 
 use Conekta\Payments\Gateway\Http\Util\HttpUtil;
 use Conekta\Payments\Helper\Data as ConektaHelper;
@@ -56,7 +56,7 @@ class TransactionAuthorize implements ClientInterface
         $this->_conektaLogger = $conektaLogger;
         $this->_conektaOrder = $conektaOrder;
         $this->_httpUtil = $httpUtil;
-        $this->_conektaLogger->info('HTTP Client Spei TransactionAuthorize :: __construct');
+        $this->_conektaLogger->info('HTTP Client BankTransfer TransactionAuthorize :: __construct');
         $this->logger = $logger;
         $this->conektaSalesOrderFactory = $conektaSalesOrderFactory;
 
@@ -74,7 +74,7 @@ class TransactionAuthorize implements ClientInterface
      */
     public function placeRequest(TransferInterface $transferObject)
     {
-        $this->_conektaLogger->info('HTTP Client Spei TransactionAuthorize :: placeRequest');
+        $this->_conektaLogger->info('HTTP Client BankTransfer TransactionAuthorize :: placeRequest');
         $request = $transferObject->getBody();
 
         $orderParams['currency']         = $request['CURRENCY'];
@@ -129,7 +129,7 @@ class TransactionAuthorize implements ClientInterface
                 ]
             );
             $this->_conektaLogger->info(
-                'HTTP Client Spei TransactionAuthorize :: placeRequest: Payment authorize error ' . $e->getMessage()
+                'HTTP Client BankTransfer TransactionAuthorize :: placeRequest: Payment authorize error ' . $e->getMessage()
             );
             throw new ValidatorException(__($e->getMessage()));
         }
@@ -159,7 +159,7 @@ class TransactionAuthorize implements ClientInterface
         );
 
         $this->_conektaLogger->info(
-            'HTTP Client Spei TransactionAuthorize :: placeRequest',
+            'HTTP Client BankTransfer TransactionAuthorize :: placeRequest',
             [
                 'request' => $request,
                 'response' => $response
@@ -173,7 +173,7 @@ class TransactionAuthorize implements ClientInterface
 
     protected function generateResponseForCode($resultCode, $txn_id, $ord_id)
     {
-        $this->_conektaLogger->info('HTTP Client Spei TransactionAuthorize :: generateResponseForCode');
+        $this->_conektaLogger->info('HTTP Client BankTransfer TransactionAuthorize :: generateResponseForCode');
 
         return array_merge(
             [

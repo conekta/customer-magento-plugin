@@ -1,5 +1,5 @@
 <?php
-namespace Conekta\Payments\Model\Ui\Spei;
+namespace Conekta\Payments\Model\Ui\BankTransfer;
 
 use Conekta\Payments\Helper\Data as ConektaHelper;
 use Magento\Checkout\Model\Session;
@@ -12,7 +12,7 @@ use Magento\Quote\Model\Quote;
 
 class ConfigProvider implements ConfigProviderInterface
 {
-    public const CODE = 'conekta_spei';
+    public const CODE = 'conekta_bank_transfer';
     /**
      * @var Session
      */

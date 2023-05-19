@@ -367,62 +367,62 @@
     </type>
     <!-- ******************************************* Cash End *********************************************** -->
 
-    <!-- +++++++++++++++++++++++++++++++++++++++++++++ SPEI +++++++++++++++++++++++++++++++++++++++++++++++++ -->
+    <!-- +++++++++++++++++++++++++++++++++++++++++++++ Bank Transfer +++++++++++++++++++++++++++++++++++++++++++++++++ -->
     <!-- Payment Method Facade configuration -->
-    <virtualType name="ConektaPaymentsSpeiFacade" type="Magento\Payment\Model\Method\Adapter">
+    <virtualType name="ConektaPaymentsBankTransferFacade" type="Magento\Payment\Model\Method\Adapter">
         <arguments>
-            <argument name="code" xsi:type="const">\Conekta\Payments\Model\Ui\Spei\ConfigProvider::CODE</argument>
+            <argument name="code" xsi:type="const">\Conekta\Payments\Model\Ui\BankTransfer\ConfigProvider::CODE</argument>
             <argument name="formBlockType" xsi:type="string">Magento\Payment\Block\Form</argument>
-            <argument name="infoBlockType" xsi:type="string">Conekta\Payments\Block\Spei\SpeiInfo</argument>
-            <argument name="valueHandlerPool" xsi:type="object">ConektaPaymentsSpeiValueHandlerPool</argument>
-            <argument name="commandPool" xsi:type="object">ConektaPaymentsSpeiCommandPool</argument>
+            <argument name="infoBlockType" xsi:type="string">Conekta\Payments\Block\BankTransfer\BankTransferInfo</argument>
+            <argument name="valueHandlerPool" xsi:type="object">ConektaPaymentsBankTransferValueHandlerPool</argument>
+            <argument name="commandPool" xsi:type="object">ConektaPaymentsBankTransferCommandPool</argument>
         </arguments>
     </virtualType>
 
     <!-- Configuration reader -->
-    <virtualType name="ConektaPaymentsSpeiConfig" type="Magento\Payment\Gateway\Config\Config">
+    <virtualType name="ConektaPaymentsBankTransferConfig" type="Magento\Payment\Gateway\Config\Config">
         <arguments>
-            <argument name="methodCode" xsi:type="const">\Conekta\Payments\Model\Ui\Spei\ConfigProvider::CODE</argument>
+            <argument name="methodCode" xsi:type="const">\Conekta\Payments\Model\Ui\BankTransfer\ConfigProvider::CODE</argument>
         </arguments>
     </virtualType>
 
-    <!-- Logger, initialized with ConektaPaymentsSpeiConfig -->
-    <virtualType name="ConektaPaymentsSpeiLogger" type="Magento\Payment\Model\Method\Logger">
+    <!-- Logger, initialized with ConektaPaymentsBankTransferConfig -->
+    <virtualType name="ConektaPaymentsBankTransferLogger" type="Magento\Payment\Model\Method\Logger">
         <arguments>
-            <argument name="config" xsi:type="object">ConektaPaymentsSpeiConfig</argument>
+            <argument name="config" xsi:type="object">ConektaPaymentsBankTransferConfig</argument>
         </arguments>
     </virtualType>
 
-    <type name="Conekta\Payments\Gateway\Http\Client\Spei\TransactionAuthorize">
+    <type name="Conekta\Payments\Gateway\Http\Client\BankTransfer\TransactionAuthorize">
         <arguments>
-            <argument name="logger" xsi:type="object">ConektaPaymentsSpeiLogger</argument>
+            <argument name="logger" xsi:type="object">ConektaPaymentsBankTransferLogger</argument>
         </arguments>
     </type>
 
     <!-- Commands infrastructure -->
-    <virtualType name="ConektaPaymentsSpeiCommandPool" type="Magento\Payment\Gateway\Command\CommandPool">
+    <virtualType name="ConektaPaymentsBankTransferCommandPool" type="Magento\Payment\Gateway\Command\CommandPool">
         <arguments>
             <argument name="commands" xsi:type="array">
-                <item name="authorize" xsi:type="string">ConektaPaymentsSpeiAuthorizeCommand</item>
+                <item name="authorize" xsi:type="string">ConektaPaymentsBankTransferAuthorizeCommand</item>
             </argument>
         </arguments>
     </virtualType>
 
     <!-- Capture command -->
-    <virtualType name="ConektaPaymentsSpeiAuthorizeCommand" type="Magento\Payment\Gateway\Command\GatewayCommand">
+    <virtualType name="ConektaPaymentsBankTransferAuthorizeCommand" type="Magento\Payment\Gateway\Command\GatewayCommand">
         <arguments>
-            <argument name="requestBuilder" xsi:type="object">ConektaPaymentsSpeiAuthorizeRequest</argument>
-            <argument name="handler" xsi:type="object">ConektaPaymentsSpeiResponseHandlerComposite</argument>
+            <argument name="requestBuilder" xsi:type="object">ConektaPaymentsBankTransferAuthorizeRequest</argument>
+            <argument name="handler" xsi:type="object">ConektaPaymentsBankTransferResponseHandlerComposite</argument>
             <argument name="transferFactory" xsi:type="object">Conekta\Payments\Gateway\Http\TransferFactory</argument>
-            <argument name="client" xsi:type="object">Conekta\Payments\Gateway\Http\Client\Spei\TransactionAuthorize</argument>
+            <argument name="client" xsi:type="object">Conekta\Payments\Gateway\Http\Client\BankTransfer\TransactionAuthorize</argument>
         </arguments>
     </virtualType>
 
     <!-- Capture Request -->
-    <virtualType name="ConektaPaymentsSpeiAuthorizeRequest" type="Magento\Payment\Gateway\Request\BuilderComposite">
+    <virtualType name="ConektaPaymentsBankTransferAuthorizeRequest" type="Magento\Payment\Gateway\Request\BuilderComposite">
         <arguments>
             <argument name="builders" xsi:type="array">
-                <item name="requestBuilder" xsi:type="string">Conekta\Payments\Gateway\Request\Spei\AuthorizeRequest</item>
+                <item name="requestBuilder" xsi:type="string">Conekta\Payments\Gateway\Request\BankTransfer\AuthorizeRequest</item>
                 <item name="lineItems" xsi:type="string">Conekta\Payments\Gateway\Request\LineItemsBuilder</item>
                 <item name="metadata" xsi:type="string">Conekta\Payments\Gateway\Request\MetadataBuilder</item>
                 <item name="taxLines" xsi:type="string">Conekta\Payments\Gateway\Request\TaxLinesBuilder</item>
@@ -433,41 +433,41 @@
             </argument>
         </arguments>
     </virtualType>
-    <type name="Conekta\Payments\Gateway\Request\Spei\AuthorizeRequest">
+    <type name="Conekta\Payments\Gateway\Request\BankTransfer\AuthorizeRequest">
         <arguments>
-            <argument name="config" xsi:type="object">ConektaPaymentsSpeiConfig</argument>
+            <argument name="config" xsi:type="object">ConektaPaymentsBankTransferConfig</argument>
         </arguments>
     </type>
 
     <!-- Response handlers -->
-    <virtualType name="ConektaPaymentsSpeiResponseHandlerComposite" type="Magento\Payment\Gateway\Response\HandlerChain">
+    <virtualType name="ConektaPaymentsBankTransferResponseHandlerComposite" type="Magento\Payment\Gateway\Response\HandlerChain">
         <arguments>
             <argument name="handlers" xsi:type="array">
-                <item name="txnid" xsi:type="string">Conekta\Payments\Gateway\Response\Spei\TxnIdHandler</item>
+                <item name="txnid" xsi:type="string">Conekta\Payments\Gateway\Response\BankTransfer\TxnIdHandler</item>
             </argument>
         </arguments>
     </virtualType>
 
     <!-- Value handlers infrastructure -->
 
-    <virtualType name="ConektaPaymentsSpeiValueHandlerPool" type="Magento\Payment\Gateway\Config\ValueHandlerPool">
+    <virtualType name="ConektaPaymentsBankTransferValueHandlerPool" type="Magento\Payment\Gateway\Config\ValueHandlerPool">
         <arguments>
             <argument name="handlers" xsi:type="array">
-                <item name="default" xsi:type="string">ConektaPaymentsSpeiConfigValueHandler</item>
+                <item name="default" xsi:type="string">ConektaPaymentsBankTransferConfigValueHandler</item>
             </argument>
         </arguments>
     </virtualType>
-    <virtualType name="ConektaPaymentsSpeiConfigValueHandler" type="Magento\Payment\Gateway\Config\ConfigValueHandler">
+    <virtualType name="ConektaPaymentsBankTransferConfigValueHandler" type="Magento\Payment\Gateway\Config\ConfigValueHandler">
         <arguments>
-            <argument name="configInterface" xsi:type="object">ConektaPaymentsSpeiConfig</argument>
+            <argument name="configInterface" xsi:type="object">ConektaPaymentsBankTransferConfig</argument>
         </arguments>
     </virtualType>
 
 
-    <type name="Conekta\Payments\Block\Spei\SpeiInfo">
+    <type name="Conekta\Payments\Block\BankTransfer\BankTransferInfo">
         <arguments>
-            <argument name="config" xsi:type="object">ConektaPaymentsSpeiConfig</argument>
+            <argument name="config" xsi:type="object">ConektaPaymentsBankTransferConfig</argument>
         </arguments>
     </type>
-    <!-- ******************************************* SPEI End *********************************************** -->
+    <!-- ******************************************* Bank Transfer End *********************************************** -->
 </config>

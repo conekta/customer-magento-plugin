@@ -274,7 +274,7 @@ class ConektaOrder extends Util
         ) {
             $methods[] = 'cash';
         }
-        if ($this->_conektaHelper->isSpeiEnabled()) {
+        if ($this->_conektaHelper->isBankTransferEnabled()) {
             $methods[] = 'bank_transfer';
         }
         return $methods;
