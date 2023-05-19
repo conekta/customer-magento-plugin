@@ -120,10 +120,15 @@ define(
 
                 } else if (!quote.isVirtual()) {
                     self.isFormLoading(false);
-                    shSP.saveShippingInformation()
-                        .done(function () {
-                            self.reRender();
-                        });
+                    try {
+                        shSP.saveShippingInformation()
+                            .done(function () {
+                                self.reRender();
+                            });
+                    } catch (error) {
+                        console.log(error)
+                        self.reRender();
+                    }
                 }
 
             },
@@ -135,63 +140,60 @@ define(
 
                 this.isFormLoading(true);
 
-                var baseGrandTotal = quote.totals._latestValue.base_grand_total;
-
-                var shippingMethodCode = '';
-                if (quote.shippingMethod._latestValue) {
-                    shippingMethodCode = quote.shippingMethod._latestValue.method_code;
-                }
-
                 var hasToReRender = false;
 
-                //check for total changes
-                if (baseGrandTotal !== this.renderProperties.quoteBaseGrandTotal) {
-                    this.renderProperties.quoteBaseGrandTotal = baseGrandTotal;
+                if (quote.shippingMethod._latestValue && !this.isEmpty(quote.shippingMethod._latestValue)
+                    && quote.shippingMethod._latestValue.method_code !== undefined
+                    && quote.shippingMethod._latestValue.method_code !== this.renderProperties.shippingMethod) {
+                    //check for shipping methods changes
+                    this.renderProperties.shippingMethod = quote.shippingMethod._latestValue.method_code;
                     hasToReRender = true;
                 }
 
-                //check for shipping methods changes
-                if (shippingMethodCode !== this.renderProperties.shippingMethod) {
-                    this.renderProperties.shippingMethod = shippingMethodCode;
+                //check for total changes
+                if (quote.totals._latestValue.base_grand_total !== this.renderProperties.quoteBaseGrandTotal) {
+                    this.renderProperties.quoteBaseGrandTotal = quote.totals._latestValue.base_grand_total;
                     hasToReRender = true;
                 }
 
                 //check for shipping changes
-                var shippingAddress = '';
-                if (quote.shippingAddress()) shippingAddress = JSON.stringify(quote.shippingAddress());
-                if (shippingAddress !== this.renderProperties.shippingAddress) {
-                    hasToReRender = true;
-                }
-                this.renderProperties.shippingAddress = shippingAddress;
-
-                //check for billing changes
-                var quoteBilling = quote.billingAddress();
-                var strBillingAddr = quoteBilling ? JSON.stringify(quote.billingAddress()) : '';
-                if (strBillingAddr !== this.renderProperties.billingAddress) {
-                    hasToReRender = true;
-                }
-                this.renderProperties.billingAddress = strBillingAddr;
-
-                var actuaGuestEmail = quote.guestEmail;
-                if (!customer.isLoggedIn() &&
-                    quote.isVirtual()
-                ) {
-
-                    //If is virtual, guest mail guets from uiregistry
-                    actuaGuestEmail = uiRegistry.get('checkout.steps.billing-step.payment.customer-email').email();
-
-                    //check for guest email changes on virtual cart
-                    if (actuaGuestEmail !== this.renderProperties.guestEmail) {
+                if (quote.shippingAddress()) {
+                    const shippingAddress = JSON.stringify(quote.shippingAddress());
+                    if (shippingAddress !== this.renderProperties.shippingAddress) {
+                        this.renderProperties.shippingAddress = shippingAddress;
                         hasToReRender = true;
                     }
                 }
-                this.renderProperties.guestEmail = actuaGuestEmail;
+
+
+                //check for billing changes
+                if(quote.billingAddress()) {
+                    const quoteBilling = JSON.stringify(quote.billingAddress());
+                    if (quoteBilling !== this.renderProperties.billingAddress) {
+                        this.renderProperties.billingAddress = quoteBilling;
+                        hasToReRender = true;
+                    }
+                }
+
+
+                if (!customer.isLoggedIn() && quote.isVirtual()) {
+                    let currentGuestEmail = quote.guestEmail;
+
+                    //If is virtual, guest mail gets from uiregistry
+                    currentGuestEmail = uiRegistry.get('checkout.steps.billing-step.payment.customer-email').email();
+
+                    //check for guest email changes on virtual cart
+                    if (currentGuestEmail !== this.renderProperties.guestEmail) {
+                        this.renderProperties.guestEmail = currentGuestEmail;
+                        hasToReRender = true;
+                    }
+                }
 
                 //Check if customer is logged in changes
                 if (customer.isLoggedIn() !== this.renderProperties.isLoggedIn) {
+                    this.renderProperties.isLoggedIn = customer.isLoggedIn();
                     hasToReRender = true;
                 }
-                this.renderProperties.isLoggedIn = customer.isLoggedIn();
 
                 if (hasToReRender) {
                     this.loadCheckoutId()
@@ -287,12 +289,16 @@ define(
                         theme: 'default'
                     },
                     onCreateTokenSucceeded: function (token) {
-                        console.log("Token:::", token)
+
                     },
                     onCreateTokenError: function (error) {
                         console.error(error);
                     },
                     onFinalizePayment: function (event) {
+                        if (event.charge.paymentMethod.type != 'card' && event.charge.payment_method.type != 'card') {
+                            event.charge.status = 'pending_payment'
+                            event.status = 'pending_payment'
+                        }
                         self.iframOrderData(event);
                         self.beforePlaceOrder();
                     }
@@ -402,16 +408,17 @@ define(
             getMinimumAmountMonthlyInstallments: function () {
                 return this.getMethodConfig().minimum_amount_monthly_installments;
             },
-
-            validateCheckoutSession: function() {
+            validateCheckoutSession: function () {
                 const lifeTime = parseInt(this.getMethodConfig().sessionExpirationTime)
-                const timeToExpire = (lifeTime - 2) * 1000
-                console.log("TimeToExpire:::: "+timeToExpire+" :::::lifetime:::::"+lifeTime)
+                const timeToExpire = (lifeTime - 5) * 1000
                 setTimeout(()=> {
-                    document.getElementById("conektaIframeContainer").innerHTML = `La sesión a finalizado por 
-                    favor refresque la pagina <button onclick="window.location.reload()" class="button action continue primary">Refrescar</button>`;
-                    console.log("Reload sessión")
+                    document.getElementById("conektaIframeContainer").innerHTML = `<div style="width: 100%; text-align: center;"><p>La sesión a finalizado por 
+                    favor actualice la pagina</p> <button onclick="window.location.reload()" class="button action continue primary">Actualizar</button></body></div>`;
                 }, timeToExpire)
+            },
+
+            isEmpty: function (obj) {
+                return obj === undefined || obj === null || obj === ''
             }
         });
     }

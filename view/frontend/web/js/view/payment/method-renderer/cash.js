@@ -12,7 +12,7 @@ define(
             },
 
             getFormTemplate: function(){
-                return 'Conekta_Payments/payment/oxxo/form'
+                return 'Conekta_Payments/payment/cash/form'
             },
 
             initialize: function() {
@@ -25,7 +25,7 @@ define(
             },
 
             getCode: function () {
-                return 'conekta_oxxo';
+                return 'conekta_cash';
             },
 
             isActive: function () {

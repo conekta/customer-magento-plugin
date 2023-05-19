@@ -30,7 +30,7 @@ class ActiveValueHandler implements ValueHandlerInterface
     public function handle(array $subject, $storeId = null)
     {
         return $this->_conektaHelper->isCreditCardEnabled()
-               || $this->_conektaHelper->isOxxoEnabled()
-               || $this->_conektaHelper->isSpeiEnabled();
+               || $this->_conektaHelper->isCashEnabled()
+               || $this->_conektaHelper->isBankTransferEnabled();
     }
 }

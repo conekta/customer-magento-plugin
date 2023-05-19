@@ -12,7 +12,7 @@ define(
             },
 
             getFormTemplate: function(){
-                return 'Conekta_Payments/payment/spei/form'
+                return 'Conekta_Payments/payment/BankTransfer/form'
             },
 
             initialize: function() {
@@ -25,7 +25,7 @@ define(
             },
 
             getCode: function () {
-                return 'conekta_spei';
+                return 'conekta_bank_transfer';
             },
 
             isActive: function () {

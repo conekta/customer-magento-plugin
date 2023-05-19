@@ -27,11 +27,11 @@
                 <privateInfoKeys>FRAUD_MSG_LIST</privateInfoKeys>
             </conekta_cc>
 
-            <!-- Conekta OXXO -->
-            <conekta_oxxo>
+            <!-- Conekta Cash -->
+            <conekta_cash>
                 <active>0</active>
-                <title>Pago en Efectivo con Oxxo</title>
-                <model>ConektaPaymentsOxxoFacade</model>
+                <title>Pago en Efectivo</title>
+                <model>ConektaPaymentsCashFacade</model>
                 <payment_action>authorize</payment_action>
                 <order_status>pending_payment</order_status>
                 <group>offline</group>
@@ -47,14 +47,14 @@
                 <can_void>0</can_void>
                 <can_cancel>1</can_cancel>
                 <can_edit>1</can_edit>
-            </conekta_oxxo>
-            <!-- // Conekta OXXO // -->
+            </conekta_cash>
+            <!-- // Conekta Cash // -->
 
-            <!-- Conekta SPEI -->
-            <conekta_spei>
+            <!-- Conekta Bank Transfer-->
+            <conekta_bank_transfer>
                 <active>0</active>
-                <title>Transferencia SPEI</title>
-                <model>ConektaPaymentsSpeiFacade</model>
+                <title>Transferencia Bancaria</title>
+                <model>ConektaPaymentsBankTransferFacade</model>
                 <payment_action>authorize</payment_action>
                 <order_status>pending_payment</order_status>
                 <group>offline</group>
@@ -70,13 +70,13 @@
                 <can_void>0</can_void>
                 <can_cancel>1</can_cancel>
                 <can_edit>1</can_edit>
-            </conekta_spei>
-            <!-- // Conekta SPEI // -->
+            </conekta_bank_transfer>
+            <!-- // Conekta Bank Transfer // -->
 
             <!-- Conekta EMBED FORM -->
             <conekta_ef>
                 <active>1</active>
-                <title>Conekta - Paga con tarjeta, efectivo o SPEI</title>
+                <title>Conekta - Paga con tarjeta, efectivo o Transferencia Bancaria</title>
                 <group>conekta</group>
                 <model>ConektaPaymentsEmbedFormFacade</model>
                 <iframe_enabled>0</iframe_enabled>
@@ -100,7 +100,7 @@
             <global>
                 <api_version><![CDATA[2.0.0]]></api_version>
                 <plugin_type><![CDATA[Magento 2]]></plugin_type>
-                <plugin_version><![CDATA[4.1.6]]></plugin_version>
+                <plugin_version><![CDATA[4.2.0]]></plugin_version>
             </global>
         </conekta>
     </default>

@@ -18,8 +18,8 @@ class ConfigProvider implements ConfigProviderInterface
      */
     public const CODE = 'conekta_ef';
     public const PAYMENT_METHOD_CREDIT_CARD = 'credit';
-    public const PAYMENT_METHOD_OXXO = 'oxxo';
-    public const PAYMENT_METHOD_SPEI = 'spei';
+    public const PAYMENT_METHOD_CASH = 'cash';
+    public const PAYMENT_METHOD_BANK_TRANSFER = 'bankTransfer';
     /**
      * Create Order Controller Path
      */
@@ -154,10 +154,10 @@ class ConfigProvider implements ConfigProviderInterface
         if ($this->_conektaHelper->isCreditCardEnabled()) {
             $methods[] = 'Card';
         }
-        if ($this->_conektaHelper->isOxxoEnabled()) {
+        if ($this->_conektaHelper->isCashEnabled()) {
             $methods[] = 'Cash';
         }
-        if ($this->_conektaHelper->isSpeiEnabled()) {
+        if ($this->_conektaHelper->isBankTransferEnabled()) {
             $methods[] = 'BankTransfer';
         }
         return $methods;
