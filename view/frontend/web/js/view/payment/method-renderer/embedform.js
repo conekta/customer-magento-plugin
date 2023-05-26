@@ -301,7 +301,10 @@ define(
                         }
                         self.iframOrderData(event);
                         self.beforePlaceOrder();
-                    }
+                    },
+                    onErrorPayment: function(a) {
+                        self.conektaError("Ocurrio un error al procesar el pago. Por favor intente de nuevo");
+                    },
                 });
 
                 $('#conektaIframeContainer').find('iframe').attr('data-cy', 'the-frame');
