@@ -1,5 +1,5 @@
 <?php
-namespace Conekta\Payments\Gateway\Config\Oxxo;
+namespace Conekta\Payments\Gateway\Config\Cash;
 
 use Conekta\Payments\Helper\Data as ConektaHelper;
 use Magento\Payment\Gateway\Config\ValueHandlerInterface;

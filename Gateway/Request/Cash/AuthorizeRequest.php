@@ -1,5 +1,5 @@
 <?php
-namespace Conekta\Payments\Gateway\Request\Spei;
+namespace Conekta\Payments\Gateway\Request\Cash;
 
 use Conekta\Payments\Helper\Data as ConektaHelper;
 use Conekta\Payments\Logger\Logger as ConektaLogger;
@@ -25,7 +25,7 @@ class AuthorizeRequest implements BuilderInterface
     ) {
         $this->_conektaHelper = $conektaHelper;
         $this->_conektaLogger = $conektaLogger;
-        $this->_conektaLogger->info('Request Spei AuthorizeRequest :: __construct');
+        $this->_conektaLogger->info('Request Cash AuthorizeRequest :: __construct');
 
         $this->config = $config;
         $this->subjectReader = $subjectReader;
@@ -33,12 +33,13 @@ class AuthorizeRequest implements BuilderInterface
 
     public function build(array $buildSubject)
     {
-        $this->_conektaLogger->info('Request Spei AuthorizeRequest :: build');
+        $this->_conektaLogger->info('Request Cash AuthorizeRequest :: build');
 
         $paymentDO = $this->subjectReader->readPayment($buildSubject);
         $payment = $paymentDO->getPayment();
         $order = $paymentDO->getOrder();
-        $expiry_date = strtotime("+" . $this->_conektaHelper->getConfigData('conekta_spei', 'expiry_days') . " days");
+        
+        $expiry_date = $this->_conektaHelper->getExpiredAt();
         $amount = $this->_conektaHelper->convertToApiPrice($order->getGrandTotalAmount());
 
         $request['metadata'] = [
@@ -48,19 +49,19 @@ class AuthorizeRequest implements BuilderInterface
             'order_id'       => $order->getOrderIncrementId(),
             'soft_validations'  => 'true'
         ];
-        
-        $request['payment_method_details'] = $this->getChargeSpei($amount, $expiry_date);
+
+        $request['payment_method_details'] = $this->getChargeCash($amount, $expiry_date);
         $request['CURRENCY'] = $order->getCurrencyCode();
         $request['TXN_TYPE'] = 'A';
 
         return $request;
     }
 
-    public function getChargeSpei($amount, $expiry_date)
+    public function getChargeCash($amount, $expiry_date)
     {
         $charge = [
             'payment_method' => [
-                'type' => 'spei',
+                'type' => 'cash',
                 'expires_at' => $expiry_date
             ],
             'amount' => $amount

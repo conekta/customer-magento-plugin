@@ -1,5 +1,5 @@
 <?php
-namespace Conekta\Payments\Gateway\Config\Spei;
+namespace Conekta\Payments\Gateway\Config\BankTransfer;
 
 use Conekta\Payments\Helper\Data as ConektaHelper;
 use Magento\Payment\Gateway\Config\ValueHandlerInterface;

@@ -1,15 +1,15 @@
 <?php
-namespace Conekta\Payments\Gateway\Http\Client\Oxxo;
+namespace Conekta\Payments\Gateway\Http\Client\BankTransfer;
 
-use Conekta\Order as ConektaOrder;
 use Conekta\Payments\Gateway\Http\Util\HttpUtil;
 use Conekta\Payments\Helper\Data as ConektaHelper;
 use Conekta\Payments\Logger\Logger as ConektaLogger;
-use Conekta\Payments\Api\Data\ConektaSalesOrderInterface;
-use Conekta\Payments\Model\ConektaSalesOrderFactory;
 use Magento\Payment\Gateway\Http\ClientInterface;
 use Magento\Payment\Gateway\Http\TransferInterface;
 use Magento\Payment\Model\Method\Logger;
+use Conekta\Order as ConektaOrder;
+use Conekta\Payments\Api\Data\ConektaSalesOrderInterface;
+use Conekta\Payments\Model\ConektaSalesOrderFactory;
 
 class TransactionAuthorize implements ClientInterface
 {
@@ -56,9 +56,10 @@ class TransactionAuthorize implements ClientInterface
         $this->_conektaLogger = $conektaLogger;
         $this->_conektaOrder = $conektaOrder;
         $this->_httpUtil = $httpUtil;
-        $this->_conektaLogger->info('HTTP Client Oxxo TransactionAuthorize :: __construct');
+        $this->_conektaLogger->info('HTTP Client BankTransfer TransactionAuthorize :: __construct');
         $this->logger = $logger;
         $this->conektaSalesOrderFactory = $conektaSalesOrderFactory;
+
         $config = [
             'locale' => 'es'
         ];
@@ -73,7 +74,7 @@ class TransactionAuthorize implements ClientInterface
      */
     public function placeRequest(TransferInterface $transferObject)
     {
-        $this->_conektaLogger->info('HTTP Client Oxxo TransactionAuthorize :: placeRequest');
+        $this->_conektaLogger->info('HTTP Client BankTransfer TransactionAuthorize :: placeRequest');
         $request = $transferObject->getBody();
 
         $orderParams['currency']         = $request['CURRENCY'];
@@ -97,6 +98,7 @@ class TransactionAuthorize implements ClientInterface
 
         try {
             $conektaOrder= $this->_conektaOrder->create($orderParams);
+            
             $charge = $conektaOrder->createCharge($chargeParams);
 
             if (isset($charge->id) && isset($conektaOrder->id)) {
@@ -111,6 +113,7 @@ class TransactionAuthorize implements ClientInterface
                             ConektaSalesOrderInterface::INCREMENT_ORDER_ID => $orderParams['metadata']['order_id']
                         ])
                         ->save();
+
             } else {
                 $result_code = 666;
             }
@@ -126,7 +129,7 @@ class TransactionAuthorize implements ClientInterface
                 ]
             );
             $this->_conektaLogger->info(
-                'HTTP Client Oxxo TransactionAuthorize :: placeRequest: Payment authorize error ' . $e->getMessage()
+                'HTTP Client BankTransfer TransactionAuthorize :: placeRequest: Payment authorize error ' . $e->getMessage()
             );
             throw new ValidatorException(__($e->getMessage()));
         }
@@ -139,9 +142,9 @@ class TransactionAuthorize implements ClientInterface
 
         $response['offline_info'] = [
             "type" => $charge->payment_method->type,
-            'barcode_url' => $charge->payment_method->barcode_url,
             "data" => [
-                "reference"     => $charge->payment_method->reference,
+                "clabe"         => $charge->payment_method->clabe,
+                "bank_name"     => $charge->payment_method->bank,
                 "expires_at"    => $charge->payment_method->expires_at
             ]
         ];
@@ -156,7 +159,7 @@ class TransactionAuthorize implements ClientInterface
         );
 
         $this->_conektaLogger->info(
-            'HTTP Client Oxxo TransactionAuthorize :: placeRequest',
+            'HTTP Client BankTransfer TransactionAuthorize :: placeRequest',
             [
                 'request' => $request,
                 'response' => $response
@@ -170,7 +173,7 @@ class TransactionAuthorize implements ClientInterface
 
     protected function generateResponseForCode($resultCode, $txn_id, $ord_id)
     {
-        $this->_conektaLogger->info('HTTP Client Oxxo TransactionAuthorize :: generateResponseForCode');
+        $this->_conektaLogger->info('HTTP Client BankTransfer TransactionAuthorize :: generateResponseForCode');
 
         return array_merge(
             [

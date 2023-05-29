@@ -1,5 +1,5 @@
 <?php
-namespace Conekta\Payments\Gateway\Response\Spei;
+namespace Conekta\Payments\Gateway\Response\BankTransfer;
 
 use Conekta\Payments\Logger\Logger as ConektaLogger;
 use Magento\Payment\Gateway\Helper\SubjectReader;
@@ -27,7 +27,7 @@ class TxnIdHandler implements HandlerInterface
         SubjectReader $subjectReader
     ) {
         $this->_conektaLogger = $conektaLogger;
-        $this->_conektaLogger->info('Response Spei TxnIdHandler :: __construct');
+        $this->_conektaLogger->info('Response BankTransfer TxnIdHandler :: __construct');
 
         $this->subjectReader = $subjectReader;
     }
@@ -41,7 +41,7 @@ class TxnIdHandler implements HandlerInterface
      */
     public function handle(array $handlingSubject, array $response)
     {
-        $this->_conektaLogger->info('Response Spei TxnIdHandler :: handle');
+        $this->_conektaLogger->info('Response BankTransfer TxnIdHandler :: handle');
 
         $paymentDO = $this->subjectReader->readPayment($handlingSubject);
         $payment = $paymentDO->getPayment();

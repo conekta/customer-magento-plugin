@@ -1,5 +1,5 @@
 <?php
-namespace Conekta\Payments\Gateway\Request\Oxxo;
+namespace Conekta\Payments\Gateway\Request\BankTransfer;
 
 use Conekta\Payments\Helper\Data as ConektaHelper;
 use Conekta\Payments\Logger\Logger as ConektaLogger;
@@ -25,7 +25,7 @@ class AuthorizeRequest implements BuilderInterface
     ) {
         $this->_conektaHelper = $conektaHelper;
         $this->_conektaLogger = $conektaLogger;
-        $this->_conektaLogger->info('Request Oxxo AuthorizeRequest :: __construct');
+        $this->_conektaLogger->info('Request BankTransfer AuthorizeRequest :: __construct');
 
         $this->config = $config;
         $this->subjectReader = $subjectReader;
@@ -33,13 +33,12 @@ class AuthorizeRequest implements BuilderInterface
 
     public function build(array $buildSubject)
     {
-        $this->_conektaLogger->info('Request Oxxo AuthorizeRequest :: build');
+        $this->_conektaLogger->info('Request BankTransfer AuthorizeRequest :: build');
 
         $paymentDO = $this->subjectReader->readPayment($buildSubject);
         $payment = $paymentDO->getPayment();
         $order = $paymentDO->getOrder();
-        
-        $expiry_date = $this->_conektaHelper->getExpiredAt();
+        $expiry_date = strtotime("+" . $this->_conektaHelper->getConfigData('conekta_bank_transfer', 'expiry_days') . " days");
         $amount = $this->_conektaHelper->convertToApiPrice($order->getGrandTotalAmount());
 
         $request['metadata'] = [
@@ -49,23 +48,27 @@ class AuthorizeRequest implements BuilderInterface
             'order_id'       => $order->getOrderIncrementId(),
             'soft_validations'  => 'true'
         ];
-
-        $request['payment_method_details'] = $this->getChargeOxxo($amount, $expiry_date);
+        
+        $request['payment_method_details'] = $this->getChargeBankTransfer($amount, $expiry_date);
         $request['CURRENCY'] = $order->getCurrencyCode();
         $request['TXN_TYPE'] = 'A';
 
         return $request;
     }
 
-    public function getChargeOxxo($amount, $expiry_date)
+    /**
+     * @param $amount
+     * @param $expiry_date
+     * @return array
+     */
+    public function getChargeBankTransfer($amount, $expiry_date)
     {
-        $charge = [
+        return [
             'payment_method' => [
-                'type' => 'oxxo_cash',
+                'type' => 'bankTransfer',
                 'expires_at' => $expiry_date
             ],
             'amount' => $amount
         ];
-        return $charge;
     }
 }

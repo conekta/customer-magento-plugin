@@ -1,12 +1,12 @@
 <?php
-namespace Conekta\Payments\Block\Spei;
+namespace Conekta\Payments\Block\Cash;
 
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\View\Element\Template\Context;
 use Magento\Payment\Block\Info;
 use Magento\Payment\Model\Config;
 
-class SpeiInfo extends Info
+class CashInfo extends Info
 {
     /**
      * @var Config
@@ -16,7 +16,7 @@ class SpeiInfo extends Info
     /**
      * @var string
      */
-    protected $_template = 'Conekta_Payments::info/spei.phtml';
+    protected $_template = 'Conekta_Payments::info/cash.phtml';
 
     /**
      * @param Context $context
@@ -33,11 +33,12 @@ class SpeiInfo extends Info
     }
 
     /**
-     * Get data spei
+     * Get Cash data
      *
      * @return false|mixed
+     * @throws LocalizedException
      */
-    public function getDataSpei()
+    public function getDataCash()
     {
         $additional_data = $this->getAdditionalData();
         if (isset($additional_data['offline_info']['data'])) {
@@ -48,7 +49,7 @@ class SpeiInfo extends Info
     }
 
     /**
-     * Get additional
+     * Get additional data
      *
      * @return mixed
      * @throws LocalizedException
