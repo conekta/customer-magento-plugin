@@ -1,3 +1,7 @@
+### 4.2.1 - 2023/06/07 17:55
+* Feat:
+  - [CHLP-1344] Fix error when monthly_installments_options doesn´t exist in checkout. @elvisheredia [#41](https://github.com/conekta/customer-magento-plugin/pull/41)
+    
 ### 4.2.0 - 2023/05/18 19:43
 * Feat:
   - [CHLP-1284] Change name for payment methods OXXO and SPEI to cash and bank transfer. @elvisheredia [#40](https://github.com/conekta/customer-magento-plugin/pull/40)

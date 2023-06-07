@@ -131,17 +131,18 @@ class EmbedFormRepository implements EmbedFormRepositoryInterface
 
             if (!empty($conektaOrder)) {
                 $chekoutParams = $orderParams['checkout'];
-                $conektaChekout = $conektaOrder->checkout;
-                $conektaCheckoutMonthlyInstallmentsOptions = (array)$conektaChekout->monthly_installments_options;
+                $conektaChekout = (array)$conektaOrder->checkout;
+                $conektaCheckoutMonthlyInstallmentsOptions = isset($conektaChekout['monthly_installments_options']) ?
+                    (array)$conektaChekout['monthly_installments_options'] : [];
                 if (!empty($conektaOrder->payment_status) ||
-                    time() >= $conektaOrder->checkout->expires_at ||
+                    time() >= $conektaChekout['expires_at'] ||
                     
                     //detect changes in checkout params
-                    $chekoutParams['allowed_payment_methods'] != (array)$conektaChekout->allowed_payment_methods ||
-                    $chekoutParams['monthly_installments_enabled'] != $conektaChekout->monthly_installments_enabled ||
+                    $chekoutParams['allowed_payment_methods'] != (array)$conektaChekout['allowed_payment_methods'] ||
+                    $chekoutParams['monthly_installments_enabled'] != $conektaChekout['monthly_installments_enabled'] ||
                     $chekoutParams['monthly_installments_options'] != $conektaCheckoutMonthlyInstallmentsOptions ||
-                    $chekoutParams['on_demand_enabled'] != $conektaChekout->on_demand_enabled ||
-                    $chekoutParams['force_3ds_flow'] != $conektaChekout->force_3ds_flow
+                    $chekoutParams['on_demand_enabled'] != $conektaChekout['on_demand_enabled'] ||
+                    $chekoutParams['force_3ds_flow'] != $conektaChekout['force_3ds_flow']
                 ) {
                     $hasToCreateNewOrder = true;
                 }
