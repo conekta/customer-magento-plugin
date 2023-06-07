@@ -2,11 +2,10 @@
 
 namespace Conekta\Payments\Helper;
 
-use Conekta\Customer;
-use Conekta\Handler;
-use Conekta\ParameterValidationError;
+use Conekta\ApiException;
+use Conekta\Payments\Api\ConektaApiClient;
 use Conekta\Payments\Logger\Logger as ConektaLogger;
-use Conekta\ProcessingError;
+use Exception;
 use Magento\Framework\App\Helper\Context;
 use Magento\Framework\App\ProductMetadataInterface;
 use Magento\Framework\Encryption\EncryptorInterface;
@@ -39,10 +38,7 @@ class Data extends Util
      * @var ConektaLogger
      */
     protected $conektaLogger;
-    /**
-     * @var Customer
-     */
-    protected $conektaCustomer;
+
     /**
      * @var StoreManagerInterface
      */
@@ -69,6 +65,11 @@ class Data extends Util
     protected $_cartRepository;
 
     /**
+     * @var ConektaApiClient
+     */
+    private $conektaApiClient;
+
+    /**
      * Data constructor.
      *
      * @param Context $context
@@ -76,7 +77,6 @@ class Data extends Util
      * @param EncryptorInterface $encryptor
      * @param ProductMetadataInterface $productMetadata
      * @param ConektaLogger $conektaLogger
-     * @param Customer $conektaCustomer
      * @param CheckoutSession $checkoutSession
      * @param CustomerSession $customerSession
      * @param ProductRepository $productRepository
@@ -91,26 +91,27 @@ class Data extends Util
         EncryptorInterface $encryptor,
         ProductMetadataInterface $productMetadata,
         ConektaLogger $conektaLogger,
-        Customer $conektaCustomer,
         CheckoutSession $checkoutSession,
         CustomerSession $customerSession,
         ProductRepository $productRepository,
         Escaper $_escaper,
         CartRepositoryInterface $cartRepository,
-        StoreManagerInterface $storeManager
+        StoreManagerInterface $storeManager,
+        ConektaApiClient $conektaApiClient
     ) {
         parent::__construct($context);
         $this->_moduleList = $moduleList;
         $this->_encryptor = $encryptor;
         $this->_productMetadata = $productMetadata;
         $this->conektaLogger = $conektaLogger;
-        $this->conektaCustomer = $conektaCustomer;
         $this->checkoutSession = $checkoutSession;
         $this->customerSession = $customerSession;
         $this->productRepository = $productRepository;
         $this->_escaper = $_escaper;
         $this->_cartRepository = $cartRepository;
         $this->_storeManager = $storeManager;
+
+        $this->conektaApiClient = $conektaApiClient;
     }
 
     /**
@@ -266,10 +267,9 @@ class Data extends Util
             }
 
             if ($customerId && $paymentSourceId) {
-                $customer = $this->conektaCustomer->find($customerId);
-                $customer->deletePaymentSourceById($paymentSourceId);
+                $this->conektaApiClient->deleteCustomerPaymentMethod($customerId, $paymentSourceId);
             }
-        } catch (ProcessingError|ParameterValidationError|Handler $error) {
+        } catch (Exception|ApiException $error) {
             $this->conektaLogger->info($error->getMessage());
         }
     }

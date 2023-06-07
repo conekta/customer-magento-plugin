@@ -9,7 +9,6 @@ use Magento\Framework\Data\Form\Element\CollectionFactory;
 
 class ExplanationLabel extends AbstractElement
 {
-
     public function __construct( // phpcs:ignore
         Factory $factoryElement,
         CollectionFactory $factoryCollection,

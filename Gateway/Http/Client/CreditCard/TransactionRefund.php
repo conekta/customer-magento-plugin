@@ -1,7 +1,8 @@
 <?php
+
 namespace Conekta\Payments\Gateway\Http\Client\CreditCard;
 
-use Conekta\Payments\Gateway\Http\Util\HttpUtil;
+use Conekta\Payments\Api\ConektaApiClient;
 use Conekta\Payments\Helper\Data as ConektaHelper;
 use Conekta\Payments\Logger\Logger as ConektaLogger;
 use Magento\Framework\Encryption\EncryptorInterface;
@@ -9,7 +10,6 @@ use Magento\Framework\Model\Context;
 use Magento\Payment\Gateway\Http\ClientInterface;
 use Magento\Payment\Gateway\Http\TransferInterface;
 use Magento\Payment\Model\Method\Logger;
-use Conekta\Order as ConektaOrder;
 
 class TransactionRefund implements ClientInterface
 {
@@ -21,22 +21,24 @@ class TransactionRefund implements ClientInterface
 
     protected $_httpUtil;
 
-    private $_conektaOrder;
+    /**
+     * @var ConektaApiClient
+     */
+    private $conektaApiClient;
 
     public function __construct(
-        ConektaHelper $conektaHelper,
-        ConektaLogger $conektaLogger,
-        ConektaOrder $conektaOrder,
-        HttpUtil $httpUtil,
-        Context $context,
+        ConektaHelper      $conektaHelper,
+        ConektaLogger      $conektaLogger,
+        ConektaApiClient   $conektaApiClient,
+        Context            $context,
         EncryptorInterface $encryptor,
-        Logger $logger,
-        array $data = []
-    ) {
+        Logger             $logger,
+        array              $data = []
+    )
+    {
         $this->_conektaHelper = $conektaHelper;
         $this->_conektaLogger = $conektaLogger;
-        $this->_conektaOrder = $conektaOrder;
-        $this->_httpUtil = $httpUtil;
+        $this->conektaApiClient = $conektaApiClient;
         $this->_encryptor = $encryptor;
         $this->logger = $logger;
 
@@ -58,11 +60,12 @@ class TransactionRefund implements ClientInterface
         $response = [];
         $response['refund_result']['transaction_id'] = $transactionId;
         try {
-            $order = $this->_conektaOrder->find($transactionId);
-            $order->refund([
+            $order = $this->conektaApiClient->getOrderByID($transactionId);
+            $this->conektaApiClient->orderRefund($order->getId(), [
                 'reason' => 'requested_by_client',
                 'amount' => $amount
             ]);
+
             $response['refund_result']['status'] = 'SUCCESS';
             $response['refund_result']['status_message'] = 'Refunded';
         } catch (\Exception $e) {
@@ -70,7 +73,7 @@ class TransactionRefund implements ClientInterface
             $this->logger->debug(
                 [
                     'transaction_id' => $transactionId,
-                    'exception'      => $e->getMessage()
+                    'exception' => $e->getMessage()
                 ]
             );
 

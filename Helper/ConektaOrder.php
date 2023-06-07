@@ -2,10 +2,8 @@
 
 namespace Conekta\Payments\Helper;
 
-use Conekta\Conekta;
-use Conekta\Customer as ConektaCustomer;
-use Conekta\Handler;
-use Conekta\Order as ConektaOrderApi;
+use Conekta\ApiException;
+use Conekta\Payments\Api\ConektaApiClient;
 use Conekta\Payments\Exception\ConektaException;
 use Conekta\Payments\Helper\Data as ConektaHelper;
 use Conekta\Payments\Logger\Logger as ConektaLogger;
@@ -29,14 +27,7 @@ class ConektaOrder extends Util
      * @var ConektaLogger
      */
     protected $conektaLogger;
-    /**
-     * @var ConektaCustomer
-     */
-    protected $conektaCustomer;
-    /**
-     * @var ConektaOrderApi
-     */
-    protected $conektaOrderApi;
+
     /**
      * @var CustomerSession
      */
@@ -63,13 +54,16 @@ class ConektaOrder extends Util
     protected $conektaConfigProvider;
 
     /**
+     * @var ConektaApiClient
+     */
+    private $conektaApiClient;
+
+    /**
      * ConektaOrder constructor.
      *
      * @param Context $context
      * @param ConektaHelper $conektaHelper
      * @param ConektaLogger $conektaLogger
-     * @param ConektaCustomer $conektaCustomer
-     * @param ConektaOrderApi $conektaOrderApi
      * @param CustomerSession $customerSession
      * @param Session $_checkoutSession
      * @param CustomerRepositoryInterface $customerRepository
@@ -79,17 +73,15 @@ class ConektaOrder extends Util
         Context $context,
         ConektaHelper $conektaHelper,
         ConektaLogger $conektaLogger,
-        ConektaCustomer $conektaCustomer,
-        ConektaOrderApi $conektaOrderApi,
+        ConektaApiClient $conektaApiClient,
         CustomerSession $customerSession,
         Session $_checkoutSession,
         CustomerRepositoryInterface $customerRepository,
         ConfigProvider $conektaConfigProvider
     ) {
         parent::__construct($context);
+        $this->conektaApiClient = $conektaApiClient;
         $this->conektaLogger = $conektaLogger;
-        $this->conektaCustomer = $conektaCustomer;
-        $this->conektaOrderApi = $conektaOrderApi;
         $this->customerSession = $customerSession;
         $this->_conektaHelper = $conektaHelper;
         $this->_checkoutSession = $_checkoutSession;
@@ -112,16 +104,16 @@ class ConektaOrder extends Util
     {
         $this->conektaLogger->info('ConektaOrder.generateOrderParams init');
 
-        Conekta::setApiKey($this->_conektaHelper->getPrivateKey());
-        Conekta::setApiVersion("2.0.0");
+        //Conekta::setApiKey($this->_conektaHelper->getPrivateKey());
+        //Conekta::setApiVersion("2.0.0");
         $customerRequest = [];
         try {
             $customer = $this->customerSession->getCustomer();
-            $customerApi = null;
+            $conektaCustomer = null;
             $conektaCustomerId = $customer->getConektaCustomerId();
             
             try {
-                $customerApi = $this->conektaCustomer->find($conektaCustomerId);
+                $conektaCustomer = $this->conektaApiClient->findCustomerByID($conektaCustomerId);
             } catch (Exception $error) {
                 $this->conektaLogger->info('Create Order. Find Customer: ' . $error->getMessage());
                 $conektaCustomerId = '';
@@ -154,8 +146,8 @@ class ConektaOrder extends Util
             }
             
             if (empty($conektaCustomerId)) {
-                $conektaAPI = $this->conektaCustomer->create($customerRequest);
-                $conektaCustomerId = $conektaAPI->id;
+                $conektaCustomer = $this->conektaApiClient->createCustomer($customerRequest);
+                $conektaCustomerId = $conektaCustomer->getId();
                 if ($customerId) {
                     $customer = $this->customerRepository->getById($customerId);
                     $customer->setCustomAttribute('conekta_customer_id', $conektaCustomerId);
@@ -163,9 +155,9 @@ class ConektaOrder extends Util
                 }
             } else {
                 //If cutomer API exists, always update error
-                $customerApi->update($customerRequest);
+                $this->conektaApiClient->updateCustomer($conektaCustomerId, $customerRequest);
             }
-        } catch (Handler $error) {
+        } catch (ApiException $e) {
             $this->conektaLogger->info($error->getMessage(), $customerRequest);
             throw new ConektaException(__($error->getMessage()));
         }
@@ -197,7 +189,7 @@ class ConektaOrder extends Util
         $installments = $this->getMonthlyInstallments();
         $validOrderWithCheckout['checkout']    = [
             'allowed_payment_methods'      => $this->getAllowedPaymentMethods(),
-            'monthly_installments_enabled' => $installments['active_installments'] ? true : false,
+            'monthly_installments_enabled' => (bool)$installments['active_installments'],
             'monthly_installments_options' => $installments['monthly_installments'],
             'on_demand_enabled'            => $saveCardEnabled,
             'force_3ds_flow'               => $threeDsEnabled,

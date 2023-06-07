@@ -1,7 +1,9 @@
 <?php
+
 namespace Conekta\Payments\Gateway\Http\Client\EmbedForm;
 
-use Conekta\Payments\Gateway\Http\Util\HttpUtil;
+use Conekta\Model\ChargeResponse;
+use Conekta\Payments\Api\ConektaApiClient;
 use Conekta\Payments\Helper\Data as ConektaHelper;
 use Conekta\Payments\Logger\Logger as ConektaLogger;
 use Conekta\Payments\Api\Data\ConektaSalesOrderInterface;
@@ -10,7 +12,6 @@ use Conekta\Payments\Model\Ui\EmbedForm\ConfigProvider;
 use Magento\Payment\Gateway\Http\ClientInterface;
 use Magento\Payment\Gateway\Http\TransferInterface;
 use Magento\Payment\Model\Method\Logger;
-use Conekta\Order as ConektaOrder;
 use Exception;
 
 class TransactionAuthorize implements ClientInterface
@@ -40,25 +41,34 @@ class TransactionAuthorize implements ClientInterface
     protected $conektaSalesOrderFactory;
 
     /**
+     * @var ConektaApiClient
+     */
+    private $conektaApiClient;
+
+    /**
+     * @var ChargeResponse
+     */
+    private $charge;
+
+    /**
      * @param Logger $logger
      * @param ConektaHelper $conektaHelper
      * @param ConektaLogger $conektaLogger
      */
     public function __construct(
-        Logger $logger,
-        ConektaHelper $conektaHelper,
-        ConektaLogger $conektaLogger,
-        ConektaOrder $conektaOrder,
-        HttpUtil $httpUtil,
+        Logger                   $logger,
+        ConektaHelper            $conektaHelper,
+        ConektaLogger            $conektaLogger,
+        ConektaApiClient         $conektaApiClient,
         ConektaSalesOrderFactory $conektaSalesOrderFactory
-    ) {
+    )
+    {
         $this->_conektaHelper = $conektaHelper;
         $this->_conektaLogger = $conektaLogger;
-        $this->_httpUtil = $httpUtil;
         $this->_conektaLogger->info('HTTP Client TransactionCapture :: __construct');
         $this->logger = $logger;
         $this->conektaSalesOrderFactory = $conektaSalesOrderFactory;
-        $this->_conektaOrder = $conektaOrder;
+        $this->conektaApiClient = $conektaApiClient;
 
         $config = [
             'locale' => 'es'
@@ -78,15 +88,15 @@ class TransactionAuthorize implements ClientInterface
         $this->_conektaLogger->info('HTTP Client TransactionCapture :: placeRequest', $request);
 
         $txnId = $request['txn_id'];
-        
+
         $this->conektaSalesOrderFactory
-                    ->create()
-                    ->setData([
-                        ConektaSalesOrderInterface::CONEKTA_ORDER_ID => $request['order_id'],
-                        ConektaSalesOrderInterface::INCREMENT_ORDER_ID => $request['metadata']['order_id']
-                    ])
-                    ->save();
-        
+            ->create()
+            ->setData([
+                ConektaSalesOrderInterface::CONEKTA_ORDER_ID => $request['order_id'],
+                ConektaSalesOrderInterface::INCREMENT_ORDER_ID => $request['metadata']['order_id']
+            ])
+            ->save();
+
         $paymentMethod = $request['payment_method_details']['payment_method']['type'];
         $response = [];
         //If is offline payment, added extra info needed
@@ -96,31 +106,32 @@ class TransactionAuthorize implements ClientInterface
             $response['offline_info'] = [];
 
             try {
-                $conektaOrder = $this->_conektaOrder->find($request['order_id']);
-                $charge = $conektaOrder->charges[0];
-                $txnId = $charge->id;
+                $conektaOrder = $this->conektaApiClient->getOrderByID($request['order_id']);
+                $charge = $conektaOrder->getCharges()->getData()[0];
+                $txnId = $charge->getID();
+                $paymentMethodResponse = $charge->getPaymentMethod();
                 $response['offline_info'] = [
-                    "type" => $charge->payment_method->type,
+                    "type" => $charge->getType(),
                     "data" => [
-                        "expires_at"    => $charge->payment_method->expires_at
+                        "expires_at" => $paymentMethodResponse->getExpiresAt()
                     ]
                 ];
 
                 if ($paymentMethod == ConfigProvider::PAYMENT_METHOD_CASH) {
-                    $response['offline_info']['data']['barcode_url'] = $charge->payment_method->barcode_url;
-                    $response['offline_info']['data']['reference'] = $charge->payment_method->reference;
+                    $response['offline_info']['data']['barcode_url'] = $paymentMethodResponse->getBarcodeUrl();
+                    $response['offline_info']['data']['reference'] = $paymentMethodResponse->getReference();
                 } else {
-                    $response['offline_info']['data']['clabe'] = $charge->payment_method->clabe;
-                    $response['offline_info']['data']['bank_name'] = $charge->payment_method->bank;
+                    $response['offline_info']['data']['clabe'] = $paymentMethodResponse->getClabe();
+                    $response['offline_info']['data']['bank_name'] = $paymentMethodResponse->getBank();
                 }
             } catch (Exception $e) {
                 $this->_conektaLogger->error(
                     'EmbedForm :: HTTP Client TransactionCapture :: cannot get offline info. ',
-                    [ 'exception' => $e ]
+                    ['exception' => $e]
                 );
             }
         }
-        
+
         $response = $this->generateResponseForCode(
             $response,
             1,
@@ -128,7 +139,7 @@ class TransactionAuthorize implements ClientInterface
             $request['order_id']
         );
         $response['error_code'] = '';
-        $response['payment_method_details'] =  $request['payment_method_details'];
+        $response['payment_method_details'] = $request['payment_method_details'];
 
         $this->_conektaLogger->info(
             'HTTP Client TransactionCapture Iframe Payment :: placeRequest',
@@ -144,7 +155,7 @@ class TransactionAuthorize implements ClientInterface
     protected function generateResponseForCode($response, $resultCode, $txn_id, $ord_id)
     {
         $this->_conektaLogger->info('HTTP Client TransactionCapture :: generateResponseForCode');
-        
+
         if (empty($txn_id)) {
             $txn_id = $this->generateTxnId();
         }

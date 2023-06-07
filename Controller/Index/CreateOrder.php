@@ -7,6 +7,7 @@ use Conekta\Payments\Exception\ConektaException;
 use Conekta\Payments\Helper\ConektaOrder;
 use Conekta\Payments\Logger\Logger;
 use Exception;
+use Magento\Framework\App\Action\Action;
 use Magento\Framework\App\Action\Context;
 use Magento\Framework\App\Action\HttpPostActionInterface;
 use Magento\Checkout\Model\Session;
@@ -15,7 +16,7 @@ use Magento\Framework\Controller\ResultInterface;
 use Magento\Framework\Serialize\Serializer\Json;
 use Magento\Framework\View\Result\PageFactory;
 
-class CreateOrder extends \Magento\Framework\App\Action\Action implements HttpPostActionInterface
+class CreateOrder extends Action implements HttpPostActionInterface
 {
     /**
      * @var PageFactory
@@ -99,13 +100,13 @@ class CreateOrder extends \Magento\Framework\App\Action\Action implements HttpPo
                 $quoteSession = $this->checkoutSession->getQuote();
 
                 //genrates checkout form
-                $order = (array)$this->embedFormRepository->generate(
+                $order = $this->embedFormRepository->generate(
                     $quoteSession->getId(),
                     $orderParams,
                     $quoteSession->getSubtotal()
                 );
                 
-                $response['checkout_id'] = $order['checkout']['id'];
+                $response['checkout_id'] = $order->getCheckout()->getId();
             } catch (\Exception $e) {
                 $errorMessage = 'Ha ocurrido un error inesperado. Notifique al dueño de la tienda.';
                 if ($e instanceof ConektaException) {

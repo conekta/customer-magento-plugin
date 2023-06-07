@@ -1,7 +1,8 @@
 <?php
 namespace Conekta\Payments\Gateway\Http\Client\BankTransfer;
 
-use Conekta\Payments\Gateway\Http\Util\HttpUtil;
+use Conekta\ApiException;
+use Conekta\Payments\Api\ConektaApiClient;
 use Conekta\Payments\Helper\Data as ConektaHelper;
 use Conekta\Payments\Logger\Logger as ConektaLogger;
 use Magento\Payment\Gateway\Http\ClientInterface;
@@ -33,7 +34,10 @@ class TransactionAuthorize implements ClientInterface
 
     private $_conektaLogger;
 
-    private $_conektaOrder;
+    /**
+     * @var ConektaApiClient
+     */
+    private $conektaApiClient;
 
     protected $_httpUtil;
 
@@ -48,14 +52,12 @@ class TransactionAuthorize implements ClientInterface
         Logger $logger,
         ConektaHelper $conektaHelper,
         ConektaLogger $conektaLogger,
-        ConektaOrder $conektaOrder,
-        HttpUtil $httpUtil,
+        ConektaApiClient $conektaApiClient,
         ConektaSalesOrderFactory $conektaSalesOrderFactory
     ) {
         $this->_conektaHelper = $conektaHelper;
         $this->_conektaLogger = $conektaLogger;
-        $this->_conektaOrder = $conektaOrder;
-        $this->_httpUtil = $httpUtil;
+        $this->conektaApiClient = $conektaApiClient;
         $this->_conektaLogger->info('HTTP Client BankTransfer TransactionAuthorize :: __construct');
         $this->logger = $logger;
         $this->conektaSalesOrderFactory = $conektaSalesOrderFactory;
@@ -71,6 +73,7 @@ class TransactionAuthorize implements ClientInterface
      *
      * @param TransferInterface $transferObject
      * @return array
+     * @throws ApiException
      */
     public function placeRequest(TransferInterface $transferObject)
     {
@@ -97,14 +100,14 @@ class TransactionAuthorize implements ClientInterface
         $error_code = '';
 
         try {
-            $conektaOrder= $this->_conektaOrder->create($orderParams);
+            $conektaOrder= $this->conektaApiClient->createOrder($orderParams);
             
-            $charge = $conektaOrder->createCharge($chargeParams);
+            $charge = $this->conektaApiClient->createOrderCharge($conektaOrder->getId(), $chargeParams);
 
-            if (isset($charge->id) && isset($conektaOrder->id)) {
+            if (!empty($charge->getId()) && !empty($conektaOrder->getId())) {
                 $result_code = 1;
-                $txn_id = $charge->id;
-                $ord_id = $conektaOrder->id;
+                $txn_id = $charge->getId();
+                $ord_id = $conektaOrder->getId();
 
                 $this->conektaSalesOrderFactory
                         ->create()
@@ -117,7 +120,7 @@ class TransactionAuthorize implements ClientInterface
             } else {
                 $result_code = 666;
             }
-        } catch (ValidatorException $e) {
+        } catch (ApiException $e) {
             $error_code = $e->getMessage();
             $result_code = 666;
             $this->logger->error(__('[Conekta]: Payment capturing error.'));
@@ -131,7 +134,7 @@ class TransactionAuthorize implements ClientInterface
             $this->_conektaLogger->info(
                 'HTTP Client BankTransfer TransactionAuthorize :: placeRequest: Payment authorize error ' . $e->getMessage()
             );
-            throw new ValidatorException(__($e->getMessage()));
+            throw new ApiException(__($e->getMessage()));
         }
 
         $response = $this->generateResponseForCode(
@@ -141,11 +144,11 @@ class TransactionAuthorize implements ClientInterface
         );
 
         $response['offline_info'] = [
-            "type" => $charge->payment_method->type,
+            "type" => $charge->getPaymentMethod()->getType(),
             "data" => [
-                "clabe"         => $charge->payment_method->clabe,
-                "bank_name"     => $charge->payment_method->bank,
-                "expires_at"    => $charge->payment_method->expires_at
+                "clabe"         => $charge->getPaymentMethod()->getClabe(),
+                "bank_name"     => $charge->getPaymentMethod()->getBank(),
+                "expires_at"    => $charge->getPaymentMethod()->getExpiresAt()
             ]
         ];
 

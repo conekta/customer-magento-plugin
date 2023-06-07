@@ -3,7 +3,6 @@ namespace Conekta\Payments\Api\Data;
 
 interface ConektaSalesOrderInterface
 {
-
     public const CONEKTA_ORDER_ID = 'conekta_order_id';
     public const INCREMENT_ORDER_ID = 'increment_order_id';
 

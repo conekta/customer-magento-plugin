@@ -1,10 +1,10 @@
 <?php
+
 namespace Conekta\Payments\Model;
 
-use Conekta\Conekta;
+use Conekta\Payments\Api\ConektaApiClient;
 use Conekta\Payments\Helper\Data as ConektaHelper;
 use Conekta\Payments\Logger\Logger as ConektaLogger;
-use Conekta\Webhook;
 use Magento\Framework\Encryption\EncryptorInterface;
 use Magento\Framework\Locale\Resolver;
 use Magento\Framework\Validator\Exception;
@@ -28,29 +28,28 @@ class Config
      */
     protected $_resolver;
     /**
-     * @var Webhook
+     * @var ConektaApiClient
      */
-    protected $_conektaWebhook;
+    protected $conektaApiClient;
 
     /**
      * @param EncryptorInterface $encryptor
      * @param ConektaHelper $conektaHelper
      * @param Resolver $resolver
      * @param ConektaLogger $conektaLogger
-     * @param Webhook $conektaWebhook
      */
     public function __construct(
         EncryptorInterface $encryptor,
-        ConektaHelper $conektaHelper,
-        Resolver $resolver,
-        ConektaLogger $conektaLogger,
-        Webhook $conektaWebhook
-    ) {
+        ConektaHelper      $conektaHelper,
+        Resolver           $resolver,
+        ConektaLogger      $conektaLogger,
+        ConektaApiClient   $conektaApiClient
+    )
+    {
         $this->_encryptor = $encryptor;
         $this->_conektaHelper = $conektaHelper;
         $this->_resolver = $resolver;
         $this->_conektaLogger = $conektaLogger;
-        $this->_conektaWebhook = $conektaWebhook;
     }
 
     /**
@@ -61,7 +60,7 @@ class Config
      */
     public function createWebhook()
     {
-        
+
         try {
             $sandboxMode = $this->_conektaHelper->getConfigData('conekta/conekta_global', 'sandbox_mode');
             $urlWebhook = $this->_conektaHelper->getUrlWebhookOrDefault();
@@ -69,29 +68,18 @@ class Config
             $events = ["events" => ["charge.paid"]];
             $errorMessage = null;
 
-            //If library can't be initialized throws exception
-            $this->initializeConektaLibrary();
-
             $different = true;
-            $webhooks = $this->_conektaWebhook->where();
+            $webhooks = $this->conektaApiClient->getWebhooks();
             foreach ($webhooks as $webhook) {
-                if (strpos($webhook->webhook_url, $urlWebhook) !== false) {
+                if (strpos($webhook->getUrl(), $urlWebhook) !== false) {
                     $different = false;
                 }
             }
             if ($different) {
-                if (!$sandboxMode) {
-                    $mode = [
-                        "production_enabled" => 1
-                    ];
-                } else {
-                    $mode = [
-                        "development_enabled" => 1
-                    ];
-                }
-                $this->_conektaWebhook->create(
-                    array_merge(["url" => $urlWebhook], $mode, $events)
-                );
+                $webhookResponse = $this->conektaApiClient->createWebhook([
+                    'url' => $urlWebhook
+                ]);
+                //$this->conektaApiClient->updateWebhook($webhookResponse->getId(), array_merge(["url" => $urlWebhook], $mode, $events))
             } else {
                 $this->_conektaLogger->info('[Conekta]: El webhook ' . $urlWebhook . ' ya se encuentra en Conekta!');
             }
@@ -105,41 +93,7 @@ class Config
 
             throw new Exception(
                 __('Can not register this webhook ' . $urlWebhook . '<br>'
-                    . 'Message: ' . (string) $errorMessage)
-            );
-        }
-    }
-
-    /**
-     * Initialize conekta library
-     *
-     * @return void
-     * @throws Exception
-     */
-    public function initializeConektaLibrary()
-    {
-        try {
-            $lang = explode('_', $this->_resolver->getLocale());
-            $locale = $lang[0] == 'es' ? 'es' : 'en';
-            $privateKey = $this->_conektaHelper->getPrivateKey();
-            $apiVersion = $this->_conektaHelper->getApiVersion();
-            $pluginType = $this->_conektaHelper->pluginType();
-            $pluginVersion = $this->_conektaHelper->pluginVersion();
-
-            if (empty($privateKey)) {
-                throw new Exception(
-                    __("Please check your conekta config.")
-                );
-            }
-
-            Conekta::setApiKey($privateKey);
-            Conekta::setApiVersion($apiVersion);
-            Conekta::setPlugin($pluginType);
-            Conekta::setPluginVersion($pluginVersion);
-            Conekta::setLocale($locale);
-        } catch (\Exception $e) {
-            throw new Exception(
-                __($e->getMessage())
+                    . 'Message: ' . (string)$errorMessage)
             );
         }
     }
