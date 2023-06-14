@@ -58,7 +58,7 @@ class CaptureRequest implements BuilderInterface
         ConektaLogger $conektaLogger,
         \Conekta\Payments\Model\Config $conektaConfig,
         CustomerSession $session,
-        CustomerRepositoryInterface $customerRepository,
+        CustomerRepositoryInterface $customerRepository
     ) {
         $this->_conektaHelper = $conektaHelper;
         $this->_conektaLogger = $conektaLogger;

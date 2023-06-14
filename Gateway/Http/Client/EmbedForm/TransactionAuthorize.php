@@ -69,11 +69,6 @@ class TransactionAuthorize implements ClientInterface
         $this->logger = $logger;
         $this->conektaSalesOrderFactory = $conektaSalesOrderFactory;
         $this->conektaApiClient = $conektaApiClient;
-
-        $config = [
-            'locale' => 'es'
-        ];
-        $this->_httpUtil->setupConektaClient($config);
     }
 
     /**
@@ -104,14 +99,14 @@ class TransactionAuthorize implements ClientInterface
             $paymentMethod == ConfigProvider::PAYMENT_METHOD_BANK_TRANSFER
         ) {
             $response['offline_info'] = [];
-
             try {
                 $conektaOrder = $this->conektaApiClient->getOrderByID($request['order_id']);
                 $charge = $conektaOrder->getCharges()->getData()[0];
+
                 $txnId = $charge->getID();
                 $paymentMethodResponse = $charge->getPaymentMethod();
                 $response['offline_info'] = [
-                    "type" => $charge->getType(),
+                    "type" => $paymentMethodResponse->getType(),
                     "data" => [
                         "expires_at" => $paymentMethodResponse->getExpiresAt()
                     ]

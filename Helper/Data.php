@@ -2,10 +2,7 @@
 
 namespace Conekta\Payments\Helper;
 
-use Conekta\ApiException;
-use Conekta\Payments\Api\ConektaApiClient;
 use Conekta\Payments\Logger\Logger as ConektaLogger;
-use Exception;
 use Magento\Framework\App\Helper\Context;
 use Magento\Framework\App\ProductMetadataInterface;
 use Magento\Framework\Encryption\EncryptorInterface;
@@ -65,11 +62,6 @@ class Data extends Util
     protected $_cartRepository;
 
     /**
-     * @var ConektaApiClient
-     */
-    private $conektaApiClient;
-
-    /**
      * Data constructor.
      *
      * @param Context $context
@@ -83,6 +75,7 @@ class Data extends Util
      * @param Escaper $_escaper
      * @param CartRepositoryInterface $cartRepository
      * @param StoreManagerInterface $storeManager
+     * @param ConektaApiClient $conektaApiClient
      */
 
     public function __construct(
@@ -96,8 +89,7 @@ class Data extends Util
         ProductRepository $productRepository,
         Escaper $_escaper,
         CartRepositoryInterface $cartRepository,
-        StoreManagerInterface $storeManager,
-        ConektaApiClient $conektaApiClient
+        StoreManagerInterface $storeManager
     ) {
         parent::__construct($context);
         $this->_moduleList = $moduleList;
@@ -111,7 +103,6 @@ class Data extends Util
         $this->_cartRepository = $cartRepository;
         $this->_storeManager = $storeManager;
 
-        $this->conektaApiClient = $conektaApiClient;
     }
 
     /**
@@ -243,35 +234,6 @@ class Data extends Util
     public function getMageVersion()
     {
         return $this->_productMetadata->getVersion();
-    }
-
-    /**
-     * Delete Save Card
-     *
-     * @param mixed $orderParams
-     * @param mixed $chargeParams
-     */
-    public function deleteSavedCard($orderParams, $chargeParams)
-    {
-        $this->conektaLogger->info('deleteSavedCard: Remove Decline Card From Conekta Customer');
-
-        try {
-            $paymentSourceId = '';
-            if (isset($chargeParams['payment_method']['payment_source_id'])) {
-                $paymentSourceId = $chargeParams['payment_method']['payment_source_id'];
-            }
-
-            $customerId = '';
-            if (isset($orderParams['customer_info']['customer_id'])) {
-                $customerId = $orderParams['customer_info']['customer_id'];
-            }
-
-            if ($customerId && $paymentSourceId) {
-                $this->conektaApiClient->deleteCustomerPaymentMethod($customerId, $paymentSourceId);
-            }
-        } catch (Exception|ApiException $error) {
-            $this->conektaLogger->info($error->getMessage());
-        }
     }
 
     /**

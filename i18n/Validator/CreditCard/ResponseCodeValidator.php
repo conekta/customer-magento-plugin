@@ -1,9 +1,10 @@
 <?php
-namespace Conekta\Payments\Gateway\Validator\CreditCard;
+namespace Conekta\Payments\i18n\Validator\CreditCard;
 
+use Conekta\Payments\Gateway\Http\Client\TransactionCapture;
 use Magento\Payment\Gateway\Validator\AbstractValidator;
 use Magento\Payment\Gateway\Validator\ResultInterface;
-use Conekta\Payments\Gateway\Http\Client\TransactionCapture;
+use function Conekta\Payments\Gateway\Validator\CreditCard\__;
 
 class ResponseCodeValidator extends AbstractValidator
 {

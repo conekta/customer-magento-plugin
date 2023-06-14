@@ -37,6 +37,7 @@ class Config
      * @param ConektaHelper $conektaHelper
      * @param Resolver $resolver
      * @param ConektaLogger $conektaLogger
+     * @param ConektaApiClient $conektaApiClient
      */
     public function __construct(
         EncryptorInterface $encryptor,
@@ -50,6 +51,7 @@ class Config
         $this->_conektaHelper = $conektaHelper;
         $this->_resolver = $resolver;
         $this->_conektaLogger = $conektaLogger;
+        $this->conektaApiClient = $conektaApiClient;
     }
 
     /**
@@ -79,7 +81,6 @@ class Config
                 $webhookResponse = $this->conektaApiClient->createWebhook([
                     'url' => $urlWebhook
                 ]);
-                //$this->conektaApiClient->updateWebhook($webhookResponse->getId(), array_merge(["url" => $urlWebhook], $mode, $events))
             } else {
                 $this->_conektaLogger->info('[Conekta]: El webhook ' . $urlWebhook . ' ya se encuentra en Conekta!');
             }

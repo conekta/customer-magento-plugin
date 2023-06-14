@@ -1,8 +1,8 @@
 <?php
 namespace Conekta\Payments\Gateway\Http\Client\Cash;
 
-use Conekta\ApiException;
-use Conekta\Payments\Api\ConektaApiClient;
+use Conekta\Order as ConektaOrder;
+use Conekta\Payments\Gateway\Http\Util\HttpUtil;
 use Conekta\Payments\Helper\Data as ConektaHelper;
 use Conekta\Payments\Logger\Logger as ConektaLogger;
 use Conekta\Payments\Api\Data\ConektaSalesOrderInterface;
@@ -40,11 +40,6 @@ class TransactionAuthorize implements ClientInterface
     protected $conektaSalesOrderFactory;
 
     /**
-     * @var ConektaApiClient
-     */
-    private $conektaApiClient;
-
-    /**
      * @param Logger $logger
      * @param ConektaHelper $conektaHelper
      * @param ConektaLogger $conektaLogger
@@ -53,12 +48,14 @@ class TransactionAuthorize implements ClientInterface
         Logger $logger,
         ConektaHelper $conektaHelper,
         ConektaLogger $conektaLogger,
-        ConektaApiClient $conektaApiClient,
+        ConektaOrder $conektaOrder,
+        HttpUtil $httpUtil,
         ConektaSalesOrderFactory $conektaSalesOrderFactory
     ) {
         $this->_conektaHelper = $conektaHelper;
         $this->_conektaLogger = $conektaLogger;
-        $this->conektaApiClient = $conektaApiClient;
+        $this->_conektaOrder = $conektaOrder;
+        $this->_httpUtil = $httpUtil;
         $this->_conektaLogger->info('HTTP Client Cash TransactionAuthorize :: __construct');
         $this->logger = $logger;
         $this->conektaSalesOrderFactory = $conektaSalesOrderFactory;
@@ -99,29 +96,26 @@ class TransactionAuthorize implements ClientInterface
         $error_code = '';
 
         try {
-            $conektaOrder= $this->conektaApiClient->createOrder($orderParams);
-            $charge = $this->conektaApiClient->createOrderCharge($conektaOrder->getId(), $chargeParams);
+            $conektaOrder= $this->_conektaOrder->create($orderParams);
+            $charge = $conektaOrder->createCharge($chargeParams);
 
-            if (!empty($charge->getId()) && !empty($conektaOrder->getId())) {
+            if (isset($charge->id) && isset($conektaOrder->id)) {
                 $result_code = 1;
-                $txn_id = $charge->getId();
-                $ord_id = $conektaOrder->getId();
+                $txn_id = $charge->id;
+                $ord_id = $conektaOrder->id;
 
                 $this->conektaSalesOrderFactory
-                        ->create()
-                        ->setData([
-                            ConektaSalesOrderInterface::CONEKTA_ORDER_ID => $ord_id,
-                            ConektaSalesOrderInterface::INCREMENT_ORDER_ID => $orderParams['metadata']['order_id']
-                        ])
-                        ->save();
+                    ->create()
+                    ->setData([
+                        ConektaSalesOrderInterface::CONEKTA_ORDER_ID => $ord_id,
+                        ConektaSalesOrderInterface::INCREMENT_ORDER_ID => $orderParams['metadata']['order_id']
+                    ])
+                    ->save();
             } else {
                 $result_code = 666;
             }
-        } catch (ApiException $e) {
-            $error_code = $e->getMessage();
-            $result_code = 666;
+        } catch (ValidatorException $e) {
             $this->logger->error(__('[Conekta]: Payment capturing error.'));
-            $this->_conektaHelper->deleteSavedCard($orderParams, $chargeParams);
             $this->logger->debug(
                 [
                     'request' => $request,
@@ -131,7 +125,7 @@ class TransactionAuthorize implements ClientInterface
             $this->_conektaLogger->info(
                 'HTTP Client Cash TransactionAuthorize :: placeRequest: Payment authorize error ' . $e->getMessage()
             );
-            throw new ApiException(__($e->getMessage()));
+            throw new ValidatorException(__($e->getMessage()));
         }
 
         $response = $this->generateResponseForCode(
@@ -141,11 +135,11 @@ class TransactionAuthorize implements ClientInterface
         );
 
         $response['offline_info'] = [
-            "type" => $charge->getPaymentMethod()->getType(),
-            'barcode_url' => $charge->getPaymentMethod()->getBarcodeUrl(),
+            "type" => $charge->payment_method->type,
+            'barcode_url' => $charge->payment_method->barcode_url,
             "data" => [
-                "reference"     => $charge->getPaymentMethod()->getReference(),
-                "expires_at"    => $charge->getPaymentMethod()->getExpiresAt()
+                "reference"     => $charge->payment_method->reference,
+                "expires_at"    => $charge->payment_method->expires_at
             ]
         ];
 
