@@ -54,6 +54,8 @@ class TransactionAuthorize implements ClientInterface
      * @param Logger $logger
      * @param ConektaHelper $conektaHelper
      * @param ConektaLogger $conektaLogger
+     * @param ConektaApiClient $conektaApiClient
+     * @param ConektaSalesOrderFactory $conektaSalesOrderFactory
      */
     public function __construct(
         Logger                   $logger,

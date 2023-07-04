@@ -3,7 +3,7 @@
     "description": "Conekta payment gateway",
     "require": {
         "php": ">=7.3",
-        "conekta/conekta-php": "dev-DRE-93-sdk-php"
+        "conekta/conekta-php": "dev-DRE-93-sdk-php-modified"
     },
     "type": "magento2-module",
     "version": "5.0.3",
@@ -38,13 +38,5 @@
         "magento/magento-coding-standard": "^31.0",
         "magento/framework": "^103.0",
         "magento/payment-services": "*"
-    },
-    "scripts": {
-        "post-install-cmd": [
-            "([ $COMPOSER_DEV_MODE -eq 0 ] || vendor/bin/phpcs --config-set installed_paths ../../magento/magento-coding-standard/,../../phpcompatibility/php-compatibility)"
-        ],
-        "post-update-cmd": [
-            "([ $COMPOSER_DEV_MODE -eq 0 ] || vendor/bin/phpcs --config-set installed_paths ../../magento/magento-coding-standard/,../../phpcompatibility/php-compatibility)"
-        ]
     }
 }
