@@ -160,8 +160,8 @@ class ConektaOrder extends Util
                 $this->conektaApiClient->updateCustomer($conektaCustomerId, $customerRequest);
             }
         } catch (ApiException $e) {
-            $this->conektaLogger->info($error->getMessage(), $customerRequest);
-            throw new ConektaException(__($error->getMessage()));
+            $this->conektaLogger->info($e->getMessage(), $customerRequest);
+            throw new ConektaException(__($e->getMessage()));
         }
         $orderItems = $this->getQuote()->getAllItems();
 
