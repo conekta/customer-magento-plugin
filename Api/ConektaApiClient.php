@@ -75,8 +75,9 @@ class ConektaApiClient
         $this->customerPaymentMethods = new PaymentMethodsApi($this->client, $this->config);
         $this->webhooks = new WebhooksApi($this->client, $this->config);
         print "basuraa----";
-        print $this->config;
-        print $this->helperData->getPrivateKey();
+        // Print the values
+        var_dump($this->config);
+        echo $this->helperData->getPrivateKey();
     }
 
 
