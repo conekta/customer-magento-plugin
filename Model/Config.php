@@ -72,7 +72,8 @@ class Config
 
             $different = true;
             $webhooks = $this->conektaApiClient->getWebhooks();
-            foreach ($webhooks as $webhook) {
+            $data = $webhooks->getData();
+            foreach ($data as $webhook) {
                 if (strpos($webhook->getUrl(), $urlWebhook) !== false) {
                     $different = false;
                 }
