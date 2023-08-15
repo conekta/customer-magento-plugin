@@ -96,7 +96,7 @@ class TransactionAuthorize implements ClientInterface
 
         $paymentMethod = $request['payment_method_details']['payment_method']['type'];
         $response = [];
-
+        $conektaOrder = $this->conektaApiClient->getOrderByID($request['order_id']);
         // info for card
         if ($paymentMethod == ConfigProvider::PAYMENT_METHOD_CREDIT_CARD){
             $response['card'] = [];
@@ -110,7 +110,6 @@ class TransactionAuthorize implements ClientInterface
         ) {
             $response['offline_info'] = [];
             try {
-                $conektaOrder = $this->conektaApiClient->getOrderByID($request['order_id']);
                 $charge = $conektaOrder->getCharges()->getData()[0];
 
                 $txnId = $charge->getID();
