@@ -43,7 +43,7 @@ class EmbedFormInfo extends Info
     public function getCcTypeName()
     {
         $types = $this->_paymentConfig->getCcTypes();
-        $ccType = $this->getInfo()->getCcType();
+        $ccType = $this->getInfo()->getAdditionalInformation('cc_type');
         if (isset($types[$ccType])) {
             return $types[$ccType];
         }
@@ -156,12 +156,6 @@ class EmbedFormInfo extends Info
      */
     public function getCardType()
     {
-        $cardType = $this->getInfo()->getAdditionalInformation('cc_type');
-        
-        if (empty($cardType)) {
-            return $this->getInfo()->getAdditionalInformation('c_type');
-        }
-        
-        return $cardType;
+       return $this->getInfo()->getAdditionalInformation('c_type');
     }
 }
