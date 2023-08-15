@@ -65,12 +65,11 @@ class TxnIdHandler implements HandlerInterface
                 'cc_exp_month' => $payment->getAdditionalInformation('cc_exp_month'),
                 'cc_bin' => $payment->getAdditionalInformation('cc_bin'),
                 'cc_last_4' => $payment->getAdditionalInformation('cc_last_4'),
-                'card_token' => $payment->getAdditionalInformation('card_token')
+                'card_token' => $payment->getAdditionalInformation('card_token'),
+                'c_type' =>  $response['card']['type']
         ];
         $payment->setAdditionalInformation('additional_data', $data);
 
-        // set card type
-        $payment->setAdditionalInformation('c_type', $response['card']['type']);
 
 
         $payment->unsAdditionalInformation('cc_type');

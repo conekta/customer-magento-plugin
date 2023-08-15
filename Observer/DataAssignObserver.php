@@ -12,6 +12,7 @@ class DataAssignObserver extends AbstractDataAssignObserver
 {
     public const PAYMENT_METHOD = 'payment_method';
     public const CC_TYPE = 'cc_type';
+    public const C_TYPE = 'c_type';
     public const CC_EXP_YEAR = 'cc_exp_year';
     public const CC_EXP_MONTH = 'cc_exp_month';
     public const CC_BIN = 'cc_bin';
@@ -30,6 +31,7 @@ class DataAssignObserver extends AbstractDataAssignObserver
     protected $additionalInformationList = [
         self::PAYMENT_METHOD,
         self::CC_TYPE,
+        self::C_TYPE,
         self::CC_EXP_YEAR,
         self::CC_EXP_MONTH,
         self::CC_BIN,
