@@ -27,6 +27,13 @@ $offlineInfo = $block->getOfflineInfo();
                         <?= $block->escapeHtml($block->getCardType()); ?>
                     </td>
                 </tr>
+                <td>
+                    <?php
+                    foreach ($block->getAdditionalData() as $key => $value) {
+                        echo $block->escapeHtml($key . ': ' . $value) . '<br>';
+                    }
+                    ?>
+                </td>
 
                 <?php } elseif ($block->isCashPaymentMethod()) { ?>
                 <tr>
