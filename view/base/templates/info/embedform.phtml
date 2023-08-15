@@ -29,8 +29,15 @@ $offlineInfo = $block->getOfflineInfo();
                 </tr>
                 <td>
                     <?php
-                    foreach ($block->getAdditionalData() as $key => $value) {
-                        echo $block->escapeHtml($key . ': ' . $value) . '<br>';
+                     foreach ($block->getAdditionalData() as $key => $value) {
+                        if (is_array($value)) {
+                            echo $block->escapeHtml($key . ': [Array]') . '<br>';
+                            foreach ($value as $innerKey => $innerValue) {
+                                echo '&nbsp;&nbsp;&nbsp;' . $block->escapeHtml($innerKey . ': ' . $innerValue) . '<br>';
+                            }
+                        } else {
+                            echo $block->escapeHtml($key . ': ' . $value) . '<br>';
+                        }
                     }
                     ?>
                 </td>

@@ -71,7 +71,7 @@ class TxnIdHandler implements HandlerInterface
         $payment->setAdditionalInformation('additional_data', $data);
 
 
-
+        $payment->unsAdditionalInformation('c_type');
         $payment->unsAdditionalInformation('cc_type');
         $payment->unsAdditionalInformation('cc_exp_year');
         $payment->unsAdditionalInformation('cc_exp_month');
