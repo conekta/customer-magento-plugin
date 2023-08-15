@@ -97,7 +97,7 @@ class EmbedFormInfo extends Info
     public function getPaymentMethodTitle()
     {
         $methodType = $this->getPaymentMethodType();
-        $title = '';
+        $title = $this->getPaymentMethodType();
 
         switch ($methodType) {
             case ConfigProvider::PAYMENT_METHOD_CREDIT_CARD:
