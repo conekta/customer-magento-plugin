@@ -147,4 +147,15 @@ class EmbedFormInfo extends Info
     {
         return $this->getPaymentMethodType() === ConfigProvider::PAYMENT_METHOD_BANK_TRANSFER;
     }
+
+    /**
+     * Show if card is debit o credit card
+     *
+     * @return string
+     * @throws LocalizedException
+     */
+    public function getCardType()
+    {
+        return $this->getInfo()->getAdditionalInformation('C_TYPE');
+    }
 }

@@ -69,6 +69,10 @@ class TxnIdHandler implements HandlerInterface
         ];
         $payment->setAdditionalInformation('additional_data', $data);
 
+        // set card type
+        $payment->setAdditionalInformation('C_TYPE', $response['card']['type']);
+
+
         $payment->unsAdditionalInformation('cc_type');
         $payment->unsAdditionalInformation('cc_exp_year');
         $payment->unsAdditionalInformation('cc_exp_month');
