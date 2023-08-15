@@ -156,6 +156,12 @@ class EmbedFormInfo extends Info
      */
     public function getCardType()
     {
-        return $this->getInfo()->getAdditionalInformation('CC_TYPE');
+        $cardType = $this->getInfo()->getAdditionalInformation('cc_type');
+        
+        if (empty($cardType)) {
+            return $this->getInfo()->getAdditionalInformation('c_type');
+        }
+        
+        return $cardType;
     }
 }
