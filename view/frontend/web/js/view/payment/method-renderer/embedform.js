@@ -324,7 +324,7 @@ define(
                             'reference': params.reference,
                             'order_id': params.charge.order_id,
                             'txn_id': params.charge.id,
-                            'c_type': params.charge.payment_method.accountType,
+                            'conekta_card_type': params.charge.payment_method.accountType,
                             'card_token': $("#" + this.getCode() + "_card_token").val(),
                             'iframe_payment': true
                         }
