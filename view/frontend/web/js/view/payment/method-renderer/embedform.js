@@ -315,7 +315,6 @@ define(
                 var number = this.creditCardNumber().replace(/\D/g, '');
                 if (this.iframOrderData() !== '') {
                     var params = this.iframOrderData();
-                    console.log('params', params);
                     var data = {
                         'method': this.getCode(),
                         'additional_data': {
@@ -325,7 +324,7 @@ define(
                             'reference': params.reference,
                             'order_id': params.charge.order_id,
                             'txn_id': params.charge.id,
-                            'tipo_tarjeta': params.charge.payment_method.type,
+                            'c_type': params.charge.payment_method.accountType,
                             'card_token': $("#" + this.getCode() + "_card_token").val(),
                             'iframe_payment': true
                         }

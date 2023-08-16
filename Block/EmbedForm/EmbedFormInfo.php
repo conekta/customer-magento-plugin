@@ -101,7 +101,7 @@ class EmbedFormInfo extends Info
 
         switch ($methodType) {
             case ConfigProvider::PAYMENT_METHOD_CREDIT_CARD:
-                $title = 'Tarjeta de Crédito';
+                $title = 'Pago con Tarjeta';
                 break;
             
             case ConfigProvider::PAYMENT_METHOD_CASH:
@@ -158,8 +158,8 @@ class EmbedFormInfo extends Info
     {
         $additionalData = $this->getAdditionalData();
     
-        if (isset($additionalData['tipo_tarjeta'])) {
-            return $additionalData['tipo_tarjeta'];
+        if (isset($additionalData['c_type'])) {
+            return $additionalData['c_type'];
         }
         
         return null;

@@ -12,7 +12,6 @@ class DataAssignObserver extends AbstractDataAssignObserver
 {
     public const PAYMENT_METHOD = 'payment_method';
     public const CC_TYPE = 'cc_type';
-    public const C_TYPE = 'c_type';
     public const CC_EXP_YEAR = 'cc_exp_year';
     public const CC_EXP_MONTH = 'cc_exp_month';
     public const CC_BIN = 'cc_bin';
@@ -24,7 +23,7 @@ class DataAssignObserver extends AbstractDataAssignObserver
     public const IFRAME_PAYMENT = 'iframe_payment';
     public const ORDER_ID = 'order_id';
     public const TXN_ID = 'txn_id';
-    public const TIPO_TARJETA = 'tipo_tarjeta';
+    public const C_TYPE = 'c_type';
     public const REFERENCE = 'reference';
     /**
      * @var string[]
