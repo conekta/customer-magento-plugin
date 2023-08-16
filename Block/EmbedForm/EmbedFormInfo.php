@@ -156,6 +156,12 @@ class EmbedFormInfo extends Info
      */
     public function getCardType()
     {
-        return $this->getInfo()->getCcType();
+        $additionalData = $this->getAdditionalData();
+    
+        if (isset($additionalData['tipo_tarjeta'])) {
+            return $additionalData['tipo_tarjeta'];
+        }
+        
+        return null;
     }
 }

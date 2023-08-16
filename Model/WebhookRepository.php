@@ -165,6 +165,11 @@ class WebhookRepository
             $invoice->getOrder()
         );
         $transactionSave->save();
+
+        // Agregar información adicional
+        $additionalInfo = $order->getAdditionalInformation();
+        $additionalInfo['tipo_tarjeta'] = 'debito'; // Cambiar a 'credito' si corresponde
+        $order->setAdditionalInformation($additionalInfo);
         $this->_conektaLogger->info('WebhookRepository :: execute - The invoice to be created');
 
         try {
