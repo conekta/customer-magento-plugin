@@ -71,7 +71,6 @@ class TxnIdHandler implements HandlerInterface
         }
 
         $payment->setCcType($payment->getAdditionalInformation('cc_type'));
-        $payment->setCType('basura');
         $payment->setCcExpMonth($payment->getAdditionalInformation('cc_exp_month'));
         $payment->setCcExpYear($payment->getAdditionalInformation('cc_exp_year'));
 
