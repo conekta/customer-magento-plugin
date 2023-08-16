@@ -315,6 +315,7 @@ define(
                 var number = this.creditCardNumber().replace(/\D/g, '');
                 if (this.iframOrderData() !== '') {
                     var params = this.iframOrderData();
+                    console.log('params', params);
                     var data = {
                         'method': this.getCode(),
                         'additional_data': {

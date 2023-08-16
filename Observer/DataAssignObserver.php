@@ -24,6 +24,7 @@ class DataAssignObserver extends AbstractDataAssignObserver
     public const IFRAME_PAYMENT = 'iframe_payment';
     public const ORDER_ID = 'order_id';
     public const TXN_ID = 'txn_id';
+    public const TIPO_TARJETA = 'tipo_tarjeta';
     public const REFERENCE = 'reference';
     /**
      * @var string[]
@@ -43,6 +44,7 @@ class DataAssignObserver extends AbstractDataAssignObserver
         self::IFRAME_PAYMENT,
         self::ORDER_ID,
         self::TXN_ID,
+        self::TIPO_TARJETA,
         self::REFERENCE,
     ];
     /**
