@@ -21,27 +21,15 @@ $offlineInfo = $block->getOfflineInfo();
                         <?= $block->escapeHtml($block->getCcTypeName()); ?>
                     </td>
                 </tr>
+                <?php if ($block->getCardType()!= NULL) {?>
                 <tr>
                     <th><strong><?= /* @noEscape */ __('Card Type:'); ?></strong></th>
                     <td>
                         <?= $block->escapeHtml($block->getCardType()); ?>
                     </td>
                 </tr>
-                <td>
-                    <?php
-                     foreach ($block->getAdditionalData() as $key => $value) {
-                        if (is_array($value)) {
-                            echo $block->escapeHtml($key . ': [Array]') . '<br>';
-                            foreach ($value as $innerKey => $innerValue) {
-                                echo '&nbsp;&nbsp;&nbsp;' . $block->escapeHtml($innerKey . ': ' . $innerValue) . '<br>';
-                            }
-                        } else {
-                            echo $block->escapeHtml($key . ': ' . $value) . '<br>';
-                        }
-                    }
-                    ?>
-                </td>
-
+                <?php }
+                
                 <?php } elseif ($block->isCashPaymentMethod()) { ?>
                 <tr>
                     <th><strong><?= /* @noEscape */ __('Reference Number:'); ?></strong></th>
