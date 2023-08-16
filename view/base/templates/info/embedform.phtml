@@ -21,15 +21,6 @@ $offlineInfo = $block->getOfflineInfo();
                         <?= $block->escapeHtml($block->getCcTypeName()); ?>
                     </td>
                 </tr>
-                <?php if ($block->getCardType()!= NULL) {?>
-                <tr>
-                    <th><strong><?= /* @noEscape */ __('Card Type:'); ?></strong></th>
-                    <td>
-                        <?= $block->escapeHtml($block->getCardType()); ?>
-                    </td>
-                </tr>
-                <?php }
-                
                 <?php } elseif ($block->isCashPaymentMethod()) { ?>
                 <tr>
                     <th><strong><?= /* @noEscape */ __('Reference Number:'); ?></strong></th>
