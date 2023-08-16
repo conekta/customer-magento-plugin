@@ -96,20 +96,14 @@ class TransactionAuthorize implements ClientInterface
 
         $paymentMethod = $request['payment_method_details']['payment_method']['type'];
         $response = [];
-        $conektaOrder = $this->conektaApiClient->getOrderByID($request['order_id']);
-        // info for card
-        if ($paymentMethod == ConfigProvider::PAYMENT_METHOD_CREDIT_CARD){
-            $response['card'] = [];
-            $charge = $conektaOrder->getCharges()->getData()[0];
-            
-            $response['card']['type'] = $charge->getPaymentMethod()->getType();
-        }
+        
         //If is offline payment, added extra info needed
         if ($paymentMethod == ConfigProvider::PAYMENT_METHOD_CASH ||
             $paymentMethod == ConfigProvider::PAYMENT_METHOD_BANK_TRANSFER
         ) {
             $response['offline_info'] = [];
             try {
+                $conektaOrder = $this->conektaApiClient->getOrderByID($request['order_id']);
                 $charge = $conektaOrder->getCharges()->getData()[0];
 
                 $txnId = $charge->getID();
