@@ -324,6 +324,7 @@ define(
                             'reference': params.reference,
                             'order_id': params.charge.order_id,
                             'txn_id': params.charge.id,
+                            'tipo_tarjeta': params.charge.payment_method.type,
                             'card_token': $("#" + this.getCode() + "_card_token").val(),
                             'iframe_payment': true
                         }
