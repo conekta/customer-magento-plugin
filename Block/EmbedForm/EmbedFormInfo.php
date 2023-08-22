@@ -158,8 +158,8 @@ class EmbedFormInfo extends Info
     {
         $additionalData = $this->getAdditionalData();
     
-        if (isset($additionalData['conekta_card_type'])) {
-            return $additionalData['conekta_card_type'];
+        if (isset($additionalData['card_type'])) {
+            return $additionalData['card_type'];
         }
         
         return null;
