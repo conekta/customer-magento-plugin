@@ -1,11 +1,11 @@
 <?php
-namespace Conekta\Payments\Gateway\Validator\CreditCard;
+namespace Conekta\Payments\i18n\Validator\CreditCard;
 
 use Conekta\Payments\Helper\Data as ConektaHelper;
 use Conekta\Payments\Logger\Logger as ConektaLogger;
+use Magento\Payment\Gateway\Helper\SubjectReader;
 use Magento\Payment\Gateway\Validator\AbstractValidator;
 use Magento\Payment\Gateway\Validator\ResultInterfaceFactory;
-use Magento\Payment\Gateway\Helper\SubjectReader;
 
 class RefundValidator extends AbstractValidator
 {

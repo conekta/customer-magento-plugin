@@ -15,7 +15,7 @@ class ConfigProvider implements ConfigProviderInterface
     /**
      * @var mixed
      */
-    private $assetRepository;
+    private $_assetRepository;
 
     /**
      * @param ConektaHelper $conektaHelper

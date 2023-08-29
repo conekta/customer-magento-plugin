@@ -2,12 +2,14 @@
 
 namespace Conekta\Payments\Model;
 
+use Conekta\Model\OrderResponse;
+use Conekta\ApiException;
 use Conekta\Payments\Logger\Logger as ConektaLogger;
 use Conekta\Payments\Api\Data\ConektaQuoteInterface;
 use Conekta\Payments\Api\EmbedFormRepositoryInterface;
+use Exception;
 use Magento\Framework\Exception\NoSuchEntityException;
-use Conekta\Order as ConektaOrderApi;
-use Conekta\ParameterValidationError;
+use Conekta\Payments\Api\ConektaApiClient;
 use Conekta\Payments\Exception\ConektaException;
 
 class EmbedFormRepository implements EmbedFormRepositoryInterface
@@ -21,7 +23,7 @@ class EmbedFormRepository implements EmbedFormRepositoryInterface
      */
     private $conektaQuoteInterface;
     /**
-     * @var ConektaOrderApi
+     * @var ConektaApiClient
      */
     protected $conektaOrderApi;
     /**
@@ -36,17 +38,18 @@ class EmbedFormRepository implements EmbedFormRepositoryInterface
     /**
      * @param ConektaLogger $conektaLogger
      * @param ConektaQuoteInterface $conektaQuoteInterface
-     * @param ConektaOrderApi $conektaOrderApi
+     * @param ConektaApiClient $conektaOrderApi
      * @param ConektaQuoteFactory $conektaQuoteFactory
      * @param ConektaQuoteRepositoryFactory $conektaQuoteRepositoryFactory
      */
     public function __construct(
-        ConektaLogger $conektaLogger,
-        ConektaQuoteInterface $conektaQuoteInterface,
-        ConektaOrderApi $conektaOrderApi,
-        ConektaQuoteFactory $conektaQuoteFactory,
+        ConektaLogger                 $conektaLogger,
+        ConektaQuoteInterface         $conektaQuoteInterface,
+        ConektaApiClient              $conektaOrderApi,
+        ConektaQuoteFactory           $conektaQuoteFactory,
         ConektaQuoteRepositoryFactory $conektaQuoteRepositoryFactory
-    ) {
+    )
+    {
         $this->_conektaLogger = $conektaLogger;
         $this->conektaQuoteInterface = $conektaQuoteInterface;
         $this->conektaQuoteRepositoryFactory = $conektaQuoteRepositoryFactory;
@@ -74,13 +77,13 @@ class EmbedFormRepository implements EmbedFormRepositoryInterface
         //Minimum amount per quote
         $total = 0;
         foreach ($orderParameters['line_items'] as $lineItem) {
-            $total += $lineItem['unit_price']*$lineItem['quantity'];
+            $total += $lineItem['unit_price'] * $lineItem['quantity'];
         }
-        
-        if ($total < ConektaQuoteInterface::MINIMUM_AMOUNT_PER_QUOTE*100) {
+
+        if ($total < ConektaQuoteInterface::MINIMUM_AMOUNT_PER_QUOTE * 100) {
             throw new ConektaException(
                 __('Para utilizar este medio de pago
-                debe ingresar una compra superior a $'.ConektaQuoteInterface::MINIMUM_AMOUNT_PER_QUOTE)
+                debe ingresar una compra superior a $' . ConektaQuoteInterface::MINIMUM_AMOUNT_PER_QUOTE)
             );
         }
 
@@ -112,10 +115,10 @@ class EmbedFormRepository implements EmbedFormRepositoryInterface
      * @param int $quoteId
      * @param array $orderParams
      * @param float $orderTotal
-     * @return ConektaOrderApi
+     * @return OrderResponse
      * @throws ConektaException
      */
-    public function generate($quoteId, $orderParams, $orderTotal)
+    public function generate($quoteId, $orderParams, $orderTotal): OrderResponse
     {
         //Validate params
         $this->validateOrderParameters($orderParams, $orderTotal);
@@ -127,27 +130,30 @@ class EmbedFormRepository implements EmbedFormRepositoryInterface
         $hasToCreateNewOrder = false;
         try {
             $conektaQuote = $conektaQuoteRepo->getByid($quoteId);
-            $conektaOrder = $this->conektaOrderApi->find($conektaQuote->getConektaOrderId());
+            $conektaOrder = $this->conektaOrderApi->getOrderByID($conektaQuote->getConektaOrderId());
 
             if (!empty($conektaOrder)) {
                 $chekoutParams = $orderParams['checkout'];
-                $conektaChekout = (array)$conektaOrder->checkout;
-                $conektaCheckoutMonthlyInstallmentsOptions = isset($conektaChekout['monthly_installments_options']) ?
-                    (array)$conektaChekout['monthly_installments_options'] : [];
-                if (!empty($conektaOrder->payment_status) ||
-                    time() >= $conektaChekout['expires_at'] ||
-                    
+                $conektaChekout = $conektaOrder->getCheckout();
+                $conektaCheckoutMonthlyInstallmentsOptions = (array)$conektaChekout->getMonthlyInstallmentsOptions();
+                if (!empty($conektaOrder->getPaymentStatus()) ||
+                    time() >= $conektaChekout->getExpiresAt() ||
+
                     //detect changes in checkout params
-                    $chekoutParams['allowed_payment_methods'] != (array)$conektaChekout['allowed_payment_methods'] ||
-                    $chekoutParams['monthly_installments_enabled'] != $conektaChekout['monthly_installments_enabled'] ||
+                    $chekoutParams['allowed_payment_methods'] != (array)$conektaChekout->getAllowedPaymentMethods() ||
+                    $chekoutParams['monthly_installments_enabled'] != $conektaChekout->getMonthlyInstallmentsEnabled() ||
                     $chekoutParams['monthly_installments_options'] != $conektaCheckoutMonthlyInstallmentsOptions ||
-                    $chekoutParams['on_demand_enabled'] != $conektaChekout['on_demand_enabled'] ||
-                    $chekoutParams['force_3ds_flow'] != $conektaChekout['force_3ds_flow']
+                    $chekoutParams['on_demand_enabled'] != $conektaChekout->getOnDemandEnabled() ||
+                    $chekoutParams['force_3ds_flow'] != $conektaChekout->getForce3dsFlow()
                 ) {
                     $hasToCreateNewOrder = true;
                 }
             }
         } catch (NoSuchEntityException $e) {
+            $conektaQuote = null;
+            $conektaOrder = null;
+            $hasToCreateNewOrder = true;
+        } catch (ApiException $e) {
             $conektaQuote = null;
             $conektaOrder = null;
             $hasToCreateNewOrder = true;
@@ -165,24 +171,23 @@ class EmbedFormRepository implements EmbedFormRepositoryInterface
             if ($hasToCreateNewOrder) {
                 $this->_conektaLogger->info('EmbedFormRepository::generate Creates conekta order', $orderParams);
                 //Creates checkout order
-                $conektaOrder = $this->conektaOrderApi->create($orderParams);
-                
+                $conektaOrder = $this->conektaOrderApi->createOrder($orderParams);
+
                 //Save map conekta order and quote
                 $conektaQuote = $this->conektaQuoteFactory->create();
                 $conektaQuote->setQuoteId($quoteId);
-                $conektaQuote->setConektaOrderId($conektaOrder['id']);
+                $conektaQuote->setConektaOrderId($conektaOrder->getId());
                 $conektaQuoteRepo->save($conektaQuote);
             } else {
                 $this->_conektaLogger->info('EmbedFormRepository::generate  Updates conekta order', $orderParams);
                 //If map between conekta order and quote exist, then just updated conekta order
-                $conektaOrder = $this->conektaOrderApi->find($conektaQuote->getConektaOrderId());
-                
+
                 unset($orderParams['customer_info']);
-                $conektaOrder->update($orderParams);
+                $conektaOrder = $this->conektaOrderApi->updateOrder($conektaQuote->getConektaOrderId(), $orderParams);
             }
 
             return $conektaOrder;
-        } catch (ParameterValidationError $e) {
+        } catch (Exception $e) {
             $this->_conektaLogger->error('EmbedFormRepository::generate Error: ' . $e->getMessage());
             throw new ConektaException(__($e->getMessage()));
         }

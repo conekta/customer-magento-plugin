@@ -1,13 +1,15 @@
 <?php
+
 namespace Conekta\Payments\Gateway\Http\Client\BankTransfer;
 
+use Conekta\ApiException;
 use Conekta\Payments\Gateway\Http\Util\HttpUtil;
 use Conekta\Payments\Helper\Data as ConektaHelper;
 use Conekta\Payments\Logger\Logger as ConektaLogger;
 use Magento\Payment\Gateway\Http\ClientInterface;
 use Magento\Payment\Gateway\Http\TransferInterface;
 use Magento\Payment\Model\Method\Logger;
-use Conekta\Order as ConektaOrder;
+use Conekta\Payments\Api\ConektaApiClient;
 use Conekta\Payments\Api\Data\ConektaSalesOrderInterface;
 use Conekta\Payments\Model\ConektaSalesOrderFactory;
 
@@ -40,21 +42,27 @@ class TransactionAuthorize implements ClientInterface
     protected $conektaSalesOrderFactory;
 
     /**
+     * @var ConektaApiClient
+     */
+    private $conektaApiClient;
+
+    /**
      * @param Logger $logger
      * @param ConektaHelper $conektaHelper
      * @param ConektaLogger $conektaLogger
      */
     public function __construct(
-        Logger $logger,
-        ConektaHelper $conektaHelper,
-        ConektaLogger $conektaLogger,
-        ConektaOrder $conektaOrder,
-        HttpUtil $httpUtil,
+        Logger                   $logger,
+        ConektaHelper            $conektaHelper,
+        ConektaLogger            $conektaLogger,
+        ConektaApiClient         $conektaApiClient,
+        HttpUtil                 $httpUtil,
         ConektaSalesOrderFactory $conektaSalesOrderFactory
-    ) {
+    )
+    {
         $this->_conektaHelper = $conektaHelper;
         $this->_conektaLogger = $conektaLogger;
-        $this->_conektaOrder = $conektaOrder;
+        $this->conektaApiClient = $conektaApiClient;
         $this->_httpUtil = $httpUtil;
         $this->_conektaLogger->info('HTTP Client BankTransfer TransactionAuthorize :: __construct');
         $this->logger = $logger;
@@ -71,24 +79,25 @@ class TransactionAuthorize implements ClientInterface
      *
      * @param TransferInterface $transferObject
      * @return array
+     * @throws ApiException
      */
     public function placeRequest(TransferInterface $transferObject)
     {
         $this->_conektaLogger->info('HTTP Client BankTransfer TransactionAuthorize :: placeRequest');
         $request = $transferObject->getBody();
 
-        $orderParams['currency']         = $request['CURRENCY'];
-        $orderParams['line_items']       = $request['line_items'];
-        $orderParams['tax_lines']        = $request['tax_lines'];
-        $orderParams['customer_info']    = $request['customer_info'];
-        $orderParams['discount_lines']   = $request['discount_lines'];
+        $orderParams['currency'] = $request['CURRENCY'];
+        $orderParams['line_items'] = $request['line_items'];
+        $orderParams['tax_lines'] = $request['tax_lines'];
+        $orderParams['customer_info'] = $request['customer_info'];
+        $orderParams['discount_lines'] = $request['discount_lines'];
         if (!empty($request['shipping_lines'])) {
-            $orderParams['shipping_lines']   = $request['shipping_lines'];
+            $orderParams['shipping_lines'] = $request['shipping_lines'];
         }
         if (!empty($request['shipping_contact'])) {
             $orderParams['shipping_contact'] = $request['shipping_contact'];
         }
-        $orderParams['metadata']         = $request['metadata'];
+        $orderParams['metadata'] = $request['metadata'];
         $chargeParams = $request['payment_method_details'];
 
         $result_code = '';
@@ -97,31 +106,28 @@ class TransactionAuthorize implements ClientInterface
         $error_code = '';
 
         try {
-            $conektaOrder= $this->_conektaOrder->create($orderParams);
-            
-            $charge = $conektaOrder->createCharge($chargeParams);
+            $conektaOrder = $this->conektaApiClient->createOrder($orderParams);
 
-            if (isset($charge->id) && isset($conektaOrder->id)) {
+            $charge = $this->conektaApiClient->createOrderCharge($conektaOrder->getId(), $chargeParams);
+
+            if ($charge->getId() && $conektaOrder->getId()) {
                 $result_code = 1;
-                $txn_id = $charge->id;
-                $ord_id = $conektaOrder->id;
+                $txn_id = $charge->getId();
+                $ord_id = $conektaOrder->getId();
 
                 $this->conektaSalesOrderFactory
-                        ->create()
-                        ->setData([
-                            ConektaSalesOrderInterface::CONEKTA_ORDER_ID => $ord_id,
-                            ConektaSalesOrderInterface::INCREMENT_ORDER_ID => $orderParams['metadata']['order_id']
-                        ])
-                        ->save();
+                    ->create()
+                    ->setData([
+                        ConektaSalesOrderInterface::CONEKTA_ORDER_ID => $ord_id,
+                        ConektaSalesOrderInterface::INCREMENT_ORDER_ID => $orderParams['metadata']['order_id']
+                    ])
+                    ->save();
 
             } else {
                 $result_code = 666;
             }
-        } catch (ValidatorException $e) {
-            $error_code = $e->getMessage();
-            $result_code = 666;
+        } catch (ApiException $e) {
             $this->logger->error(__('[Conekta]: Payment capturing error.'));
-            $this->_conektaHelper->deleteSavedCard($orderParams, $chargeParams);
             $this->logger->debug(
                 [
                     'request' => $request,
@@ -131,7 +137,7 @@ class TransactionAuthorize implements ClientInterface
             $this->_conektaLogger->info(
                 'HTTP Client BankTransfer TransactionAuthorize :: placeRequest: Payment authorize error ' . $e->getMessage()
             );
-            throw new ValidatorException(__($e->getMessage()));
+            throw new ApiException(__($e->getMessage()));
         }
 
         $response = $this->generateResponseForCode(
@@ -141,11 +147,11 @@ class TransactionAuthorize implements ClientInterface
         );
 
         $response['offline_info'] = [
-            "type" => $charge->payment_method->type,
+            "type" => $charge->getPaymentMethod()->getType(),
             "data" => [
-                "clabe"         => $charge->payment_method->clabe,
-                "bank_name"     => $charge->payment_method->bank,
-                "expires_at"    => $charge->payment_method->expires_at
+                "clabe" => $charge->getPaymentMethod()->getClabe(),
+                "bank_name" => $charge->getPaymentMethod()->getBank(),
+                "expires_at" => $charge->getPaymentMethod()->getExpiresAt()
             ]
         ];
 
@@ -166,7 +172,7 @@ class TransactionAuthorize implements ClientInterface
             ]
         );
 
-        $response['payment_method_details'] =  $request['payment_method_details'];
+        $response['payment_method_details'] = $request['payment_method_details'];
 
         return $response;
     }

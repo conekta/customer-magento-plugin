@@ -15,7 +15,6 @@ use Magento\Framework\Controller\Result\RawFactory;
 use Magento\Framework\Controller\ResultInterface;
 use Magento\Framework\Json\Helper\Data;
 use Magento\Payment\Model\Method\Logger;
-
 use Magento\Framework\App\Request\InvalidRequestException;
 
 class Index extends Action implements CsrfAwareActionInterface

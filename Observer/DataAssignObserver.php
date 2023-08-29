@@ -23,6 +23,7 @@ class DataAssignObserver extends AbstractDataAssignObserver
     public const IFRAME_PAYMENT = 'iframe_payment';
     public const ORDER_ID = 'order_id';
     public const TXN_ID = 'txn_id';
+    public const CARD_TYPE = 'card_type';
     public const REFERENCE = 'reference';
     /**
      * @var string[]
@@ -30,6 +31,7 @@ class DataAssignObserver extends AbstractDataAssignObserver
     protected $additionalInformationList = [
         self::PAYMENT_METHOD,
         self::CC_TYPE,
+        self::CARD_TYPE,
         self::CC_EXP_YEAR,
         self::CC_EXP_MONTH,
         self::CC_BIN,

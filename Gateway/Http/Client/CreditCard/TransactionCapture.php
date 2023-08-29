@@ -1,8 +1,8 @@
 <?php
+
 namespace Conekta\Payments\Gateway\Http\Client\CreditCard;
 
-use Conekta\Order as ConektaOrder;
-use Conekta\Payments\Gateway\Http\Util\HttpUtil;
+use Conekta\Payments\Api\ConektaApiClient;
 use Conekta\Payments\Helper\Data as ConektaHelper;
 use Conekta\Payments\Logger\Logger as ConektaLogger;
 use Conekta\Payments\Api\Data\ConektaSalesOrderInterface;
@@ -40,22 +40,26 @@ class TransactionCapture implements ClientInterface
     protected $conektaSalesOrderFactory;
 
     /**
+     * @var ConektaApiClient
+     */
+    private $conektaApiClient;
+
+    /**
      * @param Logger $logger
      * @param ConektaHelper $conektaHelper
      * @param ConektaLogger $conektaLogger
      */
     public function __construct(
-        Logger $logger,
-        ConektaHelper $conektaHelper,
-        ConektaLogger $conektaLogger,
-        ConektaOrder $conektaOrder,
-        HttpUtil $httpUtil,
+        Logger                   $logger,
+        ConektaHelper            $conektaHelper,
+        ConektaLogger            $conektaLogger,
+        ConektaApiClient         $conektaApiClient,
         ConektaSalesOrderFactory $conektaSalesOrderFactory
-    ) {
+    )
+    {
         $this->_conektaHelper = $conektaHelper;
         $this->_conektaLogger = $conektaLogger;
-        $this->_conektaOrder = $conektaOrder;
-        $this->_httpUtil = $httpUtil;
+        $this->conektaApiClient = $conektaApiClient;
         $this->_conektaLogger->info('HTTP Client TransactionCapture :: __construct');
         $this->logger = $logger;
         $this->conektaSalesOrderFactory = $conektaSalesOrderFactory;
@@ -76,14 +80,14 @@ class TransactionCapture implements ClientInterface
     {
         $this->_conektaLogger->info('HTTP Client TransactionCapture :: placeRequest');
         $request = $transferObject->getBody();
-       
-        $orderParams['currency']         = $request['CURRENCY'];
-        $orderParams['line_items']       = $request['line_items'];
-        $orderParams['tax_lines']        = $request['tax_lines'];
-        $orderParams['customer_info']    = $request['customer_info'];
-        $orderParams['discount_lines']   = $request['discount_lines'];
+
+        $orderParams['currency'] = $request['CURRENCY'];
+        $orderParams['line_items'] = $request['line_items'];
+        $orderParams['tax_lines'] = $request['tax_lines'];
+        $orderParams['customer_info'] = $request['customer_info'];
+        $orderParams['discount_lines'] = $request['discount_lines'];
         if (!empty($request['shipping_lines'])) {
-            $orderParams['shipping_lines']   = $request['shipping_lines'];
+            $orderParams['shipping_lines'] = $request['shipping_lines'];
         }
         if (!empty($request['shipping_contact'])) {
             $orderParams['shipping_contact'] = $request['shipping_contact'];
@@ -96,20 +100,20 @@ class TransactionCapture implements ClientInterface
         $error_code = '';
 
         try {
-            $newOrder = $this->_conektaOrder->create($orderParams);
-            $newCharge = $newOrder->createCharge($chargeParams);
-            if (isset($newCharge->id) || !empty($newCharge->id)) {
+            $newOrder = $this->conektaApiClient->createOrder($orderParams);
+            $newCharge = $this->conektaApiClient->createOrderCharge($newOrder->getId(), $chargeParams);
+            if (!empty($newCharge->getId()) ) {
                 $result_code = 1;
-                $txn_id = $newCharge->id;
-                $ord_id = $newOrder->id;
+                $txn_id = $newCharge->getId();
+                $ord_id = $newOrder->getId();
 
                 $this->conektaSalesOrderFactory
-                        ->create()
-                        ->setData([
-                            ConektaSalesOrderInterface::CONEKTA_ORDER_ID => $ord_id,
-                            ConektaSalesOrderInterface::INCREMENT_ORDER_ID => $request['metadata']['order_id']
-                        ])
-                        ->save();
+                    ->create()
+                    ->setData([
+                        ConektaSalesOrderInterface::CONEKTA_ORDER_ID => $ord_id,
+                        ConektaSalesOrderInterface::INCREMENT_ORDER_ID => $request['metadata']['order_id']
+                    ])
+                    ->save();
             } else {
                 $result_code = 666;
             }
@@ -135,7 +139,7 @@ class TransactionCapture implements ClientInterface
             $ord_id
         );
         $response['error_code'] = $error_code;
-        $response['payment_method_details'] =  $request['payment_method_details'];
+        $response['payment_method_details'] = $request['payment_method_details'];
 
         $this->logger->debug(
             [
@@ -158,7 +162,7 @@ class TransactionCapture implements ClientInterface
     protected function generateResponseForCode($resultCode, $txn_id, $ord_id)
     {
         $this->_conektaLogger->info('HTTP Client TransactionCapture :: generateResponseForCode');
-        
+
         if (empty($txn_id)) {
             $txn_id = $this->generateTxnId();
         }

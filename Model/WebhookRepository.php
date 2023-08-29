@@ -165,6 +165,7 @@ class WebhookRepository
             $invoice->getOrder()
         );
         $transactionSave->save();
+
         $this->_conektaLogger->info('WebhookRepository :: execute - The invoice to be created');
 
         try {

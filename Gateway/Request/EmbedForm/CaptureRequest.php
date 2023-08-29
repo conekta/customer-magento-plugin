@@ -1,7 +1,6 @@
 <?php
 namespace Conekta\Payments\Gateway\Request\EmbedForm;
 
-use Conekta\Customer as ConektaCustomer;
 use Conekta\Payments\Helper\Data as ConektaHelper;
 use Conekta\Payments\Logger\Logger as ConektaLogger;
 use Conekta\Payments\Model\Ui\EmbedForm\ConfigProvider;
@@ -41,10 +40,6 @@ class CaptureRequest implements BuilderInterface
      * @var CustomerRepositoryInterface
      */
     protected $customerRepository;
-    /**
-     * @var ConektaCustomer
-     */
-    protected $conektaCustomer;
 
     /**
      * CaptureRequest constructor.
@@ -55,7 +50,6 @@ class CaptureRequest implements BuilderInterface
      * @param \Conekta\Payments\Model\Config $conektaConfig
      * @param CustomerSession $session
      * @param CustomerRepositoryInterface $customerRepository
-     * @param ConektaCustomer $conektaCustomer
      */
     public function __construct(
         ConfigInterface $config,
@@ -64,10 +58,8 @@ class CaptureRequest implements BuilderInterface
         ConektaLogger $conektaLogger,
         \Conekta\Payments\Model\Config $conektaConfig,
         CustomerSession $session,
-        CustomerRepositoryInterface $customerRepository,
-        ConektaCustomer $conektaCustomer
+        CustomerRepositoryInterface $customerRepository
     ) {
-        $this->conektaCustomer = $conektaCustomer;
         $this->_conektaHelper = $conektaHelper;
         $this->_conektaLogger = $conektaLogger;
         $this->_conektaLogger->info('EMBED Request CaptureRequest :: __construct');

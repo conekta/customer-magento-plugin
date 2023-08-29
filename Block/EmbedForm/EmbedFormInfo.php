@@ -101,7 +101,7 @@ class EmbedFormInfo extends Info
 
         switch ($methodType) {
             case ConfigProvider::PAYMENT_METHOD_CREDIT_CARD:
-                $title = 'Tarjeta de Crédito';
+                $title = 'Pago con Tarjeta';
                 break;
             
             case ConfigProvider::PAYMENT_METHOD_CASH:
@@ -146,5 +146,22 @@ class EmbedFormInfo extends Info
     public function isBankTransferPaymentMethod()
     {
         return $this->getPaymentMethodType() === ConfigProvider::PAYMENT_METHOD_BANK_TRANSFER;
+    }
+
+    /**
+     * Show if card is debit o credit card
+     *
+     * @return string
+     * @throws LocalizedException
+     */
+    public function getCardType()
+    {
+        $additionalData = $this->getAdditionalData();
+    
+        if (isset($additionalData['card_type'])) {
+            return $additionalData['card_type'];
+        }
+        
+        return null;
     }
 }

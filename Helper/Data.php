@@ -2,11 +2,7 @@
 
 namespace Conekta\Payments\Helper;
 
-use Conekta\Customer;
-use Conekta\Handler;
-use Conekta\ParameterValidationError;
 use Conekta\Payments\Logger\Logger as ConektaLogger;
-use Conekta\ProcessingError;
 use Magento\Framework\App\Helper\Context;
 use Magento\Framework\App\ProductMetadataInterface;
 use Magento\Framework\Encryption\EncryptorInterface;
@@ -39,10 +35,7 @@ class Data extends Util
      * @var ConektaLogger
      */
     protected $conektaLogger;
-    /**
-     * @var Customer
-     */
-    protected $conektaCustomer;
+
     /**
      * @var StoreManagerInterface
      */
@@ -76,13 +69,13 @@ class Data extends Util
      * @param EncryptorInterface $encryptor
      * @param ProductMetadataInterface $productMetadata
      * @param ConektaLogger $conektaLogger
-     * @param Customer $conektaCustomer
      * @param CheckoutSession $checkoutSession
      * @param CustomerSession $customerSession
      * @param ProductRepository $productRepository
      * @param Escaper $_escaper
      * @param CartRepositoryInterface $cartRepository
      * @param StoreManagerInterface $storeManager
+     * @param ConektaApiClient $conektaApiClient
      */
 
     public function __construct(
@@ -91,7 +84,6 @@ class Data extends Util
         EncryptorInterface $encryptor,
         ProductMetadataInterface $productMetadata,
         ConektaLogger $conektaLogger,
-        Customer $conektaCustomer,
         CheckoutSession $checkoutSession,
         CustomerSession $customerSession,
         ProductRepository $productRepository,
@@ -104,13 +96,13 @@ class Data extends Util
         $this->_encryptor = $encryptor;
         $this->_productMetadata = $productMetadata;
         $this->conektaLogger = $conektaLogger;
-        $this->conektaCustomer = $conektaCustomer;
         $this->checkoutSession = $checkoutSession;
         $this->customerSession = $customerSession;
         $this->productRepository = $productRepository;
         $this->_escaper = $_escaper;
         $this->_cartRepository = $cartRepository;
         $this->_storeManager = $storeManager;
+
     }
 
     /**
@@ -245,36 +237,6 @@ class Data extends Util
     }
 
     /**
-     * Delete Save Card
-     *
-     * @param mixed $orderParams
-     * @param mixed $chargeParams
-     */
-    public function deleteSavedCard($orderParams, $chargeParams)
-    {
-        $this->conektaLogger->info('deleteSavedCard: Remove Decline Card From Conekta Customer');
-
-        try {
-            $paymentSourceId = '';
-            if (isset($chargeParams['payment_method']['payment_source_id'])) {
-                $paymentSourceId = $chargeParams['payment_method']['payment_source_id'];
-            }
-
-            $customerId = '';
-            if (isset($orderParams['customer_info']['customer_id'])) {
-                $customerId = $orderParams['customer_info']['customer_id'];
-            }
-
-            if ($customerId && $paymentSourceId) {
-                $customer = $this->conektaCustomer->find($customerId);
-                $customer->deletePaymentSourceById($paymentSourceId);
-            }
-        } catch (ProcessingError|ParameterValidationError|Handler $error) {
-            $this->conektaLogger->info($error->getMessage());
-        }
-    }
-
-    /**
      * Get metadata attributes
      *
      * @param mixed $metadataPath
@@ -283,7 +245,7 @@ class Data extends Util
     public function getMetadataAttributes($metadataPath)
     {
         $attributes = $this->getConfigData('conekta/conekta_global', $metadataPath);
-        $attributesArray = explode(",", $attributes);
+        $attributesArray = explode(",", $attributes  ?? '');
 
         return $attributesArray;
     }

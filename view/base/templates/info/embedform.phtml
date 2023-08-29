@@ -16,12 +16,17 @@ $offlineInfo = $block->getOfflineInfo();
 
                 <?php if ($block->isCreditCardPaymentMethod()) {?>
                 <tr>
-                    <th><strong><?= /* @noEscape */ __('Credit Card Type:'); ?></strong></th>
+                    <th><strong><?= /* @noEscape */ __('Card Brand:'); ?></strong></th>
                     <td>
                         <?= $block->escapeHtml($block->getCcTypeName()); ?>
                     </td>
                 </tr>
-
+                <tr>
+                    <th><strong><?= /* @noEscape */ __('Card Type:'); ?></strong></th>
+                    <td>
+                        <?= $block->escapeHtml($block->getCardType()); ?>
+                    </td>
+                </tr>
                 <?php } elseif ($block->isCashPaymentMethod()) { ?>
                 <tr>
                     <th><strong><?= /* @noEscape */ __('Reference Number:'); ?></strong></th>
