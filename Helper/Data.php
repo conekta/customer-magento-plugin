@@ -321,7 +321,7 @@ class Data extends Util
         }
 
         if (empty($expirationValue)) {
-            $expirationValue = 3;
+            $expirationValue = 1;
         }
 
         $expiryDate = strtotime("+" . $expirationValue . " " . $expirationUnit);
