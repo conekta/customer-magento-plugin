@@ -1,10 +1,10 @@
 ### 5.0.4 - 2023/10/02 10:55
 * Feat:
-  - [PAY22-2045] Magento - Modificar tiempo expiración ref. cash y spei. @fcarrero [#41](https://github.com/conekta/customer-magento-plugin/pull/43)
+  - [PAY22-2045] Magento - Modificar tiempo expiración ref. cash y spei. @fcarrero [#43](https://github.com/conekta/customer-magento-plugin/pull/43)
 
 ### 5.0.3 - 2023/06/14 10:55
 * Feat:
-  - [CHLP-1326] Refactor plugin to use new php-conekta version. @elvisheredia [#41](https://github.com/conekta/customer-magento-plugin/pull/42)
+  - [CHLP-1326] Refactor plugin to use new php-conekta version. @elvisheredia [#42](https://github.com/conekta/customer-magento-plugin/pull/42)
 
 ### 4.2.1 - 2023/06/07 17:55
 * Feat:
