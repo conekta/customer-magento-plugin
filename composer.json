@@ -2,7 +2,7 @@
     "name": "conekta/conekta_payments",
     "description": "Conekta payment gateway",
     "require": {
-        "php": ">=7.3",
+        "php": ">=7.4",
         "conekta/conekta-php": "v6.0.1"
     },
     "type": "magento2-module",
@@ -33,9 +33,8 @@
         }
     },
     "require-dev": {
-        "phpunit/phpunit": "^10.2",
+        "phpunit/phpunit": "^9.0",
         "squizlabs/php_codesniffer": "^3.7",
-        "magento/magento-coding-standard": "^31.0",
         "magento/framework": "^103.0",
         "magento/payment-services": "*"
     }

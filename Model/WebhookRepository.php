@@ -4,6 +4,7 @@ namespace Conekta\Payments\Model;
 
 use Conekta\Payments\Logger\Logger as ConektaLogger;
 use Conekta\Payments\Api\Data\ConektaSalesOrderInterface;
+use Exception;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Sales\Api\Data\OrderInterface;
 use Magento\Sales\Model\Order;
@@ -16,23 +17,23 @@ class WebhookRepository
     /**
      * @var OrderInterface
      */
-    protected $orderInterface;
+    protected OrderInterface $orderInterface;
     /**
      * @var InvoiceService
      */
-    protected $invoiceService;
+    protected InvoiceService $invoiceService;
     /**
      * @var InvoiceSender
      */
-    protected $invoiceSender;
+    protected InvoiceSender $invoiceSender;
     /**
      * @var Transaction
      */
-    protected $transaction;
+    protected Transaction $transaction;
     /**
      * @var ConektaLogger
      */
-    private $_conektaLogger;
+    private ConektaLogger $_conektaLogger;
     /**
      * @var ConektaSalesOrderInterface
      */
@@ -69,7 +70,7 @@ class WebhookRepository
      * @return Order
      * @throws LocalizedException
      */
-    public function findByMetadataOrderId($body)
+    public function findByMetadataOrderId($body): Order
     {
         if (!isset($body['data']['object']) ||
             !isset($body['data']['object']['id'])
@@ -82,11 +83,9 @@ class WebhookRepository
             'order_id' => $conektaOrderId
         ]);
 
-        $conetakSalesOrder = $this->conektaOrderSalesInterface->loadByConektaOrderId($conektaOrderId);
-        
-        $order = $this->orderInterface->loadByIncrementId($conetakSalesOrder->getIncrementOrderId());
-        
-        return $order;
+        $conektaSalesOrder = $this->conektaOrderSalesInterface->loadByConektaOrderId($conektaOrderId);
+
+        return $this->orderInterface->loadByIncrementId($conektaSalesOrder->getIncrementOrderId());
     }
 
     /**
@@ -106,14 +105,14 @@ class WebhookRepository
             throw new LocalizedException(__('We could not locate the order in the store'));
         }
 
-        //Only update order status if is Pending
+        //Only update order status if order is Pending
         if ($order->getState() === Order::STATE_PENDING_PAYMENT ||
             $order->getState() === Order::STATE_PAYMENT_REVIEW
         ) {
             $order->setState(Order::STATE_CANCELED);
             $order->setStatus(Order::STATE_CANCELED);
 
-            $order->addStatusHistoryComment("Order Expired")
+            $order->addCommentToStatusHistory("Order Expired")
                     ->setIsCustomerNotified(true);
 
             $order->save();
@@ -128,6 +127,7 @@ class WebhookRepository
      * @param mixed $body
      * @return void
      * @throws LocalizedException
+     * @throws Exception
      */
     public function payOrder($body)
     {
@@ -150,7 +150,7 @@ class WebhookRepository
         $order->setState(Order::STATE_PROCESSING);
         $order->setStatus(Order::STATE_PROCESSING);
 
-        $order->addStatusHistoryComment("Payment received successfully")
+        $order->addCommentToStatusHistory("Payment received successfully")
             ->setIsCustomerNotified(true);
 
         $order->save();
@@ -170,7 +170,7 @@ class WebhookRepository
 
         try {
             $this->invoiceSender->send($invoice);
-            $order->addStatusHistoryComment(
+            $order->addCommentToStatusHistory(
                 __('Notified customer about invoice creation #%1.', $invoice->getId())
             )
                 ->setIsCustomerNotified(true)
@@ -178,7 +178,7 @@ class WebhookRepository
             $this->_conektaLogger->info(
                 'WebhookRepository :: execute - Notified customer about invoice creation'
             );
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->_conektaLogger->error(
                 'WebhookRepository :: execute - We can\'t send the invoice email right now.'
             );

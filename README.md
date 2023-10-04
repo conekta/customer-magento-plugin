@@ -114,3 +114,9 @@ Magento Version Compatibility
 -----------------------------
 The plugin has been tested in Magento 2.3 and 2.4 
 Support is not guaranteed for untested versions.
+
+
+#development local
+```
+ composer install --ignore-platform-req=ext-gd --ignore-platform-req=ext-intl --ignore-platform-req=ext-xsl
+``

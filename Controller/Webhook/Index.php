@@ -13,8 +13,8 @@ use Magento\Framework\App\ResponseInterface;
 use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Framework\Controller\Result\RawFactory;
 use Magento\Framework\Controller\ResultInterface;
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Json\Helper\Data;
-use Magento\Payment\Model\Method\Logger;
 use Magento\Framework\App\Request\InvalidRequestException;
 
 class Index extends Action implements CsrfAwareActionInterface
@@ -27,34 +27,30 @@ class Index extends Action implements CsrfAwareActionInterface
     /**
      * @var JsonFactory
      */
-    protected $resultJsonFactory;
+    protected JsonFactory $resultJsonFactory;
     /**
      * @var RawFactory
      */
-    protected $resultRawFactory;
+    protected RawFactory $resultRawFactory;
     /**
      * @var Data
      */
-    protected $helper;
-    /**
-     * @var Logger
-     */
-    private $logger;
+    protected Data $helper;
+
     /**
      * @var ConektaLogger
      */
-    private $_conektaLogger;
+    private ConektaLogger $_conektaLogger;
     /**
      * @var WebhookRepository
      */
-    private $webhookRepository;
+    private WebhookRepository $webhookRepository;
 
     /**
      * @param Context $context
      * @param JsonFactory $resultJsonFactory
      * @param RawFactory $resultRawFactory
      * @param Data $helper
-     * @param Logger $logger
      * @param ConektaLogger $conektaLogger
      * @param WebhookRepository $webhookRepository
      */
@@ -63,7 +59,6 @@ class Index extends Action implements CsrfAwareActionInterface
         JsonFactory $resultJsonFactory,
         RawFactory $resultRawFactory,
         Data $helper,
-        Logger $logger,
         ConektaLogger $conektaLogger,
         WebhookRepository $webhookRepository
     ) {
@@ -72,7 +67,6 @@ class Index extends Action implements CsrfAwareActionInterface
         $this->resultJsonFactory = $resultJsonFactory;
         $this->resultRawFactory = $resultRawFactory;
         $this->helper = $helper;
-        $this->logger = $logger;
         $this->webhookRepository = $webhookRepository;
     }
 
@@ -108,10 +102,9 @@ class Index extends Action implements CsrfAwareActionInterface
         $this->_conektaLogger->info('Controller Index :: execute');
 
         $response = Response::STATUS_CODE_200;
-        
-        try {
-            $resultRaw = $this->resultRawFactory->create();
+        $resultRaw = $this->resultRawFactory->create();
 
+        try {
             $body = $this->helper->jsonDecode($this->getRequest()->getContent());
 
             if (!$body || $this->getRequest()->getMethod() !== 'POST') {
@@ -121,6 +114,7 @@ class Index extends Action implements CsrfAwareActionInterface
             $event = $body['type'];
 
             $this->_conektaLogger->info('Controller Index :: execute body json ', ['event' => $event]);
+            $this->validate_order_exist($body);
 
             switch ($event) {
                 case self::EVENT_WEBHOOK_PING:
@@ -148,5 +142,28 @@ class Index extends Action implements CsrfAwareActionInterface
         }
         
         return $resultRaw->setHttpResponseCode($response);
+    }
+
+    /**
+     * @throws LocalizedException
+     */
+    public function validate_order_exist($event){
+
+        if ($event['type'] != self::EVENT_ORDER_CREATED){
+            return ;
+        }
+
+        //check order en order with external id
+        $order = $this->webhookRepository->findByMetadataOrderId($event);
+        if ($order->getId()) {
+            return;
+        }
+
+
+
+
+
+       // check order en api
+        // create order en magento
     }
 }

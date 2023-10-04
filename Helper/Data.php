@@ -14,6 +14,7 @@ use Magento\Customer\Model\Session as CustomerSession;
 use Magento\Catalog\Model\ProductRepository;
 use Magento\Framework\Escaper;
 use Magento\Quote\Api\CartRepositoryInterface;
+use Magento\Store\Api\Data\StoreInterface;
 use Magento\Store\Model\ScopeInterface;
 use Magento\Store\Model\StoreManagerInterface;
 
@@ -75,7 +76,6 @@ class Data extends Util
      * @param Escaper $_escaper
      * @param CartRepositoryInterface $cartRepository
      * @param StoreManagerInterface $storeManager
-     * @param ConektaApiClient $conektaApiClient
      */
 
     public function __construct(
@@ -231,7 +231,7 @@ class Data extends Util
      *
      * @return string
      */
-    public function getMageVersion()
+    public function getMageVersion(): string
     {
         return $this->_productMetadata->getVersion();
     }
@@ -245,9 +245,7 @@ class Data extends Util
     public function getMetadataAttributes($metadataPath)
     {
         $attributes = $this->getConfigData('conekta/conekta_global', $metadataPath);
-        $attributesArray = explode(",", $attributes  ?? '');
-
-        return $attributesArray;
+        return explode(",", $attributes  ?? '');
     }
 
     /**
@@ -255,7 +253,7 @@ class Data extends Util
      *
      * @return bool
      */
-    public function is3DSEnabled()
+    public function is3DSEnabled(): bool
     {
         return (boolean)$this->getConfigData('conekta_cc', 'iframe_enabled');
     }
@@ -265,7 +263,7 @@ class Data extends Util
      *
      * @return bool
      */
-    public function isSaveCardEnabled()
+    public function isSaveCardEnabled(): bool
     {
         return (boolean)$this->getConfigData('conekta_cc', 'enable_saved_card');
     }
@@ -324,9 +322,7 @@ class Data extends Util
             $expirationValue = 1;
         }
 
-        $expiryDate = strtotime("+" . $expirationValue . " " . $expirationUnit);
-
-        return $expiryDate;
+        return strtotime("+" . $expirationValue . " " . $expirationUnit);
     }
 
     /**
@@ -465,13 +461,15 @@ class Data extends Util
      * Get magento metadata
      *
      * @return array
+     * @throws NoSuchEntityException
      */
-    public function getMagentoMetadata()
+    public function getMagentoMetadata(): array
     {
         return [
             'plugin'                 => 'Magento',
-            'magento_version'         => $this->getMageVersion(),
-            'plugin_conekta_version' => $this->pluginVersion()
+            'magento_version'        => $this->getMageVersion(),
+            'plugin_conekta_version' => $this->pluginVersion(),
+            'store'                  => $this->getStore()->getId()
         ];
     }
 
@@ -698,5 +696,13 @@ class Data extends Util
         ];
 
         return $taxLines;
+    }
+
+    /**
+     * @throws NoSuchEntityException
+     */
+    public function getStore(): StoreInterface
+    {
+        return  $this->_storeManager->getStore();
     }
 }

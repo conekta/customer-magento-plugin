@@ -104,8 +104,6 @@ class ConektaOrder extends Util
     {
         $this->conektaLogger->info('ConektaOrder.generateOrderParams init');
 
-        //Conekta::setApiKey($this->_conektaHelper->getPrivateKey());
-        //Conekta::setApiVersion("2.0.0");
         $customerRequest = [];
         try {
             $customer = $this->customerSession->getCustomer();
@@ -124,7 +122,6 @@ class ConektaOrder extends Util
             //Customer Info for API
             $billingAddress = $this->getQuote()->getBillingAddress();
             $customerId = $customer->getId();
-            $customerRequest = [];
             if ($customerId) {
                 //name without numbers
                 $customerRequest['name'] = $customer->getName();
@@ -173,7 +170,7 @@ class ConektaOrder extends Util
             $this->getQuote()->getId()
         );
 
-        //always needs shipping due to api does not provide info about merchant type (dropshipping, virtual)
+        //always needs shipping due to api does not provide info about merchant type (drop_shipping, virtual)
         $needsShippingContact = !$this->getQuote()->getIsVirtual() || true;
         if ($needsShippingContact) {
             $validOrderWithCheckout['shipping_contact'] = $this->_conektaHelper->getShippingContact(
@@ -211,10 +208,10 @@ class ConektaOrder extends Util
      * @throws LocalizedException
      * @throws NoSuchEntityException
      */
-    public function getMonthlyInstallments()
+    public function getMonthlyInstallments(): array
     {
         $result = [];
-        $isInstallmentsAvilable = (int)true;
+        $isInstallmentsAvailable = (int)true;
         $quote = $this->getQuote();
         $total = $quote->getGrandTotal();
         $active_monthly_installments = $this->_conektaHelper->getConfigData(
@@ -235,12 +232,12 @@ class ConektaOrder extends Util
                 $result['active_installments'] = (int)!empty($months);
                 $result['monthly_installments'] = $months;
             } else {
-                $isInstallmentsAvilable = (int)false;
+                $isInstallmentsAvailable = (int)false;
             }
         } else {
-            $isInstallmentsAvilable = (int)false;
+            $isInstallmentsAvailable = (int)false;
         }
-        if ($isInstallmentsAvilable == false) {
+        if (!$isInstallmentsAvailable) {
             $result['active_installments'] = (int)false;
             $result['monthly_installments'] = [];
         }
@@ -254,7 +251,7 @@ class ConektaOrder extends Util
      * @throws LocalizedException
      * @throws NoSuchEntityException
      */
-    public function getAllowedPaymentMethods()
+    public function getAllowedPaymentMethods(): array
     {
         $methods = [];
 
@@ -293,12 +290,11 @@ class ConektaOrder extends Util
      * @throws LocalizedException
      * @throws NoSuchEntityException
      */
-    public function getQuoteId()
+    public function getQuoteId(): array
     {
         $quote = $this->getQuote();
         $quoteId = $quote->getId();
-        $response = ['quote_id' => $quoteId];
-        return $response;
+        return ['quote_id' => $quoteId];
     }
 
     /**
@@ -309,7 +305,7 @@ class ConektaOrder extends Util
      * @throws LocalizedException
      * @throws NoSuchEntityException
      */
-    public function getMetadataOrder($orderItems)
+    public function getMetadataOrder($orderItems): array
     {
         return array_merge(
             $this->_conektaHelper->getMagentoMetadata(),
