@@ -295,6 +295,9 @@ define(
                         console.error(error);
                     },
                     onFinalizePayment: function (event) {
+
+                        self.conektaError("error intencional");
+
                         if (event.charge.paymentMethod.type != 'card' && event.charge.payment_method.type != 'card') {
                             event.charge.status = 'pending_payment'
                             event.status = 'pending_payment'
