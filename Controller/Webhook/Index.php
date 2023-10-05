@@ -183,92 +183,97 @@ class Index extends Action implements CsrfAwareActionInterface
      * @throws LocalizedException
      */
     public function validate_order_exist($event){
+        try {
+            // Código que puede generar una excepción
 
-        if ($event['type'] != self::EVENT_ORDER_PAID){
-            return ;
+            if ($event['type'] != self::EVENT_ORDER_PAID){
+                return ;
+            }
+
+            //check order en order with external id
+            $order = $this->webhookRepository->findByMetadataOrderId($event);
+            if ($order->getId()) {
+                return;
+            }
+            $conektaOrder = $event['data']['object'];
+            $metadata = $conektaOrder['metadata'];
+            $conektaCustomer = $conektaOrder['customer_info'];
+
+            $store = $this->_storeManager->getStore($metadata["store"]);
+            $websiteId = $store->getWebsiteId();
+
+            $customer = $this->customerFactory->create();
+            $customer->setWebsiteId($websiteId);
+            $customer->loadByEmail($conektaCustomer['email']);// load customer by email address
+
+            $quote=$this->quote->create(); //Create object of quote
+            $quote->setStore($store); //set store for which you create quote
+            $quote->setCurrency($conektaOrder["currency"]);
+            $quote->assignCustomer($customer); //Assign quote to customer
+
+
+            //add items in quote
+            foreach($conektaOrder['line_items']["data"] as $item){
+                $product=$this->_product->load($item["metadata"]['product_id']);
+                $product->setPrice($item['unit_price']);
+                $quote->addProduct(
+                    $product,
+                    intval($item['quantity'])
+                );
+            }
+            $shipping_address = [
+                        'firstname'    => $conektaOrder["shipping_contact"]["receiver"], //address Details
+                        'lastname'     => 'Doe',
+                        'street' => $conektaOrder["shipping_contact"]["address"]["street1"],
+                        'city' => $conektaOrder["shipping_contact"]["address"]["city"],
+                        'country_id' => $conektaOrder["shipping_contact"]["address"]["country"],
+                        'region' => $conektaOrder["shipping_contact"]["address"]["state"],
+                        'postcode' => $conektaOrder["shipping_contact"]["address"]["postal_code"],
+                        'telephone' =>  $conektaOrder["shipping_contact"]["phone"],
+                        'save_in_address_book' =>   $metadata["save_in_address_book"]
+            ];
+            $billing_address = [
+                'firstname'    =>$conektaOrder["fiscal_entity"]["name"], //address Details
+                'lastname'     => 'Doe',
+                'street' => $conektaOrder["fiscal_entity"]["address"]["street1"],
+                'city' => $conektaOrder["fiscal_entity"]["address"]["city"],
+                'country_id' => $conektaOrder["fiscal_entity"]["address"]["country"],
+                'region' => $conektaOrder["fiscal_entity"]["address"]["state"],
+                'postcode' => $conektaOrder["fiscal_entity"]["address"]["postal_code"],
+                'telephone' =>  $conektaCustomer["phone"],
+                'save_in_address_book' =>   $metadata["save_in_address_book"]
+            ];
+            //Set Address to quote
+            $quote->getBillingAddress()->addData($billing_address);
+
+            $quote->getShippingAddress()->addData($shipping_address);
+
+            // Collect Rates and Set Shipping & Payment Method
+            $shippingAddress=$quote->getShippingAddress();
+
+            $conektaShippingLines = $conektaOrder["shipping_lines"]["data"];
+
+            $shippingAddress->setCollectShippingRates(true)
+                ->collectShippingRates()
+                ->setShippingMethod($conektaShippingLines[0]["method"]); //shipping method
+
+            $quote->setPaymentMethod(ConfigProvider::CODE); //payment method
+            $quote->setInventoryProcessed(false); //not affect inventory
+            $quote->save(); //Now Save quote and your quote is ready
+
+            // Set Sales Order Payment
+            $quote->getPayment()->importData(['method' => ConfigProvider::CODE]);
+
+            // Collect Totals & Save Quote
+            $quote->collectTotals()->save();
+
+            // Create Order From Quote
+            $order = $this->quoteManagement->submit($quote);
+
+            $increment_id = $order->getRealOrderId();
+        } catch (\Exception $e) {
+            $this->_conektaLogger->error($e->getMessage());
         }
-
-        //check order en order with external id
-        $order = $this->webhookRepository->findByMetadataOrderId($event);
-        if ($order->getId()) {
-            return;
-        }
-        $conektaOrder = $event['data']['object'];
-        $metadata = $conektaOrder['metadata'];
-        $conektaCustomer = $conektaOrder['customer_info'];
-
-        $store = $this->_storeManager->getStore($metadata["store"]);
-        $websiteId = $store->getWebsiteId();
-
-        $customer = $this->customerFactory->create();
-        $customer->setWebsiteId($websiteId);
-        $customer->loadByEmail($conektaCustomer['email']);// load customer by email address
-
-        $quote=$this->quote->create(); //Create object of quote
-        $quote->setStore($store); //set store for which you create quote
-        $quote->setCurrency($conektaOrder["currency"]);
-        $quote->assignCustomer($customer); //Assign quote to customer
-
-
-        //add items in quote
-        foreach($conektaOrder['line_items']["data"] as $item){
-            $product=$this->_product->load($item["metadata"]['product_id']);
-            $product->setPrice($item['unit_price']);
-            $quote->addProduct(
-                $product,
-                intval($item['quantity'])
-            );
-        }
-        $shipping_address = [
-                    'firstname'    => $conektaOrder["shipping_contact"]["receiver"], //address Details
-                    'lastname'     => 'Doe',
-                    'street' => $conektaOrder["shipping_contact"]["address"]["street1"],
-                    'city' => $conektaOrder["shipping_contact"]["address"]["city"],
-                    'country_id' => $conektaOrder["shipping_contact"]["address"]["country"],
-                    'region' => $conektaOrder["shipping_contact"]["address"]["state"],
-                    'postcode' => $conektaOrder["shipping_contact"]["address"]["postal_code"],
-                    'telephone' =>  $conektaOrder["shipping_contact"]["phone"],
-                    'save_in_address_book' =>   $metadata["save_in_address_book"]
-        ];
-        $billing_address = [
-            'firstname'    =>$conektaOrder["fiscal_entity"]["name"], //address Details
-            'lastname'     => 'Doe',
-            'street' => $conektaOrder["fiscal_entity"]["address"]["street1"],
-            'city' => $conektaOrder["fiscal_entity"]["address"]["city"],
-            'country_id' => $conektaOrder["fiscal_entity"]["address"]["country"],
-            'region' => $conektaOrder["fiscal_entity"]["address"]["state"],
-            'postcode' => $conektaOrder["fiscal_entity"]["address"]["postal_code"],
-            'telephone' =>  $conektaCustomer["phone"],
-            'save_in_address_book' =>   $metadata["save_in_address_book"]
-        ];
-        //Set Address to quote
-        $quote->getBillingAddress()->addData($billing_address);
-
-        $quote->getShippingAddress()->addData($shipping_address);
-
-        // Collect Rates and Set Shipping & Payment Method
-        $shippingAddress=$quote->getShippingAddress();
-
-        $conektaShippingLines = $conektaOrder["shipping_lines"]["data"];
-
-        $shippingAddress->setCollectShippingRates(true)
-            ->collectShippingRates()
-            ->setShippingMethod($conektaShippingLines[0]["method"]); //shipping method
-
-        $quote->setPaymentMethod(ConfigProvider::CODE); //payment method
-        $quote->setInventoryProcessed(false); //not affect inventory
-        $quote->save(); //Now Save quote and your quote is ready
-
-        // Set Sales Order Payment
-        $quote->getPayment()->importData(['method' => ConfigProvider::CODE]);
-
-        // Collect Totals & Save Quote
-        $quote->collectTotals()->save();
-
-        // Create Order From Quote
-        $order = $this->quoteManagement->submit($quote);
-
-        $increment_id = $order->getRealOrderId();
     }
 
 }
