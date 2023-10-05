@@ -35,12 +35,12 @@ class Data extends Util
     /**
      * @var ConektaLogger
      */
-    protected $conektaLogger;
+    protected ConektaLogger $conektaLogger;
 
     /**
      * @var StoreManagerInterface
      */
-    private $_storeManager;
+    private StoreManagerInterface $_storeManager;
     /**
      * @var CheckoutSession
      */
@@ -60,7 +60,7 @@ class Data extends Util
     /**
      * @var CartRepositoryInterface
      */
-    protected $_cartRepository;
+    protected CartRepositoryInterface $_cartRepository;
 
     /**
      * Data constructor.
@@ -112,7 +112,7 @@ class Data extends Util
      * @throws LocalizedException
      * @throws NoSuchEntityException
      */
-    public function getCurrencyCode()
+    public function getCurrencyCode(): string
     {
         return $this->_storeManager->getStore()->getCurrentCurrency()->getCode();
     }
@@ -358,8 +358,7 @@ class Data extends Util
                 $ret .= $key . ' : ' . $item . $glue;
             }
         }
-        $ret = substr($ret, 0, 0 - strlen($glue));
-        return $ret;
+        return substr($ret, 0, 0 - strlen($glue));
     }
 
     /**
@@ -367,7 +366,7 @@ class Data extends Util
      * @param $product
      * @return array
      */
-    private function processProductAttributes($productAttributes, $product)
+    private function processProductAttributes($productAttributes, $product): array
     {
         $productValues = [];
 
@@ -480,7 +479,7 @@ class Data extends Util
      * @param mixed $isQuoteItem
      * @return array
      */
-    public function getLineItems($items, $isQuoteItem = true)
+    public function getLineItems($items, $isQuoteItem = true): array
     {
         $version = (int)str_replace('.', '', $this->getMageVersion());
         $request = [];
@@ -497,7 +496,7 @@ class Data extends Util
                             $price = $item->getParentItem()->getPrice();
                             $qty = (int)$item->getParentItem()->{$quantityMethod}();
                         } elseif ($parent->getProductType() == 'bundle' && $isQuoteItem) {
-                            //If it is a quote item, then qty of item has not been calculate yet
+                            //If it is a quote item, then qty of item has not been calculated yet
                             $qty = $qty * (int)$item->getParentItem()->{$quantityMethod}();
                         }
                     }
@@ -516,6 +515,9 @@ class Data extends Util
                         'quantity'    => $qty,
                         'tags'        => [
                             $item->getProductType()
+                        ],
+                        'metadata' => [
+                            "product_id" => $item->getProductId()
                         ]
                     ];
                 }
@@ -529,6 +531,9 @@ class Data extends Util
                         'quantity'    => (int)($item->{$quantityMethod}()),
                         'tags'        => [
                             $item->getProductType()
+                        ],
+                        'metadata' => [
+                            "product_id" => $item->getProductId()
                         ]
                     ];
                 }
@@ -561,7 +566,7 @@ class Data extends Util
      * @return array
      * @throws NoSuchEntityException
      */
-    public function getShippingLines($quoteId, $isCheckout = true)
+    public function getShippingLines($quoteId, $isCheckout = true): array
     {
         $quote = $this->_cartRepository->get($quoteId);
         $shippingAddress = $quote->getShippingAddress();
@@ -573,7 +578,7 @@ class Data extends Util
         } elseif ($shippingAddress) {
             $shippingLine['amount'] = $this->convertToApiPrice($shippingAddress->getShippingAmount());
 
-            //Chekout orders doesn't allow method and carrier parameters
+            //Checkout orders doesn't allow method and carrier parameters
             if (! $isCheckout) {
                 $shippingLine['method'] = $shippingAddress->getShippingMethod();
                 $shippingLine['carrier'] = $shippingAddress->getShippingDescription();
@@ -622,7 +627,7 @@ class Data extends Util
             ];
 
             $street = $address->getStreet();
-            $streetStr = isset($street[0]) ? $street[0] : 'NO STREET';
+            $streetStr = $street[0] ?? 'NO STREET';
             $shippingContact['address']['street1'] = $this->removeSpecialCharacter($streetStr);
             if (isset($street[1])) {
                 $shippingContact['address']['street2'] = $this->removeSpecialCharacter($street[1]);
@@ -656,7 +661,7 @@ class Data extends Util
      * @throws LocalizedException
      * @throws NoSuchEntityException
      */
-    public function getDiscountLines()
+    public function getDiscountLines(): array
     {
         $quote = $this->checkoutSession->getQuote();
         $totalDiscount = $quote->getSubtotal() - $quote->getSubtotalWithDiscount();
@@ -680,7 +685,7 @@ class Data extends Util
      * @param mixed $items
      * @return array
      */
-    public function getTaxLines($items)
+    public function getTaxLines($items): array
     {
         $taxLines = [];
         $ctr_amount = 0;
