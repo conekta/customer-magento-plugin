@@ -175,7 +175,7 @@ class ConektaOrder extends Util
         $validOrderWithCheckout['shipping_contact'] = $this->_conektaHelper->getShippingContact(
             $this->getQuote()->getId()
         );
-        $validOrderWithCheckout['fiscal_info'] = $this->_conektaHelper->getBillingAddress(
+        $validOrderWithCheckout['fiscal_entity'] = $this->_conektaHelper->getBillingAddress(
             $this->getQuote()->getId()
         );
 
