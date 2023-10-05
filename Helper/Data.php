@@ -641,15 +641,14 @@ class Data extends Util
         $phone = $this->removePhoneSpecialCharacter($address->getTelephone());
 
         $billingContact = [
-            'receiver' => $this->getCustomerName($address),
+            'name' => $this->getCustomerName($address),
             'phone'    => $phone,
             'address'  => [
                 'city'            => $address->getCity(),
                 'state'           => $address->getRegionCode(),
                 'country'         => $address->getCountryId(),
                 'postal_code'     => $this->onlyNumbers($address->getPostcode()),
-                'phone'           => $phone,
-                'external_number' => "",
+                'external_number' => $address->getId() !== null ? strval($address->getId()) : "",
             ]
         ];
 

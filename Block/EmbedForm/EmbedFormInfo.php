@@ -94,7 +94,7 @@ class EmbedFormInfo extends Info
      * @return string
      * @throws LocalizedException
      */
-    public function getPaymentMethodTitle()
+    public function getPaymentMethodTitle(): string
     {
         $methodType = $this->getPaymentMethodType();
         $title = '';

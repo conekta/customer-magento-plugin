@@ -184,8 +184,7 @@ class ConektaOrder extends Util
         ];
         
         $threeDsEnabled =  $this->_conektaHelper->is3DSEnabled();
-        $saveCardEnabled = $this->_conektaHelper->isSaveCardEnabled() &&
-            $customerId;
+        $saveCardEnabled = $this->_conektaHelper->isSaveCardEnabled() && $customerId;
         $installments = $this->getMonthlyInstallments();
         $validOrderWithCheckout['checkout']    = [
             'allowed_payment_methods'      => $this->getAllowedPaymentMethods(),

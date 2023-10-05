@@ -147,7 +147,7 @@ class ConfigProvider implements ConfigProviderInterface
      *
      * @return array
      */
-    public function getPaymentMethodsActive()
+    public function getPaymentMethodsActive(): array
     {
         $methods = [];
 

@@ -37,7 +37,7 @@ class ShippingContactBuilder implements BuilderInterface
         $request['shipping_contact'] = $this->_conektaHelper->getShippingContact($quoteId);
 
         if (empty($request['shipping_contact'])) {
-            throw new LocalizedException(__('Missing shipping contacta information'));
+            throw new LocalizedException(__('Missing shipping contact information'));
         }
 
         $this->_conektaLogger->info('Request ShippingContactBuilder :: build : return request', $request);
