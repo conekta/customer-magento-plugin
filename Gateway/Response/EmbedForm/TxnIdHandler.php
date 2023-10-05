@@ -12,9 +12,9 @@ class TxnIdHandler implements HandlerInterface
 
     const ORD_ID = 'ORD_ID';
 
-    private $_conektaLogger;
+    private ConektaLogger $_conektaLogger;
 
-    private $subjectReader;
+    private SubjectReader $subjectReader;
 
     /**
      * TxnIdHandler constructor.

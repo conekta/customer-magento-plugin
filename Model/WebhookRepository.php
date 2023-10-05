@@ -37,7 +37,7 @@ class WebhookRepository
     /**
      * @var ConektaSalesOrderInterface
      */
-    private $conektaOrderSalesInterface;
+    private ConektaSalesOrderInterface $conektaOrderSalesInterface;
 
     /**
      * @param OrderInterface $orderInterface

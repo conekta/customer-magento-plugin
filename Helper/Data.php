@@ -396,7 +396,7 @@ class Data extends Util
      * @throws LocalizedException
      * @throws NoSuchEntityException
      */
-    public function getMetadataAttributesConekta($items)
+    public function getMetadataAttributesConekta($items): array
     {
         $productAttributes = $this->getMetadataAttributes('metadata_additional_products');
 
@@ -468,8 +468,19 @@ class Data extends Util
             'plugin'                 => 'Magento',
             'magento_version'        => $this->getMageVersion(),
             'plugin_conekta_version' => $this->pluginVersion(),
-            'store'                  => $this->getStore()->getId()
+            'store'                  => $this->getStore()->getId(),
         ];
+    }
+
+    /**
+     * @throws NoSuchEntityException
+     */
+    public function getExtraMetadata($quoteId) :array{
+
+        $response = [];
+        $quote = $this->_cartRepository->get($quoteId);
+        $response['save_in_address_book'] = $quote->getBillingAddress()->getSaveInAddressBook();
+        return $response;
     }
 
     /**
@@ -562,7 +573,6 @@ class Data extends Util
      * Get shipping lines
      *
      * @param mixed $quoteId
-     * @param mixed $isCheckout
      * @return array
      * @throws NoSuchEntityException
      */

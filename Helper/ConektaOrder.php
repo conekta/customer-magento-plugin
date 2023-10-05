@@ -310,7 +310,8 @@ class ConektaOrder extends Util
         return array_merge(
             $this->_conektaHelper->getMagentoMetadata(),
             ['quote_id' => $this->getQuote()->getId()],
-            $this->_conektaHelper->getMetadataAttributesConekta($orderItems)
+            $this->_conektaHelper->getMetadataAttributesConekta($orderItems),
+            $this-> _conektaHelper->getExtraMetadata($this->getQuote()->getId())
         );
     }
 }
