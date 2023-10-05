@@ -566,7 +566,7 @@ class Data extends Util
      * @return array
      * @throws NoSuchEntityException
      */
-    public function getShippingLines($quoteId, $isCheckout = true): array
+    public function getShippingLines($quoteId): array
     {
         $quote = $this->_cartRepository->get($quoteId);
         $shippingAddress = $quote->getShippingAddress();
@@ -580,12 +580,8 @@ class Data extends Util
             ];
         } elseif ($shippingAddress) {
             $shippingLine['amount'] = $this->convertToApiPrice($shippingAddress->getShippingAmount());
-
-            //Checkout orders doesn't allow method and carrier parameters
-            //if (! $isCheckout) {
-                $shippingLine['method'] = $shippingAddress->getShippingMethod();
-                $shippingLine['carrier'] = $shippingAddress->getShippingDescription();
-            //}
+            $shippingLine['method'] = $shippingAddress->getShippingMethod();
+            $shippingLine['carrier'] = $shippingAddress->getShippingDescription();
 
             $shippingLines[] = $shippingLine;
         }
@@ -603,17 +599,12 @@ class Data extends Util
     public function getShippingContact($quoteId): array
     {
         $quote = $this->_cartRepository->get($quoteId);
-        $address = null;
-
-        $shippingContact = [];
+        $address = $quote->getShippingAddress();
 
         if ($quote->getIsVirtual()) {
             $address = $quote->getBillingAddress();
-        } else {
-            $address = $quote->getShippingAddress();
         }
-
-        if ($address) {
+        //if ($address) {
             $phone = $this->removePhoneSpecialCharacter($address->getTelephone());
 
             $shippingContact = [
@@ -635,6 +626,38 @@ class Data extends Util
             if (isset($street[1])) {
                 $shippingContact['address']['street2'] = $this->removeSpecialCharacter($street[1]);
             }
+      //  }
+        return $shippingContact;
+    }
+
+    /**
+     * @throws NoSuchEntityException
+     */
+    public function getBillingAddress(int $quoteId): array
+    {
+        $quote = $this->_cartRepository->get($quoteId);
+        $address = $quote->getBillingAddress();
+
+        $phone = $this->removePhoneSpecialCharacter($address->getTelephone());
+
+        $shippingContact = [
+            'receiver' => $this->getCustomerName($address),
+            'phone'    => $phone,
+            'address'  => [
+                'city'        => $address->getCity(),
+                'state'       => $address->getRegionCode(),
+                'country'     => $address->getCountryId(),
+                'postal_code' => $this->onlyNumbers($address->getPostcode()),
+                'phone'       => $phone,
+                'email'       => $address->getEmail()
+            ]
+        ];
+
+        $street = $address->getStreet();
+        $streetStr = $street[0] ?? 'NO STREET';
+        $shippingContact['address']['street1'] = $this->removeSpecialCharacter($streetStr);
+        if (isset($street[1])) {
+            $shippingContact['address']['street2'] = $this->removeSpecialCharacter($street[1]);
         }
         return $shippingContact;
     }

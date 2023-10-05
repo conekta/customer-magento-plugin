@@ -64,6 +64,7 @@ class ConektaOrder extends Util
      * @param Context $context
      * @param ConektaHelper $conektaHelper
      * @param ConektaLogger $conektaLogger
+     * @param ConektaApiClient $conektaApiClient
      * @param CustomerSession $customerSession
      * @param Session $_checkoutSession
      * @param CustomerRepositoryInterface $customerRepository
@@ -153,7 +154,7 @@ class ConektaOrder extends Util
                     $this->customerRepository->save($customer);
                 }
             } else {
-                //If cutomer API exists, always update error
+                //If customer API exists, always update error
                 $this->conektaApiClient->updateCustomer($conektaCustomerId, $customerRequest);
             }
         } catch (ApiException $e) {
@@ -171,13 +172,13 @@ class ConektaOrder extends Util
         );
 
         //always needs shipping due to api does not provide info about merchant type (drop_shipping, virtual)
-        $needsShippingContact = !$this->getQuote()->getIsVirtual() || true;
-        if ($needsShippingContact) {
-            $validOrderWithCheckout['shipping_contact'] = $this->_conektaHelper->getShippingContact(
-                $this->getQuote()->getId()
-            );
-        }
-        
+        $validOrderWithCheckout['shipping_contact'] = $this->_conektaHelper->getShippingContact(
+            $this->getQuote()->getId()
+        );
+        $validOrderWithCheckout['fiscal_info'] = $this->_conektaHelper->getBillingAddress(
+            $this->getQuote()->getId()
+        );
+
         $validOrderWithCheckout['customer_info'] = [
             'customer_id' => $conektaCustomerId
         ];
@@ -193,7 +194,7 @@ class ConektaOrder extends Util
             'on_demand_enabled'            => $saveCardEnabled,
             'force_3ds_flow'               => $threeDsEnabled,
             'expires_at'                   => $this->_conektaHelper->getExpiredAt(),
-            'needs_shipping_contact'       => $needsShippingContact
+            'needs_shipping_contact'       => true
         ];
         $validOrderWithCheckout['currency']= $this->_conektaHelper->getCurrencyCode();
         $validOrderWithCheckout['metadata'] = $this->getMetadataOrder($orderItems);
