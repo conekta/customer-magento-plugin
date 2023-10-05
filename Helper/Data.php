@@ -596,7 +596,7 @@ class Data extends Util
      * @return array
      * @throws NoSuchEntityException
      */
-    public function getShippingContact($quoteId): array
+    public function getShippingContact(int $quoteId): array
     {
         $quote = $this->_cartRepository->get($quoteId);
         $address = $quote->getShippingAddress();
@@ -640,26 +640,26 @@ class Data extends Util
 
         $phone = $this->removePhoneSpecialCharacter($address->getTelephone());
 
-        $shippingContact = [
+        $billingContact = [
             'receiver' => $this->getCustomerName($address),
             'phone'    => $phone,
             'address'  => [
-                'city'        => $address->getCity(),
-                'state'       => $address->getRegionCode(),
-                'country'     => $address->getCountryId(),
-                'postal_code' => $this->onlyNumbers($address->getPostcode()),
-                'phone'       => $phone,
-                'email'       => $address->getEmail()
+                'city'            => $address->getCity(),
+                'state'           => $address->getRegionCode(),
+                'country'         => $address->getCountryId(),
+                'postal_code'     => $this->onlyNumbers($address->getPostcode()),
+                'phone'           => $phone,
+                'external_number' => "",
             ]
         ];
 
         $street = $address->getStreet();
         $streetStr = $street[0] ?? 'NO STREET';
-        $shippingContact['address']['street1'] = $this->removeSpecialCharacter($streetStr);
+        $billingContact['address']['street1'] = $this->removeSpecialCharacter($streetStr);
         if (isset($street[1])) {
-            $shippingContact['address']['street2'] = $this->removeSpecialCharacter($street[1]);
+            $billingContact['address']['street2'] = $this->removeSpecialCharacter($street[1]);
         }
-        return $shippingContact;
+        return $billingContact;
     }
 
     /**
