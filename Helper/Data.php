@@ -574,15 +574,18 @@ class Data extends Util
         $shippingLines = [];
 
         if ($quote->getIsVirtual()) {
-            $shippingLines[] = ['amount' => 0];
+            $shippingLines[] = [
+                'amount' => 0,
+                'method' => 'virtual'
+            ];
         } elseif ($shippingAddress) {
             $shippingLine['amount'] = $this->convertToApiPrice($shippingAddress->getShippingAmount());
 
             //Checkout orders doesn't allow method and carrier parameters
-            if (! $isCheckout) {
+            //if (! $isCheckout) {
                 $shippingLine['method'] = $shippingAddress->getShippingMethod();
                 $shippingLine['carrier'] = $shippingAddress->getShippingDescription();
-            }
+            //}
 
             $shippingLines[] = $shippingLine;
         }
@@ -597,7 +600,7 @@ class Data extends Util
      * @return array
      * @throws NoSuchEntityException
      */
-    public function getShippingContact($quoteId)
+    public function getShippingContact($quoteId): array
     {
         $quote = $this->_cartRepository->get($quoteId);
         $address = null;
