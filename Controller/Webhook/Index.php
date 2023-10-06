@@ -205,8 +205,6 @@ class Index extends Action implements CsrfAwareActionInterface
      */
     public function validate_order_exist($event){
         try {
-            // Código que puede generar una excepción
-
             if ($event['type'] != self::EVENT_ORDER_PAID){
                 return ;
             }
@@ -292,6 +290,10 @@ class Index extends Action implements CsrfAwareActionInterface
             $order = $this->quoteManagement->submit($quote);
 
             $increment_id = $order->getRealOrderId();
+
+            $order->addCommentToStatusHistory("Missing Order from conekta")
+                ->setIsCustomerNotified(true)
+                ->save();
         } catch (\Exception $e) {
             $this->_conektaLogger->error($e->getMessage());
         }

@@ -179,9 +179,7 @@ class WebhookRepository
                 'WebhookRepository :: execute - Notified customer about invoice creation'
             );
         } catch (Exception $e) {
-            $this->_conektaLogger->error(
-                'WebhookRepository :: execute - We can\'t send the invoice email right now.'
-            );
+            $this->_conektaLogger->error($e->getMessage());
         }
     }
 }

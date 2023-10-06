@@ -31,35 +31,35 @@ class ConektaApiClient
     /**
      * @var Configuration
      */
-    private $config;
+    private Configuration $config;
 
     /**
      * @var HelperData
      */
-    private $helperData;
+    private HelperData $helperData;
 
     /**
      * @var Client
      */
-    private $client;
+    private Client $client;
 
     /**
      * @var OrdersApi
      */
-    private $orderInstance;
+    private OrdersApi $orderInstance;
 
     /**
      * @var CustomersApi
      */
-    private $customerInstance;
+    private CustomersApi $customerInstance;
     /**
      * @var ChargesApi
      */
-    private $chargeInstance;
+    private ChargesApi $chargeInstance;
 
-    private $customerPaymentMethods;
+    private PaymentMethodsApi $customerPaymentMethods;
 
-    private $webhooks;
+    private WebhooksApi $webhooks;
 
     public function __construct(
         Client     $client,
@@ -171,6 +171,9 @@ class ConektaApiClient
         return $this->chargeInstance->ordersCreateCharge($orderID, $chargeRequest);
     }
 
+    /**
+     * @throws ApiException
+     */
     public function orderRefund(string $orderID, array $orderRefundData)
     {
         $orderRefundRequest = new OrderRefundRequest($orderRefundData);

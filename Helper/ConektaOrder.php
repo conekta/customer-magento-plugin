@@ -127,6 +127,7 @@ class ConektaOrder extends Util
                 //name without numbers
                 $customerRequest['name'] = $customer->getName();
                 $customerRequest['email'] = $customer->getEmail();
+                $customerRequest['custom_reference'] = $customerId;
             } else {
                 //name without numbers
                 $customerRequest['name'] = $billingAddress->getName();
