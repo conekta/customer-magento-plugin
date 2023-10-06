@@ -153,6 +153,7 @@ class Index extends Action implements CsrfAwareActionInterface
             $event = $body['type'];
 
             $this->_conektaLogger->info('Controller Index :: execute body json ', ['event' => $event]);
+            $this->_conektaLogger->error('Controller Index error :: execute body json ', ['event' => $event]);
             $this->validate_order_exist($body);
 
             switch ($event) {
@@ -205,15 +206,20 @@ class Index extends Action implements CsrfAwareActionInterface
      */
     public function validate_order_exist($event){
         try {
+            $this->_conektaLogger->info('validate_order_exist  :: execute body json ', ['event' => $event['type']]);
+
             if ($event['type'] != self::EVENT_ORDER_PAID){
                 return ;
             }
 
             //check order en order with external id
             $order = $this->webhookRepository->findByMetadataOrderId($event);
-            if ($order->getId()) {
+            if ($order !=null || $order->getId() != null) {
+                $this->_conektaLogger->info('order is ready');
                 return;
             }
+            $this->_conektaLogger->info('after validate order ');
+
             $conektaOrder = $event['data']['object'];
             $metadata = $conektaOrder['metadata'];
             $conektaCustomer = $conektaOrder['customer_info'];
@@ -296,6 +302,8 @@ class Index extends Action implements CsrfAwareActionInterface
                 ->save();
         } catch (\Exception $e) {
             $this->_conektaLogger->error($e->getMessage());
+            $this->_conektaLogger->info($e->getMessage());
+
         }
     }
 

@@ -70,7 +70,7 @@ class WebhookRepository
      * @return Order
      * @throws LocalizedException
      */
-    public function findByMetadataOrderId($body): Order
+    public function findByMetadataOrderId(array $body): Order
     {
         if (!isset($body['data']['object']) ||
             !isset($body['data']['object']['id'])
@@ -95,7 +95,7 @@ class WebhookRepository
      * @return void
      * @throws LocalizedException
      */
-    public function expireOrder($body)
+    public function expireOrder(array $body)
     {
         $this->_conektaLogger->info('WebhookRepository :: expireOrder started');
 
