@@ -25,7 +25,6 @@
             <argument name="name" xsi:type="string">conektaLogger</argument>
             <argument name="handlers"  xsi:type="array">
                 <item name="debug" xsi:type="object">Conekta\Payments\Logger\Handler</item>
-                <item name="error" xsi:type="object">Conekta\Payments\Logger\Error</item>
             </argument>
         </arguments>
     </type>

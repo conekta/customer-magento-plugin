@@ -17,7 +17,7 @@ use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Json\Helper\Data;
 use Magento\Framework\App\Request\InvalidRequestException;
 use Magento\Store\Model\StoreManagerInterface;
-use Magento\Customer\Api\Data\CustomerInterfaceFactory as CustomerFactory;
+use Magento\Customer\Model\CustomerFactory;
 use Magento\Quote\Model\QuoteFactory;
 use Magento\Catalog\Model\Product;
 use Conekta\Payments\Model\Ui\EmbedForm\ConfigProvider;
@@ -229,7 +229,21 @@ class Index extends Action implements CsrfAwareActionInterface
             $customer = $this->customerFactory->create();
             $customer->setWebsiteId($websiteId);
             $customer->loadByEmail($conektaCustomer['email']);// load customer by email address
-            $this->_conektaLogger->info('end customer');
+            $this->_conektaLogger->info('end customer', ['email' =>$conektaCustomer['email'] ]);
+
+            if(!$customer->getEntityId()){
+                //If not available then create this customer
+                $customer->setWebsiteId($websiteId)
+                    ->setStore($store)
+                    ->setFirstname($conektaOrder["shipping_contact"]["receiver"])
+                    ->setLastname('doe')
+                    ->setEmail($conektaCustomer['email'])
+                    ->setPassword($conektaCustomer['email']);
+                $customer->save();
+                $this->_conektaLogger->info('end create customer');
+
+            }
+
 
             $quote=$this->quote->create(); //Create object of quote
             $quote->setStore($store); //set store for which you create quote
