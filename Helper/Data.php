@@ -622,7 +622,7 @@ class Data extends Util
                 'phone'    => $phone,
                 'address'  => [
                     'city'        => $address->getCity(),
-                    'state'       => $address->getRegionCode(),
+                    'state'       => $address->getRegion(),
                     'country'     => $address->getCountryId(),
                     'postal_code' => $this->onlyNumbers($address->getPostcode()),
                     'phone'       => $phone,
@@ -655,7 +655,7 @@ class Data extends Util
             'phone'    => $phone,
             'address'  => [
                 'city'            => $address->getCity(),
-                'state'           => $address->getRegionCode(),
+                'state'           => $address->getRegion(),
                 'country'         => $address->getCountryId(),
                 'postal_code'     => $this->onlyNumbers($address->getPostcode()),
                 'external_number' => $address->getId() !== null ? strval($address->getId()) : "",
