@@ -220,15 +220,18 @@ class Index extends Action implements CsrfAwareActionInterface
                 $this->_conektaLogger->info('order is ready', ['order' => $conektaOrderFound, 'is_set', isset($conektaOrderFound)]);
                 //return;
             }
-            $this->_conektaLogger->info('after validate order ');
-
             $conektaOrder = $event['data']['object'];
-            $metadata = $conektaOrder['metadata'];
             $conektaCustomer = $conektaOrder['customer_info'];
+            $metadata = $conektaOrder['metadata'];
+            $this->_conektaLogger->info('after validate order ', ['store'=> $metadata["store"]]);
 
-            $store = $this->_storeManager->getStore($metadata["store"]);
+
+
+            $store = $this->_storeManager->getStore(intval($metadata["store"]));
+            $this->_conektaLogger->info('store', ['store_id'=> $store->getId()]);
+
             $websiteId = $store->getWebsiteId();
-            $this->_conektaLogger->info('end getstore');
+            $this->_conektaLogger->info('end get store');
 
             $customer = $this->customerFactory->create();
             $customer->setWebsiteId($websiteId);
