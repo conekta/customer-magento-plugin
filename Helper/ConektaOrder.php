@@ -26,20 +26,20 @@ class ConektaOrder extends Util
     /**
      * @var ConektaLogger
      */
-    protected $conektaLogger;
+    protected ConektaLogger $conektaLogger;
 
     /**
      * @var CustomerSession
      */
-    protected $customerSession;
+    protected CustomerSession $customerSession;
     /**
      * @var Data
      */
-    protected $_conektaHelper;
+    protected Data $_conektaHelper;
     /**
      * @var Session
      */
-    protected $_checkoutSession;
+    protected Session $_checkoutSession;
     /**
      * @var Quote|null
      */
@@ -47,16 +47,16 @@ class ConektaOrder extends Util
     /**
      * @var CustomerRepositoryInterface
      */
-    protected $customerRepository;
+    protected CustomerRepositoryInterface $customerRepository;
     /**
      * @var ConfigProvider
      */
-    protected $conektaConfigProvider;
+    protected ConfigProvider $conektaConfigProvider;
 
     /**
      * @var ConektaApiClient
      */
-    private $conektaApiClient;
+    private ConektaApiClient $conektaApiClient;
 
     /**
      * ConektaOrder constructor.

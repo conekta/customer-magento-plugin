@@ -12,7 +12,7 @@ class Logger
     /**
      * @var MonoLogger
      */
-    private $monolog;
+    private MonoLogger $monolog;
 
     public function __construct()
     {
