@@ -3,31 +3,25 @@ namespace Conekta\Payments\Gateway\Request;
 
 use Conekta\Payments\Helper\Data as ConektaHelper;
 use Conekta\Payments\Logger\Logger as ConektaLogger;
-use Magento\Catalog\Model\Product;
 use Magento\Payment\Gateway\Data\PaymentDataObjectInterface;
 use Magento\Payment\Gateway\Request\BuilderInterface;
-use Magento\Tax\Model\ClassModel;
 
 class TaxLinesBuilder implements BuilderInterface
 {
-    private $_conektaLogger;
+    private ConektaLogger $_conektaLogger;
 
-    private $_conektaHelper;
+    private ConektaHelper $_conektaHelper;
 
     public function __construct(
-        Product $product,
-        ClassModel $taxClass,
         ConektaLogger $conektaLogger,
         ConektaHelper $conektaHelper
     ) {
         $this->_conektaLogger = $conektaLogger;
         $this->_conektaLogger->info('Request TaxLinesBuilder :: __construct');
-        $this->_product = $product;
-        $this->_taxClass = $taxClass;
         $this->_conektaHelper = $conektaHelper;
     }
 
-    public function build(array $buildSubject)
+    public function build(array $buildSubject): array
     {
         $this->_conektaLogger->info('Request TaxLinesBuilder :: build');
 

@@ -3,6 +3,7 @@ namespace Conekta\Payments\Gateway\Request\EmbedForm;
 
 use Conekta\Payments\Helper\Data as ConektaHelper;
 use Conekta\Payments\Logger\Logger as ConektaLogger;
+use Conekta\Payments\Model\Config;
 use Conekta\Payments\Model\Ui\EmbedForm\ConfigProvider;
 use Magento\Customer\Api\CustomerRepositoryInterface;
 use Magento\Customer\Model\Session as CustomerSession;
@@ -23,23 +24,23 @@ class CaptureRequest implements BuilderInterface
     /**
      * @var ConektaHelper
      */
-    protected $_conektaHelper;
+    protected ConektaHelper $_conektaHelper;
     /**
      * @var ConektaLogger
      */
-    protected $_conektaLogger;
+    protected ConektaLogger $_conektaLogger;
     /**
-     * @var \Conekta\Payments\Model\Config
+     * @var Config
      */
-    protected $conektaConfig;
+    protected Config $conektaConfig;
     /**
      * @var CustomerSession
      */
-    protected $customerSession;
+    protected CustomerSession $customerSession;
     /**
      * @var CustomerRepositoryInterface
      */
-    protected $customerRepository;
+    protected CustomerRepositoryInterface $customerRepository;
 
     /**
      * CaptureRequest constructor.
@@ -47,7 +48,7 @@ class CaptureRequest implements BuilderInterface
      * @param SubjectReader $subjectReader
      * @param ConektaHelper $conektaHelper
      * @param ConektaLogger $conektaLogger
-     * @param \Conekta\Payments\Model\Config $conektaConfig
+     * @param Config $conektaConfig
      * @param CustomerSession $session
      * @param CustomerRepositoryInterface $customerRepository
      */
@@ -56,7 +57,7 @@ class CaptureRequest implements BuilderInterface
         SubjectReader $subjectReader,
         ConektaHelper $conektaHelper,
         ConektaLogger $conektaLogger,
-        \Conekta\Payments\Model\Config $conektaConfig,
+        Config $conektaConfig,
         CustomerSession $session,
         CustomerRepositoryInterface $customerRepository
     ) {
@@ -111,7 +112,7 @@ class CaptureRequest implements BuilderInterface
         return $request;
     }
 
-    private function getCharge($payment, $orderAmount)
+    private function getCharge($payment, $orderAmount): array
     {
 
         $paymentMethod = $payment->getAdditionalInformation('payment_method');

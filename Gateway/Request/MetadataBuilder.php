@@ -3,6 +3,8 @@ namespace Conekta\Payments\Gateway\Request;
 
 use Conekta\Payments\Helper\Data as ConektaHelper;
 use Conekta\Payments\Logger\Logger as ConektaLogger;
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Payment\Gateway\Data\PaymentDataObjectInterface;
 use Magento\Payment\Gateway\Request\BuilderInterface;
 
@@ -27,6 +29,10 @@ class MetadataBuilder implements BuilderInterface
         $this->subjectReader = $subjectReader;
     }
 
+    /**
+     * @throws NoSuchEntityException
+     * @throws LocalizedException
+     */
     public function build(array $buildSubject)
     {
         $this->_conektaLogger->info('Request MetadataBuilder :: build');
