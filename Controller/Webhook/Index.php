@@ -228,6 +228,7 @@ class Index extends Action implements CsrfAwareActionInterface
 
 
             $store = $this->_storeManager->getStore(intval($metadata["store"]));
+
             $this->_conektaLogger->info('store', ['store_id'=> $store->getId()]);
 
             $websiteId = $store->getWebsiteId();
@@ -259,7 +260,9 @@ class Index extends Action implements CsrfAwareActionInterface
             $this->_conektaLogger->info('end quoting creating');
 
             $quoteCreated->setStore($store); //set store for which you create quote
-            $quoteCreated->setCurrency($conektaOrder["currency"]);
+            $this->_conektaLogger->info('end set store', ['currency'=> $conektaOrder["currency"]]);
+
+            $quoteCreated->setCurrency();
             $this->_conektaLogger->info('end set current', ['currency=> ', $conektaOrder["currency"]]);
 
             $customer= $this->customerRepository->getById($customer->getEntityId());
@@ -339,7 +342,7 @@ class Index extends Action implements CsrfAwareActionInterface
 
             $increment_id = $order->getRealOrderId();
 
-            $order->addCommentToStatusHistory("Missing Order from conekta")
+            $order->addCommentToStatusHistory("Missing Order from conekta" . $increment_id)
                 ->setIsCustomerNotified(true)
                 ->save();
             $this->_conektaLogger->info('end');
