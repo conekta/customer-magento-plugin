@@ -480,6 +480,8 @@ class Data extends Util
         $response = [];
         $quote = $this->_cartRepository->get($quoteId);
         $response['save_in_address_book'] = $quote->getBillingAddress()->getSaveInAddressBook();
+        $response['shipping_region_id'] = $quote->getShippingAddress()->getRegionId();
+        $response['billing_region_id'] = $quote->getBillingAddress()->getRegionId();
         return $response;
     }
 

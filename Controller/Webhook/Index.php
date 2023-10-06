@@ -293,7 +293,8 @@ class Index extends Action implements CsrfAwareActionInterface
                         'region' => $conektaOrder["shipping_contact"]["address"]["state"],
                         'postcode' => $conektaOrder["shipping_contact"]["address"]["postal_code"],
                         'telephone' =>  $conektaOrder["shipping_contact"]["phone"],
-                        'save_in_address_book' =>  intval( $metadata["save_in_address_book"])
+                        'save_in_address_book' =>  intval( $metadata["save_in_address_book"]),
+                        'region_id' => $metadata["shipping_region_id"]
             ];
             $billing_address = [
                 'firstname'    =>$conektaOrder["fiscal_entity"]["name"], //address Details
@@ -304,7 +305,8 @@ class Index extends Action implements CsrfAwareActionInterface
                 'region' => $conektaOrder["fiscal_entity"]["address"]["state"],
                 'postcode' => $conektaOrder["fiscal_entity"]["address"]["postal_code"],
                 'telephone' =>  $conektaCustomer["phone"],
-                'save_in_address_book' =>  intval( $metadata["save_in_address_book"])
+                'save_in_address_book' =>  intval( $metadata["save_in_address_book"]),
+                'region_id' => $metadata["billing_region_id"]
             ];
             $this->_conektaLogger->info('$billing_address', ['data'=>$billing_address]);
             $this->_conektaLogger->info('$shipping_address', ['data'=>$shipping_address]);
