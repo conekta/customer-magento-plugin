@@ -233,6 +233,8 @@ class Index extends Action implements CsrfAwareActionInterface
 
             if(!$customer->getEntityId()){
                 //If not available then create this customer
+                $this->_conektaLogger->info('start create customer');
+
                 $customer->setWebsiteId($websiteId)
                     ->setStore($store)
                     ->setFirstname($conektaOrder["shipping_contact"]["receiver"])
@@ -244,11 +246,12 @@ class Index extends Action implements CsrfAwareActionInterface
 
             }
 
+            $this->_conektaLogger->info('start quote');
 
-            $quote=$this->quote->create(); //Create object of quote
-            $quote->setStore($store); //set store for which you create quote
-            $quote->setCurrency($conektaOrder["currency"]);
-            $quote->assignCustomer($customer); //Assign quote to customer
+            $quoteCreated=$this->quote->create(); //Create object of quote
+            $quoteCreated->setStore($store); //set store for which you create quote
+            $quoteCreated->setCurrency($conektaOrder["currency"]);
+            $quoteCreated->assignCustomer($customer); //Assign quote to customer
 
             $this->_conektaLogger->info('end quote');
 
@@ -256,7 +259,7 @@ class Index extends Action implements CsrfAwareActionInterface
             foreach($conektaOrder['line_items']["data"] as $item){
                 $product=$this->_product->load($item["metadata"]['product_id']);
                 $product->setPrice($item['unit_price']);
-                $quote->addProduct(
+                $quoteCreated->addProduct(
                     $product,
                     intval($item['quantity'])
                 );
@@ -286,12 +289,12 @@ class Index extends Action implements CsrfAwareActionInterface
                 'save_in_address_book' =>   $metadata["save_in_address_book"]
             ];
             //Set Address to quote
-            $quote->getBillingAddress()->addData($billing_address);
+            $quoteCreated->getBillingAddress()->addData($billing_address);
 
-            $quote->getShippingAddress()->addData($shipping_address);
+            $quoteCreated->getShippingAddress()->addData($shipping_address);
 
             // Collect Rates and Set Shipping & Payment Method
-            $shippingAddress=$quote->getShippingAddress();
+            $shippingAddress=$quoteCreated->getShippingAddress();
 
             $conektaShippingLines = $conektaOrder["shipping_lines"]["data"];
 
@@ -302,20 +305,20 @@ class Index extends Action implements CsrfAwareActionInterface
             $this->_conektaLogger->info('end $conektaShippingLines');
 
 
-            $quote->setPaymentMethod(ConfigProvider::CODE); //payment method
-            $quote->setInventoryProcessed(false); //not affect inventory
-            $quote->save(); //Now Save quote and your quote is ready
+            $quoteCreated->setPaymentMethod(ConfigProvider::CODE); //payment method
+            $quoteCreated->setInventoryProcessed(false); //not affect inventory
+            $quoteCreated->save(); //Now Save quote and your quote is ready
             $this->_conektaLogger->info('end save quote');
 
 
             // Set Sales Order Payment
-            $quote->getPayment()->importData(['method' => ConfigProvider::CODE]);
+            $quoteCreated->getPayment()->importData(['method' => ConfigProvider::CODE]);
 
             // Collect Totals & Save Quote
-            $quote->collectTotals()->save();
+            $quoteCreated->collectTotals()->save();
 
             // Create Order From Quote
-            $order = $this->quoteManagement->submit($quote);
+            $order = $this->quoteManagement->submit($quoteCreated);
             $this->_conektaLogger->info('end submit');
 
 
