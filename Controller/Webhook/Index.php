@@ -190,7 +190,6 @@ class Index extends Action implements CsrfAwareActionInterface
         
         return $resultRaw->setHttpResponseCode($response);
     }
-    // Función para enviar una respuesta JSON con el código de estado
     private function sendJsonResponse($data, $httpStatusCode)
     {
         $resultRaw = $this->resultRawFactory->create();
