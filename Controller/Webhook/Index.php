@@ -143,7 +143,11 @@ class Index extends Action implements CsrfAwareActionInterface
             $body = $this->helper->jsonDecode($this->getRequest()->getContent());
 
             if (!$body || $this->getRequest()->getMethod() !== 'POST') {
-                return Response::STATUS_CODE_400;
+                $errorResponse = [
+                    'error' => 'Invalid request data',
+                    'message' => 'The request data is either empty or the request method is not POST.'
+                ];
+                return $this->sendJsonResponse($errorResponse, Response::STATUS_CODE_400);
             }
 
             $event = $body['type'];
@@ -158,7 +162,11 @@ class Index extends Action implements CsrfAwareActionInterface
                 case self::EVENT_ORDER_PENDING_PAYMENT:
                     $order = $this->webhookRepository->findByMetadataOrderId($body);
                     if (!$order->getId()) {
-                        $response = Response::STATUS_CODE_400;
+                        $errorResponse = [
+                            'error' => 'Order not found',
+                            'message' => 'The requested order does not exist.'
+                        ];
+                        return $this->sendJsonResponse($errorResponse, Response::STATUS_CODE_404);
                     }
                     break;
                 
@@ -173,10 +181,24 @@ class Index extends Action implements CsrfAwareActionInterface
 
         } catch (Exception $e) {
             $this->_conektaLogger->error('Controller Index :: '. $e->getMessage());
-            $response = Response::STATUS_CODE_400;
+            $errorResponse = [
+                'error' => 'Internal Server Error',
+                'message' => 'An error occurred while processing the request.'
+            ];
+            return $this->sendJsonResponse($errorResponse, Response::STATUS_CODE_500);
         }
         
         return $resultRaw->setHttpResponseCode($response);
+    }
+    // Función para enviar una respuesta JSON con el código de estado
+    private function sendJsonResponse($data, $httpStatusCode)
+    {
+        $resultRaw = $this->resultRawFactory->create();
+        $resultRaw->setHttpResponseCode($httpStatusCode);
+        $resultRaw->setHeader('Content-Type', 'application/json', true);
+        $resultRaw->setContents( $this->helper->jsonEncode(($data)));
+
+        return $resultRaw;
     }
 
     /**
