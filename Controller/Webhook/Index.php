@@ -213,10 +213,11 @@ class Index extends Action implements CsrfAwareActionInterface
             }
 
             //check order en order with external id
-            $order = $this->webhookRepository->findByMetadataOrderId($event);
-            if ($order !=null || $order->getId() != null) {
-                $this->_conektaLogger->info('order is ready');
-                return;
+            $conektaOrderFound = $this->webhookRepository->findByMetadataOrderId($event);
+
+            if ($conektaOrderFound !=null || $conektaOrderFound->getId() != null) {
+                $this->_conektaLogger->info('order is ready', ['order' => $conektaOrderFound]);
+                //return;
             }
             $this->_conektaLogger->info('after validate order ');
 
