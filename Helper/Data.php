@@ -23,15 +23,15 @@ class Data extends Util
     /**
      * @var ModuleListInterface
      */
-    protected $_moduleList;
+    protected ModuleListInterface $_moduleList;
     /**
      * @var EncryptorInterface
      */
-    protected $_encryptor;
+    protected EncryptorInterface $_encryptor;
     /**
      * @var ProductMetadataInterface
      */
-    protected $_productMetadata;
+    protected ProductMetadataInterface $_productMetadata;
     /**
      * @var ConektaLogger
      */
@@ -44,19 +44,19 @@ class Data extends Util
     /**
      * @var CheckoutSession
      */
-    private $checkoutSession;
+    private CheckoutSession $checkoutSession;
     /**
      * @var CustomerSession
      */
-    private $customerSession;
+    private CustomerSession $customerSession;
     /**
      * @var ProductRepository
      */
-    private $productRepository;
+    private ProductRepository $productRepository;
     /**
      * @var Escaper
      */
-    private $_escaper;
+    private Escaper $_escaper;
     /**
      * @var CartRepositoryInterface
      */
@@ -149,7 +149,7 @@ class Data extends Util
      *
      * @return string
      */
-    public function getPrivateKey()
+    public function getPrivateKey(): string
     {
         $sandboxMode = $this->getConfigData('conekta/conekta_global', 'sandbox_mode');
 

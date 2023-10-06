@@ -3,7 +3,6 @@ namespace Conekta\Payments\Gateway\Request;
 
 use Conekta\Payments\Helper\Data as ConektaHelper;
 use Conekta\Payments\Logger\Logger as ConektaLogger;
-use Magento\Framework\Escaper;
 use Magento\Payment\Gateway\Data\PaymentDataObjectInterface;
 use Magento\Payment\Gateway\Request\BuilderInterface;
 
@@ -11,16 +10,13 @@ use Magento\Payment\Gateway\Helper\SubjectReader;
 
 class MetadataBuilder implements BuilderInterface
 {
-    private $_conektaLogger;
+    private ConektaLogger $_conektaLogger;
 
-    protected $_conektaHelper;
+    protected ConektaHelper $_conektaHelper;
 
-    protected $productRepository;
-
-    private $subjectReader;
+    private SubjectReader $subjectReader;
 
     public function __construct(
-        Escaper $_escaper,
         ConektaHelper $conektaHelper,
         ConektaLogger $conektaLogger,
         SubjectReader $subjectReader
@@ -28,7 +24,6 @@ class MetadataBuilder implements BuilderInterface
         $this->_conektaLogger = $conektaLogger;
         $this->_conektaLogger->info('Request MetadataBuilder :: __construct');
         $this->_conektaHelper = $conektaHelper;
-        $this->_escaper = $_escaper;
         $this->subjectReader = $subjectReader;
     }
 
