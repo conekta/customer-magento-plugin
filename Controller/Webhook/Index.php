@@ -22,7 +22,7 @@ use Magento\Quote\Model\QuoteFactory;
 use Magento\Catalog\Model\Product;
 use Conekta\Payments\Model\Ui\EmbedForm\ConfigProvider;
 use Magento\Quote\Model\QuoteManagement;
-
+use  Magento\Customer\Api\CustomerRepositoryInterface;
 
 class Index extends Action implements CsrfAwareActionInterface
 {
@@ -65,6 +65,7 @@ class Index extends Action implements CsrfAwareActionInterface
     private Product $_product ;
 
     private QuoteManagement $quoteManagement;
+    private CustomerRepositoryInterface $customerRepository;
 
     /**
      * @param Context $context
@@ -78,6 +79,7 @@ class Index extends Action implements CsrfAwareActionInterface
      * @param QuoteFactory $quote
      * @param Product $product
      * @param QuoteManagement $quoteManagement
+     * @param CustomerRepositoryInterface $customerRepository
      */
     public function __construct(
         Context $context,
@@ -90,7 +92,8 @@ class Index extends Action implements CsrfAwareActionInterface
         CustomerFactory $customerFactory,
         QuoteFactory $quote,
         Product $product,
-        QuoteManagement $quoteManagement
+        QuoteManagement $quoteManagement,
+        CustomerRepositoryInterface $customerRepository
     ) {
         parent::__construct($context);
         $this->_conektaLogger = $conektaLogger;
@@ -103,6 +106,7 @@ class Index extends Action implements CsrfAwareActionInterface
         $this->quote = $quote;
         $this->_product = $product;
         $this->quoteManagement = $quoteManagement;
+        $this->customerRepository = $customerRepository;
     }
 
     /**
@@ -249,8 +253,16 @@ class Index extends Action implements CsrfAwareActionInterface
             $this->_conektaLogger->info('start quote');
 
             $quoteCreated=$this->quote->create(); //Create object of quote
+            $this->_conektaLogger->info('end quoting creating');
+
             $quoteCreated->setStore($store); //set store for which you create quote
             $quoteCreated->setCurrency($conektaOrder["currency"]);
+            $this->_conektaLogger->info('end set current', ['currency=> ', $conektaOrder["currency"]]);
+
+            $customer= $this->customerRepository->getById($customer->getEntityId());
+
+            $this->_conektaLogger->info('load customer from customerRepository');
+
             $quoteCreated->assignCustomer($customer); //Assign quote to customer
 
             $this->_conektaLogger->info('end quote');
