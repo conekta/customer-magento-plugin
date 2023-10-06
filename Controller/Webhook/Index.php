@@ -134,8 +134,6 @@ class Index extends Action implements CsrfAwareActionInterface
      */
     public function execute()
     {
-        $this->_conektaLogger->info('Controller Index :: execute');
-
         $response = Response::STATUS_CODE_200;
         $resultRaw = $this->resultRawFactory->create();
 
@@ -153,7 +151,6 @@ class Index extends Action implements CsrfAwareActionInterface
             $event = $body['type'];
 
             $this->_conektaLogger->info('Controller Index :: execute body json ', ['event' => $event]);
-            $this->_conektaLogger->error('Controller Index error :: execute body json ', ['event' => $event]);
             $this->validate_order_exist($body);
 
             switch ($event) {
@@ -216,7 +213,7 @@ class Index extends Action implements CsrfAwareActionInterface
             $conektaOrderFound = $this->webhookRepository->findByMetadataOrderId($event);
 
             if ($conektaOrderFound !=null || $conektaOrderFound->getId() != null) {
-                $this->_conektaLogger->info('order is ready', ['order' => $conektaOrderFound]);
+                $this->_conektaLogger->info('order is ready', ['order' => $conektaOrderFound, 'is_set', isset($conektaOrderFound)]);
                 //return;
             }
             $this->_conektaLogger->info('after validate order ');
@@ -227,16 +224,19 @@ class Index extends Action implements CsrfAwareActionInterface
 
             $store = $this->_storeManager->getStore($metadata["store"]);
             $websiteId = $store->getWebsiteId();
+            $this->_conektaLogger->info('end getstore');
 
             $customer = $this->customerFactory->create();
             $customer->setWebsiteId($websiteId);
             $customer->loadByEmail($conektaCustomer['email']);// load customer by email address
+            $this->_conektaLogger->info('end customer');
 
             $quote=$this->quote->create(); //Create object of quote
             $quote->setStore($store); //set store for which you create quote
             $quote->setCurrency($conektaOrder["currency"]);
             $quote->assignCustomer($customer); //Assign quote to customer
 
+            $this->_conektaLogger->info('end quote');
 
             //add items in quote
             foreach($conektaOrder['line_items']["data"] as $item){
@@ -247,6 +247,8 @@ class Index extends Action implements CsrfAwareActionInterface
                     intval($item['quantity'])
                 );
             }
+            $this->_conektaLogger->info('end products');
+
             $shipping_address = [
                         'firstname'    => $conektaOrder["shipping_contact"]["receiver"], //address Details
                         'lastname'     => 'Doe',
@@ -283,9 +285,14 @@ class Index extends Action implements CsrfAwareActionInterface
                 ->collectShippingRates()
                 ->setShippingMethod($conektaShippingLines[0]["method"]); //shipping method
 
+            $this->_conektaLogger->info('end $conektaShippingLines');
+
+
             $quote->setPaymentMethod(ConfigProvider::CODE); //payment method
             $quote->setInventoryProcessed(false); //not affect inventory
             $quote->save(); //Now Save quote and your quote is ready
+            $this->_conektaLogger->info('end save quote');
+
 
             // Set Sales Order Payment
             $quote->getPayment()->importData(['method' => ConfigProvider::CODE]);
@@ -295,13 +302,17 @@ class Index extends Action implements CsrfAwareActionInterface
 
             // Create Order From Quote
             $order = $this->quoteManagement->submit($quote);
+            $this->_conektaLogger->info('end submit');
+
 
             $increment_id = $order->getRealOrderId();
 
             $order->addCommentToStatusHistory("Missing Order from conekta")
                 ->setIsCustomerNotified(true)
                 ->save();
-        } catch (\Exception $e) {
+            $this->_conektaLogger->info('end');
+
+        } catch (Exception $e) {
             $this->_conektaLogger->error($e->getMessage());
             $this->_conektaLogger->info($e->getMessage());
 
