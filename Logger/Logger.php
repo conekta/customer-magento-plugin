@@ -4,19 +4,18 @@ namespace Conekta\Payments\Logger;
 
 use Conekta\Payments\Helper\Data;
 use Magento\Framework\App\ObjectManager;
-use Monolog\Logger as MonoLogger;
+use Psr\Log\LoggerInterface;
 
 class Logger
 {
-    private const LoggerName = 'ConektaPaymentsLogger';
     /**
-     * @var MonoLogger
+     * @var LoggerInterface
      */
-    private MonoLogger $monolog;
+    private LoggerInterface $monolog;
 
-    public function __construct()
+    public function __construct(LoggerInterface $logger)
     {
-        $this->monolog = new MonoLogger(self::LoggerName);
+        $this->monolog =  $logger;
     }
 
     /**
