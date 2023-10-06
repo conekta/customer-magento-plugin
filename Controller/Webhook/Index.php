@@ -282,7 +282,7 @@ class Index extends Action implements CsrfAwareActionInterface
                     intval($item['quantity'])
                 );
             }
-            $this->_conektaLogger->info('end products');
+            $this->_conektaLogger->info('end products', ['save_in_address_book' =>$metadata["save_in_address_book"]]);
 
             $shipping_address = [
                         'firstname'    => $conektaOrder["shipping_contact"]["receiver"], //address Details
@@ -293,7 +293,7 @@ class Index extends Action implements CsrfAwareActionInterface
                         'region' => $conektaOrder["shipping_contact"]["address"]["state"],
                         'postcode' => $conektaOrder["shipping_contact"]["address"]["postal_code"],
                         'telephone' =>  $conektaOrder["shipping_contact"]["phone"],
-                        'save_in_address_book' =>   $metadata["save_in_address_book"]
+                        'save_in_address_book' =>  intval( $metadata["save_in_address_book"])
             ];
             $billing_address = [
                 'firstname'    =>$conektaOrder["fiscal_entity"]["name"], //address Details
@@ -304,8 +304,11 @@ class Index extends Action implements CsrfAwareActionInterface
                 'region' => $conektaOrder["fiscal_entity"]["address"]["state"],
                 'postcode' => $conektaOrder["fiscal_entity"]["address"]["postal_code"],
                 'telephone' =>  $conektaCustomer["phone"],
-                'save_in_address_book' =>   $metadata["save_in_address_book"]
+                'save_in_address_book' =>  intval( $metadata["save_in_address_book"])
             ];
+            $this->_conektaLogger->info('$billing_address', ['data'=>$billing_address]);
+            $this->_conektaLogger->info('$shipping_address', ['data'=>$shipping_address]);
+
             //Set Address to quote
             $quoteCreated->getBillingAddress()->addData($billing_address);
 
@@ -331,9 +334,11 @@ class Index extends Action implements CsrfAwareActionInterface
 
             // Set Sales Order Payment
             $quoteCreated->getPayment()->importData(['method' => ConfigProvider::CODE]);
+            $this->_conektaLogger->info('Set Sales Order Payment');
 
             // Collect Totals & Save Quote
             $quoteCreated->collectTotals()->save();
+            $this->_conektaLogger->info('Collect Totals & Save Quote');
 
             // Create Order From Quote
             $order = $this->quoteManagement->submit($quoteCreated);
