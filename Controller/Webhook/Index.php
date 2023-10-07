@@ -294,7 +294,7 @@ class Index extends Action implements CsrfAwareActionInterface
                         'postcode' => $conektaOrder["shipping_contact"]["address"]["postal_code"],
                         'telephone' =>  $conektaOrder["shipping_contact"]["phone"],
                         'save_in_address_book' =>  intval( $metadata["save_in_address_book"]),
-                        'region_id' => $metadata["shipping_region_id"]
+                        'region_id' => $metadata["shipping_region_id"] ?? "941"
             ];
             $billing_address = [
                 'firstname'    =>$conektaOrder["fiscal_entity"]["name"], //address Details
@@ -306,7 +306,7 @@ class Index extends Action implements CsrfAwareActionInterface
                 'postcode' => $conektaOrder["fiscal_entity"]["address"]["postal_code"],
                 'telephone' =>  $conektaCustomer["phone"],
                 'save_in_address_book' =>  intval( $metadata["save_in_address_book"]),
-                'region_id' => $metadata["billing_region_id"]
+                'region_id' => $metadata["billing_region_id"] ?? "941"
             ];
             $this->_conektaLogger->info('$billing_address', ['data'=>$billing_address]);
             $this->_conektaLogger->info('$shipping_address', ['data'=>$shipping_address]);
@@ -336,6 +336,7 @@ class Index extends Action implements CsrfAwareActionInterface
 
             // Set Sales Order Payment
             $quoteCreated->getPayment()->importData(['method' => ConfigProvider::CODE]);
+            $quoteCreated->getPayment()->setAdditionalInformation('quote_id', $quoteCreated.getId());
             $this->_conektaLogger->info('Set Sales Order Payment');
 
             // Collect Totals & Save Quote
@@ -355,8 +356,7 @@ class Index extends Action implements CsrfAwareActionInterface
             $this->_conektaLogger->info('end');
 
         } catch (Exception $e) {
-            $this->_conektaLogger->error($e->getMessage());
-            $this->_conektaLogger->info($e->getMessage());
+            $this->_conektaLogger->error('creating order'.$e->getMessage());
 
         }
     }

@@ -33,7 +33,7 @@ class ShippingLinesBuilder implements BuilderInterface
      */
     public function build(array $buildSubject)
     {
-        $this->_conektaLogger->info('Request ShippingLinesBuilder :: build');
+        $this->_conektaLogger->info('Request ShippingLinesBuilder :: build', ['$buildSubject'=>$buildSubject]);
 
         $paymentDO = $this->subjectReader->readPayment($buildSubject);
         $payment = $paymentDO->getPayment();
