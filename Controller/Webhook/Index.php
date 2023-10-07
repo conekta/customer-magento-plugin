@@ -254,8 +254,6 @@ class Index extends Action implements CsrfAwareActionInterface
 
             }
 
-            $this->_conektaLogger->info('start quote');
-
             $quoteCreated=$this->quote->create(); //Create object of quote
             $this->_conektaLogger->info('end quoting creating');
 
@@ -336,7 +334,12 @@ class Index extends Action implements CsrfAwareActionInterface
 
             // Set Sales Order Payment
             $quoteCreated->getPayment()->importData(['method' => ConfigProvider::CODE]);
-            $quoteCreated->getPayment()->setAdditionalInformation('quote_id', $quoteCreated->getId());
+            $additionalInformation = [
+                'order_id' =>  $conektaOrder["id"],
+                'txn_id' =>  $conektaOrder["charges"]["data"][0]["id"],
+                'quote_id'=> $quoteCreated->getId()
+            ];
+            $quoteCreated->getPayment()->setAdditionalInformation($additionalInformation);
             $this->_conektaLogger->info('Set Sales Order Payment');
 
             // Collect Totals & Save Quote
