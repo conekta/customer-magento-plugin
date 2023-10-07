@@ -121,7 +121,7 @@ class EmbedFormInfo extends Info
      * @return bool
      * @throws LocalizedException
      */
-    public function isCreditCardPaymentMethod()
+    public function isCreditCardPaymentMethod(): bool
     {
         return $this->getPaymentMethodType() === ConfigProvider::PAYMENT_METHOD_CREDIT_CARD;
     }
@@ -132,7 +132,7 @@ class EmbedFormInfo extends Info
      * @return bool
      * @throws LocalizedException
      */
-    public function isCashPaymentMethod()
+    public function isCashPaymentMethod(): bool
     {
         return $this->getPaymentMethodType() === ConfigProvider::PAYMENT_METHOD_CASH;
     }

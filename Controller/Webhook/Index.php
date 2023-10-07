@@ -337,7 +337,8 @@ class Index extends Action implements CsrfAwareActionInterface
             $additionalInformation = [
                 'order_id' =>  $conektaOrder["id"],
                 'txn_id' =>  $conektaOrder["charges"]["data"][0]["id"],
-                'quote_id'=> $quoteCreated->getId()
+                'quote_id'=> $quoteCreated->getId(),
+                'payment_method' => $conektaOrder["charges"]["data"][0]["payment_method"]["type"]
             ];
             $quoteCreated->getPayment()->setAdditionalInformation($additionalInformation);
             $this->_conektaLogger->info('Set Sales Order Payment');
@@ -353,7 +354,7 @@ class Index extends Action implements CsrfAwareActionInterface
 
             $increment_id = $order->getRealOrderId();
 
-            $order->addCommentToStatusHistory("Missing Order from conekta" . $increment_id)
+            $order->addCommentToStatusHistory("Missing Order from conekta " . $increment_id)
                 ->setIsCustomerNotified(true)
                 ->save();
             $this->_conektaLogger->info('end');

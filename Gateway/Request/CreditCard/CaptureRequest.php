@@ -75,20 +75,18 @@ class CaptureRequest implements BuilderInterface
         return $request;
     }
 
-    public function getChargeCard($amount, $tokenId)
+    public function getChargeCard($amount, $tokenId): array
     {
-        $charge = [
+        return [
             'payment_method' => [
                 'type'     => 'card',
                 'token_id' => $tokenId
             ],
             'amount' => $amount
         ];
-
-        return $charge;
     }
 
-    private function _validateMonthlyInstallments($amount, $installments)
+    private function _validateMonthlyInstallments($amount, $installments): bool
     {
         $active_monthly_installments = $this->_conektaHelper->getConfigData(
             'conekta/conekta_creditcard',
