@@ -336,7 +336,7 @@ class Index extends Action implements CsrfAwareActionInterface
 
             // Set Sales Order Payment
             $quoteCreated->getPayment()->importData(['method' => ConfigProvider::CODE]);
-            $quoteCreated->getPayment()->setAdditionalInformation('quote_id', $quoteCreated.getId());
+            $quoteCreated->getPayment()->setAdditionalInformation('quote_id', $quoteCreated->getId());
             $this->_conektaLogger->info('Set Sales Order Payment');
 
             // Collect Totals & Save Quote
