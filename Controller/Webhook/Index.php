@@ -226,13 +226,9 @@ class Index extends Action implements CsrfAwareActionInterface
             $metadata = $conektaOrder['metadata'];
             $this->_conektaLogger->info('after validate order ', ['store'=> $metadata["store"]]);
 
-
-
             $store = $this->_storeManager->getStore(intval($metadata["store"]));
 
             $this->_conektaLogger->info('store', ['store_id'=> $store->getId()]);
-
-
 
             $quoteCreated=$this->quote->create(); //Create object of quote
             $this->_conektaLogger->info('end quoting creating');
@@ -245,12 +241,14 @@ class Index extends Action implements CsrfAwareActionInterface
                 'currency=> ', $conektaOrder["currency"]]
             );
 
-           // $quoteCreated->setIsGuest(null);
-           // $quoteCreated->setCustomerEmail($conektaCustomer['email']);
+            $quoteCreated->setCustomerEmail($conektaCustomer['email']);
+            $quoteCreated->setCustomerFirstname($conektaCustomer['name']);
+            $quoteCreated->setCustomerLastname("");
+            $quoteCreated->setCustomerIsGuest(true);
             if (isset($conektaCustomer['customer_custom_reference']) && !isEmpty($conektaCustomer['customer_custom_reference'])){
                 $customer = $this->customerFactory->create();
                 $customer->setWebsiteId($store->getWebsiteId());
-                $customer->load($conektaCustomer['custom_reference']);// load customer by id
+                $customer->load($conektaCustomer['customer_custom_reference']);// load customer by id
                 $this->_conektaLogger->info('end customer', ['email' =>$conektaCustomer['email'] ]);
 
                 if(!$customer->getEntityId()){
