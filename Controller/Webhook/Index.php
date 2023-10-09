@@ -27,8 +27,6 @@ use Magento\Customer\Api\CustomerRepositoryInterface;
 use Conekta\Payments\Helper\Data as ConektaData;
 use Magento\Framework\App\ObjectManager;
 
-use function PHPUnit\Framework\isEmpty;
-
 class Index extends Action implements CsrfAwareActionInterface
 {
     private const EVENT_WEBHOOK_PING = 'webhook_ping';
@@ -253,7 +251,7 @@ class Index extends Action implements CsrfAwareActionInterface
             $quoteCreated->setCustomerFirstname($conektaCustomer['name']);
             $quoteCreated->setCustomerLastname("");
             $quoteCreated->setCustomerIsGuest(true);
-            if (isset($conektaCustomer['customer_custom_reference']) && !isEmpty($conektaCustomer['customer_custom_reference'])){
+            if (isset($conektaCustomer['customer_custom_reference']) && !empty($conektaCustomer['customer_custom_reference'])){
                 $customer = $this->customerFactory->create();
                 $customer->setWebsiteId($store->getWebsiteId());
                 $customer->load($conektaCustomer['customer_custom_reference']);// load customer by id
