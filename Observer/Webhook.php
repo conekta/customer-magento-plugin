@@ -3,6 +3,7 @@
 namespace Conekta\Payments\Observer;
 
 use Magento\Framework\Event\ObserverInterface;
+use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Message\ManagerInterface;
 use Conekta\Payments\Model\Config;
 use Magento\Framework\Event\Observer;
@@ -38,9 +39,10 @@ class Webhook implements ObserverInterface
      *
      * @param Observer $observer
      * @throws Exception
+     * @throws NoSuchEntityException
      */
     public function execute(Observer $observer)
     {
-        return $this->config->createWebhook();
+        $this->config->createWebhook();
     }
 }

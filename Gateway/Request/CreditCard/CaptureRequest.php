@@ -3,6 +3,7 @@ namespace Conekta\Payments\Gateway\Request\CreditCard;
 
 use Conekta\Payments\Helper\Data as ConektaHelper;
 use Conekta\Payments\Logger\Logger as ConektaLogger;
+use Magento\Framework\Validator\Exception;
 use Magento\Payment\Gateway\ConfigInterface;
 use Magento\Payment\Gateway\Helper\SubjectReader;
 use Magento\Payment\Gateway\Request\BuilderInterface;
@@ -31,6 +32,9 @@ class CaptureRequest implements BuilderInterface
         $this->subjectReader = $subjectReader;
     }
 
+    /**
+     * @throws Exception
+     */
     public function build(array $buildSubject)
     {
         $this->_conektaLogger->info('Request CaptureRequest :: build');
@@ -61,8 +65,8 @@ class CaptureRequest implements BuilderInterface
                 $request['payment_method_details']['payment_method']['monthly_installments'] = $installments;
             }
         } catch (\Exception $e) {
-            $this->_conektaLogger->info('Request CaptureRequest :: build Problem', $e->getMessage());
-            throw new \Magento\Framework\Validator\Exception(__('Problem Creating Charge'));
+            $this->_conektaLogger->info('Request CaptureRequest :: build Problem '.$e->getMessage());
+            throw new Exception(__('Problem Creating Charge'));
         }
 
         $request['CURRENCY'] = $order->getCurrencyCode();

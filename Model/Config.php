@@ -6,6 +6,7 @@ use Conekta\Payments\Api\ConektaApiClient;
 use Conekta\Payments\Helper\Data as ConektaHelper;
 use Conekta\Payments\Logger\Logger as ConektaLogger;
 use Magento\Framework\Encryption\EncryptorInterface;
+use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Locale\Resolver;
 use Magento\Framework\Validator\Exception;
 
@@ -58,14 +59,13 @@ class Config
      * Create Webhook
      *
      * @return void
-     * @throws Exception
+     * @throws Exception|NoSuchEntityException
      */
     public function createWebhook()
     {
-
+        $urlWebhook = $this->_conektaHelper->getUrlWebhookOrDefault();
         try {
             $sandboxMode = $this->_conektaHelper->getConfigData('conekta/conekta_global', 'sandbox_mode');
-            $urlWebhook = $this->_conektaHelper->getUrlWebhookOrDefault();
 
             $events = ["events" => ["charge.paid"]];
             $errorMessage = null;

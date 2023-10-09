@@ -6,7 +6,6 @@ use Conekta\Payments\Api\EmbedFormRepositoryInterface;
 use Conekta\Payments\Exception\ConektaException;
 use Conekta\Payments\Helper\ConektaOrder;
 use Conekta\Payments\Logger\Logger;
-use Exception;
 use Magento\Framework\App\Action\Action;
 use Magento\Framework\App\Action\Context;
 use Magento\Framework\App\Action\HttpPostActionInterface;
@@ -15,6 +14,7 @@ use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Framework\Controller\ResultInterface;
 use Magento\Framework\Serialize\Serializer\Json;
 use Magento\Framework\View\Result\PageFactory;
+use Magento\Framework\Webapi\Exception;
 
 class CreateOrder extends Action implements HttpPostActionInterface
 {
@@ -116,7 +116,7 @@ class CreateOrder extends Action implements HttpPostActionInterface
                     $this->logger->critical($e, $orderParams);
                 }
 
-                $resultJson->setHttpResponseCode(\Magento\Framework\Webapi\Exception::HTTP_BAD_REQUEST);
+                $resultJson->setHttpResponseCode(Exception::HTTP_BAD_REQUEST);
                 $response['error_message'] = $errorMessage;
             }
         }

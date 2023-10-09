@@ -5,8 +5,6 @@ namespace Conekta\Payments\Gateway\Http\Client\CreditCard;
 use Conekta\Payments\Api\ConektaApiClient;
 use Conekta\Payments\Helper\Data as ConektaHelper;
 use Conekta\Payments\Logger\Logger as ConektaLogger;
-use Magento\Framework\Encryption\EncryptorInterface;
-use Magento\Framework\Model\Context;
 use Magento\Payment\Gateway\Http\ClientInterface;
 use Magento\Payment\Gateway\Http\TransferInterface;
 use Magento\Payment\Model\Method\Logger;
@@ -30,8 +28,6 @@ class TransactionRefund implements ClientInterface
         ConektaHelper      $conektaHelper,
         ConektaLogger      $conektaLogger,
         ConektaApiClient   $conektaApiClient,
-        Context            $context,
-        EncryptorInterface $encryptor,
         Logger             $logger,
         array              $data = []
     )
@@ -39,7 +35,6 @@ class TransactionRefund implements ClientInterface
         $this->_conektaHelper = $conektaHelper;
         $this->_conektaLogger = $conektaLogger;
         $this->conektaApiClient = $conektaApiClient;
-        $this->_encryptor = $encryptor;
         $this->logger = $logger;
 
         $this->_conektaLogger->info('HTTP Client CreditCard TransactionRefund :: __construct');

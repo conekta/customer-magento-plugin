@@ -22,9 +22,7 @@ class Session extends SessionManager
      *
      * @param StorageInterface $storage
      */
-    public function __construct(
-        StorageInterface $storage
-    ) {
+    public function __construct(StorageInterface $storage) {
         $this->storage = $storage;
     }
 
