@@ -242,11 +242,11 @@ class Index extends Action implements CsrfAwareActionInterface
             $quoteCreated->setCurrency();
             $this->_conektaLogger->info('end set current', [
                 'currency=> ', $conektaOrder["currency"],
-                'customer_custom_reference',$conektaCustomer['customer_custom_reference']]
+                'customer_custom_reference',$conektaCustomer['custom_reference']]
             );
 
             $quoteCreated->setCustomerId(null);
-            if (!$conektaCustomer['customer_custom_reference']){
+            if (!$conektaCustomer['custom_reference']){
                 $customer = $this->customerFactory->create();
                 $customer->setWebsiteId($store->getWebsiteId());
                 $customer->loadByEmail($conektaCustomer['email']);// load customer by email address
