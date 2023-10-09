@@ -320,6 +320,11 @@ class Index extends Action implements CsrfAwareActionInterface
             $this->_conektaLogger->info('end $conektaShippingLines');
 
 
+            //discount lines
+            if (isset($conektaOrder["discount_lines"]) && isset($conektaOrder["discount_lines"]["data"])) {
+                $quoteCreated->setCouponCode($conektaOrder["discount_lines"]["data"][0]["code"]);
+            }
+
             $quoteCreated->setPaymentMethod(ConfigProvider::CODE); //payment method
             $quoteCreated->setInventoryProcessed(false); //not affect inventory
             $quoteCreated->save(); //Now Save quote and your quote is ready
