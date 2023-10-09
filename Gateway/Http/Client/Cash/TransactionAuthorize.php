@@ -31,15 +31,13 @@ class TransactionAuthorize implements ClientInterface
      */
     private $logger;
 
-    protected $_conektaHelper;
+    protected ConektaHelper $_conektaHelper;
 
-    private $_conektaLogger;
+    private ConektaLogger $_conektaLogger;
 
-    private $_conektaOrder;
+    protected HttpUtil $_httpUtil;
 
-    protected $_httpUtil;
-
-    protected $conektaSalesOrderFactory;
+    protected ConektaSalesOrderFactory $conektaSalesOrderFactory;
 
     /**
      * @var ConektaApiClient
@@ -178,7 +176,7 @@ class TransactionAuthorize implements ClientInterface
         return $response;
     }
 
-    protected function generateResponseForCode($resultCode, $txn_id, $ord_id)
+    protected function generateResponseForCode($resultCode, $txn_id, $ord_id): array
     {
         $this->_conektaLogger->info('HTTP Client Cash TransactionAuthorize :: generateResponseForCode');
 

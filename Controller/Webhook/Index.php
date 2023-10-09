@@ -1,6 +1,7 @@
 <?php
 namespace Conekta\Payments\Controller\Webhook;
 
+use Conekta\Payments\Helper\Util;
 use Conekta\Payments\Logger\Logger as ConektaLogger;
 use Conekta\Payments\Model\WebhookRepository;
 use Exception;
@@ -67,6 +68,7 @@ class Index extends Action implements CsrfAwareActionInterface
 
     private QuoteManagement $quoteManagement;
     private CustomerRepositoryInterface $customerRepository;
+    private Util $utilHelper;
 
     /**
      * @param Context $context
@@ -81,6 +83,7 @@ class Index extends Action implements CsrfAwareActionInterface
      * @param Product $product
      * @param QuoteManagement $quoteManagement
      * @param CustomerRepositoryInterface $customerRepository
+     * @param Util $utilHelper
      */
     public function __construct(
         Context $context,
@@ -94,7 +97,8 @@ class Index extends Action implements CsrfAwareActionInterface
         QuoteFactory $quote,
         Product $product,
         QuoteManagement $quoteManagement,
-        CustomerRepositoryInterface $customerRepository
+        CustomerRepositoryInterface $customerRepository,
+        Util $utilHelper
     ) {
         parent::__construct($context);
         $this->_conektaLogger = $conektaLogger;
@@ -108,6 +112,7 @@ class Index extends Action implements CsrfAwareActionInterface
         $this->_product = $product;
         $this->quoteManagement = $quoteManagement;
         $this->customerRepository = $customerRepository;
+        $this->utilHelper = $utilHelper;
     }
 
     /**
@@ -251,19 +256,6 @@ class Index extends Action implements CsrfAwareActionInterface
                 $customer->load($conektaCustomer['customer_custom_reference']);// load customer by id
                 $this->_conektaLogger->info('end customer', ['email' =>$conektaCustomer['email'] ]);
 
-                if(!$customer->getEntityId()){
-                    //If not available then create this customer
-                    $this->_conektaLogger->info('start create customer');
-
-                    $customer->setWebsiteId($store->getWebsiteId())
-                        ->setStore($store)
-                        ->setFirstname($conektaOrder["shipping_contact"]["receiver"])
-                        ->setLastname('doe')
-                        ->setEmail($conektaCustomer['email'])
-                        ->setPassword($conektaCustomer['email']);
-                    $customer->save();
-                    $this->_conektaLogger->info('end create customer');
-                }
                 $customer= $this->customerRepository->getById($customer->getEntityId());
                 $quoteCreated->assignCustomer($customer); //Assign quote to customer
            }
@@ -273,7 +265,7 @@ class Index extends Action implements CsrfAwareActionInterface
             //add items in quote
             foreach($conektaOrder['line_items']["data"] as $item){
                 $product=$this->_product->load($item["metadata"]['product_id']);
-                $product->setPrice($item['unit_price']);
+                $product->setPrice($this->utilHelper->convertFromApiPrice($item['unit_price']));
                 $quoteCreated->addProduct(
                     $product,
                     intval($item['quantity'])
@@ -283,7 +275,7 @@ class Index extends Action implements CsrfAwareActionInterface
 
             $shipping_address = [
                         'firstname'    => $conektaOrder["shipping_contact"]["receiver"], //address Details
-                        'lastname'     => 'Doe',
+                        'lastname'     => '',
                         'street' => $conektaOrder["shipping_contact"]["address"]["street1"],
                         'city' => $conektaOrder["shipping_contact"]["address"]["city"],
                         'country_id' => strtoupper($conektaOrder["fiscal_entity"]["address"]["country"]),
@@ -295,7 +287,7 @@ class Index extends Action implements CsrfAwareActionInterface
             ];
             $billing_address = [
                 'firstname'    =>$conektaOrder["fiscal_entity"]["name"], //address Details
-                'lastname'     => 'Doe',
+                'lastname'     => '',
                 'street' => $conektaOrder["fiscal_entity"]["address"]["street1"],
                 'city' => $conektaOrder["fiscal_entity"]["address"]["city"],
                 'country_id' => strtoupper($conektaOrder["fiscal_entity"]["address"]["country"]),
@@ -337,7 +329,7 @@ class Index extends Action implements CsrfAwareActionInterface
                 'order_id' =>  $conektaOrder["id"],
                 'txn_id' =>  $conektaOrder["charges"]["data"][0]["id"],
                 'quote_id'=> $quoteCreated->getId(),
-                'payment_method' => $this->getPaymentMethod( $conektaOrder["charges"]["data"][0]["payment_method"]["type"])
+                'payment_method' => $this->getPaymentMethod($conektaOrder["charges"]["data"][0]["payment_method"]["object"])
             ];
             $quoteCreated->getPayment()->setAdditionalInformation($additionalInformation);
             $this->_conektaLogger->info('Set Sales Order Payment');
