@@ -23,7 +23,10 @@ use Magento\Quote\Model\QuoteFactory;
 use Magento\Catalog\Model\Product;
 use Conekta\Payments\Model\Ui\EmbedForm\ConfigProvider;
 use Magento\Quote\Model\QuoteManagement;
-use  Magento\Customer\Api\CustomerRepositoryInterface;
+use Magento\Customer\Api\CustomerRepositoryInterface;
+use Conekta\Payments\Helper\Data as ConektaData;
+use Magento\Framework\App\ObjectManager;
+
 use function PHPUnit\Framework\isEmpty;
 
 class Index extends Action implements CsrfAwareActionInterface
@@ -83,7 +86,6 @@ class Index extends Action implements CsrfAwareActionInterface
      * @param Product $product
      * @param QuoteManagement $quoteManagement
      * @param CustomerRepositoryInterface $customerRepository
-     * @param Util $utilHelper
      */
     public function __construct(
         Context $context,
@@ -97,8 +99,7 @@ class Index extends Action implements CsrfAwareActionInterface
         QuoteFactory $quote,
         Product $product,
         QuoteManagement $quoteManagement,
-        CustomerRepositoryInterface $customerRepository,
-        Util $utilHelper
+        CustomerRepositoryInterface $customerRepository
     ) {
         parent::__construct($context);
         $this->_conektaLogger = $conektaLogger;
@@ -112,7 +113,9 @@ class Index extends Action implements CsrfAwareActionInterface
         $this->_product = $product;
         $this->quoteManagement = $quoteManagement;
         $this->customerRepository = $customerRepository;
-        $this->utilHelper = $utilHelper;
+
+        $objectManager = ObjectManager::getInstance();
+        $this->utilHelper = $objectManager->create(ConektaData::class);
     }
 
     /**
