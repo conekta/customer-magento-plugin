@@ -1,3 +1,7 @@
+### 5.0.5 - 2023/10/09 10:55
+* Feat:
+  - [PAY22-2045] Magento - remove old sdk-php code. @fcarrero [#44](https://github.com/conekta/customer-magento-plugin/pull/44)
+
 ### 5.0.4 - 2023/10/02 10:55
 * Feat:
   - [PAY22-2045] Magento - Modificar tiempo expiración ref. cash y spei. @fcarrero [#43](https://github.com/conekta/customer-magento-plugin/pull/43)

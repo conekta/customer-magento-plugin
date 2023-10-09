@@ -3,7 +3,6 @@
 namespace Conekta\Payments\Gateway\Http\Client\Cash;
 
 use Conekta\Payments\Api\ConektaApiClient;
-use Conekta\Payments\Gateway\Http\Util\HttpUtil;
 use Conekta\Payments\Helper\Data as ConektaHelper;
 use Conekta\Payments\Logger\Logger as ConektaLogger;
 use Conekta\Payments\Api\Data\ConektaSalesOrderInterface;
@@ -37,8 +36,6 @@ class TransactionAuthorize implements ClientInterface
 
     private $_conektaOrder;
 
-    protected $_httpUtil;
-
     protected $conektaSalesOrderFactory;
 
     /**
@@ -51,30 +48,22 @@ class TransactionAuthorize implements ClientInterface
      * @param ConektaHelper $conektaHelper
      * @param ConektaLogger $conektaLogger
      * @param ConektaApiClient $conektaApiClient
-     * @param HttpUtil $httpUtil
      * @param ConektaSalesOrderFactory $conektaSalesOrderFactory
-     * @throws Exception
      */
     public function __construct(
         Logger                   $logger,
         ConektaHelper            $conektaHelper,
         ConektaLogger            $conektaLogger,
         ConektaApiClient         $conektaApiClient,
-        HttpUtil                 $httpUtil,
         ConektaSalesOrderFactory $conektaSalesOrderFactory
     )
     {
         $this->_conektaHelper = $conektaHelper;
         $this->_conektaLogger = $conektaLogger;
         $this->conektaApiClient = $conektaApiClient;
-        $this->_httpUtil = $httpUtil;
         $this->_conektaLogger->info('HTTP Client Cash TransactionAuthorize :: __construct');
         $this->logger = $logger;
         $this->conektaSalesOrderFactory = $conektaSalesOrderFactory;
-        $config = [
-            'locale' => 'es'
-        ];
-        $this->_httpUtil->setupConektaClient($config);
     }
 
     /**
