@@ -26,7 +26,7 @@ use Magento\Quote\Model\QuoteManagement;
 use Magento\Customer\Api\CustomerRepositoryInterface;
 use Conekta\Payments\Helper\Data as ConektaData;
 use Magento\Framework\App\ObjectManager;
-
+use Conekta\Payments\Api\ConektaApiClient;
 class Index extends Action implements CsrfAwareActionInterface
 {
     private const EVENT_WEBHOOK_PING = 'webhook_ping';
@@ -72,6 +72,11 @@ class Index extends Action implements CsrfAwareActionInterface
     private Util $utilHelper;
 
     /**
+     * @var ConektaApiClient
+     */
+    private ConektaApiClient $conektaApiClient;
+
+    /**
      * @param Context $context
      * @param JsonFactory $resultJsonFactory
      * @param RawFactory $resultRawFactory
@@ -84,6 +89,7 @@ class Index extends Action implements CsrfAwareActionInterface
      * @param Product $product
      * @param QuoteManagement $quoteManagement
      * @param CustomerRepositoryInterface $customerRepository
+     * @param ConektaApiClient $conektaApiClient
      */
     public function __construct(
         Context $context,
@@ -97,7 +103,8 @@ class Index extends Action implements CsrfAwareActionInterface
         QuoteFactory $quote,
         Product $product,
         QuoteManagement $quoteManagement,
-        CustomerRepositoryInterface $customerRepository
+        CustomerRepositoryInterface $customerRepository,
+        ConektaApiClient $conektaApiClient
     ) {
         parent::__construct($context);
         $this->_conektaLogger = $conektaLogger;
@@ -114,6 +121,7 @@ class Index extends Action implements CsrfAwareActionInterface
 
         $objectManager = ObjectManager::getInstance();
         $this->utilHelper = $objectManager->create(ConektaData::class);
+        $this->conektaApiClient = $conektaApiClient;
     }
 
     /**
@@ -322,8 +330,7 @@ class Index extends Action implements CsrfAwareActionInterface
 
             //discount lines
             if (isset($conektaOrder["discount_lines"]) && isset($conektaOrder["discount_lines"]["data"])) {
-                //$quoteCreated->setCouponCode($conektaOrder["discount_lines"]["data"][0]["code"]);
-                $quoteCreated->setCustomDiscount(($this->utilHelper->convertFromApiPrice( $conektaOrder["discount_lines"]["data"][0]["amount"])) * -1);
+                $quoteCreated->setCustomDiscount($this->getDiscountAmount($conektaOrder["discount_lines"]["data"]));
             }
 
             $quoteCreated->setPaymentMethod(ConfigProvider::CODE); //payment method
@@ -357,11 +364,32 @@ class Index extends Action implements CsrfAwareActionInterface
             $order->addCommentToStatusHistory("Missing Order from conekta " . $increment_id)
                 ->setIsCustomerNotified(true)
                 ->save();
+            $this->updateConektaReference($conektaOrder["charges"]["data"][0]["id"],  $increment_id);
+
             $this->_conektaLogger->info('end');
 
         } catch (Exception $e) {
             $this->_conektaLogger->error('creating order '.$e->getMessage());
         }
+    }
+    private function updateConektaReference(string $chargeId, string $orderId){
+         $chargeUpdate= [
+             "reference_id"=> $orderId,
+         ];
+         try {
+             $this->conektaApiClient->updateCharge($chargeId,  $chargeUpdate);
+         }catch (Exception $e) {
+             $this->_conektaLogger->error("updating conekta charge". $e->getMessage(), ["charge_id"=> $chargeId, "reference_id"=> $orderId]);
+         }
+    }
+
+    private function getDiscountAmount(array $discountLines) :int {
+       $discountValue = 0;
+       foreach ($discountLines as $discountLine){
+           $discountValue=+ $this->utilHelper->convertFromApiPrice($discountLine["amount"]);
+       }
+
+       return $discountValue * -1;
     }
 
     private function getPaymentMethod(string $type) :string {

@@ -11,6 +11,8 @@ use Conekta\ApiException;
 use Conekta\Configuration;
 use Conekta\Model\ChargeOrderResponse;
 use Conekta\Model\ChargeRequest;
+use Conekta\Model\ChargeResponse;
+use Conekta\Model\ChargeUpdateRequest;
 use Conekta\Model\Customer;
 use Conekta\Model\CustomerResponse;
 use Conekta\Model\GetWebhooksResponse;
@@ -61,6 +63,8 @@ class ConektaApiClient
 
     private WebhooksApi $webhooks;
 
+    private ChargesApi $charges;
+
     public function __construct(
         Client     $client,
         HelperData $helperData
@@ -74,6 +78,7 @@ class ConektaApiClient
         $this->chargeInstance = new ChargesApi($this->client, $this->config);
         $this->customerPaymentMethods = new PaymentMethodsApi($this->client, $this->config);
         $this->webhooks = new WebhooksApi($this->client, $this->config);
+        $this->charges = new ChargesApi($this->client, $this->config);
     }
 
 
@@ -211,5 +216,13 @@ class ConektaApiClient
     {
         $webhookRequest =  new WebhookUpdateRequest($webhookData);
         return $this->webhooks->updateWebhook($webhookID, $webhookRequest);
+    }
+
+    /**
+     * @throws ApiException
+     */
+    public function updateCharge(string $chargeId, array $charge): ChargeResponse{
+        $charge = new ChargeUpdateRequest($charge);
+        return $this->charges->updateCharge($chargeId, $charge);
     }
 }

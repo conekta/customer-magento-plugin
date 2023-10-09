@@ -144,7 +144,6 @@ class ConektaOrder extends Util
             }
             $customerRequest['custom_reference'] = $customerId;
             $customerRequest['metadata'] = [
-                'is_guest' => $this->isGuestUser(),
                 'group_id' => $customer->getGroupId(),
             ];
             $customerRequest['name'] = $this->removeNameSpecialCharacter($customerRequest['name']);
