@@ -246,10 +246,10 @@ class Index extends Action implements CsrfAwareActionInterface
             );
 
             $quoteCreated->setCustomerId(null);
-            if (isset($conektaCustomer['custom_reference']) && !isEmpty($conektaCustomer['custom_reference'])){
+            if (isset($conektaCustomer['customer_custom_reference']) && !isEmpty($conektaCustomer['customer_custom_reference'])){
                 $customer = $this->customerFactory->create();
                 $customer->setWebsiteId($store->getWebsiteId());
-                $customer->loadByEmail($conektaCustomer['email']);// load customer by email address
+                $customer->load($conektaCustomer['custom_reference']);// load customer by id
                 $this->_conektaLogger->info('end customer', ['email' =>$conektaCustomer['email'] ]);
 
                 if(!$customer->getEntityId()){
