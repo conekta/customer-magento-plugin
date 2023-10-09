@@ -322,7 +322,8 @@ class Index extends Action implements CsrfAwareActionInterface
 
             //discount lines
             if (isset($conektaOrder["discount_lines"]) && isset($conektaOrder["discount_lines"]["data"])) {
-                $quoteCreated->setCouponCode($conektaOrder["discount_lines"]["data"][0]["code"]);
+                //$quoteCreated->setCouponCode($conektaOrder["discount_lines"]["data"][0]["code"]);
+                $quoteCreated->setCustomDiscount($this->utilHelper->convertFromApiPrice( $conektaOrder["discount_lines"]["data"][0]["amount"]));
             }
 
             $quoteCreated->setPaymentMethod(ConfigProvider::CODE); //payment method
