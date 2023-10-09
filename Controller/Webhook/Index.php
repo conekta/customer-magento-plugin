@@ -362,7 +362,7 @@ class Index extends Action implements CsrfAwareActionInterface
 
             $increment_id = $order->getRealOrderId();
 
-            $order->addCommentToStatusHistory("Missing Order from conekta " . $increment_id . "<a href='https://panel.conekta.com/transactions/payments/'".$conektaOrder["id"] . " target='_blank'>".$conektaOrder["id"]."</a>")
+            $order->addCommentToStatusHistory("Missing Order from conekta ". "<a href='". ConfigProvider::URL_PANEL_PAYMENTS ."/".$conektaOrder["id"]. "' target='_blank'>".$conektaOrder["id"]."</a>")
                 ->setIsCustomerNotified(true)
                 ->save();
             $this->updateConektaReference($conektaOrder["charges"]["data"][0]["id"],  $increment_id);
