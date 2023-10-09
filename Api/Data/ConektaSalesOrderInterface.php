@@ -34,7 +34,7 @@ interface ConektaSalesOrderInterface
      *
      * @return string|null Sales Increment Order ID.
      */
-    public function getIncrementOrderId();
+    public function getIncrementOrderId(): ?string;
 
     /**
      * Set Increment Order Id

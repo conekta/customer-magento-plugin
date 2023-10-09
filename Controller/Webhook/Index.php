@@ -361,7 +361,7 @@ class Index extends Action implements CsrfAwareActionInterface
 
             $increment_id = $order->getRealOrderId();
 
-            $order->addCommentToStatusHistory("Missing Order from conekta " . $increment_id)
+            $order->addCommentToStatusHistory("Missing Order from conekta " . $increment_id . "<a href='https://panel.conekta.com/transactions/payments/'".$conektaOrder["id"] . " target='_blank'>".$conektaOrder["id"]."</a>")
                 ->setIsCustomerNotified(true)
                 ->save();
             $this->updateConektaReference($conektaOrder["charges"]["data"][0]["id"],  $increment_id);
@@ -383,10 +383,10 @@ class Index extends Action implements CsrfAwareActionInterface
          }
     }
 
-    private function getDiscountAmount(array $discountLines) :int {
+    private function getDiscountAmount(array $discountLines) :float {
        $discountValue = 0;
        foreach ($discountLines as $discountLine){
-           $discountValue=+ $this->utilHelper->convertFromApiPrice($discountLine["amount"]);
+           $discountValue += $this->utilHelper->convertFromApiPrice($discountLine["amount"]);
        }
 
        return $discountValue * -1;
