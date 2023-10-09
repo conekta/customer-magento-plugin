@@ -312,6 +312,7 @@ class Index extends Action implements CsrfAwareActionInterface
 
             $shippingAddress->setCollectShippingRates(true)
                 ->collectShippingRates()
+                ->setShippingAmount($this->utilHelper->convertFromApiPrice($conektaShippingLines[0]["amount"]))
                 ->setShippingMethod($conektaShippingLines[0]["method"]); //shipping method
 
             $this->_conektaLogger->info('end $conektaShippingLines');
