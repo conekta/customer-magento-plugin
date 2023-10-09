@@ -90,18 +90,28 @@ class ConektaOrder extends Util
         $this->conektaConfigProvider = $conektaConfigProvider;
     }
 
+
+    /**
+     * @throws NoSuchEntityException
+     * @throws LocalizedException
+     */
+    public function isGuestUser(): bool
+    {
+        return (!$this->customerSession->isLoggedIn() && !$this->_checkoutSession->getQuote()->getCustomerId());
+    }
+
     /**
      * Generate Order Params
      *
      * @param mixed $guestEmail
-     * @return mixed|string
+     * @return array
      * @throws ConektaException
      * @throws InputException
      * @throws LocalizedException
      * @throws NoSuchEntityException
      * @throws InputMismatchException
      */
-    public function generateOrderParams($guestEmail)
+    public function generateOrderParams($guestEmail): array
     {
         $this->conektaLogger->info('ConektaOrder.generateOrderParams init');
 
@@ -127,13 +137,14 @@ class ConektaOrder extends Util
                 //name without numbers
                 $customerRequest['name'] = $customer->getName();
                 $customerRequest['email'] = $customer->getEmail();
-                $customerRequest['custom_reference'] = $customerId;
             } else {
                 //name without numbers
                 $customerRequest['name'] = $billingAddress->getName();
                 $customerRequest['email'] = $guestEmail;
             }
+            $customerRequest['custom_reference'] = $customerId;
             $customerRequest['metadata'] = [
+                'is_guest' => $this->isGuestUser(),
                 'group_id' => $customer->getGroupId(),
             ];
             $customerRequest['name'] = $this->removeNameSpecialCharacter($customerRequest['name']);

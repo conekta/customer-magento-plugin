@@ -34,7 +34,7 @@ class Session extends SessionManager
      * @param string|null $url
      * @return $this
      */
-    public function setConektaCheckoutId($url)
+    public function setConektaCheckoutId(?string $url): Session
     {
         $this->storage->setData('conekta_checkout_id', $url);
         return $this;
@@ -45,10 +45,17 @@ class Session extends SessionManager
      *
      * @return string|null
      */
-    public function getConektaCheckoutId()
+    public function getConektaCheckoutId(): ?string
     {
         if ($this->storage->getData('conekta_checkout_id')) {
             return $this->storage->getData('conekta_checkout_id');
+        }
+        return null;
+    }
+
+    public function getConektaCustomerId(){
+        if ($this->storage->getData('conekta_customer_id')) {
+            return $this->storage->getData('conekta_customer_id');
         }
         return null;
     }

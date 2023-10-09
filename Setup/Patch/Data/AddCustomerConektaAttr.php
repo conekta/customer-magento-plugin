@@ -8,18 +8,17 @@ use Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Setup\ModuleDataSetupInterface;
 use Magento\Framework\Setup\Patch\DataPatchInterface;
-use Magento\Framework\Setup\Patch\PatchInterface;
 
 class AddCustomerConektaAttr implements DataPatchInterface
 {
     /**
      * @var ModuleDataSetupInterface
      */
-    protected $moduleDataSetup;
+    protected ModuleDataSetupInterface $moduleDataSetup;
     /**
      * @var CustomerSetupFactory
      */
-    protected $customerSetupFactory;
+    protected CustomerSetupFactory $customerSetupFactory;
 
     /**
      * AddCustomerErpCustomerIdAttribute constructor.
@@ -40,7 +39,7 @@ class AddCustomerConektaAttr implements DataPatchInterface
      *
      * @return string[]
      */
-    public static function getDependencies()
+    public static function getDependencies(): array
     {
         return [];
     }
@@ -50,7 +49,7 @@ class AddCustomerConektaAttr implements DataPatchInterface
      *
      * @return string[]
      */
-    public function getAliases()
+    public function getAliases(): array
     {
         return [];
     }

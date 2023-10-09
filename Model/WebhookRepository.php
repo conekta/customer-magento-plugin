@@ -94,6 +94,7 @@ class WebhookRepository
      * @param array $body
      * @return void
      * @throws LocalizedException
+     * @throws Exception
      */
     public function expireOrder(array $body)
     {

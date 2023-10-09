@@ -13,7 +13,7 @@ class EmbedFormInfo extends Info
     /**
      * @var Config
      */
-    protected $_paymentConfig;
+    protected Config $_paymentConfig;
 
     /**
      * @var string
@@ -62,7 +62,7 @@ class EmbedFormInfo extends Info
     }
 
     /**
-     * Get off line info
+     * Get off-line info
      *
      * @return false|mixed
      * @throws LocalizedException
@@ -143,7 +143,7 @@ class EmbedFormInfo extends Info
      * @return bool
      * @throws LocalizedException
      */
-    public function isBankTransferPaymentMethod()
+    public function isBankTransferPaymentMethod(): bool
     {
         return $this->getPaymentMethodType() === ConfigProvider::PAYMENT_METHOD_BANK_TRANSFER;
     }
@@ -154,7 +154,7 @@ class EmbedFormInfo extends Info
      * @return string
      * @throws LocalizedException
      */
-    public function getCardType()
+    public function getCardType(): ?string
     {
         $additionalData = $this->getAdditionalData();
     
