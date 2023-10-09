@@ -77,4 +77,20 @@ abstract class Util extends AbstractHelper
     {
         return $value / 100.0;
     }
+    function splitName(string  $fullName): array
+    {
+        $splitName = [];
+        $names = explode(" ", $fullName);
+
+        if (count($names) >= 2) {
+            $splitName['firstname'] = $names[0];
+            $lastNameArray = array_slice($names, 1);
+            $splitName['lastname'] = implode(" ", $lastNameArray);
+        } else {
+            $splitName['firstname'] = $fullName;
+            $splitName['lastname'] = 'vacio'; // You can configure this as needed
+        }
+
+        return $splitName;
+    }
 }

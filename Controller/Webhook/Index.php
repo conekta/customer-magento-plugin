@@ -275,10 +275,10 @@ class Index extends Action implements CsrfAwareActionInterface
                 );
             }
             $this->_conektaLogger->info('end products', ['save_in_address_book' =>$metadata["save_in_address_book"]]);
-
+            $shippingNameReceiver = $this->utilHelper->splitName($conektaOrder["shipping_contact"]["receiver"]);
             $shipping_address = [
-                        'firstname'    => $conektaOrder["shipping_contact"]["receiver"], //address Details
-                        'lastname'     => '',
+                        'firstname'    => $shippingNameReceiver["firstname"],
+                        'lastname'     => $shippingNameReceiver["lastname"],
                         'street' => $conektaOrder["shipping_contact"]["address"]["street1"],
                         'city' => $conektaOrder["shipping_contact"]["address"]["city"],
                         'country_id' => strtoupper($conektaOrder["fiscal_entity"]["address"]["country"]),
@@ -288,9 +288,10 @@ class Index extends Action implements CsrfAwareActionInterface
                         'save_in_address_book' =>  intval( $metadata["save_in_address_book"]),
                         'region_id' => $metadata["shipping_region_id"] ?? "941"
             ];
+            $billingAddressName = $this->utilHelper->splitName($conektaOrder["fiscal_entity"]["name"]);
             $billing_address = [
-                'firstname'    =>$conektaOrder["fiscal_entity"]["name"], //address Details
-                'lastname'     => '',
+                'firstname'    => $billingAddressName["firstname"], //address Details
+                'lastname'     => $billingAddressName["lastname"],
                 'street' => $conektaOrder["fiscal_entity"]["address"]["street1"],
                 'city' => $conektaOrder["fiscal_entity"]["address"]["city"],
                 'country_id' => strtoupper($conektaOrder["fiscal_entity"]["address"]["country"]),
