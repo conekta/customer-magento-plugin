@@ -707,7 +707,7 @@ class Data extends Util
         $discountLines = [];
         if (! empty($totalDiscount)) {
             $totalDiscount = $this->convertToApiPrice($totalDiscount);
-            $discountLine["code"] = $quote->getCouponCode();
+            $discountLine["code"] = $quote->getCouponCode() ?? "Discounts";
             $discountLine["type"] = "coupon";
             $discountLine["amount"] = $totalDiscount;
             $discountLines[] = $discountLine;
