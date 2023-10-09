@@ -23,6 +23,7 @@ use Magento\Catalog\Model\Product;
 use Conekta\Payments\Model\Ui\EmbedForm\ConfigProvider;
 use Magento\Quote\Model\QuoteManagement;
 use  Magento\Customer\Api\CustomerRepositoryInterface;
+use function PHPUnit\Framework\isEmpty;
 
 class Index extends Action implements CsrfAwareActionInterface
 {
@@ -241,12 +242,11 @@ class Index extends Action implements CsrfAwareActionInterface
 
             $quoteCreated->setCurrency();
             $this->_conektaLogger->info('end set current', [
-                'currency=> ', $conektaOrder["currency"],
-                'customer_custom_reference',$conektaCustomer['custom_reference']]
+                'currency=> ', $conektaOrder["currency"]]
             );
 
             $quoteCreated->setCustomerId(null);
-            if (!$conektaCustomer['custom_reference']){
+            if (isset($conektaCustomer['custom_reference']) && !isEmpty($conektaCustomer['custom_reference'])){
                 $customer = $this->customerFactory->create();
                 $customer->setWebsiteId($store->getWebsiteId());
                 $customer->loadByEmail($conektaCustomer['email']);// load customer by email address
