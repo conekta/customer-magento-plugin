@@ -11,7 +11,7 @@ class BankTransferInfo extends Info
     /**
      * @var Config
      */
-    protected $_paymentConfig;
+    protected Config $_paymentConfig;
 
     /**
      * @var string
@@ -36,6 +36,7 @@ class BankTransferInfo extends Info
      * Get data BankTransfer
      *
      * @return false|mixed
+     * @throws LocalizedException
      */
     public function getDataBankTransfer()
     {
