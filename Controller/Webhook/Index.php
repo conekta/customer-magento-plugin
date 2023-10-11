@@ -354,6 +354,15 @@ class Index extends Action implements CsrfAwareActionInterface
                 'cc_bin' => "",
                 'cc_last_4' => $this->getPaymentMethod($conektaOrder["charges"]["data"][0]["payment_method"]["last4"]),
                 'card_token' =>  "",
+                'additional_data' => [
+                    'cc_type' => $this->getPaymentMethod($conektaOrder["charges"]["data"][0]["payment_method"]["brand"]),
+                    'card_type' => $this->getPaymentMethod($conektaOrder["charges"]["data"][0]["payment_method"]["type"]),
+                    'cc_exp_month' => $this->getPaymentMethod($conektaOrder["charges"]["data"][0]["payment_method"]["exp_month"]),
+                    'cc_exp_year' => $this->getPaymentMethod($conektaOrder["charges"]["data"][0]["payment_method"]["exp_year"]),
+                    'cc_bin' => "",
+                    'cc_last_4' => $this->getPaymentMethod($conektaOrder["charges"]["data"][0]["payment_method"]["last4"]),
+                    'card_token' =>  "",
+                ]
             ];
             $quoteCreated->getPayment()->setAdditionalInformation($additionalInformation);
             $this->_conektaLogger->info('Set Sales Order Payment');
