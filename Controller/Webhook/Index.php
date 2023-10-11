@@ -31,7 +31,7 @@ use Conekta\Payments\Api\ConektaApiClient;
 class Index extends Action implements CsrfAwareActionInterface
 {
     private const EVENT_WEBHOOK_PING = 'webhook_ping';
-    private const EVENT_CHARGE_CREATED = 'charge.created';
+    private const EVENT_ORDER_CREATED = 'order.created';
     private const EVENT_ORDER_UPDATED = 'order.updated';
     private const EVENT_ORDER_PENDING_PAYMENT = 'order.pending_payment';
     private const EVENT_ORDER_PAID = 'order.paid';
@@ -176,11 +176,6 @@ class Index extends Action implements CsrfAwareActionInterface
             switch ($event) {
                 case self::EVENT_WEBHOOK_PING:
                     break;
-                case self::EVENT_CHARGE_CREATED:
-                    if (!$this->isCardPayment($body['data']['object']["payment_method"]["object"])){
-                        $this->validate_order_exist($body);
-                    }
-                    break;
                 case self::EVENT_ORDER_PENDING_PAYMENT:
                     $order = $this->webhookRepository->findByMetadataOrderId($body);
                     if (!$order->getId()) {
@@ -189,6 +184,9 @@ class Index extends Action implements CsrfAwareActionInterface
                             'message' => 'The requested order does not exist.'
                         ];
                         return $this->sendJsonResponse($errorResponse, Response::STATUS_CODE_404);
+                    }
+                    if (isset($body['data']['object']["charges"]) && !$this->isCardPayment($body['data']['object']["charges"]["data"][0]["payment_method"]["object"])){
+                        $this->validate_order_exist($body);
                     }
                     break;
                 case self::EVENT_ORDER_UPDATED:
@@ -210,7 +208,7 @@ class Index extends Action implements CsrfAwareActionInterface
             $this->_conektaLogger->error('Controller Index :: '. $e->getMessage());
             $errorResponse = [
                 'error' => 'Internal Server Error',
-                'message' => 'An error occurred while processing the request.'
+                'message' => $e->getMessage(),
             ];
             return $this->sendJsonResponse($errorResponse, Response::STATUS_CODE_500);
         }
@@ -392,6 +390,7 @@ class Index extends Action implements CsrfAwareActionInterface
 
         } catch (Exception $e) {
             $this->_conektaLogger->error('creating order '.$e->getMessage());
+            throw  $e;
         }
     }
 
