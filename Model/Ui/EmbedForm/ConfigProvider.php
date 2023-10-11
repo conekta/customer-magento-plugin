@@ -123,7 +123,7 @@ class ConfigProvider implements ConfigProviderInterface
     }
 
     /**
-     * Get Minimun amount montly installments
+     * Get Minimum amount monthly installments
      *
      * @return mixed
      */

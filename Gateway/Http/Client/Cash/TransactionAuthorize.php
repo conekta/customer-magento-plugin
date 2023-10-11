@@ -3,12 +3,10 @@
 namespace Conekta\Payments\Gateway\Http\Client\Cash;
 
 use Conekta\Payments\Api\ConektaApiClient;
-use Conekta\Payments\Gateway\Http\Util\HttpUtil;
 use Conekta\Payments\Helper\Data as ConektaHelper;
 use Conekta\Payments\Logger\Logger as ConektaLogger;
 use Conekta\Payments\Api\Data\ConektaSalesOrderInterface;
 use Conekta\Payments\Model\ConektaSalesOrderFactory;
-use Magento\Framework\Validator\Exception;
 use Magento\Payment\Gateway\Http\ClientInterface;
 use Magento\Payment\Gateway\Http\TransferInterface;
 use Magento\Payment\Model\Method\Logger;
@@ -29,50 +27,40 @@ class TransactionAuthorize implements ClientInterface
     /**
      * @var Logger
      */
-    private $logger;
+    private Logger $logger;
 
     protected ConektaHelper $_conektaHelper;
 
     private ConektaLogger $_conektaLogger;
-
-    protected HttpUtil $_httpUtil;
 
     protected ConektaSalesOrderFactory $conektaSalesOrderFactory;
 
     /**
      * @var ConektaApiClient
      */
-    private $conektaApiClient;
+    private ConektaApiClient $conektaApiClient;
 
     /**
      * @param Logger $logger
      * @param ConektaHelper $conektaHelper
      * @param ConektaLogger $conektaLogger
      * @param ConektaApiClient $conektaApiClient
-     * @param HttpUtil $httpUtil
      * @param ConektaSalesOrderFactory $conektaSalesOrderFactory
-     * @throws Exception
      */
     public function __construct(
         Logger                   $logger,
         ConektaHelper            $conektaHelper,
         ConektaLogger            $conektaLogger,
         ConektaApiClient         $conektaApiClient,
-        HttpUtil                 $httpUtil,
         ConektaSalesOrderFactory $conektaSalesOrderFactory
     )
     {
         $this->_conektaHelper = $conektaHelper;
         $this->_conektaLogger = $conektaLogger;
         $this->conektaApiClient = $conektaApiClient;
-        $this->_httpUtil = $httpUtil;
         $this->_conektaLogger->info('HTTP Client Cash TransactionAuthorize :: __construct');
         $this->logger = $logger;
         $this->conektaSalesOrderFactory = $conektaSalesOrderFactory;
-        $config = [
-            'locale' => 'es'
-        ];
-        $this->_httpUtil->setupConektaClient($config);
     }
 
     /**
@@ -126,7 +114,7 @@ class TransactionAuthorize implements ClientInterface
                 $result_code = 666;
             }
         } catch (\Exception $e) {
-            $this->logger->error(__('[Conekta]: Payment capturing error.'));
+            $this->_conektaLogger->error(__('[Conekta]: Payment capturing error.'));
             $this->logger->debug(
                 [
                     'request' => $request,

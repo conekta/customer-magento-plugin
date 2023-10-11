@@ -11,16 +11,14 @@ class TxnIdHandler implements HandlerInterface
 
     const ORD_ID = 'ORD_ID';
 
-    private $_conektaLogger;
+    private ConektaLogger $_conektaLogger;
 
-    private $subjectReader;
+    private SubjectReader $subjectReader;
 
     /**
      * TxnIdHandler constructor.
      * @param ConektaLogger $conektaLogger
      * @param SubjectReader $subjectReader
-     * @param \Magento\Sales\Model\Service\InvoiceService $invoiceService
-     * @param \Magento\Framework\DB\TransactionFactory $transactionFactory
      */
     public function __construct(
         ConektaLogger $conektaLogger,

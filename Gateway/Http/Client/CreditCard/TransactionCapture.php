@@ -7,6 +7,8 @@ use Conekta\Payments\Helper\Data as ConektaHelper;
 use Conekta\Payments\Logger\Logger as ConektaLogger;
 use Conekta\Payments\Api\Data\ConektaSalesOrderInterface;
 use Conekta\Payments\Model\ConektaSalesOrderFactory;
+use Exception;
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Payment\Gateway\Http\ClientInterface;
 use Magento\Payment\Gateway\Http\TransferInterface;
 use Magento\Payment\Model\Method\Logger;
@@ -14,40 +16,29 @@ use Magento\Payment\Model\Method\Logger;
 class TransactionCapture implements ClientInterface
 {
     const SUCCESS = 1;
-    const FAILURE = 0;
-
-    /**
-     * @var array
-     */
-    private $results = [
-        self::SUCCESS,
-        self::FAILURE
-    ];
 
     /**
      * @var Logger
      */
-    private $logger;
+    private Logger $logger;
 
-    protected $_conektaHelper;
+    protected ConektaHelper $_conektaHelper;
 
-    private $_conektaLogger;
+    private ConektaLogger $_conektaLogger;
 
-    private $_conektaOrder;
-
-    protected $_httpUtil;
-
-    protected $conektaSalesOrderFactory;
+    protected ConektaSalesOrderFactory $conektaSalesOrderFactory;
 
     /**
      * @var ConektaApiClient
      */
-    private $conektaApiClient;
+    private ConektaApiClient $conektaApiClient;
 
     /**
      * @param Logger $logger
      * @param ConektaHelper $conektaHelper
      * @param ConektaLogger $conektaLogger
+     * @param ConektaApiClient $conektaApiClient
+     * @param ConektaSalesOrderFactory $conektaSalesOrderFactory
      */
     public function __construct(
         Logger                   $logger,
@@ -63,11 +54,6 @@ class TransactionCapture implements ClientInterface
         $this->_conektaLogger->info('HTTP Client TransactionCapture :: __construct');
         $this->logger = $logger;
         $this->conektaSalesOrderFactory = $conektaSalesOrderFactory;
-
-        $config = [
-            'locale' => 'es'
-        ];
-        $this->_httpUtil->setupConektaClient($config);
     }
 
     /**
@@ -75,8 +61,10 @@ class TransactionCapture implements ClientInterface
      *
      * @param TransferInterface $transferObject
      * @return array
+     * @throws LocalizedException
+     * @throws Exception
      */
-    public function placeRequest(TransferInterface $transferObject)
+    public function placeRequest(TransferInterface $transferObject): array
     {
         $this->_conektaLogger->info('HTTP Client TransactionCapture :: placeRequest');
         $request = $transferObject->getBody();
@@ -117,7 +105,7 @@ class TransactionCapture implements ClientInterface
             } else {
                 $result_code = 666;
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->logger->debug(
                 [
                     'request' => $request,
@@ -129,8 +117,7 @@ class TransactionCapture implements ClientInterface
             );
 
             $error_code = $e->getMessage();
-            $result_code = 666;
-            throw new \Magento\Framework\Exception\LocalizedException(__($error_code));
+            throw new LocalizedException(__($error_code));
         }
 
         $response = $this->generateResponseForCode(
@@ -159,7 +146,10 @@ class TransactionCapture implements ClientInterface
         return $response;
     }
 
-    protected function generateResponseForCode($resultCode, $txn_id, $ord_id)
+    /**
+     * @throws Exception
+     */
+    protected function generateResponseForCode($resultCode, $txn_id, $ord_id): array
     {
         $this->_conektaLogger->info('HTTP Client TransactionCapture :: generateResponseForCode');
 
@@ -175,7 +165,10 @@ class TransactionCapture implements ClientInterface
         );
     }
 
-    protected function generateTxnId()
+    /**
+     * @throws Exception
+     */
+    protected function generateTxnId(): string
     {
         $this->_conektaLogger->info('HTTP Client TransactionCapture :: generateTxnId');
 

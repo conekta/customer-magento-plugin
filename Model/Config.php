@@ -7,7 +7,6 @@ use Conekta\Payments\Helper\Data as ConektaHelper;
 use Conekta\Payments\Logger\Logger as ConektaLogger;
 use Magento\Framework\Encryption\EncryptorInterface;
 use Magento\Framework\Exception\NoSuchEntityException;
-use Magento\Framework\Locale\Resolver;
 use Magento\Framework\Validator\Exception;
 
 class Config
@@ -15,42 +14,36 @@ class Config
     /**
      * @var EncryptorInterface
      */
-    protected $_encryptor;
+    protected EncryptorInterface $_encryptor;
     /**
      * @var ConektaHelper
      */
-    protected $_conektaHelper;
+    protected ConektaHelper $_conektaHelper;
     /**
      * @var ConektaLogger
      */
-    private $_conektaLogger;
-    /**
-     * @var Resolver
-     */
-    protected $_resolver;
+    private ConektaLogger $_conektaLogger;
+
     /**
      * @var ConektaApiClient
      */
-    protected $conektaApiClient;
+    protected ConektaApiClient $conektaApiClient;
 
     /**
      * @param EncryptorInterface $encryptor
      * @param ConektaHelper $conektaHelper
-     * @param Resolver $resolver
      * @param ConektaLogger $conektaLogger
      * @param ConektaApiClient $conektaApiClient
      */
     public function __construct(
         EncryptorInterface $encryptor,
         ConektaHelper      $conektaHelper,
-        Resolver           $resolver,
         ConektaLogger      $conektaLogger,
         ConektaApiClient   $conektaApiClient
     )
     {
         $this->_encryptor = $encryptor;
         $this->_conektaHelper = $conektaHelper;
-        $this->_resolver = $resolver;
         $this->_conektaLogger = $conektaLogger;
         $this->conektaApiClient = $conektaApiClient;
     }
@@ -65,11 +58,6 @@ class Config
     {
         $urlWebhook = $this->_conektaHelper->getUrlWebhookOrDefault();
         try {
-            $sandboxMode = $this->_conektaHelper->getConfigData('conekta/conekta_global', 'sandbox_mode');
-
-            $events = ["events" => ["charge.paid"]];
-            $errorMessage = null;
-
             $different = true;
             $webhooks = $this->conektaApiClient->getWebhooks();
             $data = $webhooks->getData();
@@ -79,23 +67,19 @@ class Config
                 }
             }
             if ($different) {
-                $webhookResponse = $this->conektaApiClient->createWebhook([
+                $this->conektaApiClient->createWebhook([
                     'url' => $urlWebhook
                 ]);
             } else {
                 $this->_conektaLogger->info('[Conekta]: El webhook ' . $urlWebhook . ' ya se encuentra en Conekta!');
             }
-        } catch (Exception $e) {
-            $errorMessage = $e->getMessage();
-            $this->_conektaLogger->info('[Conekta]: CreateWebhook error, Message: ' . $errorMessage);
-
         } catch (\Exception $e) {
             $errorMessage = $e->getMessage();
             $this->_conektaLogger->info('[Conekta]: Webhook error, Message: ' . $errorMessage . ' URL: ' . $urlWebhook);
 
             throw new Exception(
                 __('Can not register this webhook ' . $urlWebhook . '<br>'
-                    . 'Message: ' . (string)$errorMessage)
+                    . 'Message: ' . $errorMessage)
             );
         }
     }

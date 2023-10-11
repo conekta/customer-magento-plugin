@@ -33,6 +33,7 @@ class Index extends Action implements CsrfAwareActionInterface
 {
     private const EVENT_WEBHOOK_PING = 'webhook_ping';
     private const EVENT_ORDER_CREATED = 'order.created';
+    private const EVENT_ORDER_UPDATED = 'order.updated';
     private const EVENT_ORDER_PENDING_PAYMENT = 'order.pending_payment';
     private const EVENT_ORDER_PAID = 'order.paid';
     private const EVENT_ORDER_EXPIRED = 'order.expired';
@@ -172,12 +173,15 @@ class Index extends Action implements CsrfAwareActionInterface
             $event = $body['type'];
 
             $this->_conektaLogger->info('Controller Index :: execute body json ', ['event' => $event]);
-            $this->validate_order_exist($body);
 
             switch ($event) {
                 case self::EVENT_WEBHOOK_PING:
                     break;
                 case self::EVENT_ORDER_CREATED:
+                    if (!$this->isCardPayment($body['data']['object']["charges"]["data"][0]["payment_method"]["object"])){
+                        $this->validate_order_exist($body);
+                    }
+                    break;
                 case self::EVENT_ORDER_PENDING_PAYMENT:
                     $order = $this->webhookRepository->findByMetadataOrderId($body);
                     if (!$order->getId()) {
@@ -188,8 +192,15 @@ class Index extends Action implements CsrfAwareActionInterface
                         return $this->sendJsonResponse($errorResponse, Response::STATUS_CODE_404);
                     }
                     break;
-                
+                case self::EVENT_ORDER_UPDATED:
+                    if (!$this->isCardPayment($body['data']['object']["charges"]["data"][0]["payment_method"]["object"])){
+                        $this->updateOrder($body['data']['object']);
+                    }
+                    break;
                 case self::EVENT_ORDER_PAID:
+                    if ($this->isCardPayment($body['data']['object']["charges"]["data"][0]["payment_method"]["object"])){
+                        $this->validate_order_exist($body);
+                    }
                     $this->webhookRepository->payOrder($body);
                     break;
                 
@@ -209,6 +220,10 @@ class Index extends Action implements CsrfAwareActionInterface
         
         return $resultRaw->setHttpResponseCode($response);
     }
+
+    private function updateOrder(array $conektaOrder){
+
+    }
     private function sendJsonResponse($data, $httpStatusCode)
     {
         $resultRaw = $this->resultRawFactory->create();
@@ -224,8 +239,6 @@ class Index extends Action implements CsrfAwareActionInterface
      */
     public function validate_order_exist($event){
         try {
-            $this->_conektaLogger->info('validate_order_exist  :: execute body json ', ['event' => $event['type']]);
-
             if ($event['type'] != self::EVENT_ORDER_PAID){
                 return ;
             }
@@ -240,22 +253,15 @@ class Index extends Action implements CsrfAwareActionInterface
             $conektaOrder = $event['data']['object'];
             $conektaCustomer = $conektaOrder['customer_info'];
             $metadata = $conektaOrder['metadata'];
-            $this->_conektaLogger->info('after validate order ', ['store'=> $metadata["store"]]);
 
             $store = $this->_storeManager->getStore(intval($metadata["store"]));
-
-            $this->_conektaLogger->info('store', ['store_id'=> $store->getId()]);
 
             $quoteCreated=$this->quote->create(); //Create object of quote
             $this->_conektaLogger->info('end quoting creating');
 
             $quoteCreated->setStore($store); //set store for which you create quote
-            $this->_conektaLogger->info('end set store', ['currency'=> $conektaOrder["currency"]]);
 
             $quoteCreated->setCurrency();
-            $this->_conektaLogger->info('end set current', [
-                'currency=> ', $conektaOrder["currency"]]
-            );
             $customerName = $this->utilHelper->splitName($conektaCustomer['name']);
 
             $quoteCreated->setCustomerEmail($conektaCustomer['email']);
@@ -283,7 +289,6 @@ class Index extends Action implements CsrfAwareActionInterface
                     intval($item['quantity'])
                 );
             }
-            $this->_conektaLogger->info('end products', ['save_in_address_book' =>$metadata["save_in_address_book"]]);
             $shippingNameReceiver = $this->utilHelper->splitName($conektaOrder["shipping_contact"]["receiver"]);
             $shipping_address = [
                         'firstname'    => $shippingNameReceiver["firstname"],
@@ -326,7 +331,7 @@ class Index extends Action implements CsrfAwareActionInterface
             $shippingAddress->setCollectShippingRates(true)
                 ->collectShippingRates()
                 ->setShippingAmount($this->utilHelper->convertFromApiPrice($conektaShippingLines[0]["amount"]))
-                ->setShippingMethod($conektaShippingLines[0]["method"]); //shipping method
+                ->setShippingMethod($conektaShippingLines[0]["method"]);
 
             $this->_conektaLogger->info('end $conektaShippingLines');
 
@@ -374,6 +379,11 @@ class Index extends Action implements CsrfAwareActionInterface
             $this->_conektaLogger->error('creating order '.$e->getMessage());
         }
     }
+
+    private function isCardPayment(string $paymentMethod):bool {
+        return $paymentMethod == "card_payment";
+    }
+
     private function getAdditionalInformation(array $conektaOrder) :array{
         switch ($conektaOrder["charges"]["data"][0]["payment_method"]["object"]){
             case "card_payment":

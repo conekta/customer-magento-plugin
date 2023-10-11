@@ -4,22 +4,19 @@ namespace Conekta\Payments\Gateway\Request\CreditCard;
 use Conekta\Payments\Helper\Data as ConektaHelper;
 use Conekta\Payments\Logger\Logger as ConektaLogger;
 use Magento\Framework\Validator\Exception;
-use Magento\Payment\Gateway\ConfigInterface;
 use Magento\Payment\Gateway\Helper\SubjectReader;
 use Magento\Payment\Gateway\Request\BuilderInterface;
 
 class CaptureRequest implements BuilderInterface
 {
-    private $config;
 
-    private $subjectReader;
+    private SubjectReader $subjectReader;
 
-    protected $_conektaHelper;
+    protected ConektaHelper $_conektaHelper;
 
-    private $_conektaLogger;
+    private ConektaLogger $_conektaLogger;
 
     public function __construct(
-        ConfigInterface $config,
         SubjectReader $subjectReader,
         ConektaHelper $conektaHelper,
         ConektaLogger $conektaLogger
@@ -27,15 +24,13 @@ class CaptureRequest implements BuilderInterface
         $this->_conektaHelper = $conektaHelper;
         $this->_conektaLogger = $conektaLogger;
         $this->_conektaLogger->info('Request CaptureRequest :: __construct');
-
-        $this->config = $config;
         $this->subjectReader = $subjectReader;
     }
 
     /**
      * @throws Exception
      */
-    public function build(array $buildSubject)
+    public function build(array $buildSubject): array
     {
         $this->_conektaLogger->info('Request CaptureRequest :: build');
 

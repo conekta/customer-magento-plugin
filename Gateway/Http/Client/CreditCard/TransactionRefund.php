@@ -5,31 +5,29 @@ namespace Conekta\Payments\Gateway\Http\Client\CreditCard;
 use Conekta\Payments\Api\ConektaApiClient;
 use Conekta\Payments\Helper\Data as ConektaHelper;
 use Conekta\Payments\Logger\Logger as ConektaLogger;
+use Exception;
 use Magento\Payment\Gateway\Http\ClientInterface;
 use Magento\Payment\Gateway\Http\TransferInterface;
 use Magento\Payment\Model\Method\Logger;
 
 class TransactionRefund implements ClientInterface
 {
-    protected $_conektaHelper;
+    protected ConektaHelper $_conektaHelper;
 
-    private $_conektaLogger;
+    private ConektaLogger $_conektaLogger;
 
-    private $logger;
-
-    protected $_httpUtil;
+    private Logger $logger;
 
     /**
      * @var ConektaApiClient
      */
-    private $conektaApiClient;
+    private ConektaApiClient $conektaApiClient;
 
     public function __construct(
         ConektaHelper      $conektaHelper,
         ConektaLogger      $conektaLogger,
         ConektaApiClient   $conektaApiClient,
-        Logger             $logger,
-        array              $data = []
+        Logger             $logger
     )
     {
         $this->_conektaHelper = $conektaHelper;
@@ -38,14 +36,9 @@ class TransactionRefund implements ClientInterface
         $this->logger = $logger;
 
         $this->_conektaLogger->info('HTTP Client CreditCard TransactionRefund :: __construct');
-
-        $config = [
-            'locale' => 'es'
-        ];
-        $this->_httpUtil->setupConektaClient($config);
     }
 
-    public function placeRequest(TransferInterface $transferObject)
+    public function placeRequest(TransferInterface $transferObject): array
     {
         $this->_conektaLogger->info('HTTP Client CreditCard TransactionRefund :: placeRequest');
 
@@ -63,7 +56,7 @@ class TransactionRefund implements ClientInterface
 
             $response['refund_result']['status'] = 'SUCCESS';
             $response['refund_result']['status_message'] = 'Refunded';
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $error_code = $e->getMessage();
             $this->logger->debug(
                 [

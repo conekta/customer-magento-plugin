@@ -216,7 +216,7 @@ class ConektaOrder extends Util
     }
 
     /**
-     * Get montly installments
+     * Get monthly installments
      *
      * @return array
      * @throws LocalizedException

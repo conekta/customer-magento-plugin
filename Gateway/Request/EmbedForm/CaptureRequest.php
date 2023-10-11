@@ -16,11 +16,11 @@ class CaptureRequest implements BuilderInterface
     /**
      * @var ConfigInterface
      */
-    protected $config;
+    protected ConfigInterface $config;
     /**
      * @var SubjectReader
      */
-    protected $subjectReader;
+    protected SubjectReader $subjectReader;
     /**
      * @var ConektaHelper
      */
@@ -79,9 +79,6 @@ class CaptureRequest implements BuilderInterface
         $payment = $paymentDO->getPayment();
         $order = $paymentDO->getOrder();
         $this->_conektaLogger->info('Request CaptureRequest :: build additional', $payment->getAdditionalInformation());
-        $token = $payment->getAdditionalInformation('card_token');
-        $savedCard = $payment->getAdditionalInformation('saved_card');
-        $enableSavedCard = $payment->getAdditionalInformation('saved_card_later');
         $iframePayment = $payment->getAdditionalInformation('iframe_payment');
         $iframeOrderId = $payment->getAdditionalInformation('order_id');
         $txnId = $payment->getAdditionalInformation('txn_id');

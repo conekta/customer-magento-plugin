@@ -3,7 +3,6 @@
 namespace Conekta\Payments\Gateway\Http\Client\BankTransfer;
 
 use Conekta\ApiException;
-use Conekta\Payments\Gateway\Http\Util\HttpUtil;
 use Conekta\Payments\Helper\Data as ConektaHelper;
 use Conekta\Payments\Logger\Logger as ConektaLogger;
 use Magento\Payment\Gateway\Http\ClientInterface;
@@ -21,7 +20,7 @@ class TransactionAuthorize implements ClientInterface
     /**
      * @var array
      */
-    private $results = [
+    private array $results = [
         self::SUCCESS,
         self::FAILURE
     ];
@@ -31,47 +30,38 @@ class TransactionAuthorize implements ClientInterface
      */
     private $logger;
 
-    protected $_conektaHelper;
+    protected ConektaHelper $_conektaHelper;
 
-    private $_conektaLogger;
+    private ConektaLogger $_conektaLogger;
 
-    private $_conektaOrder;
-
-    protected $_httpUtil;
-
-    protected $conektaSalesOrderFactory;
+    protected ConektaSalesOrderFactory $conektaSalesOrderFactory;
 
     /**
      * @var ConektaApiClient
      */
-    private $conektaApiClient;
+    private ConektaApiClient $conektaApiClient;
 
     /**
      * @param Logger $logger
      * @param ConektaHelper $conektaHelper
      * @param ConektaLogger $conektaLogger
+     * @param ConektaApiClient $conektaApiClient
+     * @param ConektaSalesOrderFactory $conektaSalesOrderFactory
      */
     public function __construct(
         Logger                   $logger,
         ConektaHelper            $conektaHelper,
         ConektaLogger            $conektaLogger,
         ConektaApiClient         $conektaApiClient,
-        HttpUtil                 $httpUtil,
         ConektaSalesOrderFactory $conektaSalesOrderFactory
     )
     {
         $this->_conektaHelper = $conektaHelper;
         $this->_conektaLogger = $conektaLogger;
         $this->conektaApiClient = $conektaApiClient;
-        $this->_httpUtil = $httpUtil;
         $this->_conektaLogger->info('HTTP Client BankTransfer TransactionAuthorize :: __construct');
         $this->logger = $logger;
         $this->conektaSalesOrderFactory = $conektaSalesOrderFactory;
-
-        $config = [
-            'locale' => 'es'
-        ];
-        $this->_httpUtil->setupConektaClient($config);
     }
 
     /**
@@ -81,7 +71,7 @@ class TransactionAuthorize implements ClientInterface
      * @return array
      * @throws ApiException
      */
-    public function placeRequest(TransferInterface $transferObject)
+    public function placeRequest(TransferInterface $transferObject): array
     {
         $this->_conektaLogger->info('HTTP Client BankTransfer TransactionAuthorize :: placeRequest');
         $request = $transferObject->getBody();
@@ -127,7 +117,7 @@ class TransactionAuthorize implements ClientInterface
                 $result_code = 666;
             }
         } catch (ApiException $e) {
-            $this->logger->error(__('[Conekta]: Payment capturing error.'));
+            $this->_conektaLogger->error(__('[Conekta]: Payment capturing error.'));
             $this->logger->debug(
                 [
                     'request' => $request,
@@ -177,7 +167,7 @@ class TransactionAuthorize implements ClientInterface
         return $response;
     }
 
-    protected function generateResponseForCode($resultCode, $txn_id, $ord_id)
+    protected function generateResponseForCode($resultCode, $txn_id, $ord_id): array
     {
         $this->_conektaLogger->info('HTTP Client BankTransfer TransactionAuthorize :: generateResponseForCode');
 
