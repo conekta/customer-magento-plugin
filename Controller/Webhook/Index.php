@@ -27,12 +27,12 @@ use Magento\Customer\Api\CustomerRepositoryInterface;
 use Conekta\Payments\Helper\Data as ConektaData;
 use Magento\Framework\App\ObjectManager;
 use Conekta\Payments\Api\ConektaApiClient;
-use Magento\Quote\Api\Data\PaymentInterface;
 
 class Index extends Action implements CsrfAwareActionInterface
 {
     private const EVENT_WEBHOOK_PING = 'webhook_ping';
     private const EVENT_ORDER_CREATED = 'order.created';
+    private const EVENT_CHARGE_CREATED = 'charge.created';
     private const EVENT_ORDER_UPDATED = 'order.updated';
     private const EVENT_ORDER_PENDING_PAYMENT = 'order.pending_payment';
     private const EVENT_ORDER_PAID = 'order.paid';
@@ -177,7 +177,7 @@ class Index extends Action implements CsrfAwareActionInterface
             switch ($event) {
                 case self::EVENT_WEBHOOK_PING:
                     break;
-                case self::EVENT_ORDER_CREATED:
+                case self::EVENT_CHARGE_CREATED:
                     if (!$this->isCardPayment($body['data']['object']["charges"]["data"][0]["payment_method"]["object"])){
                         $this->validate_order_exist($body);
                     }
