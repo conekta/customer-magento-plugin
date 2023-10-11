@@ -336,9 +336,9 @@ class Index extends Action implements CsrfAwareActionInterface
                 $quoteCreated->setCustomDiscount($this->getDiscountAmount($conektaOrder["discount_lines"]["data"]));
             }
 
-            $quoteCreated->setPaymentMethod(ConfigProvider::CODE); //payment method
-            $quoteCreated->setInventoryProcessed(false); //not affect inventory
-            $quoteCreated->save(); //Now Save quote and your quote is ready
+            $quoteCreated->setPaymentMethod(ConfigProvider::CODE);
+            $quoteCreated->setInventoryProcessed(false);
+            $quoteCreated->save();
             $this->_conektaLogger->info('end save quote');
 
 
@@ -349,13 +349,6 @@ class Index extends Action implements CsrfAwareActionInterface
                 'txn_id' =>  $conektaOrder["charges"]["data"][0]["id"],
                 'quote_id'=> $quoteCreated->getId(),
                 'payment_method' => $this->getPaymentMethod($conektaOrder["charges"]["data"][0]["payment_method"]["object"]),
-                'cc_type' => $conektaOrder["charges"]["data"][0]["payment_method"]["brand"],
-                'card_type' => $conektaOrder["charges"]["data"][0]["payment_method"]["type"],
-                'cc_exp_month' =>$conektaOrder["charges"]["data"][0]["payment_method"]["exp_month"],
-                'cc_exp_year' => $conektaOrder["charges"]["data"][0]["payment_method"]["exp_year"],
-                'cc_bin' => "",
-                'cc_last_4' => $conektaOrder["charges"]["data"][0]["payment_method"]["last4"],
-                'card_token' =>  "",
                 PaymentInterface::KEY_ADDITIONAL_DATA => [
                     'cc_type' =>$conektaOrder["charges"]["data"][0]["payment_method"]["brand"],
                     'card_type' => $conektaOrder["charges"]["data"][0]["payment_method"]["type"],
@@ -367,8 +360,6 @@ class Index extends Action implements CsrfAwareActionInterface
                 ]
             ];
             $quoteCreated->getPayment()->setAdditionalInformation($additionalInformation);
-            $this->_conektaLogger->info('Set Sales Order Payment');
-
             // Collect Totals & Save Quote
             $quoteCreated->collectTotals()->save();
             $this->_conektaLogger->info('Collect Totals & Save Quote');
