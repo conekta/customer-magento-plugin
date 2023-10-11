@@ -412,7 +412,7 @@ class Index extends Action implements CsrfAwareActionInterface
                 ];
             case "cash_payment":
                 return [
-                    'reference'=>  $conektaOrder["charges"]["data"][0]["payment_method"]["reference"]
+                    'reference'=> $conektaOrder["charges"]["data"][0]["payment_method"]["reference"] ?? null
                 ];
             case "bank_transfer_payment":
                 return [];
