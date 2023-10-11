@@ -177,6 +177,9 @@ class Index extends Action implements CsrfAwareActionInterface
                 case self::EVENT_WEBHOOK_PING:
                     break;
                 case self::EVENT_ORDER_PENDING_PAYMENT:
+                    if (isset($body['data']['object']["charges"]) && !$this->isCardPayment($body['data']['object']["charges"]["data"][0]["payment_method"]["object"])){
+                        $this->validate_order_exist($body);
+                    }
                     $order = $this->webhookRepository->findByMetadataOrderId($body);
                     if (!$order->getId()) {
                         $errorResponse = [
@@ -184,9 +187,6 @@ class Index extends Action implements CsrfAwareActionInterface
                             'message' => 'The requested order does not exist.'
                         ];
                         return $this->sendJsonResponse($errorResponse, Response::STATUS_CODE_404);
-                    }
-                    if (isset($body['data']['object']["charges"]) && !$this->isCardPayment($body['data']['object']["charges"]["data"][0]["payment_method"]["object"])){
-                        $this->validate_order_exist($body);
                     }
                     break;
                 case self::EVENT_ORDER_UPDATED:
