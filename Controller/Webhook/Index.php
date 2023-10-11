@@ -177,7 +177,7 @@ class Index extends Action implements CsrfAwareActionInterface
                 case self::EVENT_WEBHOOK_PING:
                     break;
                 case self::EVENT_CHARGE_CREATED:
-                    if (!$this->isCardPayment($body['data']['object']["charges"]["data"][0]["payment_method"]["object"])){
+                    if (!$this->isCardPayment($body['data']['object']["payment_method"]["object"])){
                         $this->validate_order_exist($body);
                     }
                     break;
