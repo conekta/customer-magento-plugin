@@ -99,7 +99,7 @@ class CreateOrder extends Action implements HttpPostActionInterface
 
                 $quoteSession = $this->checkoutSession->getQuote();
 
-                //genrates checkout form
+                //generates checkout form
                 $order = $this->embedFormRepository->generate(
                     $quoteSession->getId(),
                     $orderParams,

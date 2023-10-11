@@ -31,7 +31,6 @@ use Conekta\Payments\Api\ConektaApiClient;
 class Index extends Action implements CsrfAwareActionInterface
 {
     private const EVENT_WEBHOOK_PING = 'webhook_ping';
-    private const EVENT_ORDER_CREATED = 'order.created';
     private const EVENT_CHARGE_CREATED = 'charge.created';
     private const EVENT_ORDER_UPDATED = 'order.updated';
     private const EVENT_ORDER_PENDING_PAYMENT = 'order.pending_payment';
@@ -221,7 +220,32 @@ class Index extends Action implements CsrfAwareActionInterface
         return $resultRaw->setHttpResponseCode($response);
     }
 
+    /**
+     * @throws LocalizedException
+     * @throws Exception
+     */
     private function updateOrder(array $conektaOrder){
+        $order = $this->webhookRepository->findByMetadataOrderId($conektaOrder);
+        if (!$order->getId()) {
+            return ;
+        }
+        $billingAddressName = $this->utilHelper->splitName($conektaOrder["fiscal_entity"]["name"]);
+
+        $billing_address = [
+            'firstname'    => $billingAddressName["firstname"], //address Details
+            'lastname'     => $billingAddressName["lastname"],
+            'street' => $conektaOrder["fiscal_entity"]["address"]["street1"],
+            'city' => $conektaOrder["fiscal_entity"]["address"]["city"],
+            'country_id' => strtoupper($conektaOrder["fiscal_entity"]["address"]["country"]),
+            'region' => $conektaOrder["fiscal_entity"]["address"]["state"],
+            'postcode' => $conektaOrder["fiscal_entity"]["address"]["postal_code"],
+            'telephone' =>  $conektaOrder['customer_info']["phone"],
+            'save_in_address_book' =>  intval( $conektaOrder['metadata']["save_in_address_book"]),
+            'region_id' => $metadata["billing_region_id"] ?? "941"
+        ];
+
+        $order->getBillingAddress()->addData($billing_address);
+        $order->save();
 
     }
     private function sendJsonResponse($data, $httpStatusCode)
@@ -239,10 +263,6 @@ class Index extends Action implements CsrfAwareActionInterface
      */
     public function validate_order_exist($event){
         try {
-            if ($event['type'] != self::EVENT_ORDER_PAID){
-                return ;
-            }
-
             //check order en order with external id
             $conektaOrderFound = $this->webhookRepository->findByMetadataOrderId($event);
 
@@ -315,8 +335,6 @@ class Index extends Action implements CsrfAwareActionInterface
                 'save_in_address_book' =>  intval( $metadata["save_in_address_book"]),
                 'region_id' => $metadata["billing_region_id"] ?? "941"
             ];
-            $this->_conektaLogger->info('$billing_address', ['data'=>$billing_address]);
-            $this->_conektaLogger->info('$shipping_address', ['data'=>$shipping_address]);
 
             //Set Address to quote
             $quoteCreated->getBillingAddress()->addData($billing_address);
