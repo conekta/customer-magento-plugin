@@ -349,16 +349,9 @@ class Index extends Action implements CsrfAwareActionInterface
                 'txn_id' =>  $conektaOrder["charges"]["data"][0]["id"],
                 'quote_id'=> $quoteCreated->getId(),
                 'payment_method' => $this->getPaymentMethod($conektaOrder["charges"]["data"][0]["payment_method"]["object"]),
-                'cc_type' =>$conektaOrder["charges"]["data"][0]["payment_method"]["brand"],
-                'card_type' => $conektaOrder["charges"]["data"][0]["payment_method"]["type"],
-                'cc_exp_month' => $conektaOrder["charges"]["data"][0]["payment_method"]["exp_month"],
-                'cc_exp_year' => $conektaOrder["charges"]["data"][0]["payment_method"]["exp_year"],
-                'cc_bin' => null,
-                'cc_last_4' => $conektaOrder["charges"]["data"][0]["payment_method"]["last4"],
-                'card_token' =>  null,
-                'reference'=>  $conektaOrder["charges"]["data"][0]["payment_method"]["reference"]
             ];
-            $quoteCreated->getPayment()->setAdditionalInformation($additionalInformation);
+            $additionalInformation= array_merge($additionalInformation, $this->getAdditionalInformation($conektaOrder));
+            $quoteCreated->getPayment()->setAdditionalInformation(   $additionalInformation);
             // Collect Totals & Save Quote
             $quoteCreated->collectTotals()->save();
             $this->_conektaLogger->info('Collect Totals & Save Quote');
@@ -380,6 +373,27 @@ class Index extends Action implements CsrfAwareActionInterface
         } catch (Exception $e) {
             $this->_conektaLogger->error('creating order '.$e->getMessage());
         }
+    }
+    private function getAdditionalInformation(array $conektaOrder) :array{
+        switch ($conektaOrder["charges"]["data"][0]["payment_method"]["object"]){
+            case "card_payment":
+                return [
+                    'cc_type' => $conektaOrder["charges"]["data"][0]["payment_method"]["brand"],
+                    'card_type' => $conektaOrder["charges"]["data"][0]["payment_method"]["type"],
+                    'cc_exp_month' => $conektaOrder["charges"]["data"][0]["payment_method"]["exp_month"],
+                    'cc_exp_year' => $conektaOrder["charges"]["data"][0]["payment_method"]["exp_year"],
+                    'cc_bin' => null,
+                    'cc_last_4' => $conektaOrder["charges"]["data"][0]["payment_method"]["last4"],
+                    'card_token' =>  null,
+                ];
+            case "cash_payment":
+                return [
+                    'reference'=>  $conektaOrder["charges"]["data"][0]["payment_method"]["reference"]
+                ];
+            case "bank_transfer_payment":
+                return [];
+        }
+        return [];
     }
     private function updateConektaReference(string $chargeId, string $orderId){
          $chargeUpdate= [
@@ -412,5 +426,4 @@ class Index extends Action implements CsrfAwareActionInterface
         }
         return "";
     }
-
 }
