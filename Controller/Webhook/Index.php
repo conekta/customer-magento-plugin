@@ -192,9 +192,7 @@ class Index extends Action implements CsrfAwareActionInterface
                     }
                     break;
                 case self::EVENT_ORDER_UPDATED:
-                    if (!$this->isCardPayment($body['data']['object']["charges"]["data"][0]["payment_method"]["object"])){
                         $this->updateOrder($body['data']['object']);
-                    }
                     break;
                 case self::EVENT_ORDER_PAID:
                     if ($this->isCardPayment($body['data']['object']["charges"]["data"][0]["payment_method"]["object"])){
@@ -246,7 +244,6 @@ class Index extends Action implements CsrfAwareActionInterface
 
         $order->getBillingAddress()->addData($billing_address);
         $order->save();
-
     }
     private function sendJsonResponse($data, $httpStatusCode)
     {
