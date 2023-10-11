@@ -223,7 +223,7 @@ class Index extends Action implements CsrfAwareActionInterface
     private function updateOrder(array $conektaOrder){
         $order = $this->webhookRepository->findByMetadataOrderId($conektaOrder);
         if (!$order->getId()) {
-            return ;
+            throw  new Exception("order not found ". $conektaOrder["id"]);
         }
         $billingAddressName = $this->utilHelper->splitName($conektaOrder["fiscal_entity"]["name"]);
 
