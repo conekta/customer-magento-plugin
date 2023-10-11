@@ -27,6 +27,8 @@ use Magento\Customer\Api\CustomerRepositoryInterface;
 use Conekta\Payments\Helper\Data as ConektaData;
 use Magento\Framework\App\ObjectManager;
 use Conekta\Payments\Api\ConektaApiClient;
+use Magento\Quote\Api\Data\PaymentInterface;
+
 class Index extends Action implements CsrfAwareActionInterface
 {
     private const EVENT_WEBHOOK_PING = 'webhook_ping';
@@ -347,20 +349,20 @@ class Index extends Action implements CsrfAwareActionInterface
                 'txn_id' =>  $conektaOrder["charges"]["data"][0]["id"],
                 'quote_id'=> $quoteCreated->getId(),
                 'payment_method' => $this->getPaymentMethod($conektaOrder["charges"]["data"][0]["payment_method"]["object"]),
-                'cc_type' => $this->getPaymentMethod($conektaOrder["charges"]["data"][0]["payment_method"]["brand"]),
-                'card_type' => $this->getPaymentMethod($conektaOrder["charges"]["data"][0]["payment_method"]["type"]),
-                'cc_exp_month' => $this->getPaymentMethod($conektaOrder["charges"]["data"][0]["payment_method"]["exp_month"]),
-                'cc_exp_year' => $this->getPaymentMethod($conektaOrder["charges"]["data"][0]["payment_method"]["exp_year"]),
+                'cc_type' => $conektaOrder["charges"]["data"][0]["payment_method"]["brand"],
+                'card_type' => $conektaOrder["charges"]["data"][0]["payment_method"]["type"],
+                'cc_exp_month' =>$conektaOrder["charges"]["data"][0]["payment_method"]["exp_month"],
+                'cc_exp_year' => $conektaOrder["charges"]["data"][0]["payment_method"]["exp_year"],
                 'cc_bin' => "",
-                'cc_last_4' => $this->getPaymentMethod($conektaOrder["charges"]["data"][0]["payment_method"]["last4"]),
+                'cc_last_4' => $conektaOrder["charges"]["data"][0]["payment_method"]["last4"],
                 'card_token' =>  "",
-                'additional_data' => [
-                    'cc_type' => $this->getPaymentMethod($conektaOrder["charges"]["data"][0]["payment_method"]["brand"]),
-                    'card_type' => $this->getPaymentMethod($conektaOrder["charges"]["data"][0]["payment_method"]["type"]),
-                    'cc_exp_month' => $this->getPaymentMethod($conektaOrder["charges"]["data"][0]["payment_method"]["exp_month"]),
-                    'cc_exp_year' => $this->getPaymentMethod($conektaOrder["charges"]["data"][0]["payment_method"]["exp_year"]),
+                PaymentInterface::KEY_ADDITIONAL_DATA => [
+                    'cc_type' =>$conektaOrder["charges"]["data"][0]["payment_method"]["brand"],
+                    'card_type' => $conektaOrder["charges"]["data"][0]["payment_method"]["type"],
+                    'cc_exp_month' => $conektaOrder["charges"]["data"][0]["payment_method"]["exp_month"],
+                    'cc_exp_year' => $conektaOrder["charges"]["data"][0]["payment_method"]["exp_year"],
                     'cc_bin' => "",
-                    'cc_last_4' => $this->getPaymentMethod($conektaOrder["charges"]["data"][0]["payment_method"]["last4"]),
+                    'cc_last_4' => $conektaOrder["charges"]["data"][0]["payment_method"]["last4"],
                     'card_token' =>  "",
                 ]
             ];
