@@ -15,7 +15,7 @@ class CcInfo extends Info
     /**
      * @var Config
      */
-    protected $_paymentConfig;
+    protected Config $_paymentConfig;
 
     /**
      * @var string
