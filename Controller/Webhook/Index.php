@@ -354,8 +354,6 @@ class Index extends Action implements CsrfAwareActionInterface
                 ->save();
             $this->updateConektaReference($conektaOrder["charges"]["data"][0]["id"],  $increment_id);
 
-            $this->_conektaLogger->info('end');
-
         } catch (Exception $e) {
             $this->_conektaLogger->error('creating order '.$e->getMessage());
             throw  $e;

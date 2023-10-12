@@ -3,7 +3,6 @@
 namespace Conekta\Payments\Helper;
 
 use Conekta\Payments\Logger\Logger as ConektaLogger;
-use Magento\Catalog\Model\Product;
 use Magento\Framework\App\Helper\Context;
 use Magento\Framework\App\ProductMetadataInterface;
 use Magento\Framework\Encryption\EncryptorInterface;
@@ -531,9 +530,7 @@ class Data extends Util
                             $item->getProductType()
                         ],
                         'metadata' => [
-                            "product_id" => $item->getProductId(),
-                            "color" => $this->getAttributeFromProduct($item-> getProduct(), "color") ,
-                            "size" => $this->getAttributeFromProduct($item-> getProduct(), "size"),
+                            "product_id" => $item->getProductId()
                         ]
                     ];
                 }
@@ -549,18 +546,13 @@ class Data extends Util
                             $item->getProductType()
                         ],
                         'metadata' => [
-                            "product_id" => $item->getProductId(),
-                            "color" => $this->getAttributeFromProduct($item-> getProduct(), "color") ,
-                            "size" => $this->getAttributeFromProduct($item-> getProduct(), "size"),
+                            "product_id" => $item->getProductId()
                         ]
                     ];
                 }
             }
         }
         return $request;
-    }
-    private function getAttributeFromProduct(Product $product, string $field): string{
-       return $product->getAttributeText($field);
     }
 
     /**
