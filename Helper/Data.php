@@ -3,6 +3,7 @@
 namespace Conekta\Payments\Helper;
 
 use Conekta\Payments\Logger\Logger as ConektaLogger;
+use Magento\Catalog\Model\Product;
 use Magento\Framework\App\Helper\Context;
 use Magento\Framework\App\ProductMetadataInterface;
 use Magento\Framework\Encryption\EncryptorInterface;
@@ -492,12 +493,12 @@ class Data extends Util
      * @param mixed $isQuoteItem
      * @return array
      */
-    public function getLineItems($items, $isQuoteItem = true): array
+    public function getLineItems(array $items, $isQuoteItem = true): array
     {
         $version = (int)str_replace('.', '', $this->getMageVersion());
         $request = [];
         $quantityMethod = $isQuoteItem ? "getQty" : "getQtyOrdered";
-        foreach ($items as $itemId => $item) {
+        foreach ($items as $item) {
             if ($version > 233) {
                 if ($item->getProductType() != 'bundle' && $item->getProductType() != 'configurable') {
                     $price = $item->getPrice();
@@ -530,7 +531,9 @@ class Data extends Util
                             $item->getProductType()
                         ],
                         'metadata' => [
-                            "product_id" => $item->getProductId()
+                            "product_id" => $item->getProductId(),
+                            "color" => $this-> getAttributeFromProduct($item-> getProduct(), "color") ,
+                            "size" => $this-> getAttributeFromProduct($item-> getProduct(), "size"),
                         ]
                     ];
                 }
@@ -546,13 +549,26 @@ class Data extends Util
                             $item->getProductType()
                         ],
                         'metadata' => [
-                            "product_id" => $item->getProductId()
+                            "product_id" => $item->getProductId(),
+                            "color" => $this-> getAttributeFromProduct($item-> getProduct(), "color") ,
+                            "size" => $this-> getAttributeFromProduct($item-> getProduct(), "size"),
                         ]
                     ];
                 }
             }
         }
         return $request;
+    }
+    private function getAttributeFromProduct(Product $product, string $field): string{
+        $customOptions = $product->getCustomOption('options');
+
+        if ($customOptions) {
+            $options = unserialize($customOptions->getValue());
+            if (isset($options[$field])) {
+                return  $options[$field];
+            }
+        }
+        return "";
     }
 
     /**
