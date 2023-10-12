@@ -562,7 +562,6 @@ class Data extends Util
     private function getAttributeFromProduct(Product $product, string $field): string{
         $customOptions = $product->getCustomOption('options');
         $this->conektaLogger->info("item options",["option"=> $product->getCustomOptions()] );
-        var_dump($customOptions);
         if ($customOptions) {
             $options = unserialize($customOptions->getValue());
             if (isset($options[$field])) {
