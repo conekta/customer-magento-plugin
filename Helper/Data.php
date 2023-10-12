@@ -532,8 +532,8 @@ class Data extends Util
                         ],
                         'metadata' => [
                             "product_id" => $item->getProductId(),
-                            "color" => $this-> getAttributeFromProduct($item-> getProduct(), "color") ,
-                            "size" => $this-> getAttributeFromProduct($item-> getProduct(), "size"),
+                            "color" => $this->getAttributeFromProduct($item-> getProduct(), "color") ,
+                            "size" => $this->getAttributeFromProduct($item-> getProduct(), "size"),
                         ]
                     ];
                 }
@@ -550,8 +550,8 @@ class Data extends Util
                         ],
                         'metadata' => [
                             "product_id" => $item->getProductId(),
-                            "color" => $this-> getAttributeFromProduct($item-> getProduct(), "color") ,
-                            "size" => $this-> getAttributeFromProduct($item-> getProduct(), "size"),
+                            "color" => $this->getAttributeFromProduct($item-> getProduct(), "color") ,
+                            "size" => $this->getAttributeFromProduct($item-> getProduct(), "size"),
                         ]
                     ];
                 }
@@ -561,7 +561,7 @@ class Data extends Util
     }
     private function getAttributeFromProduct(Product $product, string $field): string{
         $customOptions = $product->getCustomOption('options');
-
+        $this->conektaLogger->info("item options",["option"=> $product->getCustomOptions()] );
         if ($customOptions) {
             $options = unserialize($customOptions->getValue());
             if (isset($options[$field])) {
