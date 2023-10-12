@@ -560,15 +560,7 @@ class Data extends Util
         return $request;
     }
     private function getAttributeFromProduct(Product $product, string $field): string{
-        $customOptions = $product->getCustomOption('options');
-        $this->conektaLogger->info("item options",["option"=> $product->getCustomOptions()] );
-        if ($customOptions) {
-            $options = unserialize($customOptions->getValue());
-            if (isset($options[$field])) {
-                return  $options[$field];
-            }
-        }
-        return "";
+       return $product->getAttributeText($field);
     }
 
     /**
@@ -632,29 +624,27 @@ class Data extends Util
         if ($quote->getIsVirtual()) {
             $address = $quote->getBillingAddress();
         }
-        //if ($address) {
-            $phone = $this->removePhoneSpecialCharacter($address->getTelephone());
+        $phone = $this->removePhoneSpecialCharacter($address->getTelephone());
 
-            $shippingContact = [
-                'receiver' => $this->getCustomerName($address),
-                'phone'    => $phone,
-                'address'  => [
-                    'city'        => $address->getCity(),
-                    'state'       => $address->getRegion(),
-                    'country'     => $address->getCountryId(),
-                    'postal_code' => $this->onlyNumbers($address->getPostcode()),
-                    'phone'       => $phone,
-                    'email'       => $address->getEmail()
-                ]
-            ];
+        $shippingContact = [
+            'receiver' => $this->getCustomerName($address),
+            'phone'    => $phone,
+            'address'  => [
+                'city'        => $address->getCity(),
+                'state'       => $address->getRegion(),
+                'country'     => $address->getCountryId(),
+                'postal_code' => $this->onlyNumbers($address->getPostcode()),
+                'phone'       => $phone,
+                'email'       => $address->getEmail()
+            ]
+        ];
 
-            $street = $address->getStreet();
-            $streetStr = $street[0] ?? 'NO STREET';
-            $shippingContact['address']['street1'] = $this->removeSpecialCharacter($streetStr);
-            if (isset($street[1])) {
-                $shippingContact['address']['street2'] = $this->removeSpecialCharacter($street[1]);
-            }
-      //  }
+        $street = $address->getStreet();
+        $streetStr = $street[0] ?? 'NO STREET';
+        $shippingContact['address']['street1'] = $this->removeSpecialCharacter($streetStr);
+        if (isset($street[1])) {
+            $shippingContact['address']['street2'] = $this->removeSpecialCharacter($street[1]);
+        }
         return $shippingContact;
     }
 
