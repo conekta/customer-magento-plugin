@@ -283,7 +283,7 @@ class Index extends Action implements CsrfAwareActionInterface
                         'postcode' => $conektaOrder["shipping_contact"]["address"]["postal_code"],
                         'telephone' =>  $conektaOrder["shipping_contact"]["phone"],
                         'save_in_address_book' =>  intval( $metadata["save_in_address_book"]),
-                        'region_id' => $metadata["shipping_region_id"] ?? "941"
+                        'region_id' => $metadata["shipping_region_id"]
             ];
             $billingAddressName = $this->utilHelper->splitName($conektaOrder["fiscal_entity"]["name"]);
             $billing_address = [
@@ -296,7 +296,7 @@ class Index extends Action implements CsrfAwareActionInterface
                 'postcode' => $conektaOrder["fiscal_entity"]["address"]["postal_code"],
                 'telephone' =>  $conektaCustomer["phone"],
                 'save_in_address_book' =>  intval( $metadata["save_in_address_book"]),
-                'region_id' => $metadata["billing_region_id"] ?? "941"
+                'region_id' => $metadata["billing_region_id"]
             ];
 
             //Set Address to quote
@@ -348,7 +348,7 @@ class Index extends Action implements CsrfAwareActionInterface
 
 
             $increment_id = $order->getRealOrderId();
-
+            $order->setData('ip' , '192.168.0.1')->save();
             $order->addCommentToStatusHistory("Missing Order from conekta ". "<a href='". ConfigProvider::URL_PANEL_PAYMENTS ."/".$conektaOrder["id"]. "' target='_blank'>".$conektaOrder["id"]."</a>")
                 ->setIsCustomerNotified(true)
                 ->save();
