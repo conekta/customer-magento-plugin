@@ -102,7 +102,6 @@ class Data extends Util
         $this->_escaper = $_escaper;
         $this->_cartRepository = $cartRepository;
         $this->_storeManager = $storeManager;
-
     }
 
     /**
@@ -273,7 +272,7 @@ class Data extends Util
      *
      * @return bool
      */
-    public function isCreditCardEnabled()
+    public function isCreditCardEnabled(): bool
     {
         return (boolean)$this->getConfigData('conekta_cc', 'active');
     }
@@ -283,7 +282,7 @@ class Data extends Util
      *
      * @return bool
      */
-    public function isCashEnabled()
+    public function isCashEnabled(): bool
     {
         return (boolean)$this->getConfigData('conekta_cash', 'active');
     }
@@ -293,7 +292,7 @@ class Data extends Util
      *
      * @return bool
      */
-    public function isBankTransferEnabled()
+    public function isBankTransferEnabled(): bool
     {
         return (boolean)$this->getConfigData('conekta_bank_transfer', 'active');
     }
@@ -303,13 +302,11 @@ class Data extends Util
      *
      * @return int
      */
-    public function getExpiredAt()
+    public function getExpiredAt(): int
     {
         $timeFormat = $this->getConfigData('conekta/conekta_global', 'days_or_hours');
-        $expirationValue = null;
-        $expirationUnit = null;
 
-        //hours expiration disabled temporaly
+        //hours expiration disabled temporally
         if (! $timeFormat && false) {
             $expirationValue = $this->getConfigData('conekta/conekta_global', 'expiry_hours');
             $expirationUnit = "hours";
@@ -469,6 +466,7 @@ class Data extends Util
             'magento_version'        => $this->getMageVersion(),
             'plugin_conekta_version' => $this->pluginVersion(),
             'store'                  => $this->getStore()->getId(),
+            'remote_ip'              => $this->_remoteAddress->getRemoteAddress()
         ];
     }
 
@@ -628,6 +626,9 @@ class Data extends Util
                 'postal_code' => $this->onlyNumbers($address->getPostcode()),
                 'phone'       => $phone,
                 'email'       => $address->getEmail()
+            ],
+            'metadata' => [
+                'company'=> $address->getCompany()
             ]
         ];
 
@@ -659,6 +660,9 @@ class Data extends Util
                 'country'         => $address->getCountryId(),
                 'postal_code'     => $this->onlyNumbers($address->getPostcode()),
                 'external_number' => $address->getId() !== null ? strval($address->getId()) : "",
+            ],
+            'metadata' => [
+                'company'=> $address->getCompany()
             ]
         ];
 

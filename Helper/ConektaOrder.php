@@ -92,15 +92,6 @@ class ConektaOrder extends Util
 
 
     /**
-     * @throws NoSuchEntityException
-     * @throws LocalizedException
-     */
-    public function isGuestUser(): bool
-    {
-        return (!$this->customerSession->isLoggedIn() && !$this->_checkoutSession->getQuote()->getCustomerId());
-    }
-
-    /**
      * Generate Order Params
      *
      * @param mixed $guestEmail
@@ -118,7 +109,6 @@ class ConektaOrder extends Util
         $customerRequest = [];
         try {
             $customer = $this->customerSession->getCustomer();
-            $conektaCustomer = null;
             $conektaCustomerId = $customer->getConektaCustomerId();
 
             if(!empty($conektaCustomerId)) {

@@ -17,6 +17,7 @@ use Magento\Framework\Controller\ResultInterface;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Json\Helper\Data;
 use Magento\Framework\App\Request\InvalidRequestException;
+use Magento\Sales\Api\Data\OrderInterface;
 use Magento\Store\Model\StoreManagerInterface;
 use Magento\Customer\Model\CustomerFactory;
 use Magento\Quote\Model\QuoteFactory;
@@ -348,7 +349,9 @@ class Index extends Action implements CsrfAwareActionInterface
 
 
             $increment_id = $order->getRealOrderId();
-            $order->setData('ip' , '192.168.0.1')->save();
+            if (isset($metadata['remote_ip']) && $metadata['remote_ip']!=null) {
+                $order->setRemoteIp($metadata['remote_ip'])->save();
+            }
             $order->addCommentToStatusHistory("Missing Order from conekta ". "<a href='". ConfigProvider::URL_PANEL_PAYMENTS ."/".$conektaOrder["id"]. "' target='_blank'>".$conektaOrder["id"]."</a>")
                 ->setIsCustomerNotified(true)
                 ->save();
