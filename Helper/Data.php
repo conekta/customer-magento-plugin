@@ -628,7 +628,8 @@ class Data extends Util
                 'email'       => $address->getEmail()
             ],
             'metadata' => [
-                'company'=> $address->getCompany()
+                'company'   => $address->getCompany(),
+                'region_id' => $address->getRegionId()
             ]
         ];
 
@@ -662,7 +663,8 @@ class Data extends Util
                 'external_number' => $address->getId() !== null ? strval($address->getId()) : "",
             ],
             'metadata' => [
-                'company'=> $address->getCompany()
+                'company'=> $address->getCompany(),
+                'region_id' => $address->getRegionId()
             ]
         ];
 

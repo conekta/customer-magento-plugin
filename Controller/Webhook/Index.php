@@ -277,7 +277,7 @@ class Index extends Action implements CsrfAwareActionInterface
             $shipping_address = [
                         'firstname'    => $shippingNameReceiver["firstname"],
                         'lastname'     => $shippingNameReceiver["lastname"],
-                        'street' => $conektaOrder["shipping_contact"]["address"]["street1"],
+                        'street' => [ $conektaOrder["shipping_contact"]["address"]["street1"], $conektaOrder["shipping_contact"]["address"]["street2"] ?? ""],
                         'city' => $conektaOrder["shipping_contact"]["address"]["city"],
                         'country_id' => strtoupper($conektaOrder["fiscal_entity"]["address"]["country"]),
                         'region' => $conektaOrder["shipping_contact"]["address"]["state"],
@@ -290,7 +290,7 @@ class Index extends Action implements CsrfAwareActionInterface
             $billing_address = [
                 'firstname'    => $billingAddressName["firstname"], //address Details
                 'lastname'     => $billingAddressName["lastname"],
-                'street' => $conektaOrder["fiscal_entity"]["address"]["street1"],
+                'street' => [ $conektaOrder["fiscal_entity"]["address"]["street1"] , $conektaOrder["fiscal_entity"]["address"]["street2"] ?? "" ],
                 'city' => $conektaOrder["fiscal_entity"]["address"]["city"],
                 'country_id' => strtoupper($conektaOrder["fiscal_entity"]["address"]["country"]),
                 'region' => $conektaOrder["fiscal_entity"]["address"]["state"],
