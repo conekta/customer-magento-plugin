@@ -693,29 +693,33 @@ class Data extends Util
     public function getDiscountLines(): array
     {
         $quote = $this->checkoutSession->getQuote();
-        $totalDiscount = $quote->getSubtotal() - $quote->getSubtotalWithDiscount();
-        $totalDiscount = abs(round($totalDiscount, 2));
-
         $discountLines = [];
 
-        if (!empty($quote->getCouponCode())) {
-            $couponDiscount = $this->convertToApiPrice($quote->getBaseSubtotal() - $quote->getSubtotalWithDiscount());
-            $couponLine = [
-                "code" => $quote->getCouponCode(),
-                "type" => "coupon",
-                "amount" => $couponDiscount
-            ];
-            $discountLines[] = $couponLine;
+        // Obtener el descuento del cupón
+        $couponCode = $quote->getCouponCode();
+        if (!empty($couponCode)) {
+            $couponDiscount = $quote->getBaseSubtotal() - $quote->getSubtotalWithDiscount();
+            $couponDiscount = abs(round($couponDiscount, 2));
+            if ($couponDiscount > 0) {
+                $couponLine = [
+                    "code" => $couponCode,
+                    "type" => "coupon",
+                    "amount" => $this->convertToApiPrice($couponDiscount)
+                ];
+                $discountLines[] = $couponLine;
+            }
         }
 
-        if ($totalDiscount > 0) {
-            $otherDiscount = $this->convertToApiPrice($totalDiscount);
-            $otherLine = [
-                "code" => "Discounts",
-                "type" => "Discounts",
-                "amount" => $otherDiscount
+        // Obtener el descuento general
+        $generalDiscount = $quote->getSubtotal() - $quote->getSubtotalWithDiscount();
+        $generalDiscount = abs(round($generalDiscount, 2));
+        if ($generalDiscount > 0) {
+            $generalLine = [
+                "code" => "campaign",
+                "type" => "campaign",
+                "amount" => $this->convertToApiPrice($generalDiscount)
             ];
-            $discountLines[] = $otherLine;
+            $discountLines[] = $generalLine;
         }
 
         return $discountLines;
