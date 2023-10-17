@@ -77,7 +77,7 @@ class TransactionAuthorize implements ClientInterface
      * @param TransferInterface $transferObject
      * @return array
      */
-    public function placeRequest(TransferInterface $transferObject)
+    public function placeRequest(TransferInterface $transferObject): array
     {
         $request = $transferObject->getBody();
         $this->_conektaLogger->info('HTTP Client TransactionCapture :: placeRequest', $request);

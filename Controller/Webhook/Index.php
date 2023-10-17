@@ -261,7 +261,6 @@ class Index extends Action implements CsrfAwareActionInterface
                 $quoteCreated->assignCustomer($customer); //Assign quote to customer
            }
 
-            $this->_conektaLogger->info('end quote');
 
             //add items in quote
             foreach($conektaOrder['line_items']["data"] as $item){
@@ -272,6 +271,10 @@ class Index extends Action implements CsrfAwareActionInterface
                     intval($item['quantity'])
                 );
             }
+            $this->_conektaLogger->info('company', ["shipping"=>$conektaOrder["shipping_contact"]["metadata"]["company"],
+                                                 "billing" =>$conektaOrder["fiscal_entity"]["metadata"]["company"]]
+            );
+
             $shippingNameReceiver = $this->utilHelper->splitName($conektaOrder["shipping_contact"]["receiver"]);
             $shipping_address = [
                         'firstname'    => $shippingNameReceiver["firstname"],
@@ -284,7 +287,7 @@ class Index extends Action implements CsrfAwareActionInterface
                         'telephone' =>  $conektaOrder["shipping_contact"]["phone"],
                         'save_in_address_book' => intval( $conektaOrder["shipping_contact"]["metadata"]["save_in_address_book"]),
                         'region_id' => $conektaOrder["shipping_contact"]["metadata"]["region_id"],
-                        'company'  =>$conektaOrder["shipping_contact"]["metadata"]["company"],
+                        'company'  => $conektaOrder["shipping_contact"]["metadata"]["company"],
             ];
             $billingAddressName = $this->utilHelper->splitName($conektaOrder["fiscal_entity"]["name"]);
             $billing_address = [
@@ -298,7 +301,7 @@ class Index extends Action implements CsrfAwareActionInterface
                 'telephone' =>  $conektaCustomer["phone"],
                 'save_in_address_book' =>  intval($conektaOrder["fiscal_entity"]["metadata"]["save_in_address_book"]),
                 'region_id' =>$conektaOrder["fiscal_entity"]["metadata"]["region_id"],
-                'company'  =>$conektaOrder["fiscal_entity"]["metadata"]["company"]
+                'company'  => $conektaOrder["fiscal_entity"]["metadata"]["company"]
             ];
 
             //Set Address to quote
