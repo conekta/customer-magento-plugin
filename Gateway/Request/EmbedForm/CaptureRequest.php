@@ -100,9 +100,7 @@ class CaptureRequest implements BuilderInterface
         $request['order_id'] = $iframeOrderId;
         $request['txn_id'] = $txnId;
 
-        $request['CONNEKTA_CUSTOMER_ID'] = $conektaCustomerId ? [
-                "customer_id" => $conektaCustomerId
-        ] : '';
+        $request['conekta_customer_id'] = $payment->getAdditionalInformation('conekta_customer_id');
 
         $this->_conektaLogger->info('Request CaptureRequest :: build : return request', $request);
 

@@ -110,10 +110,10 @@ class ConektaOrder extends Util
         try {
             $customer = $this->customerSession->getCustomer();
             $conektaCustomerId = $customer->getConektaCustomerId();
-
+            $this->conektaLogger->info('looking customer id', ["conekta_customer_id"=>$conektaCustomerId]);
             if(!empty($conektaCustomerId)) {
                 try {
-                    $conektaCustomer = $this->conektaApiClient->findCustomerByID($conektaCustomerId);
+                    $this->conektaApiClient->findCustomerByID($conektaCustomerId);
                 } catch (Exception $error) {
                     $this->conektaLogger->info('Create Order. Find Customer: ' . $error->getMessage());
                     $conektaCustomerId = '';

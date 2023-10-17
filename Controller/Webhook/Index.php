@@ -271,9 +271,6 @@ class Index extends Action implements CsrfAwareActionInterface
                     intval($item['quantity'])
                 );
             }
-            $this->_conektaLogger->info('company', ["shipping"=>$conektaOrder["shipping_contact"]["metadata"]["company"],
-                                                 "billing" =>$conektaOrder["fiscal_entity"]["metadata"]["company"]]
-            );
 
             $shippingNameReceiver = $this->utilHelper->splitName($conektaOrder["shipping_contact"]["receiver"]);
             $shipping_address = [
@@ -340,6 +337,7 @@ class Index extends Action implements CsrfAwareActionInterface
                 'txn_id' =>  $conektaOrder["charges"]["data"][0]["id"],
                 'quote_id'=> $quoteCreated->getId(),
                 'payment_method' => $this->getPaymentMethod($conektaOrder["charges"]["data"][0]["payment_method"]["object"]),
+                'conekta_customer_id' => $conektaCustomer["id"]
             ];
             $additionalInformation= array_merge($additionalInformation, $this->getAdditionalInformation($conektaOrder));
             $quoteCreated->getPayment()->setAdditionalInformation(   $additionalInformation);
