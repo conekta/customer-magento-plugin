@@ -36,8 +36,6 @@ class TransactionAuthorize implements ClientInterface
 
     private $_conektaLogger;
 
-    protected $_httpUtil;
-
     protected $conektaSalesOrderFactory;
 
     /**
