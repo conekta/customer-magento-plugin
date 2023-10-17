@@ -698,7 +698,7 @@ class Data extends Util
         // Obtener el descuento del cupón
         $couponCode = $quote->getCouponCode();
         if (!empty($couponCode)) {
-            $couponDiscount = $quote->getBaseSubtotal() - $quote->getSubtotalWithDiscount();
+            $couponDiscount = $quote->getSubtotalWithDiscount() - $quote->getSubtotal();
             $couponDiscount = abs(round($couponDiscount, 2));
             if ($couponDiscount > 0) {
                 $couponLine = [
