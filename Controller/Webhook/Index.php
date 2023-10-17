@@ -298,7 +298,7 @@ class Index extends Action implements CsrfAwareActionInterface
                 'telephone' =>  $conektaCustomer["phone"],
                 'save_in_address_book' =>  intval($conektaOrder["fiscal_entity"]["metadata"]["save_in_address_book"]),
                 'region_id' =>$conektaOrder["fiscal_entity"]["metadata"]["region_id"],
-                'company'  =>$conektaOrder["fiscal_entity"]["company"]
+                'company'  =>$conektaOrder["fiscal_entity"]["metadata"]["company"]
             ];
 
             //Set Address to quote
