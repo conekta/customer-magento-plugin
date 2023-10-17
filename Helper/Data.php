@@ -695,6 +695,17 @@ class Data extends Util
         $quote = $this->checkoutSession->getQuote();
         $discountLines = [];
 
+        // Obtener el descuento general
+        $generalDiscount = $quote->getSubtotal() - $quote->getSubtotalWithDiscount();
+        $generalDiscount = abs(round($generalDiscount, 2));
+        if ($generalDiscount > 0) {
+            $generalLine = [
+                "type" => "campaign",
+                "amount" => $this->convertToApiPrice($generalDiscount)
+            ];
+            $discountLines[] = $generalLine;
+        }
+
         // Obtener el descuento del cupón
         $couponCode = $quote->getCouponCode();
         if (!empty($couponCode)) {
@@ -708,18 +719,6 @@ class Data extends Util
                 ];
                 $discountLines[] = $couponLine;
             }
-        }
-
-        // Obtener el descuento general
-        $generalDiscount = $quote->getSubtotal() - $quote->getSubtotalWithDiscount();
-        $generalDiscount = abs(round($generalDiscount, 2));
-        if ($generalDiscount > 0) {
-            $generalLine = [
-                "code" => "campaign",
-                "type" => "campaign",
-                "amount" => $this->convertToApiPrice($generalDiscount)
-            ];
-            $discountLines[] = $generalLine;
         }
 
         return $discountLines;
