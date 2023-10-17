@@ -642,7 +642,6 @@ class Data extends Util
 
         $billingContact = [
             'name' => $this->getCustomerName($address),
-            'phone'    => $phone,
             'address'  => [
                 'city'            => $address->getCity(),
                 'state'           => $address->getRegion(),

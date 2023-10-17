@@ -337,7 +337,7 @@ class Index extends Action implements CsrfAwareActionInterface
                 'txn_id' =>  $conektaOrder["charges"]["data"][0]["id"],
                 'quote_id'=> $quoteCreated->getId(),
                 'payment_method' => $this->getPaymentMethod($conektaOrder["charges"]["data"][0]["payment_method"]["object"]),
-                'conekta_customer_id' => $conektaCustomer["id"]
+                'conekta_customer_id' => $conektaCustomer["customer_id"]
             ];
             $additionalInformation= array_merge($additionalInformation, $this->getAdditionalInformation($conektaOrder));
             $quoteCreated->getPayment()->setAdditionalInformation(   $additionalInformation);
