@@ -17,7 +17,6 @@ use Magento\Framework\Controller\ResultInterface;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Json\Helper\Data;
 use Magento\Framework\App\Request\InvalidRequestException;
-use Magento\Sales\Api\Data\OrderInterface;
 use Magento\Store\Model\StoreManagerInterface;
 use Magento\Customer\Model\CustomerFactory;
 use Magento\Quote\Model\QuoteFactory;
@@ -283,8 +282,9 @@ class Index extends Action implements CsrfAwareActionInterface
                         'region' => $conektaOrder["shipping_contact"]["address"]["state"],
                         'postcode' => $conektaOrder["shipping_contact"]["address"]["postal_code"],
                         'telephone' =>  $conektaOrder["shipping_contact"]["phone"],
-                        'save_in_address_book' =>  intval( $metadata["save_in_address_book"]),
-                        'region_id' => $metadata["shipping_region_id"]
+                        'save_in_address_book' => intval( $conektaOrder["shipping_contact"]["metadata"]["save_in_address_book"]),
+                        'region_id' => $conektaOrder["shipping_contact"]["metadata"]["region_id"],
+                        'company'  =>$conektaOrder["shipping_contact"]["metadata"]["company"],
             ];
             $billingAddressName = $this->utilHelper->splitName($conektaOrder["fiscal_entity"]["name"]);
             $billing_address = [
@@ -296,8 +296,9 @@ class Index extends Action implements CsrfAwareActionInterface
                 'region' => $conektaOrder["fiscal_entity"]["address"]["state"],
                 'postcode' => $conektaOrder["fiscal_entity"]["address"]["postal_code"],
                 'telephone' =>  $conektaCustomer["phone"],
-                'save_in_address_book' =>  intval( $metadata["save_in_address_book"]),
-                'region_id' => $metadata["billing_region_id"]
+                'save_in_address_book' =>  intval($conektaOrder["fiscal_entity"]["metadata"]["save_in_address_book"]),
+                'region_id' =>$conektaOrder["fiscal_entity"]["metadata"]["region_id"],
+                'company'  =>$conektaOrder["fiscal_entity"]["company"]
             ];
 
             //Set Address to quote

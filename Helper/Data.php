@@ -471,19 +471,6 @@ class Data extends Util
     }
 
     /**
-     * @throws NoSuchEntityException
-     */
-    public function getExtraMetadata($quoteId) :array{
-
-        $response = [];
-        $quote = $this->_cartRepository->get($quoteId);
-        $response['save_in_address_book'] = $quote->getBillingAddress()->getSaveInAddressBook();
-        $response['shipping_region_id'] = $quote->getShippingAddress()->getRegionId();
-        $response['billing_region_id'] = $quote->getBillingAddress()->getRegionId();
-        return $response;
-    }
-
-    /**
      * Get line items
      *
      * @param mixed $items
@@ -629,7 +616,8 @@ class Data extends Util
             ],
             'metadata' => [
                 'company'   => $address->getCompany(),
-                'region_id' => $address->getRegionId()
+                'region_id' => $address->getRegionId(),
+                'save_in_address_book' => $address->getSaveInAddressBook()
             ]
         ];
 
@@ -664,7 +652,8 @@ class Data extends Util
             ],
             'metadata' => [
                 'company'=> $address->getCompany(),
-                'region_id' => $address->getRegionId()
+                'region_id' => $address->getRegionId(),
+                'save_in_address_book' => $address->getSaveInAddressBook()
             ]
         ];
 
