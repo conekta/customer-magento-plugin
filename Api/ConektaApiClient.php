@@ -219,9 +219,13 @@ class ConektaApiClient
     }
 
     /**
+     * @param string $chargeId
+     * @param array $charge
+     * @return ChargeResponse
      * @throws ApiException
      */
-    public function updateCharge(string $chargeId, array $charge): ChargeResponse{
+    public function updateCharge(string $chargeId, array $charge): ChargeResponse
+    {
         $charge = new ChargeUpdateRequest($charge);
         return $this->charges->updateCharge($chargeId, $charge);
     }

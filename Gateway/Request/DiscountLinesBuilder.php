@@ -47,8 +47,8 @@ class DiscountLinesBuilder implements BuilderInterface
 
         if (!empty($totalDiscount)) {
             $totalDiscount = $this->_conektaHelper->convertToApiPrice($totalDiscount);
-            $discountLine["code"] = "discount_code";
-            $discountLine["type"] = "coupon";
+            $discountLine["code"] = $quote->getCouponCode() ?? "Discounts";
+            $discountLine["type"] = $quote->getCouponCode() ? "coupon" : "Discounts";
             $discountLine["amount"] = $totalDiscount;
             $request['discount_lines'][] = $discountLine;
         } else {

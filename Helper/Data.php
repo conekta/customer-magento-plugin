@@ -697,12 +697,25 @@ class Data extends Util
         $totalDiscount = abs(round($totalDiscount, 2));
 
         $discountLines = [];
-        if (! empty($totalDiscount)) {
-            $totalDiscount = $this->convertToApiPrice($totalDiscount);
-            $discountLine["code"] = $quote->getCouponCode() ?? "Discounts";
-            $discountLine["type"] = "coupon";
-            $discountLine["amount"] = $totalDiscount;
-            $discountLines[] = $discountLine;
+
+        if (!empty($quote->getCouponCode())) {
+            $couponDiscount = $this->convertToApiPrice($quote->getBaseSubtotal() - $quote->getSubtotalWithDiscount());
+            $couponLine = [
+                "code" => $quote->getCouponCode(),
+                "type" => "coupon",
+                "amount" => $couponDiscount
+            ];
+            $discountLines[] = $couponLine;
+        }
+
+        if ($totalDiscount > 0) {
+            $otherDiscount = $this->convertToApiPrice($totalDiscount);
+            $otherLine = [
+                "code" => "Discounts",
+                "type" => "Discounts",
+                "amount" => $otherDiscount
+            ];
+            $discountLines[] = $otherLine;
         }
 
         return $discountLines;

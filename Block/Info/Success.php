@@ -11,10 +11,10 @@ class Success extends CompleteCheckout
     /**
      * GetInstructions getter
      *
-     * @param mixed $type
-     * @return Order Object
+     * @param string $type
+     * @return mixed|void
      */
-    public function getInstructions($type)
+    public function getInstructions(string $type)
     {
         if ($type == 'cash') {
             return $this->_scopeConfig->getValue(
@@ -42,7 +42,6 @@ class Success extends CompleteCheckout
     /**
      * GetOfflineInfo getter
      *
-     * @return Order Object
      * @throws LocalizedException
      */
     public function getOfflineInfo()
