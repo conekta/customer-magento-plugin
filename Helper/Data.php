@@ -700,6 +700,7 @@ class Data extends Util
         $generalDiscount = abs(round($generalDiscount, 2));
         if ($generalDiscount > 0) {
             $generalLine = [
+                "code" => "campaign",
                 "type" => "campaign",
                 "amount" => $this->convertToApiPrice($generalDiscount)
             ];
