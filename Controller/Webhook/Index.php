@@ -17,6 +17,7 @@ use Magento\Framework\Controller\ResultInterface;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Json\Helper\Data;
 use Magento\Framework\App\Request\InvalidRequestException;
+use Magento\Quote\Model\Quote;
 use Magento\Store\Model\StoreManagerInterface;
 use Magento\Customer\Model\CustomerFactory;
 use Magento\Quote\Model\QuoteFactory;
@@ -322,6 +323,7 @@ class Index extends Action implements CsrfAwareActionInterface
             //discount lines
             if (isset($conektaOrder["discount_lines"]) && isset($conektaOrder["discount_lines"]["data"])) {
                 $quoteCreated->setCustomDiscount($this->getDiscountAmount($conektaOrder["discount_lines"]["data"]));
+                $this->applyCoupon($conektaOrder["discount_lines"]["data"],$quoteCreated);
             }
 
             $quoteCreated->setPaymentMethod(ConfigProvider::CODE);
@@ -400,13 +402,19 @@ class Index extends Action implements CsrfAwareActionInterface
              $this->_conektaLogger->error("updating conekta charge". $e->getMessage(), ["charge_id"=> $chargeId, "reference_id"=> $orderId]);
          }
     }
+    private function applyCoupon(array $discountLines, Quote $quote)  {
+        foreach ($discountLines as $discountLine){
+            if ($discountLine["type"] == "coupon"){
+                $quote->setCouponCode($discountLine["code"]);
+            }
+        }
+    }
 
     private function getDiscountAmount(array $discountLines) :float {
        $discountValue = 0;
        foreach ($discountLines as $discountLine){
            $discountValue += $this->utilHelper->convertFromApiPrice($discountLine["amount"]);
        }
-
        return $discountValue * -1;
     }
 
