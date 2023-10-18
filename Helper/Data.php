@@ -14,10 +14,12 @@ use Magento\Customer\Model\Session as CustomerSession;
 use Magento\Catalog\Model\ProductRepository;
 use Magento\Framework\Escaper;
 use Magento\Quote\Api\CartRepositoryInterface;
+use Magento\Quote\Model\Quote;
+use Magento\SalesRule\Model\ResourceModel\Coupon;
 use Magento\Store\Api\Data\StoreInterface;
 use Magento\Store\Model\ScopeInterface;
 use Magento\Store\Model\StoreManagerInterface;
-
+use Magento\SalesRule\Model\CouponFactory;
 class Data extends Util
 {
     /**
@@ -124,7 +126,7 @@ class Data extends Util
      * @param mixed $storeId
      * @return mixed
      */
-    public function getConfigData($area, $field, $storeId = null)
+    public function getConfigData(string $area, string $field, $storeId = null)
     {
         return $this->scopeConfig->getValue(
             'payment/' . $area . '/' . $field,
@@ -695,8 +697,22 @@ class Data extends Util
         $quote = $this->checkoutSession->getQuote();
         $discountLines = [];
 
+        // Obtener el descuento del cupón
+        $couponDiscount = $this->getCouponDiscountAmount($quote);
+        if ($couponDiscount>0) {
+            //$couponDiscount = $quote->getSubtotalWithDiscount() - $quote->getSubtotal();
+            $couponDiscount = abs(round($couponDiscount, 2));
+                $couponLine = [
+                    "code" => $quote->getCouponCode(),
+                    "type" => "coupon",
+                    "amount" => $this->convertToApiPrice($couponDiscount)
+                ];
+                $discountLines[] = $couponLine;
+        }
+
         // Obtener el descuento general
-        $generalDiscount = $quote->getSubtotal() - $quote->getSubtotalWithDiscount();
+        $generalDiscount = ($quote->getSubtotal() - $quote->getSubtotalWithDiscount())- $couponDiscount;
+
         $generalDiscount = abs(round($generalDiscount, 2));
         if ($generalDiscount > 0) {
             $generalLine = [
@@ -707,22 +723,20 @@ class Data extends Util
             $discountLines[] = $generalLine;
         }
 
-        // Obtener el descuento del cupón
-        $couponCode = $quote->getCouponCode();
-        if (!empty($couponCode)) {
-            $couponDiscount = $quote->getSubtotalWithDiscount() - $quote->getSubtotal();
-            $couponDiscount = abs(round($couponDiscount, 2));
-            if ($couponDiscount > 0) {
-                $couponLine = [
-                    "code" => $couponCode,
-                    "type" => "coupon",
-                    "amount" => $this->convertToApiPrice($couponDiscount)
-                ];
-                $discountLines[] = $couponLine;
-            }
-        }
-
         return $discountLines;
+    }
+    private function getCouponDiscountAmount(Quote $quote) : float{
+        $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+        $couponFactory = $objectManager->create(CouponFactory::class);
+        $couponResourceModel = $objectManager->create(Coupon::class);
+        $couponCode = $quote->getCouponCode();
+        if (empty($couponCode)) {
+                return 0;
+        }
+        $coupon = $couponFactory->create();
+        $couponResourceModel->load($coupon, $couponCode, 'code');
+        return $coupon->getDiscountAmount();
+
     }
 
     /**
