@@ -15,13 +15,9 @@ use Magento\Customer\Model\Session as CustomerSession;
 use Magento\Catalog\Model\ProductRepository;
 use Magento\Framework\Escaper;
 use Magento\Quote\Api\CartRepositoryInterface;
-use Magento\Quote\Model\Quote;
-use Magento\SalesRule\Api\RuleRepositoryInterface;
-use Magento\SalesRule\Model\ResourceModel\Coupon;
 use Magento\Store\Api\Data\StoreInterface;
 use Magento\Store\Model\ScopeInterface;
 use Magento\Store\Model\StoreManagerInterface;
-use Magento\SalesRule\Model\CouponFactory;
 class Data extends Util
 {
     /**
@@ -66,9 +62,6 @@ class Data extends Util
      */
     protected CartRepositoryInterface $_cartRepository;
 
-    protected \Magento\SalesRule\Model\Coupon $couponModel;
-
-    protected RuleRepositoryInterface $ruleRepository;
     /**
      * Data constructor.
      *
@@ -96,9 +89,7 @@ class Data extends Util
         ProductRepository $productRepository,
         Escaper $_escaper,
         CartRepositoryInterface $cartRepository,
-        StoreManagerInterface $storeManager,
-          \Magento\SalesRule\Model\Coupon $couponModel,
-        RuleRepositoryInterface $ruleRepository
+        StoreManagerInterface $storeManager
     ) {
         parent::__construct($context);
         $this->_moduleList = $moduleList;
@@ -111,8 +102,6 @@ class Data extends Util
         $this->_escaper = $_escaper;
         $this->_cartRepository = $cartRepository;
         $this->_storeManager = $storeManager;
-        $this->couponModel = $couponModel;
-        $this->ruleRepository = $ruleRepository;
     }
 
     /**
@@ -269,7 +258,7 @@ class Data extends Util
     }
 
     /**
-     * Is save card enabled
+     * Is card enabled
      *
      * @return bool
      */
@@ -704,50 +693,26 @@ class Data extends Util
     public function getDiscountLines(): array
     {
         $quote = $this->checkoutSession->getQuote();
+        $totalDiscount = $quote->getSubtotal() - $quote->getSubtotalWithDiscount();
+        $totalDiscount = abs(round($totalDiscount, 2));
+
         $discountLines = [];
+        if (!empty($totalDiscount)) {
+            $totalDiscount = $this->convertToApiPrice($totalDiscount);
+            $discountLine["code"] = "campaign";
+            $discountLine["type"] = "campaign";
+            $discountLine["amount"] = $totalDiscount;
+            $discountLines[] = $discountLine;
 
-        // Obtener el descuento del cupón
-        $couponDiscount = $this->getCouponDiscountAmount($quote);
-        if ($couponDiscount>0) {
-            //$couponDiscount = $quote->getSubtotalWithDiscount() - $quote->getSubtotal();
-            $couponDiscount = abs(round($couponDiscount, 2));
-                $couponLine = [
-                    "code" => $quote->getCouponCode(),
-                    "type" => "coupon",
-                    "amount" => $this->convertToApiPrice($couponDiscount)
-                ];
-                $discountLines[] = $couponLine;
-        }
-
-        // Obtener el descuento general
-        $generalDiscount = ($quote->getSubtotal() - $quote->getSubtotalWithDiscount())- $couponDiscount;
-
-        $generalDiscount = abs(round($generalDiscount, 2));
-        if ($generalDiscount > 0) {
-            $generalLine = [
-                "code" => "campaign",
-                "type" => "campaign",
-                "amount" => $this->convertToApiPrice($generalDiscount)
-            ];
-            $discountLines[] = $generalLine;
+            if (!empty( $quote->getCouponCode())){
+                $discountLineCoupon["code"] = $quote->getCouponCode();
+                $discountLineCoupon["type"] = "campaign";
+                $discountLineCoupon["amount"] = 0;
+                $discountLines[] = $discountLineCoupon;
+            }
         }
 
         return $discountLines;
-    }
-
-    /**
-     * @throws NoSuchEntityException
-     * @throws LocalizedException
-     */
-    private function getCouponDiscountAmount(Quote $quote) : float{
-
-        if (empty($quote->getCouponCode())){
-            return 0;
-        }
-        $ruleId =  $this->couponModel->loadByCode($quote->getCouponCode())->getRuleId();
-        $rule = $this->ruleRepository->getById($ruleId);
-        return $rule->getDiscountAmount();
-
     }
 
     /**
