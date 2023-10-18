@@ -4,6 +4,7 @@ namespace Conekta\Payments\Helper;
 
 use Conekta\Payments\Logger\Logger as ConektaLogger;
 use Magento\Framework\App\Helper\Context;
+use Magento\Framework\App\ObjectManager;
 use Magento\Framework\App\ProductMetadataInterface;
 use Magento\Framework\Encryption\EncryptorInterface;
 use Magento\Framework\Exception\LocalizedException;
@@ -15,6 +16,7 @@ use Magento\Catalog\Model\ProductRepository;
 use Magento\Framework\Escaper;
 use Magento\Quote\Api\CartRepositoryInterface;
 use Magento\Quote\Model\Quote;
+use Magento\SalesRule\Api\RuleRepositoryInterface;
 use Magento\SalesRule\Model\ResourceModel\Coupon;
 use Magento\Store\Api\Data\StoreInterface;
 use Magento\Store\Model\ScopeInterface;
@@ -64,6 +66,9 @@ class Data extends Util
      */
     protected CartRepositoryInterface $_cartRepository;
 
+    protected \Magento\SalesRule\Model\Coupon $couponModel;
+
+    protected RuleRepositoryInterface $ruleRepository;
     /**
      * Data constructor.
      *
@@ -91,7 +96,9 @@ class Data extends Util
         ProductRepository $productRepository,
         Escaper $_escaper,
         CartRepositoryInterface $cartRepository,
-        StoreManagerInterface $storeManager
+        StoreManagerInterface $storeManager,
+          \Magento\SalesRule\Model\Coupon $couponModel,
+        RuleRepositoryInterface $ruleRepository
     ) {
         parent::__construct($context);
         $this->_moduleList = $moduleList;
@@ -104,6 +111,8 @@ class Data extends Util
         $this->_escaper = $_escaper;
         $this->_cartRepository = $cartRepository;
         $this->_storeManager = $storeManager;
+        $this->couponModel = $couponModel;
+        $this->ruleRepository = $ruleRepository;
     }
 
     /**
@@ -725,17 +734,19 @@ class Data extends Util
 
         return $discountLines;
     }
+
+    /**
+     * @throws NoSuchEntityException
+     * @throws LocalizedException
+     */
     private function getCouponDiscountAmount(Quote $quote) : float{
-        $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
-        $couponFactory = $objectManager->create(CouponFactory::class);
-        $couponResourceModel = $objectManager->create(Coupon::class);
-        $couponCode = $quote->getCouponCode();
-        if (empty($couponCode)) {
-                return 0;
+
+        if (empty($quote->getCouponCode())){
+            return 0;
         }
-        $coupon = $couponFactory->create();
-        $couponResourceModel->load($coupon, $couponCode, 'code');
-        return $coupon->getDiscountAmount();
+        $ruleId =  $this->couponModel->loadByCode($quote->getCouponCode())->getRuleId();
+        $rule = $this->ruleRepository->getById($ruleId);
+        return $rule->getDiscountAmount();
 
     }
 
