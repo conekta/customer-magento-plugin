@@ -192,7 +192,8 @@ class Index extends Action implements CsrfAwareActionInterface
                     if ($this->isCardPayment($body['data']['object']["charges"]["data"][0]["payment_method"]["object"])){
                         $this->validate_order_exist($body);
                     }
-                    $this->webhookRepository->payOrder($body);
+                    //$this->webhookRepository->payOrder($body);
+                    $this->webhookRepository->expireOrder($body);
                     break;
                 
                 case self::EVENT_ORDER_EXPIRED:

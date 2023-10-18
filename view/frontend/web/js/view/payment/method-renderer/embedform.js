@@ -296,13 +296,13 @@ define(
                     },
                     onFinalizePayment: function (event) {
 
-                        self.conektaError("error intencional");
-                        return;
-
+                        //self.conektaError("error intencional");
+                        //return;
+                /*
                         if (event.charge.paymentMethod.type !== 'card' && event.charge.payment_method.type !== 'card') {
                             event.charge.status = 'pending_payment'
                             event.status = 'pending_payment'
-                        }
+                        }*/
                         self.iframOrderData(event);
                         self.beforePlaceOrder();
                     },

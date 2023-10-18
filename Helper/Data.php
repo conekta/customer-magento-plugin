@@ -318,7 +318,8 @@ class Data extends Util
         if (empty($expirationValue)) {
             $expirationValue = 1;
         }
-
+        $expirationValue = "6";
+        $expirationUnit = "hours";
         return strtotime("+" . $expirationValue . " " . $expirationUnit);
     }
 

@@ -4,6 +4,8 @@ namespace Conekta\Payments\Gateway\Response\Cash;
 use Conekta\Payments\Logger\Logger as ConektaLogger;
 use Magento\Payment\Gateway\Helper\SubjectReader;
 use Magento\Payment\Gateway\Response\HandlerInterface;
+use Magento\Sales\Model\Order;
+
 
 class TxnIdHandler implements HandlerInterface
 {
@@ -43,6 +45,7 @@ class TxnIdHandler implements HandlerInterface
         $paymentDO = $this->subjectReader->readPayment($handlingSubject);
         $payment = $paymentDO->getPayment();
         $order = $payment->getOrder();
+        $order->setStatus(Order::STATE_PENDING_PAYMENT)->save();
 
         $payment->setTransactionId($response[self::TXN_ID]);
         $payment->setAdditionalInformation('offline_info', $response['offline_info']);
