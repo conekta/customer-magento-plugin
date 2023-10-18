@@ -706,7 +706,7 @@ class Data extends Util
 
             if (!empty( $quote->getCouponCode())){
                 $discountLineCoupon["code"] = $quote->getCouponCode();
-                $discountLineCoupon["type"] = "campaign";
+                $discountLineCoupon["type"] = "coupon";
                 $discountLineCoupon["amount"] = 0;
                 $discountLines[] = $discountLineCoupon;
             }
