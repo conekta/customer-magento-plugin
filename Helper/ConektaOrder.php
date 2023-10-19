@@ -18,11 +18,10 @@ use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Exception\State\InputMismatchException;
 use Magento\Quote\Model\Quote;
+use Magento\Quote\Api\Data\CartInterface;
 
 class ConektaOrder extends Util
 {
-    public const CURRENCY_CODE = 'mxn';
-    public const STREET = 'Conekta Street';
     /**
      * @var ConektaLogger
      */
@@ -282,7 +281,7 @@ class ConektaOrder extends Util
      * @throws LocalizedException
      * @throws NoSuchEntityException
      */
-    public function getQuote()
+    public function getQuote(): Quote
     {
         return $this->_checkoutSession->getQuote();
     }
@@ -313,7 +312,10 @@ class ConektaOrder extends Util
     {
         return array_merge(
             $this->_conektaHelper->getMagentoMetadata(),
-            ['quote_id' => $this->getQuote()->getId()],
+            [
+                'quote_id'                     => $this->getQuote()->getId(),
+                 CartInterface::KEY_IS_VIRTUAL => $this->getQuote()->isVirtual()
+            ],
             $this->_conektaHelper->getMetadataAttributesConekta($orderItems)
         );
     }

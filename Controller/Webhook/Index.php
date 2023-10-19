@@ -17,6 +17,7 @@ use Magento\Framework\Controller\ResultInterface;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Json\Helper\Data;
 use Magento\Framework\App\Request\InvalidRequestException;
+use Magento\Quote\Api\Data\CartInterface;
 use Magento\Quote\Model\Quote;
 use Magento\Store\Model\StoreManagerInterface;
 use Magento\Customer\Model\CustomerFactory;
@@ -241,9 +242,9 @@ class Index extends Action implements CsrfAwareActionInterface
             $store = $this->_storeManager->getStore(intval($metadata["store"]));
 
             $quoteCreated=$this->quote->create(); //Create object of quote
-            $this->_conektaLogger->info('end quoting creating');
 
             $quoteCreated->setStore($store); //set store for which you create quote
+            $quoteCreated->setIsVirtual($metadata[CartInterface::KEY_IS_VIRTUAL]);
 
             $quoteCreated->setCurrency();
             $customerName = $this->utilHelper->splitName($conektaCustomer['name']);
