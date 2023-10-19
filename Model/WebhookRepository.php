@@ -7,12 +7,11 @@ use Conekta\Payments\Api\Data\ConektaSalesOrderInterface;
 use Exception;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Sales\Api\Data\OrderInterface;
-use Magento\Sales\Api\OrderManagementInterface;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\Email\Sender\InvoiceSender;
 use Magento\Sales\Model\Service\InvoiceService;
 use Magento\Framework\DB\Transaction;
-use Magento\Sales\Api\Data\OrderStatusHistoryInterfaceFactory;
+
 class WebhookRepository
 {
     /**
@@ -39,8 +38,6 @@ class WebhookRepository
      * @var ConektaSalesOrderInterface
      */
     private ConektaSalesOrderInterface $conektaOrderSalesInterface;
-    private OrderManagementInterface $orderManagement;
-    private OrderStatusHistoryInterfaceFactory $orderStatusHistoryFactory;
 
     /**
      * @param OrderInterface $orderInterface
@@ -56,9 +53,7 @@ class WebhookRepository
         InvoiceSender $invoiceSender,
         Transaction $transaction,
         ConektaLogger $conektaLogger,
-        ConektaSalesOrderInterface $conektaOrderSalesInterface,
-        OrderManagementInterface $orderManagement,
-        OrderStatusHistoryInterfaceFactory $orderStatusHistoryFactory
+        ConektaSalesOrderInterface $conektaOrderSalesInterface
     ) {
         $this->orderInterface = $orderInterface;
         $this->invoiceService = $invoiceService;
@@ -66,8 +61,6 @@ class WebhookRepository
         $this->transaction = $transaction;
         $this->_conektaLogger = $conektaLogger;
         $this->conektaOrderSalesInterface = $conektaOrderSalesInterface;
-        $this->orderManagement = $orderManagement;
-        $this->orderStatusHistoryFactory = $orderStatusHistoryFactory;
     }
 
     /**
@@ -117,100 +110,17 @@ class WebhookRepository
         if ($order->getState() === Order::STATE_PENDING_PAYMENT ||
             $order->getState() === Order::STATE_PAYMENT_REVIEW
         ) {
-            //$order->setState(Order::STATE_CANCELED);
-            //$order->setStatus(Order::STATE_CANCELED);
-            $this->canCancel($order);
-            $this->_conektaLogger->info('WebhookRepository :: after can cancel',
-                [
-                    "can" => $order->canCancel(),
-                    "isCanceled" => $order->isCanceled(),
-                    "canUnhold" => $order->canUnhold() ,
-                    "canUnhold_inside" => $order->getActionFlag("unhold") ,
-                    "canUnhold_inside_2" => $order->getState() ,
-                    "isPaymentReview" => $order->isPaymentReview(),
-                    "canReviewPayment" => $order->canReviewPayment(),
-                    "canFetchPaymentReviewUpdate" => $order->canFetchPaymentReviewUpdate(),
-                    "getActionFlag" => $order->getActionFlag("cancel"),
-                //{
-                    //"can":false,
-                //"isCanceled":false,
-                //"canUnhold":false,
-                //"isPaymentReview":true,
-                //"canReviewPayment":false,
-                //"canFetchPaymentReviewUpdate":false,
-                //"getActionFlag":null} []
-                    /*
-                     protected function _canVoidOrder()
-                    {
-                        return !($this->isCanceled() || $this->canUnhold() || $this->isPaymentReview());
-                    }*/
-                                ]
-            );
             $order->setState(Order::STATE_CANCELED);
             $order->setStatus(Order::STATE_CANCELED);
-            $order->cancel()->save();
-/*
-            $canceled = $this->orderManagement->cancel($order->getId());
-            if ($canceled) {
-                $history = $this->orderStatusHistoryFactory->create();
-                $history->setParentId($order->getId()); // Establece el ID de la orden
-                $history->setComment("Order Expired");
-                $history->setIsCustomerNotified(true);
-                $this->orderManagement->addComment($order->getId(), $history );
-            }*/
-            $this->_conektaLogger->info('WebhookRepository :: end can cancel', ["canceled" =>$order->isCanceled()]);
 
+            $order->addCommentToStatusHistory("Order Expired")
+                    ->setIsCustomerNotified(true);
+
+            $order->save();
         }
         
         $this->_conektaLogger->info('WebhookRepository :: orderExpiredProcess: Order has been Canceled');
     }
-    public function canvoid(Order $order) :bool{
-        return !($order->isCanceled() || $order->canUnhold() || $order->isPaymentReview());
-    }
-    public function canCancel(Order $order): bool
-    {
-        if (!$this->canvoid($order)) {
-            $this->_conektaLogger->info('canvoid');
-
-            return false;
-        }
-        if ($order->canUnhold()) {
-            $this->_conektaLogger->info('canUnhold');
-
-            return false;
-        }
-        if (!$order->canReviewPayment() && $order->canFetchPaymentReviewUpdate()) {
-            $this->_conektaLogger->info('$order->canReviewPayment() && $order->canFetchPaymentReviewUpdate()');
-            return false;
-        }
-
-        $allInvoiced = true;
-        foreach ($order->getAllItems() as $item) {
-            if ($item->getQtyToInvoice()) {
-                $allInvoiced = false;
-                break;
-            }
-        }
-
-        if ($allInvoiced) {
-            $this->_conektaLogger->info('$allInvoiced');
-            return false;
-        }
-
-        $state = $order->getState();
-        if ($order->isCanceled() || $state === 'complete' || $state === 'closed') {
-            $this->_conektaLogger->info('if $state');
-            return false;
-        }
-
-        if ($order->getActionFlag('cancel') === false) {
-            $this->_conektaLogger->info('getActionFlag');
-            return false;
-        }
-
-        return true;
-    }
-
 
     /**
      * Pay Order

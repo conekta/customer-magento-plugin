@@ -57,14 +57,15 @@ class AuthorizeRequest implements BuilderInterface
         return $request;
     }
 
-    public function getChargeCash($amount, $expiry_date): array
+    public function getChargeCash($amount, $expiry_date)
     {
-        return [
+        $charge = [
             'payment_method' => [
                 'type' => 'cash',
                 'expires_at' => $expiry_date
             ],
             'amount' => $amount
         ];
+        return $charge;
     }
 }
