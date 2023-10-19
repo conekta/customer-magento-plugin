@@ -223,9 +223,8 @@ class MissingOrders
                     'cc_last_4' => $conektaOrder["charges"]["data"][0]["payment_method"]["last4"],
                     'card_token' =>  null,
                 ];
-            case "cash_payment":
-                return [];
             case "bank_transfer_payment":
+            case "cash_payment":
                 return [];
         }
         return [];

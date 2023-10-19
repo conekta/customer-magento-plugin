@@ -68,7 +68,7 @@ class EmbedFormRepository implements EmbedFormRepositoryInterface
     private function validateOrderParameters($orderParameters, $orderTotal)
     {
         //Currency
-        if (strtoupper($orderParameters['currency']) !== 'MXN') {
+        if (!in_array(strtoupper($orderParameters['currency']), ["MXN", "USD"])) {
             throw new ConektaException(
                 __('Este medio de pago no acepta moneda extranjera')
             );
