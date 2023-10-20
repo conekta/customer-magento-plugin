@@ -132,13 +132,8 @@ class ConektaOrder extends Util
                 $customerRequest['email'] = $guestEmail;
             }
             $customerRequest['custom_reference'] = $customerId;
-            $customerRequest['metadata'] = [
-                'group_id' => $customer->getGroupId(),
-            ];
             $customerRequest['name'] = $this->removeNameSpecialCharacter($customerRequest['name']);
-            $customerRequest['phone'] = $this->removePhoneSpecialCharacter(
-                $billingAddress->getTelephone()
-            );
+            $customerRequest['phone'] = $this->removePhoneSpecialCharacter($billingAddress->getTelephone());
             
             if (strlen($customerRequest['phone']) < 10) {
                 $this->conektaLogger->info('Helper.CreateOrder phone validation error', $customerRequest);

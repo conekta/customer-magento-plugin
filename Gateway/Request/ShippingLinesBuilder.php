@@ -33,7 +33,7 @@ class ShippingLinesBuilder implements BuilderInterface
      */
     public function build(array $buildSubject)
     {
-        $this->_conektaLogger->info('Request ShippingLinesBuilder :: build', ['$buildSubject'=>$buildSubject]);
+        $this->_conektaLogger->info('Request ShippingLinesBuilder :: build');
 
         $paymentDO = $this->subjectReader->readPayment($buildSubject);
         $payment = $paymentDO->getPayment();
@@ -44,7 +44,7 @@ class ShippingLinesBuilder implements BuilderInterface
 
         if (empty($shippingLines)) {
 
-            throw new LocalizedException(__('Shippment information should be provided'));
+            throw new LocalizedException(__('Shipment information should be provided'));
         }
 
         $request['shipping_lines'] = $shippingLines;

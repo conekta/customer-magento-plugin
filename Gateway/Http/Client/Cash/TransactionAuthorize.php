@@ -19,7 +19,7 @@ class TransactionAuthorize implements ClientInterface
     /**
      * @var array
      */
-    private $results = [
+    private array $results = [
         self::SUCCESS,
         self::FAILURE
     ];

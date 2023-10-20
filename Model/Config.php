@@ -5,16 +5,12 @@ namespace Conekta\Payments\Model;
 use Conekta\Payments\Api\ConektaApiClient;
 use Conekta\Payments\Helper\Data as ConektaHelper;
 use Conekta\Payments\Logger\Logger as ConektaLogger;
-use Magento\Framework\Encryption\EncryptorInterface;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Validator\Exception;
 
 class Config
 {
-    /**
-     * @var EncryptorInterface
-     */
-    protected EncryptorInterface $_encryptor;
+
     /**
      * @var ConektaHelper
      */
@@ -30,19 +26,16 @@ class Config
     protected ConektaApiClient $conektaApiClient;
 
     /**
-     * @param EncryptorInterface $encryptor
      * @param ConektaHelper $conektaHelper
      * @param ConektaLogger $conektaLogger
      * @param ConektaApiClient $conektaApiClient
      */
     public function __construct(
-        EncryptorInterface $encryptor,
         ConektaHelper      $conektaHelper,
         ConektaLogger      $conektaLogger,
         ConektaApiClient   $conektaApiClient
     )
     {
-        $this->_encryptor = $encryptor;
         $this->_conektaHelper = $conektaHelper;
         $this->_conektaLogger = $conektaLogger;
         $this->conektaApiClient = $conektaApiClient;

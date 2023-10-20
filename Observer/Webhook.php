@@ -17,11 +17,11 @@ class Webhook implements ObserverInterface
     /**
      * @var Config
      */
-    protected $config;
+    protected Config $config;
     /**
      * @var ManagerInterface
      */
-    protected $messageManager;
+    protected ManagerInterface $messageManager;
     /**
      * @param Config $config
      * @param ManagerInterface $messageManager

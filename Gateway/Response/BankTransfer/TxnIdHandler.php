@@ -2,7 +2,6 @@
 namespace Conekta\Payments\Gateway\Response\BankTransfer;
 
 use Conekta\Payments\Logger\Logger as ConektaLogger;
-use Magento\Framework\DB\TransactionFactory;
 use Magento\Payment\Gateway\Helper\SubjectReader;
 use Magento\Payment\Gateway\Response\HandlerInterface;
 
