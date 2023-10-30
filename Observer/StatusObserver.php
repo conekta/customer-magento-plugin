@@ -3,6 +3,7 @@
 namespace Conekta\Payments\Observer;
 
 use Conekta\Payments\Logger\Logger;
+use Conekta\Payments\Model\Ui\EmbedForm\ConfigProvider;
 use Magento\Framework\Event\Observer;
 use Magento\Framework\Event\ObserverInterface;
 use Magento\Sales\Model\Order;
@@ -18,15 +19,20 @@ class StatusObserver implements ObserverInterface
 
     public function execute(Observer $observer)
     {
-        $this->_logger->info("Se ha creado StatusObserver");
+        $this->_logger->info("execute StatusObserver");
         $order = $observer->getEvent()->getOrder();
-        // Obtén los datos adicionales (additional_data)
-        $additionalData = $order->getData('additional_data');
+        if ($order->getPayment()->getMethod() != ConfigProvider::CODE ) {
+            return;
+        }
+
+        $paymentMethodConekta = $order->getPayment()->getAdditionalInformation('payment_method');
+        $this->_logger->info("execute paymentMethodConekta",["paymentMethodConekta"=> $paymentMethodConekta]);
+        if (!in_array($paymentMethodConekta, [ConfigProvider::PAYMENT_METHOD_CASH,ConfigProvider::PAYMENT_METHOD_BANK_TRANSFER])) {
+            return;
+        }
 
         $order->setState(Order::STATE_PENDING_PAYMENT);
         $order->setStatus(Order::STATE_PENDING_PAYMENT);
         $order->save();
-        $paymentMethod = $order->getPayment()->getMethod();
-        $this->_logger->info("Se ha creado una ", ["data"=>$additionalData, "method"=> $paymentMethod]);
     }
 }
