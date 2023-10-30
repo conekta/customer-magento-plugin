@@ -3,7 +3,4 @@
     <event name="admin_system_config_changed_section_payment">
         <observer name="conekta_observer_check_config" instance="Conekta\Payments\Observer\Webhook"/>
     </event>
-    <event name="sales_order_place_after">
-        <observer name="conekta_payments_status_observer" instance="Conekta\Payments\Observer\StatusObserver" />
-    </event>
 </config>

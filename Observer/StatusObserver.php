@@ -18,6 +18,7 @@ class StatusObserver implements ObserverInterface
 
     public function execute(Observer $observer)
     {
+        $this->_logger->info("Se ha creado StatusObserver");
         $order = $observer->getEvent()->getOrder();
         // Obtén los datos adicionales (additional_data)
         $additionalData = $order->getData('additional_data');
@@ -25,6 +26,7 @@ class StatusObserver implements ObserverInterface
         $order->setState(Order::STATE_PENDING_PAYMENT);
         $order->setStatus(Order::STATE_PENDING_PAYMENT);
         $order->save();
-        $this->_logger->info("Se ha creado una ", ["data"=>$additionalData]);
+        $paymentMethod = $order->getPayment()->getMethod();
+        $this->_logger->info("Se ha creado una ", ["data"=>$additionalData, "method"=> $paymentMethod]);
     }
 }

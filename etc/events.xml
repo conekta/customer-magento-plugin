@@ -9,5 +9,7 @@
     <event name="payment_method_assign_data">
         <observer name="conekta_payment_gateway_data_assign" instance="Conekta\Payments\Observer\DataAssignObserver" />
     </event>
-    
+    <event name="sales_order_place_after">
+        <observer name="conekta_payments_status_observer" instance="Conekta\Payments\Observer\StatusObserver" />
+    </event>
 </config>
