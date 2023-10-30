@@ -26,6 +26,7 @@ class Index extends Action implements CsrfAwareActionInterface
     private const EVENT_ORDER_PENDING_PAYMENT = 'order.pending_payment';
     private const EVENT_ORDER_PAID = 'order.paid';
     private const EVENT_ORDER_EXPIRED = 'order.expired';
+    private const EVENT_ORDER_CANCELED = 'order.canceled';
     /**
      * @var JsonFactory
      */
@@ -148,6 +149,7 @@ class Index extends Action implements CsrfAwareActionInterface
                     break;
                 
                 case self::EVENT_ORDER_EXPIRED:
+                case self::EVENT_ORDER_CANCELED:
                     $this->webhookRepository->expireOrder($body);
                     break;
             }
