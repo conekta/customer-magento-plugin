@@ -5,7 +5,6 @@ namespace Conekta\Payments\Observer;
 use Conekta\Payments\Logger\Logger;
 use Magento\Framework\Event\Observer;
 use Magento\Framework\Event\ObserverInterface;
-use Magento\Quote\Api\Data\PaymentInterface;
 use Magento\Sales\Model\Order;
 
 class StatusObserver implements ObserverInterface
