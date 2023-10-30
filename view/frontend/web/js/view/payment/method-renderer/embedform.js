@@ -366,7 +366,7 @@ define(
             },
 
             getCode: function () {
-                return 'conekta_cash';
+                return 'conekta_ef';
             },
 
             isActive: function () {
