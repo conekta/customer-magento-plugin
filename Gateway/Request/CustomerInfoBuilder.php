@@ -2,23 +2,19 @@
 namespace Conekta\Payments\Gateway\Request;
 
 use Conekta\Payments\Logger\Logger as ConektaLogger;
-use Magento\Catalog\Model\Product;
 use Magento\Payment\Gateway\Data\PaymentDataObjectInterface;
 use Magento\Payment\Gateway\Request\BuilderInterface;
 
 class CustomerInfoBuilder implements BuilderInterface
 {
-    private $_product;
 
-    private $_conektaLogger;
+    private ConektaLogger $_conektaLogger;
 
     public function __construct(
-        Product $product,
         ConektaLogger $conektaLogger
     ) {
         $this->_conektaLogger = $conektaLogger;
         $this->_conektaLogger->info('Request LineItemsBuilder :: __construct');
-        $this->_product = $product;
     }
 
     public function build(array $buildSubject)
@@ -50,16 +46,14 @@ class CustomerInfoBuilder implements BuilderInterface
         return $request;
     }
 
-    public function getCustomerName($order)
+    public function getCustomerName($order): string
     {
         $billing = $order->getBillingAddress();
-        $customerName = sprintf(
+        return sprintf(
             '%s %s %s',
             $billing->getFirstName(),
             $billing->getMiddleName(),
             $billing->getLastName()
         );
-
-        return $customerName;
     }
 }

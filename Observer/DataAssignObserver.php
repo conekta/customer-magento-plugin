@@ -17,7 +17,7 @@ class DataAssignObserver extends AbstractDataAssignObserver
     public const CC_BIN = 'cc_bin';
     public const CC_LAST_4 = 'cc_last_4';
     public const CARD_TOKEN = 'card_token';
-    public const MONTLY_INSTALLAMENTS = 'monthly_installments';
+    public const MONTHLY_INSTALLMENTS = 'monthly_installments';
     public const SAVED_CARD = 'saved_card';
     public const SAVED_CARD_LATER = 'saved_card_later';
     public const IFRAME_PAYMENT = 'iframe_payment';
@@ -28,7 +28,7 @@ class DataAssignObserver extends AbstractDataAssignObserver
     /**
      * @var string[]
      */
-    protected $additionalInformationList = [
+    protected array $additionalInformationList = [
         self::PAYMENT_METHOD,
         self::CC_TYPE,
         self::CARD_TYPE,
@@ -37,7 +37,7 @@ class DataAssignObserver extends AbstractDataAssignObserver
         self::CC_BIN,
         self::CC_LAST_4,
         self::CARD_TOKEN,
-        self::MONTLY_INSTALLAMENTS,
+        self::MONTHLY_INSTALLMENTS,
         self::SAVED_CARD,
         self::SAVED_CARD_LATER,
         self::IFRAME_PAYMENT,
@@ -48,7 +48,7 @@ class DataAssignObserver extends AbstractDataAssignObserver
     /**
      * @var Session
      */
-    protected $_checkoutSession;
+    protected Session $_checkoutSession;
 
     /**
      * @param Session $checkoutSession

@@ -18,28 +18,27 @@ use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Exception\State\InputMismatchException;
 use Magento\Quote\Model\Quote;
+use Magento\Quote\Api\Data\CartInterface;
 
 class ConektaOrder extends Util
 {
-    public const CURRENCY_CODE = 'mxn';
-    public const STREET = 'Conekta Street';
     /**
      * @var ConektaLogger
      */
-    protected $conektaLogger;
+    protected ConektaLogger $conektaLogger;
 
     /**
      * @var CustomerSession
      */
-    protected $customerSession;
+    protected CustomerSession $customerSession;
     /**
      * @var Data
      */
-    protected $_conektaHelper;
+    protected Data $_conektaHelper;
     /**
      * @var Session
      */
-    protected $_checkoutSession;
+    protected Session $_checkoutSession;
     /**
      * @var Quote|null
      */
@@ -47,16 +46,16 @@ class ConektaOrder extends Util
     /**
      * @var CustomerRepositoryInterface
      */
-    protected $customerRepository;
+    protected CustomerRepositoryInterface $customerRepository;
     /**
      * @var ConfigProvider
      */
-    protected $conektaConfigProvider;
+    protected ConfigProvider $conektaConfigProvider;
 
     /**
      * @var ConektaApiClient
      */
-    private $conektaApiClient;
+    private ConektaApiClient $conektaApiClient;
 
     /**
      * ConektaOrder constructor.
@@ -64,6 +63,7 @@ class ConektaOrder extends Util
      * @param Context $context
      * @param ConektaHelper $conektaHelper
      * @param ConektaLogger $conektaLogger
+     * @param ConektaApiClient $conektaApiClient
      * @param CustomerSession $customerSession
      * @param Session $_checkoutSession
      * @param CustomerRepositoryInterface $customerRepository
@@ -89,32 +89,30 @@ class ConektaOrder extends Util
         $this->conektaConfigProvider = $conektaConfigProvider;
     }
 
+
     /**
      * Generate Order Params
      *
      * @param mixed $guestEmail
-     * @return mixed|string
+     * @return array
      * @throws ConektaException
      * @throws InputException
      * @throws LocalizedException
      * @throws NoSuchEntityException
      * @throws InputMismatchException
      */
-    public function generateOrderParams($guestEmail)
+    public function generateOrderParams($guestEmail): array
     {
         $this->conektaLogger->info('ConektaOrder.generateOrderParams init');
 
-        //Conekta::setApiKey($this->_conektaHelper->getPrivateKey());
-        //Conekta::setApiVersion("2.0.0");
         $customerRequest = [];
         try {
             $customer = $this->customerSession->getCustomer();
-            $conektaCustomer = null;
             $conektaCustomerId = $customer->getConektaCustomerId();
-
+            $this->conektaLogger->info('looking customer id', ["conekta_customer_id"=>$conektaCustomerId]);
             if(!empty($conektaCustomerId)) {
                 try {
-                    $conektaCustomer = $this->conektaApiClient->findCustomerByID($conektaCustomerId);
+                    $this->conektaApiClient->findCustomerByID($conektaCustomerId);
                 } catch (Exception $error) {
                     $this->conektaLogger->info('Create Order. Find Customer: ' . $error->getMessage());
                     $conektaCustomerId = '';
@@ -124,7 +122,6 @@ class ConektaOrder extends Util
             //Customer Info for API
             $billingAddress = $this->getQuote()->getBillingAddress();
             $customerId = $customer->getId();
-            $customerRequest = [];
             if ($customerId) {
                 //name without numbers
                 $customerRequest['name'] = $customer->getName();
@@ -134,10 +131,9 @@ class ConektaOrder extends Util
                 $customerRequest['name'] = $billingAddress->getName();
                 $customerRequest['email'] = $guestEmail;
             }
+            $customerRequest['custom_reference'] = $customerId;
             $customerRequest['name'] = $this->removeNameSpecialCharacter($customerRequest['name']);
-            $customerRequest['phone'] = $this->removePhoneSpecialCharacter(
-                $billingAddress->getTelephone()
-            );
+            $customerRequest['phone'] = $this->removePhoneSpecialCharacter($billingAddress->getTelephone());
             
             if (strlen($customerRequest['phone']) < 10) {
                 $this->conektaLogger->info('Helper.CreateOrder phone validation error', $customerRequest);
@@ -156,7 +152,7 @@ class ConektaOrder extends Util
                     $this->customerRepository->save($customer);
                 }
             } else {
-                //If cutomer API exists, always update error
+                //If customer API exists, always update error
                 $this->conektaApiClient->updateCustomer($conektaCustomerId, $customerRequest);
             }
         } catch (ApiException $e) {
@@ -173,21 +169,20 @@ class ConektaOrder extends Util
             $this->getQuote()->getId()
         );
 
-        //always needs shipping due to api does not provide info about merchant type (dropshipping, virtual)
-        $needsShippingContact = !$this->getQuote()->getIsVirtual() || true;
-        if ($needsShippingContact) {
-            $validOrderWithCheckout['shipping_contact'] = $this->_conektaHelper->getShippingContact(
-                $this->getQuote()->getId()
-            );
-        }
-        
+        //always needs shipping due to api does not provide info about merchant type (drop_shipping, virtual)
+        $validOrderWithCheckout['shipping_contact'] = $this->_conektaHelper->getShippingContact(
+            $this->getQuote()->getId()
+        );
+        $validOrderWithCheckout['fiscal_entity'] = $this->_conektaHelper->getBillingAddress(
+            $this->getQuote()->getId()
+        );
+
         $validOrderWithCheckout['customer_info'] = [
             'customer_id' => $conektaCustomerId
         ];
         
         $threeDsEnabled =  $this->_conektaHelper->is3DSEnabled();
-        $saveCardEnabled = $this->_conektaHelper->isSaveCardEnabled() &&
-            $customerId;
+        $saveCardEnabled = $this->_conektaHelper->isSaveCardEnabled() && $customerId;
         $installments = $this->getMonthlyInstallments();
         $validOrderWithCheckout['checkout']    = [
             'allowed_payment_methods'      => $this->getAllowedPaymentMethods(),
@@ -196,7 +191,7 @@ class ConektaOrder extends Util
             'on_demand_enabled'            => $saveCardEnabled,
             'force_3ds_flow'               => $threeDsEnabled,
             'expires_at'                   => $this->_conektaHelper->getExpiredAt(),
-            'needs_shipping_contact'       => $needsShippingContact
+            'needs_shipping_contact'       => true
         ];
         $validOrderWithCheckout['currency']= $this->_conektaHelper->getCurrencyCode();
         $validOrderWithCheckout['metadata'] = $this->getMetadataOrder($orderItems);
@@ -205,16 +200,16 @@ class ConektaOrder extends Util
     }
 
     /**
-     * Get montly installments
+     * Get monthly installments
      *
      * @return array
      * @throws LocalizedException
      * @throws NoSuchEntityException
      */
-    public function getMonthlyInstallments()
+    public function getMonthlyInstallments(): array
     {
         $result = [];
-        $isInstallmentsAvilable = (int)true;
+        $isInstallmentsAvailable = (int)true;
         $quote = $this->getQuote();
         $total = $quote->getGrandTotal();
         $active_monthly_installments = $this->_conektaHelper->getConfigData(
@@ -235,12 +230,12 @@ class ConektaOrder extends Util
                 $result['active_installments'] = (int)!empty($months);
                 $result['monthly_installments'] = $months;
             } else {
-                $isInstallmentsAvilable = (int)false;
+                $isInstallmentsAvailable = (int)false;
             }
         } else {
-            $isInstallmentsAvilable = (int)false;
+            $isInstallmentsAvailable = (int)false;
         }
-        if ($isInstallmentsAvilable == false) {
+        if (!$isInstallmentsAvailable) {
             $result['active_installments'] = (int)false;
             $result['monthly_installments'] = [];
         }
@@ -254,7 +249,7 @@ class ConektaOrder extends Util
      * @throws LocalizedException
      * @throws NoSuchEntityException
      */
-    public function getAllowedPaymentMethods()
+    public function getAllowedPaymentMethods(): array
     {
         $methods = [];
 
@@ -281,7 +276,7 @@ class ConektaOrder extends Util
      * @throws LocalizedException
      * @throws NoSuchEntityException
      */
-    public function getQuote()
+    public function getQuote(): Quote
     {
         return $this->_checkoutSession->getQuote();
     }
@@ -293,12 +288,11 @@ class ConektaOrder extends Util
      * @throws LocalizedException
      * @throws NoSuchEntityException
      */
-    public function getQuoteId()
+    public function getQuoteId(): array
     {
         $quote = $this->getQuote();
         $quoteId = $quote->getId();
-        $response = ['quote_id' => $quoteId];
-        return $response;
+        return ['quote_id' => $quoteId];
     }
 
     /**
@@ -309,11 +303,14 @@ class ConektaOrder extends Util
      * @throws LocalizedException
      * @throws NoSuchEntityException
      */
-    public function getMetadataOrder($orderItems)
+    public function getMetadataOrder($orderItems): array
     {
         return array_merge(
             $this->_conektaHelper->getMagentoMetadata(),
-            ['quote_id' => $this->getQuote()->getId()],
+            [
+                'quote_id'                     => $this->getQuote()->getId(),
+                 CartInterface::KEY_IS_VIRTUAL => $this->getQuote()->isVirtual()
+            ],
             $this->_conektaHelper->getMetadataAttributesConekta($orderItems)
         );
     }

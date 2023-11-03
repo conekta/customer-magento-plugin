@@ -9,14 +9,12 @@ class ActiveValueHandler implements ValueHandlerInterface
     /**
      * @var ConektaHelper
      */
-    protected $_conektaHelper;
+    protected ConektaHelper $_conektaHelper;
 
     /**
      * @param ConektaHelper $conektaHelper
      */
-    public function __construct(
-        ConektaHelper $conektaHelper
-    ) {
+    public function __construct(ConektaHelper $conektaHelper) {
         $this->_conektaHelper = $conektaHelper;
     }
 
@@ -27,7 +25,7 @@ class ActiveValueHandler implements ValueHandlerInterface
      * @param mixed $storeId
      * @return bool
      */
-    public function handle(array $subject, $storeId = null)
+    public function handle(array $subject, $storeId = null): bool
     {
         return $this->_conektaHelper->isCreditCardEnabled()
                || $this->_conektaHelper->isCashEnabled()

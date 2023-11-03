@@ -295,7 +295,7 @@ define(
                         console.error(error);
                     },
                     onFinalizePayment: function (event) {
-                        if (event.charge.paymentMethod.type != 'card' && event.charge.payment_method.type != 'card') {
+                        if (event.charge.paymentMethod.type !== 'card' && event.charge.payment_method.type !== 'card') {
                             event.charge.status = 'pending_payment'
                             event.status = 'pending_payment'
                         }
@@ -303,7 +303,7 @@ define(
                         self.beforePlaceOrder();
                     },
                     onErrorPayment: function(a) {
-                        self.conektaError("Ocurrio un error al procesar el pago. Por favor intente de nuevo");
+                        self.conektaError("Ocurrió un error al procesar el pago. Por favor, inténtalo de nuevo.");
                     },
                 });
 

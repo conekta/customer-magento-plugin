@@ -4,17 +4,17 @@ namespace Conekta\Payments\Gateway\Request;
 use Conekta\Payments\Helper\Data as ConektaHelper;
 use Conekta\Payments\Logger\Logger as ConektaLogger;
 use Magento\Framework\Exception\LocalizedException;
-use Magento\Payment\Gateway\Data\PaymentDataObjectInterface;
+use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Payment\Gateway\Helper\SubjectReader;
 use Magento\Payment\Gateway\Request\BuilderInterface;
 
 class ShippingLinesBuilder implements BuilderInterface
 {
-    private $subjectReader;
+    private SubjectReader $subjectReader;
 
-    private $_conektaLogger;
+    private ConektaLogger $_conektaLogger;
 
-    private $_conektaHelper;
+    private ConektaHelper $_conektaHelper;
 
     public function __construct(
         SubjectReader $subjectReader,
@@ -27,6 +27,10 @@ class ShippingLinesBuilder implements BuilderInterface
         $this->_conektaHelper = $conektaHelper;
     }
 
+    /**
+     * @throws NoSuchEntityException
+     * @throws LocalizedException
+     */
     public function build(array $buildSubject)
     {
         $this->_conektaLogger->info('Request ShippingLinesBuilder :: build');
@@ -40,7 +44,7 @@ class ShippingLinesBuilder implements BuilderInterface
 
         if (empty($shippingLines)) {
 
-            throw new LocalizedException(__('Shippment information should be provided'));
+            throw new LocalizedException(__('Shipment information should be provided'));
         }
 
         $request['shipping_lines'] = $shippingLines;

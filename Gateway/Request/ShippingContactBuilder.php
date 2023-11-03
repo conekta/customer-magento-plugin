@@ -2,17 +2,19 @@
 namespace Conekta\Payments\Gateway\Request;
 
 use Conekta\Payments\Logger\Logger as ConektaLogger;
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Payment\Gateway\Helper\SubjectReader;
 use Magento\Payment\Gateway\Request\BuilderInterface;
 use Conekta\Payments\Helper\Data as ConektaHelper;
 
 class ShippingContactBuilder implements BuilderInterface
 {
-    private $subjectReader;
+    private SubjectReader $subjectReader;
 
-    private $_conektaLogger;
+    private ConektaLogger $_conektaLogger;
 
-    private $_conektaHelper;
+    private ConektaHelper $_conektaHelper;
 
     public function __construct(
         SubjectReader $subjectReader,
@@ -25,6 +27,10 @@ class ShippingContactBuilder implements BuilderInterface
         $this->_conektaHelper = $conektaHelper;
     }
 
+    /**
+     * @throws NoSuchEntityException
+     * @throws LocalizedException
+     */
     public function build(array $buildSubject)
     {
         $this->_conektaLogger->info('Request ShippingContactBuilder :: build');
@@ -37,7 +43,7 @@ class ShippingContactBuilder implements BuilderInterface
         $request['shipping_contact'] = $this->_conektaHelper->getShippingContact($quoteId);
 
         if (empty($request['shipping_contact'])) {
-            throw new LocalizedException(__('Missing shipping contacta information'));
+            throw new LocalizedException(__('Missing shipping contact information'));
         }
 
         $this->_conektaLogger->info('Request ShippingContactBuilder :: build : return request', $request);

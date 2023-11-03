@@ -1,3 +1,8 @@
+### 5.1.0 - 2023/10/30 10:55
+* Feat:
+  - [PAY22-2045] Magento - Mejoras para órdenes perdidas. @fcarrero [#46](https://github.com/conekta/customer-magento-plugin/pull/46)
+  - Upgrade php version requerida.
+  - Fix conekta.png route location
 ### 5.0.5 - 2023/10/09 10:55
 * Feat:
   - [PAY22-2045] Magento - remove old sdk-php code. @fcarrero [#45](https://github.com/conekta/customer-magento-plugin/pull/45)
@@ -29,7 +34,7 @@
 ### 4.1.8 - 2023/03/08 16:34
 [Full Changelog](https://github.com/conekta/customer-magento-plugin/compare/4.1.7...4.1.8)
 * Feat:
-  - [CHLP-830] Add session control, to prevent errors when session was expire @elvisheredia [#36](https://github.com/conekta/customer-magento-plugin/pull/36)
+  - [CHLP-830] Add session control, to prevent errors when session has expired @elvisheredia [#36](https://github.com/conekta/customer-magento-plugin/pull/36)
 
 ### 4.1.7 - 2023/01/07 12:34
 [Full Changelog](https://github.com/conekta/customer-magento-plugin/compare/4.1.6...4.1.7)

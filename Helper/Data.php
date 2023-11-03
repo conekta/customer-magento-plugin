@@ -4,6 +4,7 @@ namespace Conekta\Payments\Helper;
 
 use Conekta\Payments\Logger\Logger as ConektaLogger;
 use Magento\Framework\App\Helper\Context;
+use Magento\Framework\App\ObjectManager;
 use Magento\Framework\App\ProductMetadataInterface;
 use Magento\Framework\Encryption\EncryptorInterface;
 use Magento\Framework\Exception\LocalizedException;
@@ -14,52 +15,52 @@ use Magento\Customer\Model\Session as CustomerSession;
 use Magento\Catalog\Model\ProductRepository;
 use Magento\Framework\Escaper;
 use Magento\Quote\Api\CartRepositoryInterface;
+use Magento\Store\Api\Data\StoreInterface;
 use Magento\Store\Model\ScopeInterface;
 use Magento\Store\Model\StoreManagerInterface;
-
 class Data extends Util
 {
     /**
      * @var ModuleListInterface
      */
-    protected $_moduleList;
+    protected ModuleListInterface $_moduleList;
     /**
      * @var EncryptorInterface
      */
-    protected $_encryptor;
+    protected EncryptorInterface $_encryptor;
     /**
      * @var ProductMetadataInterface
      */
-    protected $_productMetadata;
+    protected ProductMetadataInterface $_productMetadata;
     /**
      * @var ConektaLogger
      */
-    protected $conektaLogger;
+    protected ConektaLogger $conektaLogger;
 
     /**
      * @var StoreManagerInterface
      */
-    private $_storeManager;
+    private StoreManagerInterface $_storeManager;
     /**
      * @var CheckoutSession
      */
-    private $checkoutSession;
+    private CheckoutSession $checkoutSession;
     /**
      * @var CustomerSession
      */
-    private $customerSession;
+    private CustomerSession $customerSession;
     /**
      * @var ProductRepository
      */
-    private $productRepository;
+    private ProductRepository $productRepository;
     /**
      * @var Escaper
      */
-    private $_escaper;
+    private Escaper $_escaper;
     /**
      * @var CartRepositoryInterface
      */
-    protected $_cartRepository;
+    protected CartRepositoryInterface $_cartRepository;
 
     /**
      * Data constructor.
@@ -75,7 +76,6 @@ class Data extends Util
      * @param Escaper $_escaper
      * @param CartRepositoryInterface $cartRepository
      * @param StoreManagerInterface $storeManager
-     * @param ConektaApiClient $conektaApiClient
      */
 
     public function __construct(
@@ -102,7 +102,6 @@ class Data extends Util
         $this->_escaper = $_escaper;
         $this->_cartRepository = $cartRepository;
         $this->_storeManager = $storeManager;
-
     }
 
     /**
@@ -112,7 +111,7 @@ class Data extends Util
      * @throws LocalizedException
      * @throws NoSuchEntityException
      */
-    public function getCurrencyCode()
+    public function getCurrencyCode(): string
     {
         return $this->_storeManager->getStore()->getCurrentCurrency()->getCode();
     }
@@ -125,7 +124,7 @@ class Data extends Util
      * @param mixed $storeId
      * @return mixed
      */
-    public function getConfigData($area, $field, $storeId = null)
+    public function getConfigData(string $area, string $field, $storeId = null)
     {
         return $this->scopeConfig->getValue(
             'payment/' . $area . '/' . $field,
@@ -149,7 +148,7 @@ class Data extends Util
      *
      * @return string
      */
-    public function getPrivateKey()
+    public function getPrivateKey(): string
     {
         $sandboxMode = $this->getConfigData('conekta/conekta_global', 'sandbox_mode');
 
@@ -231,7 +230,7 @@ class Data extends Util
      *
      * @return string
      */
-    public function getMageVersion()
+    public function getMageVersion(): string
     {
         return $this->_productMetadata->getVersion();
     }
@@ -245,9 +244,7 @@ class Data extends Util
     public function getMetadataAttributes($metadataPath)
     {
         $attributes = $this->getConfigData('conekta/conekta_global', $metadataPath);
-        $attributesArray = explode(",", $attributes  ?? '');
-
-        return $attributesArray;
+        return explode(",", $attributes  ?? '');
     }
 
     /**
@@ -255,17 +252,17 @@ class Data extends Util
      *
      * @return bool
      */
-    public function is3DSEnabled()
+    public function is3DSEnabled(): bool
     {
         return (boolean)$this->getConfigData('conekta_cc', 'iframe_enabled');
     }
 
     /**
-     * Is save card enabled
+     * Is card enabled
      *
      * @return bool
      */
-    public function isSaveCardEnabled()
+    public function isSaveCardEnabled(): bool
     {
         return (boolean)$this->getConfigData('conekta_cc', 'enable_saved_card');
     }
@@ -275,7 +272,7 @@ class Data extends Util
      *
      * @return bool
      */
-    public function isCreditCardEnabled()
+    public function isCreditCardEnabled(): bool
     {
         return (boolean)$this->getConfigData('conekta_cc', 'active');
     }
@@ -285,7 +282,7 @@ class Data extends Util
      *
      * @return bool
      */
-    public function isCashEnabled()
+    public function isCashEnabled(): bool
     {
         return (boolean)$this->getConfigData('conekta_cash', 'active');
     }
@@ -295,7 +292,7 @@ class Data extends Util
      *
      * @return bool
      */
-    public function isBankTransferEnabled()
+    public function isBankTransferEnabled(): bool
     {
         return (boolean)$this->getConfigData('conekta_bank_transfer', 'active');
     }
@@ -305,13 +302,11 @@ class Data extends Util
      *
      * @return int
      */
-    public function getExpiredAt()
+    public function getExpiredAt(): int
     {
         $timeFormat = $this->getConfigData('conekta/conekta_global', 'days_or_hours');
-        $expirationValue = null;
-        $expirationUnit = null;
 
-        //hours expiration disabled temporaly
+        //hours expiration disabled temporally
         if (! $timeFormat && false) {
             $expirationValue = $this->getConfigData('conekta/conekta_global', 'expiry_hours');
             $expirationUnit = "hours";
@@ -324,9 +319,7 @@ class Data extends Util
             $expirationValue = 1;
         }
 
-        $expiryDate = strtotime("+" . $expirationValue . " " . $expirationUnit);
-
-        return $expiryDate;
+        return strtotime("+" . $expirationValue . " " . $expirationUnit);
     }
 
     /**
@@ -362,8 +355,7 @@ class Data extends Util
                 $ret .= $key . ' : ' . $item . $glue;
             }
         }
-        $ret = substr($ret, 0, 0 - strlen($glue));
-        return $ret;
+        return substr($ret, 0, 0 - strlen($glue));
     }
 
     /**
@@ -371,7 +363,7 @@ class Data extends Util
      * @param $product
      * @return array
      */
-    private function processProductAttributes($productAttributes, $product)
+    private function processProductAttributes($productAttributes, $product): array
     {
         $productValues = [];
 
@@ -401,7 +393,7 @@ class Data extends Util
      * @throws LocalizedException
      * @throws NoSuchEntityException
      */
-    public function getMetadataAttributesConekta($items)
+    public function getMetadataAttributesConekta($items): array
     {
         $productAttributes = $this->getMetadataAttributes('metadata_additional_products');
 
@@ -465,13 +457,16 @@ class Data extends Util
      * Get magento metadata
      *
      * @return array
+     * @throws NoSuchEntityException
      */
-    public function getMagentoMetadata()
+    public function getMagentoMetadata(): array
     {
         return [
             'plugin'                 => 'Magento',
-            'magento_version'         => $this->getMageVersion(),
-            'plugin_conekta_version' => $this->pluginVersion()
+            'magento_version'        => $this->getMageVersion(),
+            'plugin_conekta_version' => $this->pluginVersion(),
+            'store'                  => $this->getStore()->getId(),
+            'remote_ip'              => $this->_remoteAddress->getRemoteAddress()
         ];
     }
 
@@ -482,12 +477,12 @@ class Data extends Util
      * @param mixed $isQuoteItem
      * @return array
      */
-    public function getLineItems($items, $isQuoteItem = true)
+    public function getLineItems(array $items, $isQuoteItem = true): array
     {
         $version = (int)str_replace('.', '', $this->getMageVersion());
         $request = [];
         $quantityMethod = $isQuoteItem ? "getQty" : "getQtyOrdered";
-        foreach ($items as $itemId => $item) {
+        foreach ($items as $item) {
             if ($version > 233) {
                 if ($item->getProductType() != 'bundle' && $item->getProductType() != 'configurable') {
                     $price = $item->getPrice();
@@ -499,7 +494,7 @@ class Data extends Util
                             $price = $item->getParentItem()->getPrice();
                             $qty = (int)$item->getParentItem()->{$quantityMethod}();
                         } elseif ($parent->getProductType() == 'bundle' && $isQuoteItem) {
-                            //If it is a quote item, then qty of item has not been calculate yet
+                            //If it is a quote item, then qty of item has not been calculated yet
                             $qty = $qty * (int)$item->getParentItem()->{$quantityMethod}();
                         }
                     }
@@ -518,6 +513,9 @@ class Data extends Util
                         'quantity'    => $qty,
                         'tags'        => [
                             $item->getProductType()
+                        ],
+                        'metadata' => [
+                            "product_id" => $item->getProductId()
                         ]
                     ];
                 }
@@ -531,6 +529,9 @@ class Data extends Util
                         'quantity'    => (int)($item->{$quantityMethod}()),
                         'tags'        => [
                             $item->getProductType()
+                        ],
+                        'metadata' => [
+                            "product_id" => $item->getProductId()
                         ]
                     ];
                 }
@@ -559,11 +560,10 @@ class Data extends Util
      * Get shipping lines
      *
      * @param mixed $quoteId
-     * @param mixed $isCheckout
      * @return array
      * @throws NoSuchEntityException
      */
-    public function getShippingLines($quoteId, $isCheckout = true)
+    public function getShippingLines($quoteId): array
     {
         $quote = $this->_cartRepository->get($quoteId);
         $shippingAddress = $quote->getShippingAddress();
@@ -571,15 +571,14 @@ class Data extends Util
         $shippingLines = [];
 
         if ($quote->getIsVirtual()) {
-            $shippingLines[] = ['amount' => 0];
+            $shippingLines[] = [
+                'amount' => 0,
+                'method' => 'virtual'
+            ];
         } elseif ($shippingAddress) {
             $shippingLine['amount'] = $this->convertToApiPrice($shippingAddress->getShippingAmount());
-
-            //Chekout orders doesn't allow method and carrier parameters
-            if (! $isCheckout) {
-                $shippingLine['method'] = $shippingAddress->getShippingMethod();
-                $shippingLine['carrier'] = $shippingAddress->getShippingDescription();
-            }
+            $shippingLine['method'] = $shippingAddress->getShippingMethod();
+            $shippingLine['carrier'] = $shippingAddress->getShippingDescription();
 
             $shippingLines[] = $shippingLine;
         }
@@ -594,43 +593,76 @@ class Data extends Util
      * @return array
      * @throws NoSuchEntityException
      */
-    public function getShippingContact($quoteId)
+    public function getShippingContact(int $quoteId): array
     {
         $quote = $this->_cartRepository->get($quoteId);
-        $address = null;
-
-        $shippingContact = [];
+        $address = $quote->getShippingAddress();
 
         if ($quote->getIsVirtual()) {
             $address = $quote->getBillingAddress();
-        } else {
-            $address = $quote->getShippingAddress();
         }
+        $phone = $this->removePhoneSpecialCharacter($address->getTelephone());
 
-        if ($address) {
-            $phone = $this->removePhoneSpecialCharacter($address->getTelephone());
+        $shippingContact = [
+            'receiver' => $this->getCustomerName($address),
+            'phone'    => $phone,
+            'address'  => [
+                'city'        => $address->getCity(),
+                'state'       => $address->getRegion(),
+                'country'     => $address->getCountryId(),
+                'postal_code' => $this->onlyNumbers($address->getPostcode()),
+                'phone'       => $phone,
+                'email'       => $address->getEmail()
+            ],
+            'metadata' => [
+                'company'   => $address->getCompany(),
+                'region_id' => $address->getRegionId(),
+                'save_in_address_book' => $address->getSaveInAddressBook()
+            ]
+        ];
 
-            $shippingContact = [
-                'receiver' => $this->getCustomerName($address),
-                'phone'    => $phone,
-                'address'  => [
-                    'city'        => $address->getCity(),
-                    'state'       => $address->getRegionCode(),
-                    'country'     => $address->getCountryId(),
-                    'postal_code' => $this->onlyNumbers($address->getPostcode()),
-                    'phone'       => $phone,
-                    'email'       => $address->getEmail()
-                ]
-            ];
-
-            $street = $address->getStreet();
-            $streetStr = isset($street[0]) ? $street[0] : 'NO STREET';
-            $shippingContact['address']['street1'] = $this->removeSpecialCharacter($streetStr);
-            if (isset($street[1])) {
-                $shippingContact['address']['street2'] = $this->removeSpecialCharacter($street[1]);
-            }
+        $street = $address->getStreet();
+        $streetStr = $street[0] ?? 'NO STREET';
+        $shippingContact['address']['street1'] = $this->removeSpecialCharacter($streetStr);
+        if (isset($street[1])) {
+            $shippingContact['address']['street2'] = $this->removeSpecialCharacter($street[1]);
         }
         return $shippingContact;
+    }
+
+    /**
+     * @throws NoSuchEntityException
+     */
+    public function getBillingAddress(int $quoteId): array
+    {
+        $quote = $this->_cartRepository->get($quoteId);
+        $address = $quote->getBillingAddress();
+
+        $phone = $this->removePhoneSpecialCharacter($address->getTelephone());
+
+        $billingContact = [
+            'name' => $this->getCustomerName($address),
+            'address'  => [
+                'city'            => $address->getCity(),
+                'state'           => $address->getRegion(),
+                'country'         => $address->getCountryId(),
+                'postal_code'     => $this->onlyNumbers($address->getPostcode()),
+                'external_number' => $address->getId() !== null ? strval($address->getId()) : "",
+            ],
+            'metadata' => [
+                'company'=> $address->getCompany(),
+                'region_id' => $address->getRegionId(),
+                'save_in_address_book' => $address->getSaveInAddressBook()
+            ]
+        ];
+
+        $street = $address->getStreet();
+        $streetStr = $street[0] ?? 'NO STREET';
+        $billingContact['address']['street1'] = $this->removeSpecialCharacter($streetStr);
+        if (isset($street[1])) {
+            $billingContact['address']['street2'] = $this->removeSpecialCharacter($street[1]);
+        }
+        return $billingContact;
     }
 
     /**
@@ -658,19 +690,26 @@ class Data extends Util
      * @throws LocalizedException
      * @throws NoSuchEntityException
      */
-    public function getDiscountLines()
+    public function getDiscountLines(): array
     {
         $quote = $this->checkoutSession->getQuote();
         $totalDiscount = $quote->getSubtotal() - $quote->getSubtotalWithDiscount();
         $totalDiscount = abs(round($totalDiscount, 2));
 
         $discountLines = [];
-        if (! empty($totalDiscount)) {
+        if (!empty($totalDiscount)) {
             $totalDiscount = $this->convertToApiPrice($totalDiscount);
-            $discountLine["code"] = "Discounts";
-            $discountLine["type"] = "coupon";
+            $discountLine["code"] = "campaign";
+            $discountLine["type"] = "campaign";
             $discountLine["amount"] = $totalDiscount;
             $discountLines[] = $discountLine;
+
+            if (!empty( $quote->getCouponCode())){
+                $discountLineCoupon["code"] = $quote->getCouponCode();
+                $discountLineCoupon["type"] = "coupon";
+                $discountLineCoupon["amount"] = 0;
+                $discountLines[] = $discountLineCoupon;
+            }
         }
 
         return $discountLines;
@@ -682,7 +721,7 @@ class Data extends Util
      * @param mixed $items
      * @return array
      */
-    public function getTaxLines($items)
+    public function getTaxLines($items): array
     {
         $taxLines = [];
         $ctr_amount = 0;
@@ -698,5 +737,13 @@ class Data extends Util
         ];
 
         return $taxLines;
+    }
+
+    /**
+     * @throws NoSuchEntityException
+     */
+    public function getStore(): StoreInterface
+    {
+        return  $this->_storeManager->getStore();
     }
 }

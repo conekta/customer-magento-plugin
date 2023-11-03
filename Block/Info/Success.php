@@ -2,26 +2,29 @@
 namespace Conekta\Payments\Block\Info;
 
 use Magento\Checkout\Block\Onepage\Success as CompleteCheckout;
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Sales\Model\Order;
+use Magento\Store\Model\ScopeInterface;
 
 class Success extends CompleteCheckout
 {
     /**
      * GetInstructions getter
      *
-     * @param mixed $type
-     * @return Order Object
+     * @param string $type
+     * @return mixed|void
      */
-    public function getInstructions($type)
+    public function getInstructions(string $type)
     {
         if ($type == 'cash') {
             return $this->_scopeConfig->getValue(
                 'payment/conekta_cash/instructions',
-                \Magento\Store\Model\ScopeInterface::SCOPE_STORE
+                ScopeInterface::SCOPE_STORE
             );
         } elseif ($type == 'bankTransfer') {
             return $this->_scopeConfig->getValue(
                 'payment/conekta_bank_transfer/instructions',
-                \Magento\Store\Model\ScopeInterface::SCOPE_STORE
+                ScopeInterface::SCOPE_STORE
             );
         }
     }
@@ -29,9 +32,9 @@ class Success extends CompleteCheckout
     /**
      * GetMethod getter
      *
-     * @return Order Object
+     * @return string Object
      */
-    public function getMethod()
+    public function getMethod(): string
     {
         return $this->getOrder()->getPayment()->getMethod();
     }
@@ -39,17 +42,15 @@ class Success extends CompleteCheckout
     /**
      * GetOfflineInfo getter
      *
-     * @return Order Object
+     * @throws LocalizedException
      */
     public function getOfflineInfo()
     {
-        $offline_info = $this->getOrder()
+        return $this->getOrder()
             ->getPayment()
             ->getMethodInstance()
             ->getInfoInstance()
             ->getAdditionalInformation("offline_info");
-
-        return $offline_info;
     }
 
     /**
@@ -57,21 +58,17 @@ class Success extends CompleteCheckout
      *
      * @return Order Object
      */
-    public function getOrder()
+    public function getOrder(): Order
     {
         return $this->_checkoutSession->getLastRealOrder();
     }
 
-    /**
-     * GeetAccountOwner getter
-     *
-     * @return Store Instance
-     */
+
     public function getAccountOwner()
     {
         return $this->_scopeConfig->getValue(
             'payment/conekta_bank_transfer/account_owner',
-            \Magento\Store\Model\ScopeInterface::SCOPE_STORE
+            ScopeInterface::SCOPE_STORE
         );
     }
 }

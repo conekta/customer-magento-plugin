@@ -20,6 +20,8 @@ class ConfigProvider implements ConfigProviderInterface
     public const PAYMENT_METHOD_CREDIT_CARD = 'card';
     public const PAYMENT_METHOD_CASH = 'cash';
     public const PAYMENT_METHOD_BANK_TRANSFER = 'bankTransfer';
+
+    public const URL_PANEL_PAYMENTS = "https://panel.conekta.com/transactions/payments";
     /**
      * Create Order Controller Path
      */
@@ -121,7 +123,7 @@ class ConfigProvider implements ConfigProviderInterface
     }
 
     /**
-     * Get Minimun amount montly installments
+     * Get Minimum amount monthly installments
      *
      * @return mixed
      */
@@ -147,7 +149,7 @@ class ConfigProvider implements ConfigProviderInterface
      *
      * @return array
      */
-    public function getPaymentMethodsActive()
+    public function getPaymentMethodsActive(): array
     {
         $methods = [];
 

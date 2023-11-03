@@ -4,23 +4,20 @@ namespace Conekta\Payments\Gateway\Response\Cash;
 use Conekta\Payments\Logger\Logger as ConektaLogger;
 use Magento\Payment\Gateway\Helper\SubjectReader;
 use Magento\Payment\Gateway\Response\HandlerInterface;
-use Magento\Sales\Model\Order;
 
 class TxnIdHandler implements HandlerInterface
 {
     const TXN_ID = 'TXN_ID';
     const ORD_ID = 'ORD_ID';
 
-    private $_conektaLogger;
+    private ConektaLogger $_conektaLogger;
 
-    private $subjectReader;
+    private SubjectReader $subjectReader;
 
     /**
      * TxnIdHandler constructor.
      * @param ConektaLogger $conektaLogger
      * @param SubjectReader $subjectReader
-     * @param \Magento\Sales\Model\Service\InvoiceService $invoiceService
-     * @param \Magento\Framework\DB\TransactionFactory $transactionFactory
      */
     public function __construct(
         ConektaLogger $conektaLogger,

@@ -11,7 +11,7 @@ class MetadataOrder implements ArrayInterface
     /**
      * @var Order
      */
-    protected $orderResource;
+    protected Order $orderResource;
 
     /**
      * @param Order $orderResource
@@ -27,7 +27,7 @@ class MetadataOrder implements ArrayInterface
      *
      * @return array
      */
-    public function toOptionArray()
+    public function toOptionArray(): array
     {
         $result = [];
         foreach ($this->getOptions() as $value => $label) {
@@ -44,7 +44,7 @@ class MetadataOrder implements ArrayInterface
      *
      * @return array
      */
-    public function getOptions()
+    public function getOptions(): array
     {
         $orderAttributes = array_keys($this->orderResource->getConnection()->describeTable('quote'));
         $optionsMetadata = [];

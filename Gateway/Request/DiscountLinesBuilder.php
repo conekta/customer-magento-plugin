@@ -3,19 +3,20 @@ namespace Conekta\Payments\Gateway\Request;
 
 use Conekta\Payments\Helper\Data as ConektaHelper;
 use Conekta\Payments\Logger\Logger as ConektaLogger;
+use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Payment\Gateway\Helper\SubjectReader;
 use Magento\Payment\Gateway\Request\BuilderInterface;
 use Magento\Quote\Api\CartRepositoryInterface;
 
 class DiscountLinesBuilder implements BuilderInterface
 {
-    private $_conektaLogger;
+    private ConektaLogger $_conektaLogger;
 
-    private $subjectReader;
+    private SubjectReader $subjectReader;
 
-    protected $_cartRepository;
+    protected CartRepositoryInterface $_cartRepository;
 
-    private $_conektaHelper;
+    private ConektaHelper $_conektaHelper;
 
     public function __construct(
         ConektaLogger $conektaLogger,
@@ -30,6 +31,9 @@ class DiscountLinesBuilder implements BuilderInterface
         $this->_conektaHelper = $conektaHelper;
     }
 
+    /**
+     * @throws NoSuchEntityException
+     */
     public function build(array $buildSubject)
     {
         $this->_conektaLogger->info('Request DiscountLinesBuilder :: build');
@@ -43,8 +47,8 @@ class DiscountLinesBuilder implements BuilderInterface
 
         if (!empty($totalDiscount)) {
             $totalDiscount = $this->_conektaHelper->convertToApiPrice($totalDiscount);
-            $discountLine["code"] = "discount_code";
-            $discountLine["type"] = "coupon";
+            $discountLine["code"] = $quote->getCouponCode() ?? "Discounts";
+            $discountLine["type"] = $quote->getCouponCode() ? "coupon" : "Discounts";
             $discountLine["amount"] = $totalDiscount;
             $request['discount_lines'][] = $discountLine;
         } else {
@@ -54,10 +58,5 @@ class DiscountLinesBuilder implements BuilderInterface
         $this->_conektaLogger->info('Request DiscountLinesBuilder :: build : return request', $request);
 
         return $request;
-    }
-
-    private function _mergeLines($lines, $line)
-    {
-        return array_merge($lines, [$line]);
     }
 }

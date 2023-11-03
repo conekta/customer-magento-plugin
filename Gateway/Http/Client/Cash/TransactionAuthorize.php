@@ -7,7 +7,6 @@ use Conekta\Payments\Helper\Data as ConektaHelper;
 use Conekta\Payments\Logger\Logger as ConektaLogger;
 use Conekta\Payments\Api\Data\ConektaSalesOrderInterface;
 use Conekta\Payments\Model\ConektaSalesOrderFactory;
-use Magento\Framework\Validator\Exception;
 use Magento\Payment\Gateway\Http\ClientInterface;
 use Magento\Payment\Gateway\Http\TransferInterface;
 use Magento\Payment\Model\Method\Logger;
@@ -20,7 +19,7 @@ class TransactionAuthorize implements ClientInterface
     /**
      * @var array
      */
-    private $results = [
+    private array $results = [
         self::SUCCESS,
         self::FAILURE
     ];
@@ -28,20 +27,18 @@ class TransactionAuthorize implements ClientInterface
     /**
      * @var Logger
      */
-    private $logger;
+    private Logger $logger;
 
-    protected $_conektaHelper;
+    protected ConektaHelper $_conektaHelper;
 
-    private $_conektaLogger;
+    private ConektaLogger $_conektaLogger;
 
-    private $_conektaOrder;
-
-    protected $conektaSalesOrderFactory;
+    protected ConektaSalesOrderFactory $conektaSalesOrderFactory;
 
     /**
      * @var ConektaApiClient
      */
-    private $conektaApiClient;
+    private ConektaApiClient $conektaApiClient;
 
     /**
      * @param Logger $logger
@@ -117,7 +114,7 @@ class TransactionAuthorize implements ClientInterface
                 $result_code = 666;
             }
         } catch (\Exception $e) {
-            $this->logger->error(__('[Conekta]: Payment capturing error.'));
+            $this->_conektaLogger->error(__('[Conekta]: Payment capturing error.'));
             $this->logger->debug(
                 [
                     'request' => $request,
@@ -167,7 +164,7 @@ class TransactionAuthorize implements ClientInterface
         return $response;
     }
 
-    protected function generateResponseForCode($resultCode, $txn_id, $ord_id)
+    protected function generateResponseForCode($resultCode, $txn_id, $ord_id): array
     {
         $this->_conektaLogger->info('HTTP Client Cash TransactionAuthorize :: generateResponseForCode');
 

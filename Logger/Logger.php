@@ -3,20 +3,20 @@
 namespace Conekta\Payments\Logger;
 
 use Conekta\Payments\Helper\Data;
+use Exception;
 use Magento\Framework\App\ObjectManager;
-use Monolog\Logger as MonoLogger;
+use Psr\Log\LoggerInterface;
 
 class Logger
 {
-    private const LoggerName = 'ConektaPaymentsLogger';
     /**
-     * @var MonoLogger
+     * @var LoggerInterface
      */
-    private $monolog;
+    private LoggerInterface $logger;
 
-    public function __construct()
+    public function __construct(LoggerInterface $logger)
     {
-        $this->monolog = new MonoLogger(self::LoggerName);
+        $this->logger =  $logger;
     }
 
     /**
@@ -31,7 +31,7 @@ class Logger
         $conektaHelper = $objectManager->create(Data::class);
 
         if ((int)$conektaHelper->getConfigData('conekta/conekta_global', 'debug')) {
-            return $this->monolog->addRecord($level, $message, $context);
+            return $this->logger->addRecord($level, $message, $context);
         }
 
         return true;
@@ -44,7 +44,7 @@ class Logger
      */
     public function info(string $string, array $customerRequest = []): void
     {
-        $this->monolog->info($string, $customerRequest);
+        $this->logger->info($string, $customerRequest);
     }
 
     /**
@@ -54,7 +54,7 @@ class Logger
      */
     public function error(string $string, array $array = []): void
     {
-        $this->monolog->error($string, $array);
+        $this->logger->error($string, $array);
     }
 
     /**
@@ -64,16 +64,16 @@ class Logger
      */
     public function debug(string $message, array $array = [])
     {
-        $this->monolog->debug($message, $array);
+        $this->logger->debug($message, $array);
     }
 
     /**
-     * @param \Exception $e
+     * @param Exception $e
      * @param array $orderParams
      * @return void
      */
-    public function critical(\Exception $e, array $orderParams)
+    public function critical(Exception $e, array $orderParams)
     {
-        $this->monolog->critical($e->getMessage(), $orderParams);
+        $this->logger->critical($e->getMessage(), $orderParams);
     }
 }

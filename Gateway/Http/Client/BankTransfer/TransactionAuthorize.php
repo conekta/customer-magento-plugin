@@ -20,7 +20,7 @@ class TransactionAuthorize implements ClientInterface
     /**
      * @var array
      */
-    private $results = [
+    private array $results = [
         self::SUCCESS,
         self::FAILURE
     ];
@@ -30,18 +30,16 @@ class TransactionAuthorize implements ClientInterface
      */
     private $logger;
 
-    protected $_conektaHelper;
+    protected ConektaHelper $_conektaHelper;
 
-    private $_conektaLogger;
+    private ConektaLogger $_conektaLogger;
 
-    private $_conektaOrder;
-
-    protected $conektaSalesOrderFactory;
+    protected ConektaSalesOrderFactory $conektaSalesOrderFactory;
 
     /**
      * @var ConektaApiClient
      */
-    private $conektaApiClient;
+    private ConektaApiClient $conektaApiClient;
 
     /**
      * @param Logger $logger
@@ -73,7 +71,7 @@ class TransactionAuthorize implements ClientInterface
      * @return array
      * @throws ApiException
      */
-    public function placeRequest(TransferInterface $transferObject)
+    public function placeRequest(TransferInterface $transferObject): array
     {
         $this->_conektaLogger->info('HTTP Client BankTransfer TransactionAuthorize :: placeRequest');
         $request = $transferObject->getBody();
@@ -169,7 +167,7 @@ class TransactionAuthorize implements ClientInterface
         return $response;
     }
 
-    protected function generateResponseForCode($resultCode, $txn_id, $ord_id)
+    protected function generateResponseForCode($resultCode, $txn_id, $ord_id): array
     {
         $this->_conektaLogger->info('HTTP Client BankTransfer TransactionAuthorize :: generateResponseForCode');
 

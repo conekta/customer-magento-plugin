@@ -13,7 +13,7 @@ class EmbedFormInfo extends Info
     /**
      * @var Config
      */
-    protected $_paymentConfig;
+    protected Config $_paymentConfig;
 
     /**
      * @var string
@@ -62,7 +62,7 @@ class EmbedFormInfo extends Info
     }
 
     /**
-     * Get off line info
+     * Get off-line info
      *
      * @return false|mixed
      * @throws LocalizedException
@@ -94,7 +94,7 @@ class EmbedFormInfo extends Info
      * @return string
      * @throws LocalizedException
      */
-    public function getPaymentMethodTitle()
+    public function getPaymentMethodTitle(): string
     {
         $methodType = $this->getPaymentMethodType();
         $title = '';
@@ -121,7 +121,7 @@ class EmbedFormInfo extends Info
      * @return bool
      * @throws LocalizedException
      */
-    public function isCreditCardPaymentMethod()
+    public function isCreditCardPaymentMethod(): bool
     {
         return $this->getPaymentMethodType() === ConfigProvider::PAYMENT_METHOD_CREDIT_CARD;
     }
@@ -132,7 +132,7 @@ class EmbedFormInfo extends Info
      * @return bool
      * @throws LocalizedException
      */
-    public function isCashPaymentMethod()
+    public function isCashPaymentMethod(): bool
     {
         return $this->getPaymentMethodType() === ConfigProvider::PAYMENT_METHOD_CASH;
     }
@@ -143,7 +143,7 @@ class EmbedFormInfo extends Info
      * @return bool
      * @throws LocalizedException
      */
-    public function isBankTransferPaymentMethod()
+    public function isBankTransferPaymentMethod(): bool
     {
         return $this->getPaymentMethodType() === ConfigProvider::PAYMENT_METHOD_BANK_TRANSFER;
     }
@@ -154,7 +154,7 @@ class EmbedFormInfo extends Info
      * @return string
      * @throws LocalizedException
      */
-    public function getCardType()
+    public function getCardType(): ?string
     {
         $additionalData = $this->getAdditionalData();
     

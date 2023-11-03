@@ -12,7 +12,7 @@ class ConektaQuoteRepository implements ConektaQuoteRepositoryInterface
     /**
      * @var ConektaQuoteFactory
      */
-    private $conektaQuoteFactory;
+    private ConektaQuoteFactory $conektaQuoteFactory;
     /**
      * @var ConektaQuoteResource
      */

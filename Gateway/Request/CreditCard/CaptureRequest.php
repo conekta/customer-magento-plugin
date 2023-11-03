@@ -3,22 +3,20 @@ namespace Conekta\Payments\Gateway\Request\CreditCard;
 
 use Conekta\Payments\Helper\Data as ConektaHelper;
 use Conekta\Payments\Logger\Logger as ConektaLogger;
-use Magento\Payment\Gateway\ConfigInterface;
+use Magento\Framework\Validator\Exception;
 use Magento\Payment\Gateway\Helper\SubjectReader;
 use Magento\Payment\Gateway\Request\BuilderInterface;
 
 class CaptureRequest implements BuilderInterface
 {
-    private $config;
 
-    private $subjectReader;
+    private SubjectReader $subjectReader;
 
-    protected $_conektaHelper;
+    protected ConektaHelper $_conektaHelper;
 
-    private $_conektaLogger;
+    private ConektaLogger $_conektaLogger;
 
     public function __construct(
-        ConfigInterface $config,
         SubjectReader $subjectReader,
         ConektaHelper $conektaHelper,
         ConektaLogger $conektaLogger
@@ -26,12 +24,13 @@ class CaptureRequest implements BuilderInterface
         $this->_conektaHelper = $conektaHelper;
         $this->_conektaLogger = $conektaLogger;
         $this->_conektaLogger->info('Request CaptureRequest :: __construct');
-
-        $this->config = $config;
         $this->subjectReader = $subjectReader;
     }
 
-    public function build(array $buildSubject)
+    /**
+     * @throws Exception
+     */
+    public function build(array $buildSubject): array
     {
         $this->_conektaLogger->info('Request CaptureRequest :: build');
 
@@ -61,8 +60,8 @@ class CaptureRequest implements BuilderInterface
                 $request['payment_method_details']['payment_method']['monthly_installments'] = $installments;
             }
         } catch (\Exception $e) {
-            $this->_conektaLogger->info('Request CaptureRequest :: build Problem', $e->getMessage());
-            throw new \Magento\Framework\Validator\Exception(__('Problem Creating Charge'));
+            $this->_conektaLogger->info('Request CaptureRequest :: build Problem '.$e->getMessage());
+            throw new Exception(__('Problem Creating Charge'));
         }
 
         $request['CURRENCY'] = $order->getCurrencyCode();
@@ -75,20 +74,18 @@ class CaptureRequest implements BuilderInterface
         return $request;
     }
 
-    public function getChargeCard($amount, $tokenId)
+    public function getChargeCard($amount, $tokenId): array
     {
-        $charge = [
+        return [
             'payment_method' => [
                 'type'     => 'card',
                 'token_id' => $tokenId
             ],
             'amount' => $amount
         ];
-
-        return $charge;
     }
 
-    private function _validateMonthlyInstallments($amount, $installments)
+    private function _validateMonthlyInstallments($amount, $installments): bool
     {
         $active_monthly_installments = $this->_conektaHelper->getConfigData(
             'conekta/conekta_creditcard',
