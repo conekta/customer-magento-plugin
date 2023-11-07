@@ -1,5 +1,5 @@
 ### 5.1.0 - 2023/10/30 10:55
-* Feat:
+* Feat: 
   - [PAY22-2045] Magento - Mejoras para órdenes perdidas. @fcarrero [#46](https://github.com/conekta/customer-magento-plugin/pull/46)
   - Upgrade php version requerida.
   - Fix conekta.png route location
