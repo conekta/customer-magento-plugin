@@ -110,16 +110,21 @@ class WebhookRepository
         if ($order->getState() === Order::STATE_PENDING_PAYMENT ||
             $order->getState() === Order::STATE_PAYMENT_REVIEW
         ) {
-            $order->setState(Order::STATE_CANCELED);
-            $order->setStatus(Order::STATE_CANCELED);
-
-            $order->addCommentToStatusHistory("Order Expired")
+            if ($order->canCancel()) {
+                $order->cancel();
+                $order->setState(Order::STATE_CANCELED);
+                $order->setStatus(Order::STATE_CANCELED);
+                $order->addCommentToStatusHistory("Order Expired")
                     ->setIsCustomerNotified(true);
 
-            $order->save();
+                $order->save();
+
+                $this->_conektaLogger->info('La orden con ID $order_id ha sido cancelada exitosamente', ["id"=>$order->getId()]);
+
+            } else {
+                $this->_conektaLogger->info("No se puede cancelar la orden con ID  en su estado actual.",["id"=>$order->getId()]);
+            }
         }
-        
-        $this->_conektaLogger->info('WebhookRepository :: orderExpiredProcess: Order has been Canceled');
     }
 
     /**

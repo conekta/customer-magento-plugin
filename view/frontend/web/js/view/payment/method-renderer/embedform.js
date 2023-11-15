@@ -295,10 +295,6 @@ define(
                         console.error(error);
                     },
                     onFinalizePayment: function (event) {
-                        if (event.charge.paymentMethod.type !== 'card' && event.charge.payment_method.type !== 'card') {
-                            event.charge.status = 'pending_payment'
-                            event.status = 'pending_payment'
-                        }
                         self.iframOrderData(event);
                         self.beforePlaceOrder();
                     },
