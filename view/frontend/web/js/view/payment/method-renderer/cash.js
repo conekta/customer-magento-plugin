@@ -25,7 +25,6 @@ define(
             },
 
             getCode: function () {
-                console.log("entrooooooo")
                 return 'conekta_cash';
             },
 
