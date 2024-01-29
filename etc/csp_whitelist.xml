@@ -10,7 +10,7 @@
         </policy>
         <policy id="connect-src">
             <values>
-                <value id="s3_conektaapi" type="host">api.conekta.io</value>
+                <value id="s3_conektaapi" type="host">api.stg.conekta.io</value>
             </values>
         </policy>
     </policies>
