@@ -267,8 +267,12 @@ define(
                         },
                         error: function (xhr, status, error) {
                             console.error(status);
-                            self.conektaError(xhr.responseJSON.error_message);
                             self.isFormLoading(false);
+                            if (xhr.responseJSON) {
+                                self.conektaError(xhr.responseJSON.error_message);
+                            }else {
+                                self.conektaError("Ocurrió un error al procesar el pago. Por favor, inténtalo de nuevo.");
+                            }
                         }
                     })
                 } else {
