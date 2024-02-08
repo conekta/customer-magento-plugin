@@ -62,12 +62,14 @@ class TransactionRefund implements ObserverInterface
                 'reason' => 'requested_by_client',
                 'amount' => $amount
             ]);
-            $order->addCommentToStatusHistory(
-                __('Conekta refund id #%1.', $refund->getId())
-            )
-                ->setIsCustomerNotified(false)
-                ->save();
-
+            if (!empty( $refund->getCharges()->getData()) &&  !empty($refund->getCharges()->getData()[0]->getRefunds()->getData())){
+                $refundId = $refund->getCharges()->getData()[0]->getRefunds()->getData()[0]->getId();
+                $order->addCommentToStatusHistory(
+                    __('Conekta refund id #%1.', $refundId)
+                )
+                    ->setIsCustomerNotified(false)
+                    ->save();
+            }
         } catch (Exception $e) {
             $error_code = $e->getMessage();
             $this->logger->debug(
