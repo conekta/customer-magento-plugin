@@ -58,7 +58,6 @@ class TransactionRefund implements ObserverInterface
 
         $amount = $creditmemo->getGrandTotal() * 100;
         try {
-            //$order = $this->conektaApiClient->getOrderByID($transactionId);
             $this->conektaApiClient->orderRefund($conektaOrderId, [
                 'reason' => 'requested_by_client',
                 'amount' => $amount
