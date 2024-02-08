@@ -57,19 +57,10 @@ class TransactionRefund implements ObserverInterface
         $conektaOrderId = $order->getExtOrderId();
 
         $amount = $creditmemo->getGrandTotal() * 100;
-        $comments = [];
-        foreach ($creditmemo->getComments() as $comment) {
-            $comments[] = $comment->getComment();
-        }
-        $comment = join(", ",$comments);
-
-        if (empty($comment)) {
-            $comment = "requested_by_client";
-        }
         try {
             //$order = $this->conektaApiClient->getOrderByID($transactionId);
             $this->conektaApiClient->orderRefund($conektaOrderId, [
-                'reason' => $comment,
+                'reason' => 'requested_by_client',
                 'amount' => $amount
             ]);
 
