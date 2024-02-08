@@ -58,10 +58,15 @@ class TransactionRefund implements ObserverInterface
 
         $amount = $creditmemo->getGrandTotal() * 100;
         try {
-            $this->conektaApiClient->orderRefund($conektaOrderId, [
+            $refund = $this->conektaApiClient->orderRefund($conektaOrderId, [
                 'reason' => 'requested_by_client',
                 'amount' => $amount
             ]);
+            $order->addCommentToStatusHistory(
+                __('Conekta refund id #%1.', $refund->getId())
+            )
+                ->setIsCustomerNotified(false)
+                ->save();
 
         } catch (Exception $e) {
             $error_code = $e->getMessage();
