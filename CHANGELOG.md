@@ -1,3 +1,7 @@
+### 5.1.1 - 2024/02/08
+* Fix:
+  - [PAY22-2358]  Refund orders from admin panel. @fcarrero [#47]
+
 ### 5.1.0 - 2023/10/30 10:55
 * Feat: 
   - [PAY22-2045] Magento - Mejoras para órdenes perdidas. @fcarrero [#46](https://github.com/conekta/customer-magento-plugin/pull/46)
