@@ -1,6 +1,7 @@
 ### 5.1.1 - 2024/02/08
 * Fix:
-  - [PAY22-2358]  Refund orders from admin panel. @fcarrero [#47]
+  - [PAY22-2358]  Refund orders from magento panel. @fcarrero [#49]
+  - Update conekta-php version to 6.0.5
 
 ### 5.1.0 - 2023/10/30 10:55
 * Feat: 
