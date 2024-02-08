@@ -57,10 +57,7 @@ class TransactionRefund implements ObserverInterface
         $conektaOrderId = $order->getExtOrderId();
 
         $amount = $creditmemo->getGrandTotal() * 100;
-        $comment = implode(', ', array_map(function($comment) {
-            return $comment->getComment();
-
-        }, $creditmemo->getComments()->getItems()));
+        $comment = join(", ",$creditmemo->getComments());
 
         if (empty($comment)) {
             $comment = "requested_by_client";
