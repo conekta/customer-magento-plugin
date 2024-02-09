@@ -12,4 +12,7 @@
     <event name="sales_order_place_after">
         <observer name="conekta_payments_status_observer" instance="Conekta\Payments\Observer\StatusObserver" />
     </event>
+    <event name="sales_order_creditmemo_save_after">
+        <observer name="conekta_payments_refund_order" instance="Conekta\Payments\Gateway\Http\Client\CreditCard\TransactionRefund" />
+    </event>
 </config>

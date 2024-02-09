@@ -5,12 +5,12 @@ namespace Conekta\Payments\Gateway\Http\Client\CreditCard;
 use Conekta\Payments\Api\ConektaApiClient;
 use Conekta\Payments\Helper\Data as ConektaHelper;
 use Conekta\Payments\Logger\Logger as ConektaLogger;
+use Conekta\Payments\Model\Ui\EmbedForm\ConfigProvider;
 use Exception;
-use Magento\Payment\Gateway\Http\ClientInterface;
-use Magento\Payment\Gateway\Http\TransferInterface;
+use Magento\Framework\Event\ObserverInterface;
 use Magento\Payment\Model\Method\Logger;
-
-class TransactionRefund implements ClientInterface
+use Magento\Framework\Event\Observer;
+class TransactionRefund implements ObserverInterface
 {
     protected ConektaHelper $_conektaHelper;
 
@@ -38,29 +38,43 @@ class TransactionRefund implements ClientInterface
         $this->_conektaLogger->info('HTTP Client CreditCard TransactionRefund :: __construct');
     }
 
-    public function placeRequest(TransferInterface $transferObject): array
+    public function execute(Observer $observer)
     {
         $this->_conektaLogger->info('HTTP Client CreditCard TransactionRefund :: placeRequest');
 
-        $request = $transferObject->getBody();
-        $transactionId = $request['payment_transaction_id'];
-        $amount = (int)($request['payment_transaction_amount'] * 100);
-        $response = [];
-        $response['refund_result']['transaction_id'] = $transactionId;
+        $creditmemo = $observer->getEvent()->getCreditmemo();
+        $order = $creditmemo->getOrder();
+
+        if ($order->getPayment()->getMethod() != ConfigProvider::CODE ) {
+            return;
+        }
+        $paymentMethodConekta = $order->getPayment()->getAdditionalInformation('payment_method');
+        $this->_conektaLogger->info("execute paymentMethodConekta",["paymentMethodConekta"=> $paymentMethodConekta]);
+        if ($paymentMethodConekta != ConfigProvider::PAYMENT_METHOD_CREDIT_CARD) {
+            return;
+        }
+
+        $conektaOrderId = $order->getExtOrderId();
+
+        $amount = $creditmemo->getGrandTotal() * 100;
         try {
-            $order = $this->conektaApiClient->getOrderByID($transactionId);
-            $this->conektaApiClient->orderRefund($order->getId(), [
+            $refund = $this->conektaApiClient->orderRefund($conektaOrderId, [
                 'reason' => 'requested_by_client',
                 'amount' => $amount
             ]);
-
-            $response['refund_result']['status'] = 'SUCCESS';
-            $response['refund_result']['status_message'] = 'Refunded';
+            if (!empty( $refund->getCharges()->getData()) &&  !empty($refund->getCharges()->getData()[0]->getRefunds()->getData())){
+                $refundId = $refund->getCharges()->getData()[0]->getRefunds()->getData()[0]->getId();
+                $order->addCommentToStatusHistory(
+                    __('Conekta refund id #%1.', $refundId)
+                )
+                    ->setIsCustomerNotified(false)
+                    ->save();
+            }
         } catch (Exception $e) {
             $error_code = $e->getMessage();
             $this->logger->debug(
                 [
-                    'transaction_id' => $transactionId,
+                    'transaction_id' => $conektaOrderId,
                     'exception' => $e->getMessage()
                 ]
             );
@@ -68,20 +82,6 @@ class TransactionRefund implements ClientInterface
             $this->_conektaLogger->info(
                 'HTTP Client  CreditCard TransactionRefund :: placeRequest: Payment refund error ' . $error_code
             );
-            $response['refund_result']['status'] = 'ERROR';
-            $response['refund_result']['status_message'] = $error_code;
         }
-
-        $response['transaction_id'] = $transactionId;
-
-        $this->_conektaLogger->info(
-            'HTTP Client TransactionCapture :: placeRequest',
-            [
-                'request' => $request,
-                'response' => $response
-            ]
-        );
-
-        return $response;
     }
 }
