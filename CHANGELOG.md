@@ -1,4 +1,4 @@
-### 5.1.1 - 2024/03/07
+### 5.1.2 - 2024/03/07
 * Fix:
   - [CRD-154]  Fix shipping line taxes. @fcarrero [#50]
 
