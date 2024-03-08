@@ -165,6 +165,10 @@ class ConektaOrder extends Util
         $validOrderWithCheckout['line_items'] = $this->_conektaHelper->getLineItems($orderItems);
         $validOrderWithCheckout['discount_lines'] = $this->_conektaHelper->getDiscountLines();
         $validOrderWithCheckout['tax_lines'] = $this->_conektaHelper->getTaxLines($orderItems);
+        $shippingLinesTax = $this->_conektaHelper->getShippingLinesTaxes($this->getQuote()->getId());
+        if (!empty($shippingLinesTax)) {
+            $validOrderWithCheckout['tax_lines'][] = $shippingLinesTax;
+        }
         $validOrderWithCheckout['shipping_lines'] = $this->_conektaHelper->getShippingLines(
             $this->getQuote()->getId()
         );

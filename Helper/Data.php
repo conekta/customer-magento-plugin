@@ -587,6 +587,28 @@ class Data extends Util
     }
 
     /**
+     * @param mixed $quoteId
+     * @return array
+     * @throws NoSuchEntityException
+     */
+    public function getShippingLinesTaxes($quoteId) : array
+    {
+        $quote = $this->_cartRepository->get($quoteId);
+        $shippingAddress = $quote->getShippingAddress();
+        if ($quote->getIsVirtual()) {
+            return [];
+        }
+        if ($shippingAddress->getShippingTaxAmount() <= 0) {
+            return [];
+        }
+        return[
+            'description' => 'Tax shipping lines',
+            'amount'      => $this->convertToApiPrice($shippingAddress->getShippingTaxAmount())
+        ];
+
+    }
+
+    /**
      * Get shipping contact
      *
      * @param mixed $quoteId
@@ -721,7 +743,7 @@ class Data extends Util
      * @param mixed $items
      * @return array
      */
-    public function getTaxLines($items): array
+    public function getTaxLines(array $items): array
     {
         $taxLines = [];
         $ctr_amount = 0;
@@ -732,7 +754,7 @@ class Data extends Util
         }
 
         $taxLines[] = [
-            'description' => 'Tax',
+            'description' => 'Tax products',
             'amount'      => $ctr_amount
         ];
 

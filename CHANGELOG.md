@@ -1,3 +1,7 @@
+### 5.1.2 - 2024/03/07
+* Fix:
+  - [CRD-154]  Fix shipping line taxes. @fcarrero [#50]
+
 ### 5.1.1 - 2024/02/08
 * Fix:
   - [PAY22-2358]  Refund orders from magento panel. @fcarrero [#49]
