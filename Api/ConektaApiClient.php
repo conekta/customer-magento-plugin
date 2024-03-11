@@ -65,14 +65,19 @@ class ConektaApiClient
 
     private ChargesApi $charges;
 
+    private String $apiHost;
+
     public function __construct(
         Client     $client,
         HelperData $helperData
     )
     {
+        $this->apiHost = "https://api.stg.conekta.io";
         $this->client = $client;
         $this->helperData = $helperData;
-        $this->config = Configuration::getDefaultConfiguration()->setAccessToken($this->helperData->getPrivateKey());
+        $this->config = Configuration::getDefaultConfiguration()
+            ->setAccessToken($this->helperData->getPrivateKey())
+            ->setHost($this->apiHost);
         $this->orderInstance = new OrdersApi($this->client, $this->config);
         $this->customerInstance = new CustomersApi($this->client, $this->config);
         $this->chargeInstance = new ChargesApi($this->client, $this->config);
