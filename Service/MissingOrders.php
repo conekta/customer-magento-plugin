@@ -41,6 +41,9 @@ class MissingOrders
     private QuoteManagement $quoteManagement;
     private ConektaApiClient $conektaApiClient;
 
+    private const APPLIED_RULE_IDS_KEY = 'applied_rule_ids';
+
+
     public function __construct(
         WebhookRepository $webhookRepository,
         ConektaLogger $conektaLogger,
@@ -84,11 +87,14 @@ class MissingOrders
 
             $store = $this->_storeManager->getStore(intval($metadata["store"]));
 
-            $quoteCreated=$this->quote->create(); //Create object of quote
+            $quoteCreated= $this->quote->create(); //Create object of quote
 
             $quoteCreated->setStore($store); //set store for which you create quote
             $quoteCreated->setIsVirtual($metadata[CartInterface::KEY_IS_VIRTUAL]);
 
+            if (!empty($metadata[self::APPLIED_RULE_IDS_KEY])){
+                $quoteCreated->setAppliedRuleIds($metadata[self::APPLIED_RULE_IDS_KEY]);
+            }
             $quoteCreated->setCurrency();
             $customerName = $this->utilHelper->splitName($conektaCustomer['name']);
 
@@ -96,7 +102,7 @@ class MissingOrders
             $quoteCreated->setCustomerFirstname($customerName["firstname"]);
             $quoteCreated->setCustomerLastname($customerName["lastname"]);
             $quoteCreated->setCustomerIsGuest(true);
-            if (isset($conektaCustomer['customer_custom_reference']) && !empty($conektaCustomer['customer_custom_reference'])){
+            if (!empty($conektaCustomer['customer_custom_reference'])){
                 $customer = $this->customerFactory->create();
                 $customer->setWebsiteId($store->getWebsiteId());
                 $customer->load($conektaCustomer['customer_custom_reference']);// load customer by id
@@ -167,7 +173,7 @@ class MissingOrders
             //discount lines
             if (isset($conektaOrder["discount_lines"]) && isset($conektaOrder["discount_lines"]["data"])) {
                 $quoteCreated->setCustomDiscount($this->getDiscountAmount($conektaOrder["discount_lines"]["data"]));
-                $this->applyCoupon($conektaOrder["discount_lines"]["data"],$quoteCreated);
+                $this->applyCoupon($conektaOrder["discount_lines"]["data"], $quoteCreated);
             }
 
             $quoteCreated->setPaymentMethod(ConfigProvider::CODE);
