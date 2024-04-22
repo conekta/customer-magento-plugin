@@ -495,7 +495,7 @@ class Data extends Util
                             $qty = (int)$item->getParentItem()->{$quantityMethod}();
                         } elseif ($parent->getProductType() == 'bundle' && $isQuoteItem) {
                             //If it is a quote item, then qty of item has not been calculated yet
-                            $qty = $qty * (int)$item->getParentItem()->{$quantityMethod}();
+                            $price = $item->getParentItem()->getPrice();
                         }
                     }
 
