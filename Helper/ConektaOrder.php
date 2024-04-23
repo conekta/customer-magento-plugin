@@ -3,6 +3,7 @@
 namespace Conekta\Payments\Helper;
 
 use Conekta\ApiException;
+use Conekta\Payments\Service\MissingOrders;
 use Conekta\Payments\Api\ConektaApiClient;
 use Conekta\Payments\Exception\ConektaException;
 use Conekta\Payments\Helper\Data as ConektaHelper;
@@ -312,8 +313,9 @@ class ConektaOrder extends Util
         return array_merge(
             $this->_conektaHelper->getMagentoMetadata(),
             [
-                'quote_id'                     => $this->getQuote()->getId(),
-                 CartInterface::KEY_IS_VIRTUAL => $this->getQuote()->isVirtual()
+                'quote_id'                              => $this->getQuote()->getId(),
+                 MissingOrders::APPLIED_RULE_IDS_KEY    => $this->getQuote()->getAppliedRuleIds(),
+                 CartInterface::KEY_IS_VIRTUAL          => $this->getQuote()->isVirtual(),
             ],
             $this->_conektaHelper->getMetadataAttributesConekta($orderItems)
         );

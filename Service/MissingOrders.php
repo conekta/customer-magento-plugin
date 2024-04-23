@@ -41,7 +41,7 @@ class MissingOrders
     private QuoteManagement $quoteManagement;
     private ConektaApiClient $conektaApiClient;
 
-    private const APPLIED_RULE_IDS_KEY = 'applied_rule_ids';
+    public const APPLIED_RULE_IDS_KEY = 'applied_rule_ids';
 
 
     public function __construct(

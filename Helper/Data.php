@@ -520,7 +520,7 @@ class Data extends Util
                         'description' => $description,
                         'quantity'    => $qty,
                         'tags'        => [
-                            $item->getProductType()
+                            $productType
                         ],
                         'metadata' => [
                             "product_type" => $productType,
