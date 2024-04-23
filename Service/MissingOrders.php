@@ -177,9 +177,9 @@ class MissingOrders
             $quoteCreated->setPaymentMethod(ConfigProvider::CODE);
             $quoteCreated->setInventoryProcessed(false);
 
-            if (!empty($metadata[self::APPLIED_RULE_IDS_KEY])){
-                $quoteCreated->setAppliedRuleIds($metadata[self::APPLIED_RULE_IDS_KEY]);
-            }
+            //if (!empty($metadata[self::APPLIED_RULE_IDS_KEY])){
+              //  $quoteCreated->setAppliedRuleIds($metadata[self::APPLIED_RULE_IDS_KEY]);
+            //}
             $quoteCreated->save();
             $this->_conektaLogger->info('end save quote');
 
