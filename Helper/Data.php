@@ -487,6 +487,8 @@ class Data extends Util
                 if ($item->getProductType() != 'bundle' && $item->getProductType() != 'configurable') {
                     $price = $item->getPrice();
                     $qty = (int)$item->{$quantityMethod}();
+                    $name = $this->removeSpecialCharacter($item->getName());
+                    $sku = $this->removeSpecialCharacter($item->getSku());
                     if (! empty($item->getParentItem())) {
                         $parent = $item->getParentItem();
 
@@ -495,20 +497,21 @@ class Data extends Util
                             $qty = (int)$item->getParentItem()->{$quantityMethod}();
                         } elseif ($parent->getProductType() == 'bundle' && $isQuoteItem) {
                             //If it is a quote item, then qty of item has not been calculated yet
-                            $qty =  (int)$item->getParentItem()->{$quantityMethod}();
+                            $qty   =  $item->getParentItem()->getQty();
                             $price = $item->getParentItem()->getPrice();
+                            $name  = $this->removeSpecialCharacter($item->getParentItem()->getName());
+                            $sku   = $this->removeSpecialCharacter($item->getParentItem()->getSku());
                         }
                     }
 
-                    $name = $this->removeSpecialCharacter($item->getName());
                     $description = $this->removeSpecialCharacter(
-                        $this->_escaper->escapeHtml($item->getName() . ' - ' . $item->getSku())
+                        $this->_escaper->escapeHtml($name . ' - ' . $sku)
                     );
                     $description = substr($description, 0, 250);
 
                     $request[] = [
                         'name'        => $name,
-                        'sku'         => $this->removeSpecialCharacter($item->getSku()),
+                        'sku'         => $sku,
                         'unit_price'  => $this->convertToApiPrice($price),
                         'description' => $description,
                         'quantity'    => $qty,
