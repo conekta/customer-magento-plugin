@@ -310,20 +310,18 @@ class ConektaOrder extends Util
      */
     public function getMetadataOrder($orderItems): array
     {
-        $metadata = [
+        $metadata=  array_merge(
             $this->_conektaHelper->getMagentoMetadata(),
-            'quote_id' => $this->getQuote()->getId(),
-            CartInterface::KEY_IS_VIRTUAL => $this->getQuote()->isVirtual(),
-        ];
-
-        $appliedRuleIds = $this->getQuote()->getAppliedRuleIds();
-        if (!empty($appliedRuleIds)) {
-            $metadata[MissingOrders::APPLIED_RULE_IDS_KEY] = $appliedRuleIds;
-        }
-
-        return array_merge(
-            $metadata,
+            [
+                'quote_id'                              => $this->getQuote()->getId(),
+                 CartInterface::KEY_IS_VIRTUAL          => $this->getQuote()->isVirtual(),
+            ],
             $this->_conektaHelper->getMetadataAttributesConekta($orderItems)
         );
+
+        if (!empty($this->getQuote()->getAppliedRuleIds())){
+            $metadata[MissingOrders::APPLIED_RULE_IDS_KEY] = $this->getQuote()->getAppliedRuleIds();
+        }
+        return $metadata;
     }
 }
