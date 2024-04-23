@@ -178,7 +178,7 @@ class MissingOrders
             $quoteCreated->setInventoryProcessed(false);
 
             if (!empty($metadata[self::APPLIED_RULE_IDS_KEY])){
-                $quoteCreated->setAppliedRuleIds($metadata[self::APPLIED_RULE_IDS_KEY]);
+                $quoteCreated->setAppliedRuleIds(explode(',',$metadata[self::APPLIED_RULE_IDS_KEY]));
             }
             $quoteCreated->save();
             $this->_conektaLogger->info('end save quote');
