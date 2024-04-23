@@ -92,9 +92,7 @@ class MissingOrders
             $quoteCreated->setStore($store); //set store for which you create quote
             $quoteCreated->setIsVirtual($metadata[CartInterface::KEY_IS_VIRTUAL]);
 
-            if (!empty($metadata[self::APPLIED_RULE_IDS_KEY])){
-                $quoteCreated->setAppliedRuleIds($metadata[self::APPLIED_RULE_IDS_KEY]);
-            }
+
             $quoteCreated->setCurrency();
             $customerName = $this->utilHelper->splitName($conektaCustomer['name']);
 
@@ -178,6 +176,10 @@ class MissingOrders
 
             $quoteCreated->setPaymentMethod(ConfigProvider::CODE);
             $quoteCreated->setInventoryProcessed(false);
+
+            if (!empty($metadata[self::APPLIED_RULE_IDS_KEY])){
+                $quoteCreated->setAppliedRuleIds($metadata[self::APPLIED_RULE_IDS_KEY]);
+            }
             $quoteCreated->save();
             $this->_conektaLogger->info('end save quote');
 
