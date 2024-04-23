@@ -213,6 +213,7 @@ class MissingOrders
 
         } catch (Exception $e) {
             $this->_conektaLogger->error('creating order '.$e->getMessage());
+            $this->_conektaLogger->info('creating info order '.$e->getMessage());
             throw  $e;
         }
     }
