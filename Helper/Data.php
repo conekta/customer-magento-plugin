@@ -489,6 +489,8 @@ class Data extends Util
                     $qty = (int)$item->{$quantityMethod}();
                     $name = $this->removeSpecialCharacter($item->getName());
                     $sku = $this->removeSpecialCharacter($item->getSku());
+                    $productId = $item->getProductId();
+                    $productType = $item->getProductType();
                     if (! empty($item->getParentItem())) {
                         $parent = $item->getParentItem();
 
@@ -501,6 +503,8 @@ class Data extends Util
                             $price = $item->getParentItem()->getPrice();
                             $name  = $this->removeSpecialCharacter($item->getParentItem()->getName());
                             $sku   = $this->removeSpecialCharacter($item->getParentItem()->getSku());
+                            $productId = $item->getParentItem()->getProductId();
+                            $productType = $item->getParentItem()->getProductType();
                         }
                     }
 
@@ -519,8 +523,8 @@ class Data extends Util
                             $item->getProductType()
                         ],
                         'metadata' => [
-                            "product_type" =>  $item->getParentItem()->getProductType(),
-                            "product_id" => $item->getProductId()
+                            "product_type" => $productType,
+                            "product_id" => $productId
                         ]
                     ];
                 }
