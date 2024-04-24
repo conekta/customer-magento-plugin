@@ -3,7 +3,6 @@
 namespace Conekta\Payments\Helper;
 
 use Conekta\ApiException;
-use Conekta\Payments\Service\MissingOrders;
 use Conekta\Payments\Api\ConektaApiClient;
 use Conekta\Payments\Exception\ConektaException;
 use Conekta\Payments\Helper\Data as ConektaHelper;
@@ -119,25 +118,19 @@ class ConektaOrder extends Util
                     $conektaCustomerId = '';
                 }
             }
-            $quote = $this->getQuote();
 
             //Customer Info for API
-            $billingAddress = $quote->getBillingAddress();
+            $billingAddress = $this->getQuote()->getBillingAddress();
             $customerId = $customer->getId();
-            $quoteEmail = $guestEmail;
             if ($customerId) {
                 //name without numbers
                 $customerRequest['name'] = $customer->getName();
                 $customerRequest['email'] = $customer->getEmail();
-                $quoteEmail = $customer->getEmail();
             } else {
                 //name without numbers
                 $customerRequest['name'] = $billingAddress->getName();
                 $customerRequest['email'] = $guestEmail;
             }
-            //$quote->setCustomerEmail($quoteEmail)->save();
-
-
             $customerRequest['custom_reference'] = $customerId;
             $customerRequest['name'] = $this->removeNameSpecialCharacter($customerRequest['name']);
             $customerRequest['phone'] = $this->removePhoneSpecialCharacter($billingAddress->getTelephone());
@@ -162,7 +155,7 @@ class ConektaOrder extends Util
                 //If customer API exists, always update error
                 $this->conektaApiClient->updateCustomer($conektaCustomerId, $customerRequest);
             }
-        } catch (Exception | ApiException $e) {
+        } catch (ApiException $e) {
             $this->conektaLogger->info($e->getMessage(), $customerRequest);
             throw new ConektaException(__($e->getMessage()));
         }
@@ -177,15 +170,15 @@ class ConektaOrder extends Util
             $validOrderWithCheckout['tax_lines'][] = $shippingLinesTax;
         }
         $validOrderWithCheckout['shipping_lines'] = $this->_conektaHelper->getShippingLines(
-            $quote->getId()
+            $this->getQuote()->getId()
         );
 
         //always needs shipping due to api does not provide info about merchant type (drop_shipping, virtual)
         $validOrderWithCheckout['shipping_contact'] = $this->_conektaHelper->getShippingContact(
-            $quote->getId()
+            $this->getQuote()->getId()
         );
         $validOrderWithCheckout['fiscal_entity'] = $this->_conektaHelper->getBillingAddress(
-            $quote->getId()
+            $this->getQuote()->getId()
         );
 
         $validOrderWithCheckout['customer_info'] = [
@@ -316,18 +309,13 @@ class ConektaOrder extends Util
      */
     public function getMetadataOrder($orderItems): array
     {
-        $metadata=  array_merge(
+        return array_merge(
             $this->_conektaHelper->getMagentoMetadata(),
             [
-                'quote_id'                              => $this->getQuote()->getId(),
-                 CartInterface::KEY_IS_VIRTUAL          => $this->getQuote()->isVirtual(),
+                'quote_id'                     => $this->getQuote()->getId(),
+                 CartInterface::KEY_IS_VIRTUAL => $this->getQuote()->isVirtual()
             ],
             $this->_conektaHelper->getMetadataAttributesConekta($orderItems)
         );
-
-        if (!empty($this->getQuote()->getAppliedRuleIds())){
-            $metadata[MissingOrders::APPLIED_RULE_IDS_KEY] = $this->getQuote()->getAppliedRuleIds();
-        }
-        return $metadata;
     }
 }
