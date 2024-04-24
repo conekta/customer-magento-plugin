@@ -112,6 +112,7 @@ class MissingOrders
             $quoteCreated = $this->_cartRepository->get($quoteId);
             $order = $this->quoteManagement->submit($quoteCreated);
             $order->setEmailSent(0); //
+            $order->setExtOrderId($conektaOrder["id"]);
             $order->save();
 
             $conektaQuote = $this->conektaQuoteFactory->create();
@@ -129,6 +130,8 @@ class MissingOrders
 
             $this->_conektaLogger->info('end submit new flow');
             return ;
+
+
 
             $quoteCreated= $this->quote->create(); //Create object of quote
 
