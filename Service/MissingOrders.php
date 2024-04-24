@@ -119,6 +119,7 @@ class MissingOrders
                 return;
             }
             $quoteCreated->setPaymentMethod(ConfigProvider::CODE);
+            $quoteCreated->setCustomerEmail($conektaCustomer['email']);
             $quoteCreated->getPayment()->importData(['method' => ConfigProvider::CODE]);
             $additionalInformation = [
                 'order_id' =>  $conektaOrder["id"],
