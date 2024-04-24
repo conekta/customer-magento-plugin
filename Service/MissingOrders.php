@@ -8,6 +8,7 @@ use Conekta\Payments\Helper\Util;
 use Conekta\Payments\Logger\Logger as ConektaLogger;
 use Conekta\Payments\Model\Ui\EmbedForm\ConfigProvider;
 use Conekta\Payments\Model\WebhookRepository;
+use Magento\Catalog\Model\Product;
 use Magento\Customer\Api\CustomerRepositoryInterface;
 use Magento\Framework\App\ObjectManager;
 use Magento\Framework\Exception\LocalizedException;
@@ -55,8 +56,7 @@ class MissingOrders
         CustomerRepositoryInterface $customerRepository,
         QuoteManagement $quoteManagement,
         ConektaApiClient $conektaApiClient,
-        CartRepositoryInterface $cartRepository,
-
+        CartRepositoryInterface $cartRepository
     ){
         $this->webhookRepository = $webhookRepository;
         $this->_conektaLogger = $conektaLogger;
@@ -71,8 +71,6 @@ class MissingOrders
         $objectManager = ObjectManager::getInstance();
         $this->utilHelper = $objectManager->create(ConektaData::class);
         $this->_cartRepository = $cartRepository;
-
-
     }
 
     /**
