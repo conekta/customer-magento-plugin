@@ -9,12 +9,10 @@ use Conekta\Payments\Model\WebhookRepository;
 use Magento\Framework\App\ObjectManager;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Quote\Model\QuoteManagement;
-use Magento\Quote\Model\QuoteFactory;
-use Magento\Customer\Model\CustomerFactory;
 use Exception;
 use Magento\Quote\Api\CartRepositoryInterface;
-use Conekta\Payments\Model\ConektaQuoteFactory;
-use Conekta\Payments\Model\ConektaQuoteRepositoryFactory;
+use Magento\Sales\Api\Data\OrderInterface;
+
 class MissingOrders
 {
     /**
@@ -68,12 +66,11 @@ class MissingOrders
             $quoteId = $metadata['quote_id'];
             $quoteCreated = $this->_cartRepository->get($quoteId);
 
-            $orderFounded = $this->objectManager->create('Magento\Sales\Model\Order')->load($quoteCreated->getReservedOrderId(), 'increment_id');
+            $orderFounded = $this->objectManager->create('Magento\Sales\Model\Order')->load($quoteCreated->getReservedOrderId(), OrderInterface::INCREMENT_ID);
             if ($orderFounded->getId() != null || !empty($orderFounded->getId()) ) {
                 $this->_conektaLogger->info('order is ready', ['order' => $orderFounded, 'is_set', isset($orderFounded)]);
                 return;
             }
-            //$quoteCreated->setPaymentMethod(ConfigProvider::CODE);
             $quoteCreated->setCustomerEmail($conektaCustomer['email']);
             $quoteCreated->getPayment()->importData(['method' => ConfigProvider::CODE]);
             $additionalInformation = [
