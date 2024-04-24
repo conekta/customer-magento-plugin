@@ -98,6 +98,15 @@ class MissingOrders
             $quoteId = $metadata['quote_id'];
             $quoteCreated = $this->_cartRepository->get($quoteId);
             $order = $this->quoteManagement->submit($quoteCreated);
+
+            $increment_id = $order->getRealOrderId();
+            if (isset($metadata['remote_ip']) && $metadata['remote_ip']!=null) {
+                $order->setRemoteIp($metadata['remote_ip'])->save();
+            }
+            $order->addCommentToStatusHistory("Missing Order from conekta ". "<a href='". ConfigProvider::URL_PANEL_PAYMENTS ."/".$conektaOrder["id"]. "' target='_blank'>".$conektaOrder["id"]."</a>")
+                ->setIsCustomerNotified(true)
+                ->save();
+            $this->updateConektaReference($conektaOrder["charges"]["data"][0]["id"],  $increment_id);
             $this->_conektaLogger->info('end submit new flow');
             return ;
 
