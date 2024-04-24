@@ -131,7 +131,9 @@ class MissingOrders
             $quoteCreated->getPayment()->setAdditionalInformation($additionalInformation);
 
             $order = $this->quoteManagement->submit($quoteCreated);
-            $order->setEmailSent(0); //
+
+            //$order->setEmailSent(0); //
+
             //$order->setExtOrderId($conektaOrder["id"]);
             $order->save();
 
