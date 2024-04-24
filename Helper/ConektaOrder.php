@@ -175,15 +175,15 @@ class ConektaOrder extends Util
             $validOrderWithCheckout['tax_lines'][] = $shippingLinesTax;
         }
         $validOrderWithCheckout['shipping_lines'] = $this->_conektaHelper->getShippingLines(
-            $this->getQuote()->getId()
+            $quote->getId()
         );
 
         //always needs shipping due to api does not provide info about merchant type (drop_shipping, virtual)
         $validOrderWithCheckout['shipping_contact'] = $this->_conektaHelper->getShippingContact(
-            $this->getQuote()->getId()
+            $quote->getId()
         );
         $validOrderWithCheckout['fiscal_entity'] = $this->_conektaHelper->getBillingAddress(
-            $this->getQuote()->getId()
+            $quote->getId()
         );
 
         $validOrderWithCheckout['customer_info'] = [
