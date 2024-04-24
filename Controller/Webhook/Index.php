@@ -14,6 +14,7 @@ use Magento\Framework\App\ResponseInterface;
 use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Framework\Controller\Result\RawFactory;
 use Magento\Framework\Controller\ResultInterface;
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Json\Helper\Data;
 use Magento\Framework\App\Request\InvalidRequestException;
 use Magento\Customer\Model\CustomerFactory;
@@ -154,7 +155,7 @@ class Index extends Action implements CsrfAwareActionInterface
                     break;
             }
 
-        } catch (Exception $e) {
+        } catch (Exception | LocalizedException $e) {
             $this->_conektaLogger->error('Controller Index :: '. $e->getMessage());
             $errorResponse = [
                 'error' => 'Internal Server Error',
