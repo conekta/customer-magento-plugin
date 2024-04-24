@@ -151,6 +151,8 @@ class MissingOrders
             $this->_conektaLogger->info('end submit new flow');
             return ;
 
+            /*
+
 
 
             $quoteCreated= $this->quote->create(); //Create object of quote
@@ -278,6 +280,7 @@ class MissingOrders
                 ->setIsCustomerNotified(true)
                 ->save();
             $this->updateConektaReference($conektaOrder["charges"]["data"][0]["id"],  $increment_id);
+            */
 
         } catch (Exception | LocalizedException $e) {
             $this->_conektaLogger->error('creating order '.$e->getMessage());

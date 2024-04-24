@@ -133,8 +133,8 @@ class ConektaOrder extends Util
                 $customerRequest['email'] = $guestEmail;
             }
 
-            $quote = $this->getQuote()->setCustomerEmail($guestEmail);
-            $quote->save();
+            $quote = $this->getQuote();//->setCustomerEmail($guestEmail);
+            //$quote->save();
 
             $customerRequest['custom_reference'] = $customerId;
             $customerRequest['name'] = $this->removeNameSpecialCharacter($customerRequest['name']);
