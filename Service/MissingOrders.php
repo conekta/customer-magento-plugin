@@ -113,7 +113,13 @@ class MissingOrders
 
             //add items in quote
             foreach($conektaOrder['line_items']["data"] as $item){
-                $product=$this->_product->load($item["metadata"]['product_id']);
+                $productType = $item["metadata"]['product_type'];
+                $productId = $item["metadata"]['product_id'];
+                if ($productType === 'bundle') {
+                    $bundleOptions = $item['metadata']['bundle_options'];
+
+                }
+                $product=$this->_product->load($productId);
                 $product->setPrice($this->utilHelper->convertFromApiPrice($item['unit_price']));
                 $quoteCreated->addProduct(
                     $product,

@@ -491,6 +491,7 @@ class Data extends Util
                     $sku = $this->removeSpecialCharacter($item->getSku());
                     $productId = $item->getProductId();
                     $productType = $item->getProductType();
+                    $bundleOptions = [];
                     if (! empty($item->getParentItem())) {
                         $parent = $item->getParentItem();
 
@@ -505,6 +506,14 @@ class Data extends Util
                             $sku   = $this->removeSpecialCharacter($item->getParentItem()->getSku());
                             $productId = $item->getParentItem()->getProductId();
                             $productType = $item->getParentItem()->getProductType();
+
+                            $bundleOptions= $item->getProductOptions()['bundle_selection_attributes'];
+                            foreach ($bundleOptions as $optionId => $optionValue) {
+                                $bundleOptions[] = [
+                                    'option_id' => $optionId,
+                                    'option_value' => $optionValue
+                                ];
+                            }
                         }
                     }
 
@@ -512,7 +521,13 @@ class Data extends Util
                         $this->_escaper->escapeHtml($name . ' - ' . $sku)
                     );
                     $description = substr($description, 0, 250);
-
+                    $metadata = [
+                        "product_type" => $productType,
+                        "product_id" => $productId
+                    ];
+                    if (!empty(($bundleOptions))){
+                        $metadata['bundle_options'] = $bundleOptions;
+                    }
                     $request[] = [
                         'name'        => $name,
                         'sku'         => $sku,
@@ -522,10 +537,7 @@ class Data extends Util
                         'tags'        => [
                             $productType
                         ],
-                        'metadata' => [
-                            "product_type" => $productType,
-                            "product_id" => $productId
-                        ]
+                        'metadata' =>  $metadata
                     ];
                 }
             } else {
@@ -540,6 +552,7 @@ class Data extends Util
                             $item->getProductType()
                         ],
                         'metadata' => [
+                            "product_type" => $item->getProductType(),
                             "product_id" => $item->getProductId()
                         ]
                     ];
