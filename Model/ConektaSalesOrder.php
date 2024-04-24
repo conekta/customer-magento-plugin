@@ -82,4 +82,9 @@ class ConektaSalesOrder extends AbstractModel implements ConektaSalesOrderInterf
         $this->load($value, $attribute);
         return $this;
     }
+
+    public function getId()
+    {
+        // TODO: Implement getId() method.
+    }
 }

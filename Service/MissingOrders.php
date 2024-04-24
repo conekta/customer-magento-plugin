@@ -45,6 +45,15 @@ class MissingOrders
     public const APPLIED_RULE_IDS_KEY = 'applied_rule_ids';
     protected CartRepositoryInterface $_cartRepository;
 
+    /**
+     * @var ConektaQuoteFactory
+     */
+    private $conektaQuoteFactory;
+    /**
+     * @var ConektaQuoteRepositoryFactory
+     */
+    private $conektaQuoteRepositoryFactory;
+
 
     public function __construct(
         WebhookRepository $webhookRepository,
@@ -56,7 +65,9 @@ class MissingOrders
         CustomerRepositoryInterface $customerRepository,
         QuoteManagement $quoteManagement,
         ConektaApiClient $conektaApiClient,
-        CartRepositoryInterface $cartRepository
+        CartRepositoryInterface $cartRepository,
+        ConektaQuoteFactory           $conektaQuoteFactory,
+        ConektaQuoteRepositoryFactory $conektaQuoteRepositoryFactory
     ){
         $this->webhookRepository = $webhookRepository;
         $this->_conektaLogger = $conektaLogger;
@@ -71,6 +82,9 @@ class MissingOrders
         $objectManager = ObjectManager::getInstance();
         $this->utilHelper = $objectManager->create(ConektaData::class);
         $this->_cartRepository = $cartRepository;
+        $this->conektaQuoteRepositoryFactory = $conektaQuoteRepositoryFactory;
+        $this->conektaQuoteFactory = $conektaQuoteFactory;
+
     }
 
     /**
@@ -98,12 +112,20 @@ class MissingOrders
             $order = $this->quoteManagement->submit($quoteCreated);
             $order->setEmailSent(0); //
             $order->save();
-            $increment_id = $order->getRealOrderId();
+
+            $conektaQuote = $this->conektaQuoteFactory->create();
+            $conektaQuote->setQuoteId($quoteId);
+            $conektaQuote->setConektaOrderId($conektaOrder["id"]);
+            $conektaQuoteRepo = $this->conektaQuoteRepositoryFactory->create();
+
+            $conektaQuoteRepo->save($conektaQuote);
 
             $order->addCommentToStatusHistory("Missing Order from conekta ". "<a href='". ConfigProvider::URL_PANEL_PAYMENTS ."/".$conektaOrder["id"]. "' target='_blank'>".$conektaOrder["id"]."</a>")
                 ->setIsCustomerNotified(true)
                 ->save();
-            $this->updateConektaReference($conektaOrder["charges"]["data"][0]["id"],  $increment_id);
+            $this->updateConektaReference($conektaOrder["charges"]["data"][0]["id"],  $order->getRealOrderId());
+
+
             $this->_conektaLogger->info('end submit new flow');
             return ;
 
