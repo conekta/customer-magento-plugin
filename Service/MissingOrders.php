@@ -20,7 +20,8 @@ use Magento\Quote\Model\QuoteFactory;
 use Magento\Customer\Model\CustomerFactory;
 use Exception;
 use Magento\Quote\Api\CartRepositoryInterface;
-
+use Conekta\Payments\Model\ConektaQuoteFactory;
+use Conekta\Payments\Model\ConektaQuoteRepositoryFactory;
 class MissingOrders
 {
     /**
