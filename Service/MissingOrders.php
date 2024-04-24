@@ -73,7 +73,7 @@ class MissingOrders
                 $this->_conektaLogger->info('order is ready', ['order' => $orderFounded, 'is_set', isset($orderFounded)]);
                 return;
             }
-            $quoteCreated->setPaymentMethod(ConfigProvider::CODE);
+            //$quoteCreated->setPaymentMethod(ConfigProvider::CODE);
             $quoteCreated->setCustomerEmail($conektaCustomer['email']);
             $quoteCreated->getPayment()->importData(['method' => ConfigProvider::CODE]);
             $additionalInformation = [
