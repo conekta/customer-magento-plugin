@@ -19,6 +19,7 @@ use Magento\Store\Model\StoreManagerInterface;
 use Magento\Quote\Model\QuoteFactory;
 use Magento\Customer\Model\CustomerFactory;
 use Exception;
+use Magento\Quote\Api\CartRepositoryInterface;
 
 class MissingOrders
 {
@@ -42,6 +43,7 @@ class MissingOrders
     private ConektaApiClient $conektaApiClient;
 
     public const APPLIED_RULE_IDS_KEY = 'applied_rule_ids';
+    protected CartRepositoryInterface $_cartRepository;
 
 
     public function __construct(
@@ -53,7 +55,9 @@ class MissingOrders
         CustomerFactory $customerFactory,
         CustomerRepositoryInterface $customerRepository,
         QuoteManagement $quoteManagement,
-        ConektaApiClient $conektaApiClient
+        ConektaApiClient $conektaApiClient,
+        CartRepositoryInterface $cartRepository,
+
     ){
         $this->webhookRepository = $webhookRepository;
         $this->_conektaLogger = $conektaLogger;
@@ -67,6 +71,9 @@ class MissingOrders
 
         $objectManager = ObjectManager::getInstance();
         $this->utilHelper = $objectManager->create(ConektaData::class);
+        $this->_cartRepository = $cartRepository;
+
+
     }
 
     /**
@@ -86,6 +93,14 @@ class MissingOrders
             $metadata = $conektaOrder['metadata'];
 
             $store = $this->_storeManager->getStore(intval($metadata["store"]));
+
+
+            // Create Order From Quote
+            $quoteId = $metadata['quote_id'];
+            $quoteCreated = $this->_cartRepository->get($quoteId);
+            $order = $this->quoteManagement->submit($quoteCreated);
+            $this->_conektaLogger->info('end submit new flow');
+            return ;
 
             $quoteCreated= $this->quote->create(); //Create object of quote
 
@@ -119,7 +134,7 @@ class MissingOrders
                     $bundleOptions = $item['metadata']['bundle_options'];
 
                 }
-                $product=$this->_product->load($productId);
+                $product= $this->_product->load($productId);
                 $product->setPrice($this->utilHelper->convertFromApiPrice($item['unit_price']));
                 $quoteCreated->addProduct(
                     $product,
@@ -225,7 +240,24 @@ class MissingOrders
             throw  $e;
         }
     }
-
+    /**
+     * get all the selection products used in bundle product
+     * @param $product
+     * @return mixed
+     */
+    private function getBundleOptions(Product $product)
+    {
+        $selectionCollection = $product->getTypeInstance()
+            ->getSelectionsCollection(
+                $product->getTypeInstance()->getOptionsIds($product),
+                $product
+            );
+        $bundleOptions = [];
+        foreach ($selectionCollection as $selection) {
+            $bundleOptions[$selection->getOptionId()][] = $selection->getSelectionId();
+        }
+        return $bundleOptions;
+    }
     private function getAdditionalInformation(array $conektaOrder) :array{
         switch ($conektaOrder["charges"]["data"][0]["payment_method"]["object"]){
             case "card_payment":

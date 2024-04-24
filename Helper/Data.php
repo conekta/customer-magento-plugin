@@ -491,7 +491,6 @@ class Data extends Util
                     $sku = $this->removeSpecialCharacter($item->getSku());
                     $productId = $item->getProductId();
                     $productType = $item->getProductType();
-                    $bundleOptions = [];
                     if (! empty($item->getParentItem())) {
                         $parent = $item->getParentItem();
 
@@ -507,13 +506,7 @@ class Data extends Util
                             $productId = $item->getParentItem()->getProductId();
                             $productType = $item->getParentItem()->getProductType();
 
-                            $bundleOptions= $item->getProductOptions()['bundle_selection_attributes'];
-                            foreach ($bundleOptions as $optionId => $optionValue) {
-                                $bundleOptions[] = [
-                                    'option_id' => $optionId,
-                                    'option_value' => $optionValue
-                                ];
-                            }
+
                         }
                     }
 
@@ -525,9 +518,7 @@ class Data extends Util
                         "product_type" => $productType,
                         "product_id" => $productId
                     ];
-                    if (!empty(($bundleOptions))){
-                        $metadata['bundle_options'] = $bundleOptions;
-                    }
+
                     $request[] = [
                         'name'        => $name,
                         'sku'         => $sku,
