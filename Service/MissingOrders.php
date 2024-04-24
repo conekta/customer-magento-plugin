@@ -55,6 +55,8 @@ class MissingOrders
      */
     private $conektaQuoteRepositoryFactory;
 
+    private $objectManager;
+
 
     public function __construct(
         WebhookRepository $webhookRepository,
@@ -80,8 +82,8 @@ class MissingOrders
         $this->quoteManagement = $quoteManagement;
         $this->conektaApiClient = $conektaApiClient;
 
-        $objectManager = ObjectManager::getInstance();
-        $this->utilHelper = $objectManager->create(ConektaData::class);
+        $this->objectManager = ObjectManager::getInstance();
+        $this->utilHelper = $this->objectManager->create(ConektaData::class);
         $this->_cartRepository = $cartRepository;
         $this->conektaQuoteRepositoryFactory = $conektaQuoteRepositoryFactory;
         $this->conektaQuoteFactory = $conektaQuoteFactory;
@@ -110,6 +112,13 @@ class MissingOrders
             // Create Order From Quote
             $quoteId = $metadata['quote_id'];
             $quoteCreated = $this->_cartRepository->get($quoteId);
+
+            $orderFounded = $this->objectManager->create('Magento\Sales\Model\Order')->load($quoteCreated->getReservedOrderId(), 'increment_id');
+            if ($orderFounded->getId() != null || !empty($orderFounded->getId()) ) {
+                $this->_conektaLogger->info('order is ready', ['order' => $orderFounded, 'is_set', isset($orderFounded)]);
+                return;
+            }
+
             $order = $this->quoteManagement->submit($quoteCreated);
             $order->setEmailSent(0); //
             $order->setExtOrderId($conektaOrder["id"]);
