@@ -213,7 +213,7 @@ class MissingOrders
                 ->save();
             $this->updateConektaReference($conektaOrder["charges"]["data"][0]["id"],  $increment_id);
 
-        } catch (Exception $e) {
+        } catch (Exception | LocalizedException $e) {
             $this->_conektaLogger->error('creating order '.$e->getMessage());
             $this->_conektaLogger->info('creating info order '.$e->getMessage());
             throw  $e;
