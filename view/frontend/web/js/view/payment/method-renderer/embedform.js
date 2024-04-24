@@ -295,7 +295,6 @@ define(
                         console.error(error);
                     },
                     onFinalizePayment: function (event) {
-                        return ;
                         self.iframOrderData(event);
                         self.beforePlaceOrder();
                     },
