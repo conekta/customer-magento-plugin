@@ -118,6 +118,17 @@ class MissingOrders
                 $this->_conektaLogger->info('order is ready', ['order' => $orderFounded, 'is_set', isset($orderFounded)]);
                 return;
             }
+            $quoteCreated->setPaymentMethod(ConfigProvider::CODE);
+            $quoteCreated->getPayment()->importData(['method' => ConfigProvider::CODE]);
+            $additionalInformation = [
+                'order_id' =>  $conektaOrder["id"],
+                'txn_id' =>  $conektaOrder["charges"]["data"][0]["id"],
+                'quote_id'=> $quoteCreated->getId(),
+                'payment_method' => $this->getPaymentMethod($conektaOrder["charges"]["data"][0]["payment_method"]["object"]),
+                'conekta_customer_id' => $conektaCustomer["customer_id"]
+            ];
+            $additionalInformation= array_merge($additionalInformation, $this->getAdditionalInformation($conektaOrder));
+            $quoteCreated->getPayment()->setAdditionalInformation($additionalInformation);
 
             $order = $this->quoteManagement->submit($quoteCreated);
             $order->setEmailSent(0); //
@@ -235,9 +246,6 @@ class MissingOrders
             $quoteCreated->setPaymentMethod(ConfigProvider::CODE);
             $quoteCreated->setInventoryProcessed(false);
 
-            //if (!empty($metadata[self::APPLIED_RULE_IDS_KEY])){
-              //  $quoteCreated->setAppliedRuleIds($metadata[self::APPLIED_RULE_IDS_KEY]);
-            //}
             $quoteCreated->save();
             $this->_conektaLogger->info('end save quote');
 
@@ -252,7 +260,7 @@ class MissingOrders
                 'conekta_customer_id' => $conektaCustomer["customer_id"]
             ];
             $additionalInformation= array_merge($additionalInformation, $this->getAdditionalInformation($conektaOrder));
-            $quoteCreated->getPayment()->setAdditionalInformation(   $additionalInformation);
+            $quoteCreated->getPayment()->setAdditionalInformation($additionalInformation);
             // Collect Totals & Save Quote
             $quoteCreated->collectTotals()->save();
             $this->_conektaLogger->info('Collect Totals & Save Quote');
