@@ -119,22 +119,24 @@ class ConektaOrder extends Util
                     $conektaCustomerId = '';
                 }
             }
+            $quote = $this->getQuote();
 
             //Customer Info for API
-            $billingAddress = $this->getQuote()->getBillingAddress();
+            $billingAddress = $quote->getBillingAddress();
             $customerId = $customer->getId();
+            $quoteEmail = $guestEmail;
             if ($customerId) {
                 //name without numbers
                 $customerRequest['name'] = $customer->getName();
                 $customerRequest['email'] = $customer->getEmail();
+                $quoteEmail = $customer->getEmail();
             } else {
                 //name without numbers
                 $customerRequest['name'] = $billingAddress->getName();
                 $customerRequest['email'] = $guestEmail;
             }
+            $quote->setCustomerEmail($quoteEmail)->save();
 
-            $quote = $this->getQuote();//->setCustomerEmail($guestEmail);
-            //$quote->save();
 
             $customerRequest['custom_reference'] = $customerId;
             $customerRequest['name'] = $this->removeNameSpecialCharacter($customerRequest['name']);
@@ -160,7 +162,7 @@ class ConektaOrder extends Util
                 //If customer API exists, always update error
                 $this->conektaApiClient->updateCustomer($conektaCustomerId, $customerRequest);
             }
-        } catch (ApiException $e) {
+        } catch (Exception | ApiException $e) {
             $this->conektaLogger->info($e->getMessage(), $customerRequest);
             throw new ConektaException(__($e->getMessage()));
         }

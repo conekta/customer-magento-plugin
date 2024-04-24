@@ -132,15 +132,17 @@ class MissingOrders
 
             $order = $this->quoteManagement->submit($quoteCreated);
             $order->setEmailSent(0); //
-            $order->setExtOrderId($conektaOrder["id"]);
+            //$order->setExtOrderId($conektaOrder["id"]);
             $order->save();
 
+            /*
             $conektaQuote = $this->conektaQuoteFactory->create();
             $conektaQuote->setQuoteId($quoteId);
             $conektaQuote->setConektaOrderId($conektaOrder["id"]);
             $conektaQuoteRepo = $this->conektaQuoteRepositoryFactory->create();
 
             $conektaQuoteRepo->save($conektaQuote);
+            */
 
             $order->addCommentToStatusHistory("Missing Order from conekta ". "<a href='". ConfigProvider::URL_PANEL_PAYMENTS ."/".$conektaOrder["id"]. "' target='_blank'>".$conektaOrder["id"]."</a>")
                 ->setIsCustomerNotified(true)
