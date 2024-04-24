@@ -8,7 +8,6 @@ use Conekta\Payments\Helper\Util;
 use Conekta\Payments\Logger\Logger as ConektaLogger;
 use Conekta\Payments\Model\Ui\EmbedForm\ConfigProvider;
 use Conekta\Payments\Model\WebhookRepository;
-use Magento\Catalog\Model\Product;
 use Magento\Customer\Api\CustomerRepositoryInterface;
 use Magento\Framework\App\ObjectManager;
 use Magento\Framework\Exception\LocalizedException;
@@ -130,10 +129,7 @@ class MissingOrders
             foreach($conektaOrder['line_items']["data"] as $item){
                 $productType = $item["metadata"]['product_type'];
                 $productId = $item["metadata"]['product_id'];
-                if ($productType === 'bundle') {
-                    $bundleOptions = $item['metadata']['bundle_options'];
 
-                }
                 $product= $this->_product->load($productId);
                 $product->setPrice($this->utilHelper->convertFromApiPrice($item['unit_price']));
                 $quoteCreated->addProduct(
@@ -240,24 +236,7 @@ class MissingOrders
             throw  $e;
         }
     }
-    /**
-     * get all the selection products used in bundle product
-     * @param $product
-     * @return mixed
-     */
-    private function getBundleOptions(Product $product)
-    {
-        $selectionCollection = $product->getTypeInstance()
-            ->getSelectionsCollection(
-                $product->getTypeInstance()->getOptionsIds($product),
-                $product
-            );
-        $bundleOptions = [];
-        foreach ($selectionCollection as $selection) {
-            $bundleOptions[$selection->getOptionId()][] = $selection->getSelectionId();
-        }
-        return $bundleOptions;
-    }
+
     private function getAdditionalInformation(array $conektaOrder) :array{
         switch ($conektaOrder["charges"]["data"][0]["payment_method"]["object"]){
             case "card_payment":
