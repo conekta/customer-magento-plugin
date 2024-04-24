@@ -21,7 +21,7 @@ class ConektaSalesOrder extends AbstractModel implements ConektaSalesOrderInterf
      * SetConektaOrderId
      *
      * @param mixed $value
-     * @return mixed|void
+     * @return void
      */
     public function setConektaOrderId($value)
     {
@@ -42,7 +42,7 @@ class ConektaSalesOrder extends AbstractModel implements ConektaSalesOrderInterf
      * SetIncrementOrderId
      *
      * @param mixed $value
-     * @return mixed|void
+     * @return void
      */
     public function setIncrementOrderId($value)
     {
@@ -65,7 +65,7 @@ class ConektaSalesOrder extends AbstractModel implements ConektaSalesOrderInterf
      * @param mixed $conektaOrderId
      * @return $this
      */
-    public function loadByConektaOrderId($conektaOrderId)
+    public function loadByConektaOrderId($conektaOrderId): ConektaSalesOrder
     {
         return $this->loadByAttribute(ConektaSalesOrderInterface::CONEKTA_ORDER_ID, $conektaOrderId);
     }
@@ -77,7 +77,7 @@ class ConektaSalesOrder extends AbstractModel implements ConektaSalesOrderInterf
      * @param string $value
      * @return $this
      */
-    public function loadByAttribute($attribute, $value)
+    public function loadByAttribute($attribute, $value): ConektaSalesOrder
     {
         $this->load($value, $attribute);
         return $this;
@@ -85,6 +85,6 @@ class ConektaSalesOrder extends AbstractModel implements ConektaSalesOrderInterf
 
     public function getId()
     {
-        // TODO: Implement getId() method.
+        return $this->getData("id");
     }
 }
