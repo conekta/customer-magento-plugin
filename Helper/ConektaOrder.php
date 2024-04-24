@@ -132,6 +132,9 @@ class ConektaOrder extends Util
                 $customerRequest['name'] = $billingAddress->getName();
                 $customerRequest['email'] = $guestEmail;
             }
+
+            $this->getQuote()->setCustomerEmail($guestEmail);
+
             $customerRequest['custom_reference'] = $customerId;
             $customerRequest['name'] = $this->removeNameSpecialCharacter($customerRequest['name']);
             $customerRequest['phone'] = $this->removePhoneSpecialCharacter($billingAddress->getTelephone());
