@@ -177,7 +177,7 @@ class WebhookRepository
         try {
             $this->invoiceSender->send($invoice);
             $order->addCommentToStatusHistory(
-                __('Notified customer about invoice creation #%1.', $invoice->getId())
+                __('Notified customer about invoice creation')
             )
                 ->setIsCustomerNotified(true)
                 ->save();
