@@ -135,7 +135,7 @@ class ConektaOrder extends Util
                 $customerRequest['name'] = $billingAddress->getName();
                 $customerRequest['email'] = $guestEmail;
             }
-            $quote->setCustomerEmail($quoteEmail)->save();
+            //$quote->setCustomerEmail($quoteEmail)->save();
 
 
             $customerRequest['custom_reference'] = $customerId;
