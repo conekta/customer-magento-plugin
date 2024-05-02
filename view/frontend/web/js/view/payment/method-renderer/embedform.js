@@ -295,8 +295,6 @@ define(
                         console.error(error);
                     },
                     onFinalizePayment: function (event) {
-                        self.conektaError("error intencional");
-                        return;
                         self.iframOrderData(event);
                         self.beforePlaceOrder();
                     },
