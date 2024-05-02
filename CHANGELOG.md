@@ -1,3 +1,8 @@
+### 5.1.3 - 2024/03/07
+* Fix:
+  - [CRD-191]  Fix bundle product. @fcarrero [#51]
+  - Fix applied rules on missing orders module
+  
 ### 5.1.2 - 2024/03/07
 * Fix:
   - [CRD-154]  Fix shipping line taxes. @fcarrero [#50]

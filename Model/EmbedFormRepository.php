@@ -97,10 +97,6 @@ class EmbedFormRepository implements EmbedFormRepositoryInterface
                 primer carácter especial: +'));
         }
 
-        if (strlen($orderParameters["shipping_contact"]["address"]["postal_code"]) !== 5) {
-            throw new ConektaException(__("Código Postal invalido. Debe tener 5 dígitos"));
-        }
-
         //cash validations
         if (in_array('cash', $orderParameters["checkout"]["allowed_payment_methods"]) &&
             $orderTotal > 10000

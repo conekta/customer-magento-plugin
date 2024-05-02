@@ -487,6 +487,10 @@ class Data extends Util
                 if ($item->getProductType() != 'bundle' && $item->getProductType() != 'configurable') {
                     $price = $item->getPrice();
                     $qty = (int)$item->{$quantityMethod}();
+                    $name = $this->removeSpecialCharacter($item->getName());
+                    $sku = $this->removeSpecialCharacter($item->getSku());
+                    $productId = $item->getProductId();
+                    $productType = $item->getProductType();
                     if (! empty($item->getParentItem())) {
                         $parent = $item->getParentItem();
 
@@ -495,28 +499,36 @@ class Data extends Util
                             $qty = (int)$item->getParentItem()->{$quantityMethod}();
                         } elseif ($parent->getProductType() == 'bundle' && $isQuoteItem) {
                             //If it is a quote item, then qty of item has not been calculated yet
-                            $qty = $qty * (int)$item->getParentItem()->{$quantityMethod}();
+                            $qty   =  $item->getParentItem()->getQty();
+                            $price = $item->getParentItem()->getPrice();
+                            $name  = $this->removeSpecialCharacter($item->getParentItem()->getName());
+                            $sku   = $this->removeSpecialCharacter($item->getParentItem()->getSku());
+                            $productId = $item->getParentItem()->getProductId();
+                            $productType = $item->getParentItem()->getProductType();
+
+
                         }
                     }
 
-                    $name = $this->removeSpecialCharacter($item->getName());
                     $description = $this->removeSpecialCharacter(
-                        $this->_escaper->escapeHtml($item->getName() . ' - ' . $item->getSku())
+                        $this->_escaper->escapeHtml($name . ' - ' . $sku)
                     );
                     $description = substr($description, 0, 250);
+                    $metadata = [
+                        "product_type" => $productType,
+                        "product_id" => $productId
+                    ];
 
                     $request[] = [
                         'name'        => $name,
-                        'sku'         => $this->removeSpecialCharacter($item->getSku()),
+                        'sku'         => $sku,
                         'unit_price'  => $this->convertToApiPrice($price),
                         'description' => $description,
                         'quantity'    => $qty,
                         'tags'        => [
-                            $item->getProductType()
+                            $productType
                         ],
-                        'metadata' => [
-                            "product_id" => $item->getProductId()
-                        ]
+                        'metadata' =>  $metadata
                     ];
                 }
             } else {
@@ -531,6 +543,7 @@ class Data extends Util
                             $item->getProductType()
                         ],
                         'metadata' => [
+                            "product_type" => $item->getProductType(),
                             "product_id" => $item->getProductId()
                         ]
                     ];
