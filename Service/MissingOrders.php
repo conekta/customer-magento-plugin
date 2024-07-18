@@ -120,20 +120,20 @@ class MissingOrders
             'country_id' => strtoupper($conektaOrder["fiscal_entity"]["address"]["country"]),
             'region' => $conektaOrder["shipping_contact"]["address"]["state"],
             'postcode' => $conektaOrder["shipping_contact"]["address"]["postal_code"],
-            'telephone' =>  $this->utilHelper->convertToInt( $conektaOrder["shipping_contact"]["phone"] || "5200000000"),
+            'telephone' =>   $conektaOrder["shipping_contact"]["phone"] ?? "5200000000",
             'region_id' => $conektaOrder["shipping_contact"]["metadata"]["region_id"],
             'company'  => $conektaOrder["shipping_contact"]["metadata"]["company"],
         ];
         $billingAddressName = $this->utilHelper->splitName($conektaOrder["fiscal_entity"]["name"]);
         $billing_address = [
-            'firstname'    => $billingAddressName["firstname"], //address Details
+            'firstname'    => $billingAddressName["firstname"],
             'lastname'     => $billingAddressName["lastname"],
             'street' => [ $conektaOrder["fiscal_entity"]["address"]["street1"] , $conektaOrder["fiscal_entity"]["address"]["street2"] ?? "" ],
             'city' => $conektaOrder["fiscal_entity"]["address"]["city"],
             'country_id' => strtoupper($conektaOrder["fiscal_entity"]["address"]["country"]),
             'region' => $conektaOrder["fiscal_entity"]["address"]["state"],
             'postcode' => $conektaOrder["fiscal_entity"]["address"]["postal_code"],
-            'telephone' => $this->utilHelper->convertToInt($conektaOrder["fiscal_entity"]["phone"] ||  $conektaOrder["shipping_contact"]["phone"] || "5200000000"),
+            'telephone' => $conektaOrder["fiscal_entity"]["phone"] ??  $conektaOrder["shipping_contact"]["phone"] ?? "5200000000",
             'region_id' =>$conektaOrder["fiscal_entity"]["metadata"]["region_id"],
             'company'  => $conektaOrder["fiscal_entity"]["metadata"]["company"]
         ];

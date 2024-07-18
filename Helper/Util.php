@@ -93,11 +93,4 @@ abstract class Util extends AbstractHelper
 
         return $splitName;
     }
-    function convertToInt($value)
-    {
-        if (is_numeric($value)) {
-            return intval($value);
-        }
-        return $value;
-    }
 }
