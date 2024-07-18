@@ -2,6 +2,7 @@
 
 namespace Conekta\Payments\Model;
 
+use Conekta\Payments\Exception\EntityNotFoundException;
 use Conekta\Payments\Logger\Logger as ConektaLogger;
 use Conekta\Payments\Api\Data\ConektaSalesOrderInterface;
 use Exception;
@@ -150,7 +151,7 @@ class WebhookRepository
             $this->_conektaLogger->error(
                 'WebhookRepository :: execute - ' . $message
             );
-            throw new LocalizedException(__($message));
+            throw new EntityNotFoundException(__($message));
         }
 
         $order->setState(Order::STATE_PROCESSING);
