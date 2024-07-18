@@ -120,7 +120,7 @@ class MissingOrders
             'country_id' => strtoupper($conektaOrder["fiscal_entity"]["address"]["country"]),
             'region' => $conektaOrder["shipping_contact"]["address"]["state"],
             'postcode' => $conektaOrder["shipping_contact"]["address"]["postal_code"],
-            'telephone' =>  $conektaOrder["shipping_contact"]["phone"] || "52000000000",
+            'telephone' =>  $conektaOrder["shipping_contact"]["phone"] || "5200000000",
             'region_id' => $conektaOrder["shipping_contact"]["metadata"]["region_id"],
             'company'  => $conektaOrder["shipping_contact"]["metadata"]["company"],
         ];
@@ -133,7 +133,7 @@ class MissingOrders
             'country_id' => strtoupper($conektaOrder["fiscal_entity"]["address"]["country"]),
             'region' => $conektaOrder["fiscal_entity"]["address"]["state"],
             'postcode' => $conektaOrder["fiscal_entity"]["address"]["postal_code"],
-            'telephone' =>  $conektaOrder["fiscal_entity"]["phone"] ||  $conektaOrder["shipping_contact"]["phone"] || "52000000000",
+            'telephone' =>  $conektaOrder["fiscal_entity"]["phone"] ||  $conektaOrder["shipping_contact"]["phone"] || "5200000000",
             'region_id' =>$conektaOrder["fiscal_entity"]["metadata"]["region_id"],
             'company'  => $conektaOrder["fiscal_entity"]["metadata"]["company"]
         ];
