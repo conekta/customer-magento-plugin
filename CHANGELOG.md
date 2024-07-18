@@ -1,3 +1,6 @@
+### 5.1.4 - 2024/07/18
+* Fix:
+  - Fix recovery orders when quote has not a valid shipping address
 ### 5.1.3 - 2024/03/07
 * Fix:
   - [CRD-191]  Fix bundle product. @fcarrero [#51]

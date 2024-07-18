@@ -8,6 +8,7 @@ use Conekta\Payments\Model\Ui\EmbedForm\ConfigProvider;
 use Conekta\Payments\Model\WebhookRepository;
 use Magento\Framework\App\ObjectManager;
 use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Quote\Model\QuoteManagement;
 use Exception;
 use Magento\Quote\Api\CartRepositoryInterface;
@@ -92,13 +93,14 @@ class MissingOrders
                 ->setIsCustomerNotified(true)
                 ->save();
             $this->updateConektaReference($conektaOrder["charges"]["data"][0]["id"],  $order->getRealOrderId());
-
-
-            $this->_conektaLogger->info('end submit new flow');
             return ;
 
-        } catch (Exception | LocalizedException $e) {
-            $this->_conektaLogger->error('creating order '.$e->getMessage());
+        }catch (NoSuchEntityException $e){
+            $this->_conektaLogger->error($e->getMessage());
+            return;
+        }
+        catch (Exception | LocalizedException $e) {
+            $this->_conektaLogger->error('recovery order '.$e->getMessage());
             throw  $e;
         }
     }
