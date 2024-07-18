@@ -676,6 +676,7 @@ class Data extends Util
         $phone = $this->removePhoneSpecialCharacter($address->getTelephone());
 
         $billingContact = [
+            'phone'=> $phone,
             'name' => $this->getCustomerName($address),
             'address'  => [
                 'city'            => $address->getCity(),
