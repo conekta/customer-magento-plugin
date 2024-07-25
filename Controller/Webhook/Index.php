@@ -1,6 +1,7 @@
 <?php
 namespace Conekta\Payments\Controller\Webhook;
 
+use Conekta\Payments\Exception\EntityNotFoundException;
 use Conekta\Payments\Logger\Logger as ConektaLogger;
 use Conekta\Payments\Model\WebhookRepository;
 use Conekta\Payments\Service\MissingOrders;
@@ -154,7 +155,14 @@ class Index extends Action implements CsrfAwareActionInterface
                     break;
             }
 
-        } catch (Exception $e) {
+        }catch (EntityNotFoundException $e) {
+            $errorResponse = [
+                'error' => 'Entity Not Found',
+                'message' => $e->getMessage(),
+            ];
+            return $this->sendJsonResponse($errorResponse, Response::STATUS_CODE_404);
+        }
+        catch (Exception $e) {
             $this->_conektaLogger->error('Controller Index :: '. $e->getMessage());
             $errorResponse = [
                 'error' => 'Internal Server Error',

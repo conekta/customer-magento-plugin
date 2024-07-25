@@ -2,7 +2,9 @@
 
 namespace Conekta\Payments\Exception;
 
-class ConektaException extends \Exception
+use Exception;
+
+class ConektaException extends Exception
 {
     public const INVALID_PHONE_MESSAGE = 'Télefono no válido. 
         El télefono debe tener al menos 10 carácteres.

@@ -4,7 +4,6 @@ namespace Conekta\Payments\Helper;
 
 use Conekta\Payments\Logger\Logger as ConektaLogger;
 use Magento\Framework\App\Helper\Context;
-use Magento\Framework\App\ObjectManager;
 use Magento\Framework\App\ProductMetadataInterface;
 use Magento\Framework\Encryption\EncryptorInterface;
 use Magento\Framework\Exception\LocalizedException;
@@ -676,6 +675,7 @@ class Data extends Util
         $phone = $this->removePhoneSpecialCharacter($address->getTelephone());
 
         $billingContact = [
+            'phone'=> $phone,
             'name' => $this->getCustomerName($address),
             'address'  => [
                 'city'            => $address->getCity(),

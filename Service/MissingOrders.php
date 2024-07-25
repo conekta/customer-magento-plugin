@@ -8,11 +8,14 @@ use Conekta\Payments\Model\Ui\EmbedForm\ConfigProvider;
 use Conekta\Payments\Model\WebhookRepository;
 use Magento\Framework\App\ObjectManager;
 use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Exception\NoSuchEntityException;
+use Magento\Quote\Model\Quote;
 use Magento\Quote\Model\QuoteManagement;
 use Exception;
 use Magento\Quote\Api\CartRepositoryInterface;
 use Magento\Sales\Api\Data\OrderInterface;
-
+use Conekta\Payments\Helper\Util;
+use Conekta\Payments\Helper\Data as ConektaData;
 class MissingOrders
 {
     /**
@@ -30,6 +33,8 @@ class MissingOrders
 
     private ObjectManager $objectManager;
 
+    private Util $utilHelper;
+
 
     public function __construct(
         WebhookRepository $webhookRepository,
@@ -45,6 +50,7 @@ class MissingOrders
 
         $this->objectManager = ObjectManager::getInstance();
         $this->_cartRepository = $cartRepository;
+        $this->utilHelper = $this->objectManager->create(ConektaData::class);
     }
 
     /**
@@ -82,7 +88,7 @@ class MissingOrders
             ];
             $additionalInformation= array_merge($additionalInformation, $this->getAdditionalInformation($conektaOrder));
             $quoteCreated->getPayment()->setAdditionalInformation($additionalInformation);
-
+            $this->saveMissingFieldsQuote($quoteCreated, $conektaOrder);
             $order = $this->quoteManagement->submit($quoteCreated);
 
 
@@ -92,17 +98,51 @@ class MissingOrders
                 ->setIsCustomerNotified(true)
                 ->save();
             $this->updateConektaReference($conektaOrder["charges"]["data"][0]["id"],  $order->getRealOrderId());
-
-
-            $this->_conektaLogger->info('end submit new flow');
             return ;
 
-        } catch (Exception | LocalizedException $e) {
-            $this->_conektaLogger->error('creating order '.$e->getMessage());
+        }catch (NoSuchEntityException $e){
+            $this->_conektaLogger->error($e->getMessage());
+            return;
+        }
+        catch (Exception | LocalizedException $e) {
+            $this->_conektaLogger->error('recovery order '.$e->getMessage());
             throw  $e;
         }
     }
 
+    private function saveMissingFieldsQuote(Quote  $quoteCreated, array $conektaOrder){
+        $shippingNameReceiver = $this->utilHelper->splitName($conektaOrder["shipping_contact"]["receiver"]);
+        $shipping_address = [
+            'firstname'    => $shippingNameReceiver["firstname"],
+            'lastname'     => $shippingNameReceiver["lastname"],
+            'street' => [ $conektaOrder["shipping_contact"]["address"]["street1"], $conektaOrder["shipping_contact"]["address"]["street2"] ?? ""],
+            'city' => $conektaOrder["shipping_contact"]["address"]["city"],
+            'country_id' => strtoupper($conektaOrder["fiscal_entity"]["address"]["country"]),
+            'region' => $conektaOrder["shipping_contact"]["address"]["state"],
+            'postcode' => $conektaOrder["shipping_contact"]["address"]["postal_code"],
+            'telephone' =>   $conektaOrder["shipping_contact"]["phone"] ?? "5200000000",
+            'region_id' => $conektaOrder["shipping_contact"]["metadata"]["region_id"],
+            'company'  => $conektaOrder["shipping_contact"]["metadata"]["company"],
+        ];
+        $billingAddressName = $this->utilHelper->splitName($conektaOrder["fiscal_entity"]["name"]);
+        $billing_address = [
+            'firstname'    => $billingAddressName["firstname"],
+            'lastname'     => $billingAddressName["lastname"],
+            'street' => [ $conektaOrder["fiscal_entity"]["address"]["street1"] , $conektaOrder["fiscal_entity"]["address"]["street2"] ?? "" ],
+            'city' => $conektaOrder["fiscal_entity"]["address"]["city"],
+            'country_id' => strtoupper($conektaOrder["fiscal_entity"]["address"]["country"]),
+            'region' => $conektaOrder["fiscal_entity"]["address"]["state"],
+            'postcode' => $conektaOrder["fiscal_entity"]["address"]["postal_code"],
+            'telephone' => $conektaOrder["fiscal_entity"]["phone"] ??  $conektaOrder["shipping_contact"]["phone"] ?? "5200000000",
+            'region_id' =>$conektaOrder["fiscal_entity"]["metadata"]["region_id"],
+            'company'  => $conektaOrder["fiscal_entity"]["metadata"]["company"]
+        ];
+
+        //Set Address to quote
+        $quoteCreated->getBillingAddress()->addData($billing_address);
+
+        $quoteCreated->getShippingAddress()->addData($shipping_address);
+    }
     private function getAdditionalInformation(array $conektaOrder) :array{
         switch ($conektaOrder["charges"]["data"][0]["payment_method"]["object"]){
             case "card_payment":

@@ -8,6 +8,7 @@ use Magento\Framework\Message\ManagerInterface;
 use Conekta\Payments\Model\Config;
 use Magento\Framework\Event\Observer;
 use Magento\Framework\Validator\Exception;
+use Conekta\Payments\Helper\Data as ConektaHelper;
 
 /**
  * Class CreateWebhook
@@ -18,6 +19,8 @@ class Webhook implements ObserverInterface
      * @var Config
      */
     protected Config $config;
+
+    protected ConektaHelper $_conektaHelper;
     /**
      * @var ManagerInterface
      */
@@ -28,10 +31,12 @@ class Webhook implements ObserverInterface
      */
     public function __construct(
         Config $config,
-        ManagerInterface $messageManager
+        ManagerInterface $messageManager,
+        ConektaHelper $_conektaHelper
     ) {
         $this->config = $config;
         $this->messageManager = $messageManager;
+        $this->_conektaHelper = $_conektaHelper;
     }
 
     /**
@@ -43,6 +48,11 @@ class Webhook implements ObserverInterface
      */
     public function execute(Observer $observer)
     {
-        $this->config->createWebhook();
+        if ($this->_conektaHelper->isCashEnabled()
+            || $this->_conektaHelper->isBankTransferEnabled()
+            || $this->_conektaHelper->isCreditCardEnabled()){
+
+            $this->config->createWebhook();
+        }
     }
 }
