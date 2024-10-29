@@ -558,7 +558,6 @@ class Data extends Util
         return $request;
     }
 
-
     /**
      * Get Url webhook or default
      *
