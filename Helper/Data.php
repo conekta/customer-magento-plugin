@@ -480,32 +480,39 @@ class Data extends Util
     {
         $version = (int)str_replace('.', '', $this->getMageVersion());
         $request = [];
+        $processedItems = []; // Array para rastrear elementos procesados
         $quantityMethod = $isQuoteItem ? "getQty" : "getQtyOrdered";
+
         foreach ($items as $item) {
+            $productId = $item->getProductId();
+            $productType = $item->getProductType();
+
+            // Saltar si el producto ya fue procesado
+            if (in_array($productId, $processedItems)) {
+                continue;
+            }
+
             if ($version > 233) {
-                if ($item->getProductType() != 'bundle' && $item->getProductType() != 'configurable') {
+                if ($productType != 'bundle' && $productType != 'configurable') {
                     $price = $item->getPrice();
                     $qty = (int)$item->{$quantityMethod}();
                     $name = $this->removeSpecialCharacter($item->getName());
                     $sku = $this->removeSpecialCharacter($item->getSku());
-                    $productId = $item->getProductId();
-                    $productType = $item->getProductType();
-                    if (! empty($item->getParentItem())) {
+
+                    if (!empty($item->getParentItem())) {
                         $parent = $item->getParentItem();
 
                         if ($parent->getProductType() == 'configurable') {
-                            $price = $item->getParentItem()->getPrice();
-                            $qty = (int)$item->getParentItem()->{$quantityMethod}();
+                            $price = $parent->getPrice();
+                            $qty = (int)$parent->{$quantityMethod}();
                         } elseif ($parent->getProductType() == 'bundle' && $isQuoteItem) {
-                            //If it is a quote item, then qty of item has not been calculated yet
-                            $qty   =  $item->getParentItem()->getQty();
-                            $price = $item->getParentItem()->getPrice();
-                            $name  = $this->removeSpecialCharacter($item->getParentItem()->getName());
-                            $sku   = $this->removeSpecialCharacter($item->getParentItem()->getSku());
-                            $productId = $item->getParentItem()->getProductId();
-                            $productType = $item->getParentItem()->getProductType();
-
-
+                            // Procesa solo el elemento principal del bundle
+                            $qty = $parent->getQty();
+                            $price = $parent->getPrice();
+                            $name = $this->removeSpecialCharacter($parent->getName());
+                            $sku = $this->removeSpecialCharacter($parent->getSku());
+                            $productId = $parent->getProductId();
+                            $productType = $parent->getProductType();
                         }
                     }
 
@@ -529,9 +536,12 @@ class Data extends Util
                         ],
                         'metadata' =>  $metadata
                     ];
+
+                    // Marca el producto como procesado
+                    $processedItems[] = $productId;
                 }
             } else {
-                if ($item->getProductType() != 'bundle' && $item->getPrice() > 0) {
+                if ($productType != 'bundle' && $item->getPrice() > 0) {
                     $request[] = [
                         'name'        => $item->getName(),
                         'sku'         => $item->getSku(),
@@ -539,11 +549,11 @@ class Data extends Util
                         'description' => $this->_escaper->escapeHtml($item->getName() . ' - ' . $item->getSku()),
                         'quantity'    => (int)($item->{$quantityMethod}()),
                         'tags'        => [
-                            $item->getProductType()
+                            $productType
                         ],
                         'metadata' => [
-                            "product_type" => $item->getProductType(),
-                            "product_id" => $item->getProductId()
+                            "product_type" => $productType,
+                            "product_id" => $productId
                         ]
                     ];
                 }
@@ -551,6 +561,7 @@ class Data extends Util
         }
         return $request;
     }
+
 
     /**
      * Get Url webhook or default

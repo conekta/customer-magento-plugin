@@ -1,3 +1,6 @@
+### 5.1.4 - 2024/10/28
+* Fix:
+  - Fix bundle products
 ### 5.1.4 - 2024/07/18
 * Fix:
   - Fix recovery orders when quote has not a valid shipping address
