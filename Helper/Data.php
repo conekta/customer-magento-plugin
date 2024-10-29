@@ -480,33 +480,32 @@ class Data extends Util
     {
         $version = (int)str_replace('.', '', $this->getMageVersion());
         $request = [];
-        $processedItems = []; // Array para rastrear elementos procesados
         $quantityMethod = $isQuoteItem ? "getQty" : "getQtyOrdered";
+        $processedBundleItems = [];
 
         foreach ($items as $item) {
-            $productId = $item->getProductId();
-            $productType = $item->getProductType();
-
-            // Saltar si el producto ya fue procesado
-            if (in_array($productId, $processedItems)) {
-                continue;
-            }
-
             if ($version > 233) {
-                if ($productType != 'bundle' && $productType != 'configurable') {
+                if ($item->getProductType() != 'bundle' && $item->getProductType() != 'configurable') {
                     $price = $item->getPrice();
                     $qty = (int)$item->{$quantityMethod}();
                     $name = $this->removeSpecialCharacter($item->getName());
                     $sku = $this->removeSpecialCharacter($item->getSku());
-
+                    $productId = $item->getProductId();
+                    $productType = $item->getProductType();
                     if (!empty($item->getParentItem())) {
                         $parent = $item->getParentItem();
 
                         if ($parent->getProductType() == 'configurable') {
-                            $price = $parent->getPrice();
-                            $qty = (int)$parent->{$quantityMethod}();
+                            $price = $item->getParentItem()->getPrice();
+                            $qty = (int)$item->getParentItem()->{$quantityMethod}();
                         } elseif ($parent->getProductType() == 'bundle' && $isQuoteItem) {
-                            // Procesa solo el elemento principal del bundle
+                            // Verificar si el bundle product ya ha sido procesado
+                            if (in_array($parent->getId(), $processedBundleItems)) {
+                                continue;
+                            }
+                            $processedBundleItems[] = $parent->getId();
+
+                            // Si es un quote item, entonces la cantidad del item no ha sido calculada aún
                             $qty = $parent->getQty();
                             $price = $parent->getPrice();
                             $name = $this->removeSpecialCharacter($parent->getName());
@@ -536,12 +535,9 @@ class Data extends Util
                         ],
                         'metadata' =>  $metadata
                     ];
-
-                    // Marca el producto como procesado
-                    $processedItems[] = $productId;
                 }
             } else {
-                if ($productType != 'bundle' && $item->getPrice() > 0) {
+                if ($item->getProductType() != 'bundle' && $item->getPrice() > 0) {
                     $request[] = [
                         'name'        => $item->getName(),
                         'sku'         => $item->getSku(),
@@ -549,11 +545,11 @@ class Data extends Util
                         'description' => $this->_escaper->escapeHtml($item->getName() . ' - ' . $item->getSku()),
                         'quantity'    => (int)($item->{$quantityMethod}()),
                         'tags'        => [
-                            $productType
+                            $item->getProductType()
                         ],
                         'metadata' => [
-                            "product_type" => $productType,
-                            "product_id" => $productId
+                            "product_type" => $item->getProductType(),
+                            "product_id" => $item->getProductId()
                         ]
                     ];
                 }
