@@ -481,6 +481,8 @@ class Data extends Util
         $version = (int)str_replace('.', '', $this->getMageVersion());
         $request = [];
         $quantityMethod = $isQuoteItem ? "getQty" : "getQtyOrdered";
+        $processedBundleItems = [];
+
         foreach ($items as $item) {
             if ($version > 233) {
                 if ($item->getProductType() != 'bundle' && $item->getProductType() != 'configurable') {
@@ -490,22 +492,26 @@ class Data extends Util
                     $sku = $this->removeSpecialCharacter($item->getSku());
                     $productId = $item->getProductId();
                     $productType = $item->getProductType();
-                    if (! empty($item->getParentItem())) {
+                    if (!empty($item->getParentItem())) {
                         $parent = $item->getParentItem();
 
                         if ($parent->getProductType() == 'configurable') {
                             $price = $item->getParentItem()->getPrice();
                             $qty = (int)$item->getParentItem()->{$quantityMethod}();
                         } elseif ($parent->getProductType() == 'bundle' && $isQuoteItem) {
-                            //If it is a quote item, then qty of item has not been calculated yet
-                            $qty   =  $item->getParentItem()->getQty();
-                            $price = $item->getParentItem()->getPrice();
-                            $name  = $this->removeSpecialCharacter($item->getParentItem()->getName());
-                            $sku   = $this->removeSpecialCharacter($item->getParentItem()->getSku());
-                            $productId = $item->getParentItem()->getProductId();
-                            $productType = $item->getParentItem()->getProductType();
+                            // Verificar si el bundle product ya ha sido procesado
+                            if (in_array($parent->getId(), $processedBundleItems)) {
+                                continue;
+                            }
+                            $processedBundleItems[] = $parent->getId();
 
-
+                            // Si es un quote item, entonces la cantidad del item no ha sido calculada aún
+                            $qty = $parent->getQty();
+                            $price = $parent->getPrice();
+                            $name = $this->removeSpecialCharacter($parent->getName());
+                            $sku = $this->removeSpecialCharacter($parent->getSku());
+                            $productId = $parent->getProductId();
+                            $productType = $parent->getProductType();
                         }
                     }
 
