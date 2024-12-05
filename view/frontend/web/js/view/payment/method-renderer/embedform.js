@@ -260,6 +260,7 @@ define(
                             self.checkoutId(response.checkout_id);
 
                             if (self.checkoutId()) {
+                                self.renderizeEmbedFormTimes = 0
                                 self.renderizeEmbedForm();
                             } else {
                                 self.isFormLoading(false);
@@ -279,32 +280,42 @@ define(
 
             renderizeEmbedForm: function () {
                 var self = this;
-                document.getElementById("conektaIframeContainer").innerHTML = "";
-                window.ConektaCheckoutComponents.Integration({
-                    targetIFrame: '#conektaIframeContainer',
-                    checkoutRequestId: this.checkoutId(),
-                    publicKey: this.getPublicKey(),
-                    paymentMethods: this.getPaymenMethods(),
-                    options: {
-                        theme: 'default'
-                    },
-                    onCreateTokenSucceeded: function (token) {
+                try {
+                    document.getElementById("conektaIframeContainer").innerHTML = "";
+                    window.ConektaCheckoutComponents.Integration({
+                        targetIFrame: '#conektaIframeContainer',
+                        checkoutRequestId: this.checkoutId(),
+                        publicKey: this.getPublicKey(),
+                        paymentMethods: this.getPaymenMethods(),
+                        options: {
+                            theme: 'default'
+                        },
+                        onCreateTokenSucceeded: function (token) {
 
-                    },
-                    onCreateTokenError: function (error) {
-                        console.error(error);
-                    },
-                    onFinalizePayment: function (event) {
-                        self.iframOrderData(event);
-                        self.beforePlaceOrder();
-                    },
-                    onErrorPayment: function(a) {
-                        self.conektaError("Ocurrió un error al procesar el pago. Por favor, inténtalo de nuevo.");
-                    },
-                });
+                        },
+                        onCreateTokenError: function (error) {
+                            console.error(error);
+                        },
+                        onFinalizePayment: function (event) {
+                            self.iframOrderData(event);
+                            self.beforePlaceOrder();
+                        },
+                        onErrorPayment: function(a) {
+                            self.conektaError("Ocurrió un error al procesar el pago. Por favor, inténtalo de nuevo.");
+                        },
+                    });
 
-                $('#conektaIframeContainer').find('iframe').attr('data-cy', 'the-frame');
-                self.isFormLoading(false);
+                    $('#conektaIframeContainer').find('iframe').attr('data-cy', 'the-frame');
+                    self.isFormLoading(false);
+                } catch {
+                    if(self.renderizeEmbedFormTimes > 4) 
+                        return self.isFormLoading(false);
+
+                    self.renderizeEmbedFormTimes++;
+                    setTimeout(function() { 
+                        self.renderizeEmbedForm();
+                    }, 500);
+                }
             },
 
             getData: function () {
