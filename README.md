@@ -1,6 +1,6 @@
 ![alt tag](https://conekta.com/static/assets/Home/conekta-logo-blue-full.svg)
 
-Magento 2 Plugin v.5.1.7 (Stable)
+Magento 2 Plugin v.5.1.8 (Stable)
 ========================
 
 Installation for Magento 2.3
@@ -13,7 +13,7 @@ composer config repositories.conekta git https://github.com/conekta/customer-mag
 
 2. Add composer dependency
 ```bash
-composer require conekta/conekta_payments 5.1.7
+composer require conekta/conekta_payments 5.1.8
 ```
 
 3. Update Magento
