@@ -68,9 +68,10 @@ class MissingOrders
             $conektaOrder = $event['data']['object'];
             $conektaCustomer = $conektaOrder['customer_info'];
             $metadata = $conektaOrder['metadata'];
-
+            $storeId = $metadata['store'];
             $quoteId = $metadata['quote_id'];
             $quoteCreated = $this->_cartRepository->get($quoteId);
+            $quoteCreated->setStoreId($storeId);
 
             $orderFounded = $this->objectManager->create('Magento\Sales\Model\Order')->load($quoteCreated->getReservedOrderId(), OrderInterface::INCREMENT_ID);
             if ($orderFounded->getId() != null || !empty($orderFounded->getId()) ) {
@@ -90,8 +91,7 @@ class MissingOrders
             $quoteCreated->getPayment()->setAdditionalInformation($additionalInformation);
             $this->saveMissingFieldsQuote($quoteCreated, $conektaOrder);
             $order = $this->quoteManagement->submit($quoteCreated);
-
-
+            $order->setStoreId($storeId);
             $order->save();
 
             $order->addCommentToStatusHistory("Missing Order from conekta ". "<a href='". ConfigProvider::URL_PANEL_PAYMENTS ."/".$conektaOrder["id"]. "' target='_blank'>".$conektaOrder["id"]."</a>")
