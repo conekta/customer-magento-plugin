@@ -68,7 +68,7 @@ class MissingOrders
             $conektaOrder = $event['data']['object'];
             $conektaCustomer = $conektaOrder['customer_info'];
             $metadata = $conektaOrder['metadata'];
-            $storeId = $metadata['store_id'];
+            $storeId = $metadata['store'];
             $quoteId = $metadata['quote_id'];
             $quoteCreated = $this->_cartRepository->get($quoteId);
             $quoteCreated->setStoreId($storeId);

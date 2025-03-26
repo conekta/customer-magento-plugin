@@ -1,4 +1,8 @@
-### 5.16 - 2024/11/04
+### 5.1.8 - 2024/11/04
+* Set store id in missing orders module
+### 5.1.7 - 2024/11/04
+* Fix Magento Infinite Loader
+### 5.1.6 - 2024/11/04
 * create new release
 ### 5.1.5 - 2024/10/28
 * Fix:
