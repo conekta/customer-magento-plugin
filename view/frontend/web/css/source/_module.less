@@ -65,6 +65,55 @@
                     padding: 20px;
                 }
             }
+
+            .conekta-bnpl-info {
+                padding: 15px;
+                border: 1px solid #ddd;
+                border-radius: 5px;
+                margin: 10px 0;
+
+                .conekta-logo {
+                    text-align: center;
+                    margin-bottom: 10px;
+
+                    img {
+                        max-height: 40px;
+                        width: auto;
+                    }
+                }
+
+                .bnpl-description {
+                    margin-bottom: 15px;
+
+                    p {
+                        margin: 5px 0;
+                        color: #666;
+                    }
+                }
+
+                .bnpl-features {
+                    ul {
+                        list-style: none;
+                        padding: 0;
+                        margin: 0;
+
+                        li {
+                            position: relative;
+                            padding-left: 20px;
+                            margin: 5px 0;
+                            color: #333;
+
+                            &:before {
+                                content: "✓";
+                                position: absolute;
+                                left: 0;
+                                color: #28a745;
+                                font-weight: bold;
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         .payment-method-footer {
