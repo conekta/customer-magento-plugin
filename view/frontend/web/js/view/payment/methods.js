@@ -12,6 +12,10 @@ define(
             {
                 type: 'conekta_ef',
                 component: 'Conekta_Payments/js/view/payment/method-renderer/embedform'
+            },
+            {
+                type: 'conekta_bnpl',
+                component: 'Conekta_Payments/js/view/payment/method-renderer/bnpl'
             }
         );
         return Component.extend({});
