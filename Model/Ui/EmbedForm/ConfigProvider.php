@@ -162,6 +162,9 @@ class ConfigProvider implements ConfigProviderInterface
         if ($this->_conektaHelper->isBankTransferEnabled()) {
             $methods[] = 'BankTransfer';
         }
+        if ($this->_conektaHelper->isBnplEnabled()) {
+            $methods[] = 'Bnpl';
+        }
         return $methods;
     }
 }
