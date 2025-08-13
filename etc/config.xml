@@ -95,30 +95,6 @@
                 <paymentInfoKeys>FRAUD_MSG_LIST</paymentInfoKeys>
                 <privateInfoKeys>FRAUD_MSG_LIST</privateInfoKeys>
             </conekta_ef>
-
-            <!-- Conekta BNPL -->
-            <conekta_bnpl>
-                <active>0</active>
-                <title>Conekta - Compra Ahora, Paga Después (BNPL)</title>
-                <group>conekta</group>
-                <model>ConektaPaymentsBnplFacade</model>
-                <sort_order>5</sort_order>
-                <payment_action>authorize</payment_action>
-                <order_status>pending_payment</order_status>
-                <is_offline>1</is_offline>
-                <can_use_checkout>1</can_use_checkout>
-                <can_authorize>1</can_authorize>
-                <can_capture>0</can_capture>
-                <can_refund>0</can_refund>
-                <can_void>0</can_void>
-                <can_cancel>1</can_cancel>
-                <can_edit>1</can_edit>
-                <min_order_total>100</min_order_total>
-                <max_order_total>50000</max_order_total>
-                <debugReplaceKeys>MERCHANT_KEY</debugReplaceKeys>
-                <paymentInfoKeys>FRAUD_MSG_LIST</paymentInfoKeys>
-                <privateInfoKeys>FRAUD_MSG_LIST</privateInfoKeys>
-            </conekta_bnpl>
         </payment>
         <conekta>
             <global>

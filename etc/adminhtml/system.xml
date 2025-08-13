@@ -291,65 +291,6 @@
                     </field>
                 </group>
                 <!-- // Conekta Bank Transfer // -->
-
-                <!-- Conekta BNPL -->
-                <group id="conekta_bnpl" translate="label" type="text" sortOrder="5" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Buy Now Pay Later (BNPL)</label>
-                    <field id="active" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="0">
-                        <label>Enabled</label>
-                        <config_path>payment/conekta_bnpl/active</config_path>
-                        <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-                    </field>
-                    <field id="title" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
-                        <label>Title</label>
-                        <config_path>payment/conekta_bnpl/title</config_path>
-                        <depends>
-                            <field id="active">1</field>
-                        </depends>
-                    </field>
-                    <field id="min_order_total" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="0">
-                        <label>Minimum Order Total</label>
-                        <depends>
-                            <field id="active">1</field>
-                        </depends>
-                        <validate>validate-number validate-number-range number-range-100-50000</validate>
-                        <comment>The minimum amount is $100 [MXN]</comment>
-                        <config_path>payment/conekta_bnpl/min_order_total</config_path>
-                    </field>
-                    <field id="max_order_total" translate="label" type="text" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="0">
-                        <label>Maximum Order Total</label>
-                        <depends>
-                            <field id="active">1</field>
-                        </depends>
-                        <validate>validate-number validate-number-range number-range-100-50000</validate>
-                        <comment>The maximum amount is $50000 [MXN]</comment>
-                        <config_path>payment/conekta_bnpl/max_order_total</config_path>
-                    </field>
-                    <field id="instructions" translate="label" type="textarea" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
-                        <label>Instructions</label>
-                        <depends>
-                            <field id="active">1</field>
-                        </depends>
-                        <config_path>payment/conekta_bnpl/instructions</config_path>
-                    </field>
-                    <field id="order_status" translate="label" type="select" sortOrder="60" showInDefault="1" showInWebsite="1" showInStore="0">
-                        <label>New Order Status</label>
-                        <source_model>Conekta\Payments\Model\Source\Order\Status\Pendingpayment</source_model>
-                        <depends>
-                            <field id="active">1</field>
-                        </depends>
-                        <config_path>payment/conekta_bnpl/order_status</config_path>
-                    </field>
-                    <field id="sort_order" translate="label" type="text" sortOrder="100" showInDefault="1" showInWebsite="1" showInStore="0">
-                        <label>Sort Order</label>
-                        <depends>
-                            <field id="active">1</field>
-                        </depends>
-                        <frontend_class>validate-number</frontend_class>
-                        <config_path>payment/conekta_bnpl/sort_order</config_path>
-                    </field>
-                </group>
-                <!-- // Conekta BNPL // -->
             </group>
         </section>
     </system>
