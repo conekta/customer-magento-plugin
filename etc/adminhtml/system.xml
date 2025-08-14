@@ -294,10 +294,22 @@
                 <!-- Conekta BNPL -->
                 <group id="conekta_bnpl" translate="label" type="text" sortOrder="6" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>BNPL</label>
+                    <field id="title" translate="label" type="text" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+                        <label>Title</label>
+                        <config_path>payment/conekta_bnpl/title</config_path>
+                    </field>
                     <field id="active" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="0">
                         <label>Enabled</label>
                         <config_path>payment/conekta_bnpl/active</config_path>
                         <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    </field>
+                    <field id="sort_order" translate="label" type="text" sortOrder="100" showInDefault="1" showInWebsite="1" showInStore="0">
+                        <label>Sort Order</label>
+                        <depends>
+                            <field id="active">1</field>
+                        </depends>
+                        <frontend_class>validate-number</frontend_class>
+                        <config_path>payment/conekta_bnpl/sort_order</config_path>
                     </field>
                 </group>
                 <!-- // Conekta BNPL // -->
