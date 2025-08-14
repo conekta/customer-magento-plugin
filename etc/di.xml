@@ -470,4 +470,37 @@
         </arguments>
     </type>
     <!-- ******************************************* Bank Transfer End *********************************************** -->
+    
+    <!-- +++++++++++++++++++++++++++++++++++++++++++++ BNPL +++++++++++++++++++++++++++++++++++++++++++++++++ -->
+    <!-- Payment Method Facade configuration -->
+    <virtualType name="ConektaPaymentsBnplFacade" type="Magento\Payment\Model\Method\Adapter">
+        <arguments>
+            <argument name="code" xsi:type="string">conekta_bnpl</argument>
+            <argument name="formBlockType" xsi:type="string">Magento\Payment\Block\Form</argument>
+            <argument name="infoBlockType" xsi:type="string">Magento\Payment\Block\Info</argument>
+            <argument name="valueHandlerPool" xsi:type="object">ConektaPaymentsBnplValueHandlerPool</argument>
+        </arguments>
+    </virtualType>
+
+    <!-- Configuration reader -->
+    <virtualType name="ConektaPaymentsBnplConfig" type="Magento\Payment\Gateway\Config\Config">
+        <arguments>
+            <argument name="methodCode" xsi:type="string">conekta_bnpl</argument>
+        </arguments>
+    </virtualType>
+
+    <!-- Value handlers infrastructure -->
+    <virtualType name="ConektaPaymentsBnplValueHandlerPool" type="Magento\Payment\Gateway\Config\ValueHandlerPool">
+        <arguments>
+            <argument name="handlers" xsi:type="array">
+                <item name="default" xsi:type="string">ConektaPaymentsBnplConfigValueHandler</item>
+            </argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="ConektaPaymentsBnplConfigValueHandler" type="Magento\Payment\Gateway\Config\ConfigValueHandler">
+        <arguments>
+            <argument name="configInterface" xsi:type="object">ConektaPaymentsBnplConfig</argument>
+        </arguments>
+    </virtualType>
+    <!-- ******************************************* BNPL End *********************************************** -->
 </config>
