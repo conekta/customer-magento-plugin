@@ -291,6 +291,16 @@
                     </field>
                 </group>
                 <!-- // Conekta Bank Transfer // -->
+                <!-- Conekta BNPL -->
+                <group id="conekta_bnpl" translate="label" type="text" sortOrder="6" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>BNPL</label>
+                    <field id="active" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="0">
+                        <label>Enabled</label>
+                        <config_path>payment/conekta_bnpl/active</config_path>
+                        <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    </field>
+                </group>
+                <!-- // Conekta BNPL // -->
             </group>
         </section>
     </system>
