@@ -23,6 +23,7 @@ define(
             defaults: {
                 template: 'Conekta_Payments/payment/base-form',
                 transactionResult: '',
+                redirectAfterPlaceOrder: true,
                 renderProperties: {
                     shippingMethodCode: '',
                     quoteBaseGrandTotal: '',
@@ -362,8 +363,7 @@ define(
             beforePlaceOrder: function () {
                 var self = this;
                 if (this.iframOrderData() !== '') {
-                    self.placeOrder();
-                    return;
+                    return self.placeOrder();
                 }
             },
 
