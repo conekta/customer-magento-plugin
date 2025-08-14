@@ -95,6 +95,7 @@
                 <paymentInfoKeys>FRAUD_MSG_LIST</paymentInfoKeys>
                 <privateInfoKeys>FRAUD_MSG_LIST</privateInfoKeys>
             </conekta_ef>
+            
             <!-- Conekta BNPL -->
             <conekta_bnpl>
                 <active>0</active>

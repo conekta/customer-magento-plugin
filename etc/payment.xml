@@ -18,5 +18,8 @@
         <method name="conekta_ef">
             <allow_multiple_address>0</allow_multiple_address>
         </method>
+        <method name="conekta_bnpl">
+            <allow_multiple_address>0</allow_multiple_address>
+        </method>
     </methods>
 </payment>
