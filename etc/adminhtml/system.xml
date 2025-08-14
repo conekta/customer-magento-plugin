@@ -303,6 +303,14 @@
                         <config_path>payment/conekta_bnpl/active</config_path>
                         <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     </field>
+                    <field id="order_status" translate="label" type="select" sortOrder="60" showInDefault="1" showInWebsite="1" showInStore="0">
+                        <label>New Order Status</label>
+                        <source_model>Conekta\Payments\Model\Source\Order\Status\Pendingpayment</source_model>
+                        <depends>
+                            <field id="active">1</field>
+                        </depends>
+                        <config_path>payment/conekta_bnpl/order_status</config_path>
+                    </field>
                     <field id="sort_order" translate="label" type="text" sortOrder="100" showInDefault="1" showInWebsite="1" showInStore="0">
                         <label>Sort Order</label>
                         <depends>
