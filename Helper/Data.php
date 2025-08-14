@@ -297,6 +297,16 @@ class Data extends Util
     }
 
     /**
+     * Is BNPL enabled
+     *
+     * @return bool
+     */
+    public function isBnplEnabled(): bool
+    {
+        return (boolean)$this->getConfigData('conekta_bnpl', 'active');
+    }
+
+    /**
      * Get expired At
      *
      * @return int

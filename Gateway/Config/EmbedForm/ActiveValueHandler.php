@@ -29,6 +29,7 @@ class ActiveValueHandler implements ValueHandlerInterface
     {
         return $this->_conektaHelper->isCreditCardEnabled()
                || $this->_conektaHelper->isCashEnabled()
-               || $this->_conektaHelper->isBankTransferEnabled();
+               || $this->_conektaHelper->isBankTransferEnabled()
+               || $this->_conektaHelper->isBnplEnabled();
     }
 }

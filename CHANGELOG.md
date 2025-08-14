@@ -1,3 +1,5 @@
+### 5.1.9 - 2025/08/13
+* Support for paying with BNPL has been added to the embedded component
 ### 5.1.8 - 2024/11/04
 * Set store id in missing orders module
 ### 5.1.7 - 2024/11/04

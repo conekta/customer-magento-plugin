@@ -12,7 +12,7 @@ define(
             {
                 type: 'conekta_ef',
                 component: 'Conekta_Payments/js/view/payment/method-renderer/embedform'
-            }
+            },
         );
         return Component.extend({});
     }
