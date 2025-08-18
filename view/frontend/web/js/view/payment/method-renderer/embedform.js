@@ -14,9 +14,10 @@ define(
         'Magento_Checkout/js/model/shipping-save-processor',
         'Magento_Checkout/js/action/set-billing-address',
         'Magento_Checkout/js/model/cart/totals-processor/default',
-        'Magento_Checkout/js/model/cart/cache'
+        'Magento_Checkout/js/model/cart/cache',
+        'Magento_Checkout/js/action/redirect-on-success'
     ],
-    function (ko, CONEKTA, conektaCheckout, Component, $, quote, customer, validator, storage, uiRegistry, domRe, shSP, sBA, totalsProcessor, cartCache) {
+    function (ko, CONEKTA, conektaCheckout, Component, $, quote, customer, validator, storage, uiRegistry, domRe, shSP, sBA, totalsProcessor, cartCache, redirectOnSuccessAction) {
         'use strict';
 
         return Component.extend({
@@ -364,6 +365,14 @@ define(
                 var self = this;
                 if (this.iframOrderData() !== '') {
                     return self.placeOrder();
+                }
+            },
+
+            afterPlaceOrder: function () {
+                var data = (typeof this.iframOrderData === 'function') ? this.iframOrderData() : null;
+                var methodType = data && data.charge && data.charge.payment_method && data.charge.payment_method.type;
+                if (methodType && String(methodType).toLowerCase().indexOf('bnpl') !== -1) {
+                    redirectOnSuccessAction.execute();
                 }
             },
 
