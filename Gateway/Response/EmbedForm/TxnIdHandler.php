@@ -53,6 +53,7 @@ class TxnIdHandler implements HandlerInterface
                 break;
             case ConfigProvider::PAYMENT_METHOD_CASH:
             case ConfigProvider::PAYMENT_METHOD_BANK_TRANSFER:
+            case ConfigProvider::PAYMENT_METHOD_BNPL:
                 $this->handleOffline($payment, $response);
                 break;
         }
