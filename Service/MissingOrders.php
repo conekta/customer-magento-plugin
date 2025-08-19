@@ -156,6 +156,7 @@ class MissingOrders
                     'card_token' =>  null,
                 ];
             case "bank_transfer_payment":
+            case "bnpl_payment":
             case "cash_payment":
                 return [];
         }
@@ -180,6 +181,8 @@ class MissingOrders
                 return ConfigProvider::PAYMENT_METHOD_CASH;
             case "bank_transfer_payment":
                 return ConfigProvider::PAYMENT_METHOD_BANK_TRANSFER;
+            case "bnpl_payment":
+                return ConfigProvider::PAYMENT_METHOD_BNPL;
         }
         return "";
     }
