@@ -298,7 +298,7 @@ define(
                             console.error(error);
                         },
                         onFinalizePayment: function (event) {
-                            console.log('AAAAA', event);
+                            console.log('AAAAA event', event);
                             self.iframOrderData(event);
                             self.beforePlaceOrder();
                         },
@@ -324,6 +324,7 @@ define(
                 var number = this.creditCardNumber().replace(/\D/g, '');
                 if (this.iframOrderData() !== '') {
                     var params = this.iframOrderData();
+                    console.log('AAAAA params', params);
                     var data = {
                         'method': this.getCode(),
                         'additional_data': {
