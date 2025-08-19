@@ -298,6 +298,7 @@ define(
                             console.error(error);
                         },
                         onFinalizePayment: function (event) {
+                            console.log('AAAAA', event);
                             self.iframOrderData(event);
                             self.beforePlaceOrder();
                         },
