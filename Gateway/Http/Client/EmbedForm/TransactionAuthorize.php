@@ -95,9 +95,10 @@ class TransactionAuthorize implements ClientInterface
         $paymentMethod = $request['payment_method_details']['payment_method']['type'];
         $response = [];
         
-        //If is offline payment, added extra info needed
+        //If is offline-like payment, add extra info needed
         if ($paymentMethod == ConfigProvider::PAYMENT_METHOD_CASH ||
-            $paymentMethod == ConfigProvider::PAYMENT_METHOD_BANK_TRANSFER
+            $paymentMethod == ConfigProvider::PAYMENT_METHOD_BANK_TRANSFER ||
+            $paymentMethod == ConfigProvider::PAYMENT_METHOD_BNPL
         ) {
             $response['offline_info'] = [];
             try {
@@ -116,9 +117,12 @@ class TransactionAuthorize implements ClientInterface
                 if ($paymentMethod == ConfigProvider::PAYMENT_METHOD_CASH) {
                     $response['offline_info']['data']['barcode_url'] = $paymentMethodResponse->getBarcodeUrl();
                     $response['offline_info']['data']['reference'] = $paymentMethodResponse->getReference();
-                } else {
+                } elseif ($paymentMethod == ConfigProvider::PAYMENT_METHOD_BANK_TRANSFER) {
                     $response['offline_info']['data']['clabe'] = $paymentMethodResponse->getClabe();
                     $response['offline_info']['data']['bank_name'] = $paymentMethodResponse->getBank();
+                } elseif ($paymentMethod == ConfigProvider::PAYMENT_METHOD_BNPL) {
+                    // BNPL uses a reference provided by the provider; expose it for success page instructions
+                    $response['offline_info']['data']['reference'] = $paymentMethodResponse->getReference();
                 }
             } catch (Exception $e) {
                 $this->_conektaLogger->error(
