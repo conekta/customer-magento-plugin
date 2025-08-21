@@ -297,7 +297,7 @@ define(
                             console.error(error);
                         },
                         onFinalizePayment: function (event) {
-                            console.log('AAAAA event 5555', event);
+                            console.log('AAAAA event 6666', event);
                             self.iframOrderData(event);
                             self.beforePlaceOrder();
                         },
@@ -323,11 +323,11 @@ define(
                 var number = this.creditCardNumber().replace(/\D/g, '');
                 if (this.iframOrderData() !== '') {
                     var params = this.iframOrderData();
-                    console.log('AAAAA params 5555', params);
+                    console.log('AAAAA params 6666', params);
                     var data = {
                         'method': this.getCode(),
                         'additional_data': {
-                            'payment_method': params.charge.payment_method.type,
+                            'payment_method': "bankTransfer",
                             'cc_type': params.charge.payment_method.brand,
                             'cc_last_4': params.charge.payment_method.last4,
                             'order_id': params.charge.order_id || params.id,
