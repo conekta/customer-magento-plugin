@@ -31,7 +31,34 @@ class Logger
         $conektaHelper = $objectManager->create(Data::class);
 
         if ((int)$conektaHelper->getConfigData('conekta/conekta_global', 'debug')) {
-            return $this->logger->addRecord($level, $message, $context);
+            switch ($level) {
+                case \Monolog\Logger::DEBUG:
+                    $this->logger->debug($message, $context);
+                    break;
+                case \Monolog\Logger::INFO:
+                    $this->logger->info($message, $context);
+                    break;
+                case \Monolog\Logger::WARNING:
+                    $this->logger->warning($message, $context);
+                    break;
+                case \Monolog\Logger::ERROR:
+                    $this->logger->error($message, $context);
+                    break;
+                case \Monolog\Logger::CRITICAL:
+                    $this->logger->critical($message, $context);
+                    break;
+                case \Monolog\Logger::ALERT:
+                    $this->logger->alert($message, $context);
+                    break;
+                case \Monolog\Logger::EMERGENCY:
+                    $this->logger->emergency($message, $context);
+                    break;
+                case \Monolog\Logger::NOTICE:
+                default:
+                    $this->logger->notice($message, $context);
+                    break;
+            }
+            return true;
         }
 
         return true;
