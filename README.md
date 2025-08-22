@@ -3,7 +3,7 @@
 Magento 2 Plugin v.5.2.0 (Stable)
 ========================
 
-Installation for Magento 2.3
+Installation for Magento 2.4.8-p1
 -----------
 
 1. First add this repository in your composer config
@@ -36,7 +36,7 @@ php bin/magento module:enable conekta_payments
 bin/magento c:f
 ```
 
-Installation for Magento 2.4
+Installation for Magento 2.4 (generic)
 -----------
 
 1. First add this repository in your composer config
@@ -46,7 +46,7 @@ composer config repositories.conekta git https://github.com/conekta/customer-mag
 
 2. Add composer dependency
 ```bash
-composer require conekta/conekta_payments master
+composer require conekta/conekta_payments ^5.2
 ```
 
 3. Update Magento
@@ -112,7 +112,7 @@ bin/magento c:f
 
 Magento Version Compatibility
 -----------------------------
-The plugin has been tested in Magento 2.3 and 2.4 
+The plugin has been tested in Magento 2.4.8-p1, 2.4.7, 2.4.6 
 Support is not guaranteed for untested versions.
 
 

@@ -1,3 +1,16 @@
+### 5.2.0 - 2025/08/18
+Compatibility with Adobe Commerce 2.4.8-p1
+- Support for PHP 8.2, 8.3, and 8.4 in the module.
+- Compatibility adjustments for Monolog 3 (using PSR-3 methods in the internal logger).
+- CSP update: `pay.conekta.com` added to `script-src`, `connect-src`, and `frame-src` for the embedded component.
+- Development constraints updated for PHPUnit 10.
+- No database schema changes required.
+
+Upgrade notes
+- Requires running `bin/magento setup:upgrade` after updating the package.
+- Ensure you have PHP 8.3+ before upgrading to Adobe Commerce 2.4.8-p1, per the official 2.4.8 release notes.
+- If you use custom CSP policies, include `pay.conekta.com` in `script-src`, `connect-src`, and `frame-src`.
+
 ### 5.1.9 - 2025/08/13
 * Support for paying with BNPL has been added to the embedded component
 ### 5.1.8 - 2024/11/04
