@@ -36,7 +36,7 @@ php bin/magento module:enable conekta_payments
 bin/magento c:f
 ```
 
-Installation for Magento 2.4 (genérico)
+Installation for Magento 2.4 (generic)
 -----------
 
 1. First add this repository in your composer config
