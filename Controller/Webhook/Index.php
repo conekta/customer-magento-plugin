@@ -130,7 +130,9 @@ class Index extends Action implements CsrfAwareActionInterface
                 case self::EVENT_WEBHOOK_PING:
                     break;
                 case self::EVENT_ORDER_PENDING_PAYMENT:
-                    if (isset($body['data']['object']["charges"]) && !$this->isCardPayment($body['data']['object']["charges"]["data"][0]["payment_method"]["object"])){
+                    $chargesData = $body['data']['object']['charges']['data'] ?? [];
+                    $paymentMethodObject = $chargesData[0]['payment_method']['object'] ?? null;
+                    if ($paymentMethodObject === null || !$this->isCardPayment($paymentMethodObject)){
                         $this->missingOrder->recover_order($body);
                     }
                     $order = $this->webhookRepository->findByMetadataOrderId($body);
@@ -143,7 +145,9 @@ class Index extends Action implements CsrfAwareActionInterface
                     }
                     break;
                 case self::EVENT_ORDER_PAID:
-                    if ($this->isCardPayment($body['data']['object']["charges"]["data"][0]["payment_method"]["object"])){
+                    $chargesData = $body['data']['object']['charges']['data'] ?? [];
+                    $paymentMethodObject = $chargesData[0]['payment_method']['object'] ?? null;
+                    if ($paymentMethodObject !== null && $this->isCardPayment($paymentMethodObject)){
                         $this->missingOrder->recover_order($body);
                     }
                     $this->webhookRepository->payOrder($body);

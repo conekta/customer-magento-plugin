@@ -66,7 +66,7 @@ class MissingOrders
                 return;
             }
             $conektaOrder = $event['data']['object'];
-            $conektaCustomer = $conektaOrder['customer_info'];
+            $conektaCustomer = $conektaOrder['customer_info'] ?? [];
             $metadata = $conektaOrder['metadata'];
             $storeId = $metadata['store'];
             $quoteId = $metadata['quote_id'];
@@ -78,16 +78,22 @@ class MissingOrders
                 $this->_conektaLogger->info('order is ready', ['order' => $orderFounded, 'is_set', isset($orderFounded)]);
                 return;
             }
-            $quoteCreated->setCustomerEmail($conektaCustomer['email']);
+            $quoteCreated->setCustomerEmail($conektaCustomer['email'] ?? $quoteCreated->getCustomerEmail());
             $quoteCreated->getPayment()->importData(['method' => ConfigProvider::CODE]);
+            $chargeData = $conektaOrder['charges']['data'][0] ?? null;
+            $paymentMethodObject = $chargeData['payment_method']['object'] ?? 'bnpl';
+            $txnId = $chargeData['id'] ?? null;
+
             $additionalInformation = [
                 'order_id' =>  $conektaOrder["id"],
-                'txn_id' =>  $conektaOrder["charges"]["data"][0]["id"],
                 'quote_id'=> $quoteCreated->getId(),
-                'payment_method' => $this->getPaymentMethod($conektaOrder["charges"]["data"][0]["payment_method"]["object"]),
-                'conekta_customer_id' => $conektaCustomer["customer_id"]
+                'payment_method' => $this->getPaymentMethod($paymentMethodObject),
+                'conekta_customer_id' => $conektaCustomer["customer_id"] ?? null
             ];
-            $additionalInformation= array_merge($additionalInformation, $this->getAdditionalInformation($conektaOrder));
+            if ($txnId) {
+                $additionalInformation['txn_id'] = $txnId;
+            }
+            $additionalInformation= array_merge($additionalInformation, $this->getAdditionalInformation($chargeData));
             $quoteCreated->getPayment()->setAdditionalInformation($additionalInformation);
             $this->saveMissingFieldsQuote($quoteCreated, $conektaOrder);
             $order = $this->quoteManagement->submit($quoteCreated);
@@ -97,7 +103,9 @@ class MissingOrders
             $order->addCommentToStatusHistory("Missing Order from conekta ". "<a href='". ConfigProvider::URL_PANEL_PAYMENTS ."/".$conektaOrder["id"]. "' target='_blank'>".$conektaOrder["id"]."</a>")
                 ->setIsCustomerNotified(true)
                 ->save();
-            $this->updateConektaReference($conektaOrder["charges"]["data"][0]["id"],  $order->getRealOrderId());
+            if ($txnId) {
+                $this->updateConektaReference($txnId,  $order->getRealOrderId());
+            }
             return ;
 
         }catch (NoSuchEntityException $e){
@@ -111,31 +119,39 @@ class MissingOrders
     }
 
     private function saveMissingFieldsQuote(Quote  $quoteCreated, array $conektaOrder){
-        $shippingNameReceiver = $this->utilHelper->splitName($conektaOrder["shipping_contact"]["receiver"]);
+        $shippingContact = $conektaOrder["shipping_contact"] ?? [];
+        $shippingAddressData = $shippingContact["address"] ?? [];
+        $shippingMetadata = $shippingContact["metadata"] ?? [];
+
+        $shippingNameReceiver = $this->utilHelper->splitName($shippingContact["receiver"] ?? "");
         $shipping_address = [
-            'firstname'    => $shippingNameReceiver["firstname"],
-            'lastname'     => $shippingNameReceiver["lastname"],
-            'street' => [ $conektaOrder["shipping_contact"]["address"]["street1"], $conektaOrder["shipping_contact"]["address"]["street2"] ?? ""],
-            'city' => $conektaOrder["shipping_contact"]["address"]["city"],
-            'country_id' => strtoupper($conektaOrder["fiscal_entity"]["address"]["country"]),
-            'region' => $conektaOrder["shipping_contact"]["address"]["state"],
-            'postcode' => $conektaOrder["shipping_contact"]["address"]["postal_code"],
-            'telephone' =>   $conektaOrder["shipping_contact"]["phone"] ?? "5200000000",
-            'region_id' => $conektaOrder["shipping_contact"]["metadata"]["region_id"],
-            'company'  => $conektaOrder["shipping_contact"]["metadata"]["company"],
+            'firstname'    => $shippingNameReceiver["firstname"] ?? "",
+            'lastname'     => $shippingNameReceiver["lastname"] ?? "",
+            'street' => [ $shippingAddressData["street1"] ?? "", $shippingAddressData["street2"] ?? ""],
+            'city' => $shippingAddressData["city"] ?? "",
+            'country_id' => strtoupper($shippingAddressData["country"] ?? ($conektaOrder["fiscal_entity"]["address"]["country"] ?? "")),
+            'region' => $shippingAddressData["state"] ?? "",
+            'postcode' => $shippingAddressData["postal_code"] ?? "",
+            'telephone' =>   $shippingContact["phone"] ?? "5200000000",
+            'region_id' => $shippingMetadata["region_id"] ?? null,
+            'company'  => $shippingMetadata["company"] ?? "",
         ];
-        $billingAddressName = $this->utilHelper->splitName($conektaOrder["fiscal_entity"]["name"]);
+
+        $fiscalEntity = $conektaOrder["fiscal_entity"] ?? [];
+        $fiscalAddress = $fiscalEntity["address"] ?? [];
+        $fiscalMetadata = $fiscalEntity["metadata"] ?? [];
+        $billingAddressName = $this->utilHelper->splitName($fiscalEntity["name"] ?? "");
         $billing_address = [
-            'firstname'    => $billingAddressName["firstname"],
-            'lastname'     => $billingAddressName["lastname"],
-            'street' => [ $conektaOrder["fiscal_entity"]["address"]["street1"] , $conektaOrder["fiscal_entity"]["address"]["street2"] ?? "" ],
-            'city' => $conektaOrder["fiscal_entity"]["address"]["city"],
-            'country_id' => strtoupper($conektaOrder["fiscal_entity"]["address"]["country"]),
-            'region' => $conektaOrder["fiscal_entity"]["address"]["state"],
-            'postcode' => $conektaOrder["fiscal_entity"]["address"]["postal_code"],
-            'telephone' => $conektaOrder["fiscal_entity"]["phone"] ??  $conektaOrder["shipping_contact"]["phone"] ?? "5200000000",
-            'region_id' =>$conektaOrder["fiscal_entity"]["metadata"]["region_id"],
-            'company'  => $conektaOrder["fiscal_entity"]["metadata"]["company"]
+            'firstname'    => $billingAddressName["firstname"] ?? "",
+            'lastname'     => $billingAddressName["lastname"] ?? "",
+            'street' => [ $fiscalAddress["street1"] ?? "" , $fiscalAddress["street2"] ?? "" ],
+            'city' => $fiscalAddress["city"] ?? "",
+            'country_id' => strtoupper($fiscalAddress["country"] ?? ($shippingAddressData["country"] ?? "")),
+            'region' => $fiscalAddress["state"] ?? "",
+            'postcode' => $fiscalAddress["postal_code"] ?? "",
+            'telephone' => $fiscalEntity["phone"] ??  ($shippingContact["phone"] ?? "5200000000"),
+            'region_id' => $fiscalMetadata["region_id"] ?? null,
+            'company'  => $fiscalMetadata["company"] ?? ""
         ];
 
         //Set Address to quote
@@ -143,16 +159,17 @@ class MissingOrders
 
         $quoteCreated->getShippingAddress()->addData($shipping_address);
     }
-    private function getAdditionalInformation(array $conektaOrder) :array{
-        switch ($conektaOrder["charges"]["data"][0]["payment_method"]["object"]){
+    private function getAdditionalInformation(?array $chargeData) :array{
+        $paymentObject = $chargeData['payment_method']['object'] ?? null;
+        switch ($paymentObject){
             case "card_payment":
                 return [
-                    'cc_type' => $conektaOrder["charges"]["data"][0]["payment_method"]["brand"],
-                    'card_type' => $conektaOrder["charges"]["data"][0]["payment_method"]["type"],
-                    'cc_exp_month' => $conektaOrder["charges"]["data"][0]["payment_method"]["exp_month"],
-                    'cc_exp_year' => $conektaOrder["charges"]["data"][0]["payment_method"]["exp_year"],
+                    'cc_type' => $chargeData["payment_method"]["brand"] ?? null,
+                    'card_type' => $chargeData["payment_method"]["type"] ?? null,
+                    'cc_exp_month' => $chargeData["payment_method"]["exp_month"] ?? null,
+                    'cc_exp_year' => $chargeData["payment_method"]["exp_year"] ?? null,
                     'cc_bin' => null,
-                    'cc_last_4' => $conektaOrder["charges"]["data"][0]["payment_method"]["last4"],
+                    'cc_last_4' => $chargeData["payment_method"]["last4"] ?? null,
                     'card_token' =>  null,
                 ];
             case "bank_transfer_payment":
