@@ -60,7 +60,14 @@ $offlineInfo = $block->getOfflineInfo();
                         <?= $block->escapeHtml(date("Y-m-d", (integer) $offlineInfo["expires_at"])) ?>
                     </td>
                 </tr>
-                <?php } ?>                    
+                <?php } elseif ($block->isBnplPaymentMethod()) { ?>
+                <tr>
+                    <th>Mensaje</th>
+                    <td>
+                        <h2>Gracias por tu compra</h2>
+                    </td>
+                </tr>
+                <?php } ?>                  
             </tbody>
         </table>
     </dd>

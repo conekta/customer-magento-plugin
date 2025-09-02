@@ -110,6 +110,9 @@ class EmbedFormInfo extends Info
             case ConfigProvider::PAYMENT_METHOD_BANK_TRANSFER:
                 $title = 'Transferencia Bancaria';
                 break;
+            case ConfigProvider::PAYMENT_METHOD_BNPL:
+                $title = '(BNPL) Compra ahora, paga después';
+                break;
         }
 
         return $title;
@@ -146,6 +149,17 @@ class EmbedFormInfo extends Info
     public function isBankTransferPaymentMethod(): bool
     {
         return $this->getPaymentMethodType() === ConfigProvider::PAYMENT_METHOD_BANK_TRANSFER;
+    }
+
+    /**
+     * Is BNPL payment method
+     *
+     * @return bool
+     * @throws LocalizedException
+     */
+    public function isBnplPaymentMethod(): bool
+    {
+        return $this->getPaymentMethodType() === ConfigProvider::PAYMENT_METHOD_BNPL;
     }
 
     /**

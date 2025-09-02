@@ -121,8 +121,7 @@ class TransactionAuthorize implements ClientInterface
                     $response['offline_info']['data']['clabe'] = $paymentMethodResponse->getClabe();
                     $response['offline_info']['data']['bank_name'] = $paymentMethodResponse->getBank();
                 } elseif ($paymentMethod == ConfigProvider::PAYMENT_METHOD_BNPL) {
-                    // BNPL uses a reference provided by the provider; expose it for success page instructions
-                    $response['offline_info']['data']['reference'] = $paymentMethodResponse->getReference();
+                    // BNPL does not have a reference
                 }
             } catch (Exception $e) {
                 $this->_conektaLogger->error(
