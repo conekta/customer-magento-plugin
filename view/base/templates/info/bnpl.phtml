@@ -1,0 +1,36 @@
+<?php
+$title = $block->escapeHtml($block->getMethod()->getTitle());
+$bnplData = $block->getDataBnpl();
+?>
+<dl class="payment-method">
+    <dt class="title"><?= /* @noEscape */ $title; ?></dt>
+    <dd style="margin: 0 !important; -webkit-margin-start: 0 !important;">
+        <table class="data-table admin__table-secondary">
+            <tbody>
+                <tr>
+                    <th><strong><?= /* @noEscape */ __('Payment Method:'); ?></strong></th>
+                    <td>
+                        <?= $block->escapeHtml(__('BNPL (Buy Now, Pay Later)')); ?>
+                    </td>
+                </tr>
+                <?php if ($bnplData && isset($bnplData['reference'])): ?>
+                <tr>
+                    <th><strong><?= /* @noEscape */ __('Reference Number:'); ?></strong></th>
+                    <td>
+                        <?= $block->escapeHtml($bnplData['reference']); ?>
+                    </td>
+                </tr>
+                <?php endif; ?>
+                <?php if ($bnplData && isset($bnplData['expires_at'])): ?>
+                <tr>
+                    <th><strong><?= /* @noEscape */ __('Expires at:'); ?></strong></th>
+                    <td>
+                        <?= $block->escapeHtml(date("Y-m-d", (integer) $bnplData["expires_at"])); ?>
+                    </td>
+                </tr>
+                <?php endif; ?>
+            </tbody>
+        </table>
+    </dd>
+</dl>
+<?= $block->getChildHtml(); ?> 

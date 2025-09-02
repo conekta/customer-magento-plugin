@@ -105,6 +105,7 @@
                 <payment_action>authorize</payment_action>
                 <order_status>pending</order_status>
                 <sort_order>4</sort_order>
+                <instructions>Complete el pago utilizando el número de referencia proporcionado. El pago debe realizarse antes de la fecha de vencimiento.</instructions>
                 <can_use_checkout>1</can_use_checkout>
                 <can_authorize>1</can_authorize>
                 <can_capture>1</can_capture>

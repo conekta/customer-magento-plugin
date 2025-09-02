@@ -477,8 +477,9 @@
         <arguments>
             <argument name="code" xsi:type="string">conekta_bnpl</argument>
             <argument name="formBlockType" xsi:type="string">Magento\Payment\Block\Form</argument>
-            <argument name="infoBlockType" xsi:type="string">Magento\Payment\Block\Info</argument>
+            <argument name="infoBlockType" xsi:type="string">Conekta\Payments\Block\Bnpl\BnplInfo</argument>
             <argument name="valueHandlerPool" xsi:type="object">ConektaPaymentsBnplValueHandlerPool</argument>
+            <argument name="commandPool" xsi:type="object">ConektaPaymentsBnplCommandPool</argument>
         </arguments>
     </virtualType>
 
@@ -489,11 +490,64 @@
         </arguments>
     </virtualType>
 
+    <!-- Logger, initialized with ConektaPaymentsBnplConfig -->
+    <virtualType name="ConektaPaymentsBnplLogger" type="Magento\Payment\Model\Method\Logger">
+        <arguments>
+            <argument name="config" xsi:type="object">ConektaPaymentsBnplConfig</argument>
+        </arguments>
+    </virtualType>
+
+    <!-- Commands infrastructure -->
+    <virtualType name="ConektaPaymentsBnplCommandPool" type="Magento\Payment\Gateway\Command\CommandPool">
+        <arguments>
+            <argument name="commands" xsi:type="array">
+                <item name="authorize" xsi:type="string">ConektaPaymentsBnplAuthorizeCommand</item>
+            </argument>
+        </arguments>
+    </virtualType>
+
+    <!-- Authorize command -->
+    <virtualType name="ConektaPaymentsBnplAuthorizeCommand" type="Magento\Payment\Gateway\Command\GatewayCommand">
+        <arguments>
+            <argument name="requestBuilder" xsi:type="object">ConektaPaymentsBnplAuthorizeRequest</argument>
+            <argument name="transferFactory" xsi:type="object">Conekta\Payments\Gateway\Http\TransferFactory</argument>
+            <argument name="client" xsi:type="object">Conekta\Payments\Gateway\Http\Client\Bnpl\TransactionAuthorize</argument>
+            <argument name="handler" xsi:type="object">ConektaPaymentsBnplAuthorizationHandler</argument>
+            <argument name="validator" xsi:type="object">Conekta\Payments\i18n\Validator\CreditCard\ResponseCodeValidator</argument>
+        </arguments>
+    </virtualType>
+
+    <!-- Request builders -->
+    <virtualType name="ConektaPaymentsBnplAuthorizeRequest" type="Magento\Payment\Gateway\Request\BuilderComposite">
+        <arguments>
+            <argument name="builders" xsi:type="array">
+                <item name="customer" xsi:type="string">Conekta\Payments\Gateway\Request\CustomerInfoBuilder</item>
+                <item name="line_items" xsi:type="string">Conekta\Payments\Gateway\Request\LineItemsBuilder</item>
+                <item name="shipping_lines" xsi:type="string">Conekta\Payments\Gateway\Request\ShippingLinesBuilder</item>
+                <item name="discount_lines" xsi:type="string">Conekta\Payments\Gateway\Request\DiscountLinesBuilder</item>
+                <item name="shipping_contact" xsi:type="string">Conekta\Payments\Gateway\Request\ShippingContactBuilder</item>
+                <item name="tax_lines" xsi:type="string">Conekta\Payments\Gateway\Request\TaxLinesBuilder</item>
+                <item name="metadata" xsi:type="string">Conekta\Payments\Gateway\Request\MetadataBuilder</item>
+                <item name="bnpl" xsi:type="string">Conekta\Payments\Gateway\Request\Bnpl\AuthorizeRequest</item>
+            </argument>
+        </arguments>
+    </virtualType>
+
+    <!-- Response handlers -->
+    <virtualType name="ConektaPaymentsBnplAuthorizationHandler" type="Magento\Payment\Gateway\Response\HandlerChain">
+        <arguments>
+            <argument name="handlers" xsi:type="array">
+                <item name="txnid" xsi:type="string">Conekta\Payments\Gateway\Response\Bnpl\TxnIdHandler</item>
+            </argument>
+        </arguments>
+    </virtualType>
+
     <!-- Value handlers infrastructure -->
     <virtualType name="ConektaPaymentsBnplValueHandlerPool" type="Magento\Payment\Gateway\Config\ValueHandlerPool">
         <arguments>
             <argument name="handlers" xsi:type="array">
                 <item name="default" xsi:type="string">ConektaPaymentsBnplConfigValueHandler</item>
+                <item name="payment_action" xsi:type="string">Conekta\Payments\Gateway\Config\Bnpl\PaymentActionValueHandler</item>
             </argument>
         </arguments>
     </virtualType>
@@ -502,5 +556,11 @@
             <argument name="configInterface" xsi:type="object">ConektaPaymentsBnplConfig</argument>
         </arguments>
     </virtualType>
+
+    <type name="Conekta\Payments\Block\Bnpl\BnplInfo">
+        <arguments>
+            <argument name="config" xsi:type="object">ConektaPaymentsBnplConfig</argument>
+        </arguments>
+    </type>
     <!-- ******************************************* BNPL End *********************************************** -->
 </config>
