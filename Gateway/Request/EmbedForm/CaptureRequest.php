@@ -131,6 +131,13 @@ class CaptureRequest implements BuilderInterface
                 $charge['payment_method']['reference'] = $reference;
                 $charge['payment_method']['expires_at'] = $expireAt;
                 break;
+            
+            case ConfigProvider::PAYMENT_METHOD_BNPL:
+                $reference = $payment->getAdditionalInformation('reference');
+                $expireAt = $this->_conektaHelper->getExpiredAt();
+                $charge['payment_method']['reference'] = $reference;
+                $charge['payment_method']['expires_at'] = $expireAt;
+                break;
         }
 
         return $charge;

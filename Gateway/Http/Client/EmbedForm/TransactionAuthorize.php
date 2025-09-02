@@ -83,6 +83,23 @@ class TransactionAuthorize implements ClientInterface
         $this->_conektaLogger->info('HTTP Client TransactionCapture :: placeRequest', $request);
 
         $txnId = $request['txn_id'];
+        $isIframePayment = $request['iframe_payment'] ?? false;
+
+        // If this is an iframe payment, the transaction was already processed by Conekta
+        // We just need to save the order mapping and return the response
+        if ($isIframePayment) {
+            $this->_conektaLogger->info('HTTP Client TransactionCapture :: iframe payment detected, skipping charge creation');
+            
+            $this->conektaSalesOrderFactory
+                ->create()
+                ->setData([
+                    ConektaSalesOrderInterface::CONEKTA_ORDER_ID => $request['order_id'],
+                    ConektaSalesOrderInterface::INCREMENT_ORDER_ID => $request['metadata']['order_id']
+                ])
+                ->save();
+
+            return $this->generateIframeResponse($request);
+        }
 
         $this->conektaSalesOrderFactory
             ->create()
@@ -174,5 +191,63 @@ class TransactionAuthorize implements ClientInterface
         $this->_conektaLogger->info('HTTP Client TransactionCapture :: generateTxnId');
 
         return sha1(random_int(0, 1000));
+    }
+
+    /**
+     * Generate response for iframe payments (already processed by Conekta)
+     *
+     * @param array $request
+     * @return array
+     */
+    private function generateIframeResponse(array $request): array
+    {
+        $this->_conektaLogger->info('HTTP Client TransactionCapture :: generateIframeResponse');
+        
+        $paymentMethod = $request['payment_method_details']['payment_method']['type'];
+        $txnId = $request['txn_id'];
+        
+        $response = $this->generateResponseForCode(
+            [],
+            1,
+            $txnId,
+            $request['order_id']
+        );
+
+        // For offline payments (cash, bank transfer, BNPL), get additional info from Conekta
+        if ($paymentMethod == ConfigProvider::PAYMENT_METHOD_CASH ||
+            $paymentMethod == ConfigProvider::PAYMENT_METHOD_BANK_TRANSFER ||
+            $paymentMethod == ConfigProvider::PAYMENT_METHOD_BNPL
+        ) {
+            try {
+                $conektaOrder = $this->conektaApiClient->getOrderByID($request['order_id']);
+                $charge = $conektaOrder->getCharges()->getData()[0];
+                $paymentMethodResponse = $charge->getPaymentMethod();
+                
+                $response['offline_info'] = [
+                    "type" => $paymentMethodResponse->getType(),
+                    "data" => [
+                        "expires_at" => $paymentMethodResponse->getExpiresAt()
+                    ]
+                ];
+
+                if ($paymentMethod == ConfigProvider::PAYMENT_METHOD_CASH) {
+                    $response['offline_info']['data']['barcode_url'] = $paymentMethodResponse->getBarcodeUrl();
+                    $response['offline_info']['data']['reference'] = $paymentMethodResponse->getReference();
+                } elseif ($paymentMethod == ConfigProvider::PAYMENT_METHOD_BANK_TRANSFER) {
+                    $response['offline_info']['data']['clabe'] = $paymentMethodResponse->getClabe();
+                    $response['offline_info']['data']['bank_name'] = $paymentMethodResponse->getBank();
+                } elseif ($paymentMethod == ConfigProvider::PAYMENT_METHOD_BNPL) {
+                    $response['offline_info']['data']['reference'] = $paymentMethodResponse->getReference();
+                }
+            } catch (Exception $e) {
+                $this->_conektaLogger->error(
+                    'EmbedForm :: HTTP Client TransactionCapture :: cannot get offline info for iframe payment. ',
+                    ['exception' => $e]
+                );
+            }
+        }
+
+        $this->_conektaLogger->info('HTTP Client TransactionCapture :: generateIframeResponse completed', $response);
+        return $response;
     }
 }
