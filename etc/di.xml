@@ -563,4 +563,11 @@
         </arguments>
     </type>
     <!-- ******************************************* BNPL End *********************************************** -->
+    
+    <!-- Plugin for handling iframe payments -->
+    <type name="Magento\Checkout\Model\GuestPaymentInformationManagement">
+        <plugin name="conekta_iframe_payment_plugin" 
+                type="Conekta\Payments\Plugin\GuestPaymentInformationManagementPlugin" 
+                sortOrder="10"/>
+    </type>
 </config>

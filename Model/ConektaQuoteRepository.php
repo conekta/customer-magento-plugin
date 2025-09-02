@@ -48,6 +48,23 @@ class ConektaQuoteRepository implements ConektaQuoteRepositoryInterface
     }
 
     /**
+     * Get by Conekta Order ID
+     *
+     * @param string $conektaOrderId
+     * @return ConektaQuoteInterface
+     * @throws NoSuchEntityException
+     */
+    public function getByConektaOrderId(string $conektaOrderId)
+    {
+        $conektaQuote = $this->conektaQuoteFactory->create();
+        $this->conektaQuoteResource->load($conektaQuote, $conektaOrderId, 'conekta_order_id');
+        if (!$conektaQuote->getId()) {
+            throw new NoSuchEntityException(__('Unable to find conekta quote with Order ID "%1"', $conektaOrderId));
+        }
+        return $conektaQuote;
+    }
+
+    /**
      * Save quote
      *
      * @param ConektaQuoteInterface $conektaQuote

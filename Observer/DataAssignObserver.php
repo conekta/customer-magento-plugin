@@ -78,12 +78,22 @@ class DataAssignObserver extends AbstractDataAssignObserver
         }
 
         $paymentInfo = $this->readPaymentModelArgument($observer);
-        $quote = $this->_checkoutSession->getQuote();
-
-        $paymentInfo->setAdditionalInformation(
-            'quote_id',
-            $quote->getId()
-        );
+        
+        // Handle iframe payments - the quote might not be available in session
+        $isIframePayment = isset($additionalData[self::IFRAME_PAYMENT]) && $additionalData[self::IFRAME_PAYMENT];
+        
+        if (!$isIframePayment) {
+            try {
+                $quote = $this->_checkoutSession->getQuote();
+                $paymentInfo->setAdditionalInformation(
+                    'quote_id',
+                    $quote->getId()
+                );
+            } catch (\Exception $e) {
+                // If we can't get the quote, it might be an iframe payment
+                // Log the error but continue processing
+            }
+        }
 
         foreach ($this->additionalInformationList as $additionalInformationKey) {
             if (isset($additionalData[$additionalInformationKey])) {
