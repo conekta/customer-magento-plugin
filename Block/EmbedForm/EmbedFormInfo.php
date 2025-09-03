@@ -111,7 +111,7 @@ class EmbedFormInfo extends Info
                 $title = 'Transferencia Bancaria';
                 break;
             case ConfigProvider::PAYMENT_METHOD_BNPL:
-                $title = '(BNPL) Compra ahora, paga después';
+                $title = 'BNPL (Compra ahora, paga después)';
                 break;
         }
 
