@@ -71,6 +71,26 @@
                     </tr>
                     <?php
                     break;
+                case "bnpl":
+                    ?>
+                    <tr>
+                        <td>
+                            <strong><?= /* @noEscape */
+                                __('Payment Type:'); ?></strong>
+                            <?= $block->escapeHtml(__('Buy Now Pay Later')); ?>
+                        </td>
+                    </tr>
+                    <?php if (isset($data["data"]["expires_at"]) && !empty($data["data"]["expires_at"])): ?>
+                    <tr>
+                        <td>
+                            <strong><?= /* @noEscape */
+                                __('Expires at:'); ?></strong>
+                            <?= $block->escapeHtml(date("Y-m-d", (integer)$data["data"]["expires_at"])); ?>
+                        </td>
+                    </tr>
+                    <?php endif; ?>
+                    <?php
+                    break;
 
             endswitch; ?>
             </tbody>
