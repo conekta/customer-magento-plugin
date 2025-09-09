@@ -311,6 +311,14 @@
                         </depends>
                         <config_path>payment/conekta_bnpl/order_status</config_path>
                     </field>
+                    <field id="instructions" translate="label" type="textarea" sortOrder="80" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Instructions</label>
+                        <depends>
+                            <field id="active">1</field>
+                        </depends>
+                        <config_path>payment/conekta_bnpl/instructions</config_path>
+                        <comment>Instructions that will be displayed on the checkout success page and in emails.</comment>
+                    </field>
                     <field id="sort_order" translate="label" type="text" sortOrder="100" showInDefault="1" showInWebsite="1" showInStore="0">
                         <label>Sort Order</label>
                         <depends>

@@ -2,17 +2,74 @@
 $title = $block->escapeHtml($block->getMethod()->getTitle());
 $bnplData = $block->getDataBnpl();
 ?>
+
 <dl class="payment-method">
     <dt class="title"><?= /* @noEscape */ $title; ?></dt>
+    <?php if ($bnplData) { ?>
     <dd style="margin: 0 !important; -webkit-margin-start: 0 !important;">
         <table class="data-table admin__table-secondary">
             <tbody>
+                <?php if (isset($bnplData['reference']) && !empty($bnplData['reference'])): ?>
                 <tr>
-                    <th>Hola</th>
-                    <td>Mundo</td>
+                    <th><strong><?= /* @noEscape */ __('Reference Number:'); ?></strong></th>
+                    <td>
+                        <?= $block->escapeHtml($bnplData['reference']); ?>
+                    </td>
                 </tr>
+                <?php endif; ?>
+                
+                <?php if (isset($bnplData['expires_at']) && !empty($bnplData['expires_at'])): ?>
+                <tr>
+                    <th><strong><?= /* @noEscape */ __('Expires at:'); ?></strong></th>
+                    <td>
+                        <?= $block->escapeHtml(date("Y-m-d H:i:s", (integer) $bnplData['expires_at'])); ?>
+                    </td>
+                </tr>
+                <?php endif; ?>
+                
+                <?php if (isset($bnplData['monthly_installments']) && !empty($bnplData['monthly_installments'])): ?>
+                <tr>
+                    <th><strong><?= /* @noEscape */ __('Monthly Installments:'); ?></strong></th>
+                    <td>
+                        <?= $block->escapeHtml($bnplData['monthly_installments']); ?> <?= /* @noEscape */ __('months'); ?>
+                    </td>
+                </tr>
+                <?php endif; ?>
+                
+                <?php if (isset($bnplData['payment_url']) && !empty($bnplData['payment_url'])): ?>
+                <tr>
+                    <th><strong><?= /* @noEscape */ __('Payment Link:'); ?></strong></th>
+                    <td>
+                        <a href="<?= $block->escapeUrl($bnplData['payment_url']); ?>" target="_blank" class="action primary">
+                            <?= /* @noEscape */ __('Complete Payment'); ?>
+                        </a>
+                    </td>
+                </tr>
+                <?php endif; ?>
+                
+                <?php if (isset($bnplData['status']) && !empty($bnplData['status'])): ?>
+                <tr>
+                    <th><strong><?= /* @noEscape */ __('Payment Status:'); ?></strong></th>
+                    <td>
+                        <span class="payment-status status-<?= $block->escapeHtmlAttr(strtolower($bnplData['status'])); ?>">
+                            <?= $block->escapeHtml(ucfirst($bnplData['status'])); ?>
+                        </span>
+                    </td>
+                </tr>
+                <?php endif; ?>
             </tbody>
         </table>
     </dd>
+    <?php } else { ?>
+    <dd style="margin: 0 !important; -webkit-margin-start: 0 !important;">
+        <p><?= /* @noEscape */ __('BNPL payment information will be available after order confirmation.'); ?></p>
+        <?php if ($block->getInstructions()): ?>
+        <div class="payment-instructions">
+            <strong><?= /* @noEscape */ __('Instructions:'); ?></strong>
+            <p><?= $block->escapeHtml($block->getInstructions()); ?></p>
+        </div>
+        <?php endif; ?>
+    </dd>
+    <?php } ?>
 </dl>
 <?= $block->getChildHtml(); ?> 
