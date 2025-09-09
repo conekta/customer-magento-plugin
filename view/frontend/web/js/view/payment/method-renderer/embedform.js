@@ -297,6 +297,7 @@ define(
                             console.error(error);
                         },
                         onFinalizePayment: function (event) {
+                            console.log('AAAAA event 77777', event);
                             self.iframOrderData(event);
                             self.beforePlaceOrder();
                         },
