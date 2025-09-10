@@ -108,6 +108,7 @@ class Index extends Action implements CsrfAwareActionInterface
      */
     public function execute()
     {
+        sleep(25);
         $response = Response::STATUS_CODE_200;
         $resultRaw = $this->resultRawFactory->create();
 
@@ -152,8 +153,6 @@ class Index extends Action implements CsrfAwareActionInterface
                             $this->_conektaLogger->info('BNPL order not found, attempting recovery');
                         }
                         
-                        // Si no se encuentra la orden, intentar recuperarla con delay
-                        sleep(5);
                         try {
                             $this->missingOrder->recover_order($body);
                             $this->_conektaLogger->info('BNPL order recovery attempted');
@@ -211,10 +210,6 @@ class Index extends Action implements CsrfAwareActionInterface
                     // Manejo especial para pagos BNPL expirados/cancelados
                     if ($this->isBnplPayment($paymentMethodObject)) {
                         $this->_conektaLogger->info('BNPL payment expiration/cancellation detected');
-                        
-                        // Para BNPL, agregar delay antes de procesar la expiración
-                        // ya que puede ser un estado temporal
-                        sleep(10);
                     }
                     
                     $this->webhookRepository->expireOrder($body);
