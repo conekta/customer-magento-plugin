@@ -133,10 +133,10 @@ class Index extends Action implements CsrfAwareActionInterface
                     $chargesData = $body['data']['object']['charges']['data'] ?? [];
                     $paymentMethodObject = $chargesData[0]['payment_method']['object'] ?? null;
                     
-                    // Add 10 second delay for BNPL payments
+                    // Add 20 second delay for BNPL payments
                     if ($this->isBnplPayment($paymentMethodObject)) {
-                        $this->_conektaLogger->info('BNPL payment detected - adding 10 second delay');
-                        sleep(10);
+                        $this->_conektaLogger->info('BNPL payment detected - adding 20 second delay');
+                        sleep(20);
                     }
                     
                     if ($paymentMethodObject === null || !$this->isCardPayment($paymentMethodObject)){
@@ -155,10 +155,10 @@ class Index extends Action implements CsrfAwareActionInterface
                     $chargesData = $body['data']['object']['charges']['data'] ?? [];
                     $paymentMethodObject = $chargesData[0]['payment_method']['object'] ?? null;
                     
-                    // Add 10 second delay for BNPL payments
+                    // Add 20 second delay for BNPL payments
                     if ($this->isBnplPayment($paymentMethodObject)) {
-                        $this->_conektaLogger->info('BNPL payment detected - adding 10 second delay');
-                        sleep(10);
+                        $this->_conektaLogger->info('BNPL payment detected - adding 20 second delay');
+                        sleep(20);
                     }
                     
                     if ($paymentMethodObject !== null && $this->isCardPayment($paymentMethodObject)){
@@ -172,10 +172,10 @@ class Index extends Action implements CsrfAwareActionInterface
                     $chargesData = $body['data']['object']['charges']['data'] ?? [];
                     $paymentMethodObject = $chargesData[0]['payment_method']['object'] ?? null;
                     
-                    // Add 10 second delay for BNPL payments
+                    // Add 20 second delay for BNPL payments
                     if ($this->isBnplPayment($paymentMethodObject)) {
-                        $this->_conektaLogger->info('BNPL payment detected - adding 10 second delay');
-                        sleep(10);
+                        $this->_conektaLogger->info('BNPL payment detected - adding 20 second delay');
+                        sleep(20);
                     }
                     
                     $this->webhookRepository->expireOrder($body);
