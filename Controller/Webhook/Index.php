@@ -122,6 +122,12 @@ class Index extends Action implements CsrfAwareActionInterface
                 return $this->sendJsonResponse($errorResponse, Response::STATUS_CODE_400);
             }
 
+            $chargesData = $body['data']['object']['charges']['data'] ?? [];
+            $paymentMethodObject = $chargesData[0]['payment_method']['object'] ?? null;
+
+            if ($this->isBnplPayment($paymentMethodObject)) {
+                sleep(20);
+            }
 
             $event = $body['type'];
 
@@ -131,9 +137,6 @@ class Index extends Action implements CsrfAwareActionInterface
                 case self::EVENT_WEBHOOK_PING:
                     break;
                 case self::EVENT_ORDER_PENDING_PAYMENT:
-                    $chargesData = $body['data']['object']['charges']['data'] ?? [];
-                    $paymentMethodObject = $chargesData[0]['payment_method']['object'] ?? null;
-                    
                     if ($paymentMethodObject === null || !$this->isCardPayment($paymentMethodObject)){
                         $this->missingOrder->recover_order($body);
                     }
@@ -153,7 +156,6 @@ class Index extends Action implements CsrfAwareActionInterface
                     // Add 25 second delay only for BNPL payments when order is paid
                     if ($this->isBnplPayment($paymentMethodObject)) {
                         $this->_conektaLogger->info('BNPL payment detected - adding 25 second delay for paid order');
-                        sleep(25);
                     }
                     
                     if ($paymentMethodObject !== null && $this->isCardPayment($paymentMethodObject)){
