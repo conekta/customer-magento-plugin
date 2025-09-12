@@ -108,7 +108,6 @@ class Index extends Action implements CsrfAwareActionInterface
      */
     public function execute()
     {
-        sleep(25);
         $response = Response::STATUS_CODE_200;
         $resultRaw = $this->resultRawFactory->create();
 
@@ -123,6 +122,14 @@ class Index extends Action implements CsrfAwareActionInterface
                 return $this->sendJsonResponse($errorResponse, Response::STATUS_CODE_400);
             }
 
+            // Check if this is a BNPL payment and add delay at the beginning
+            $chargesData = $body['data']['object']['charges']['data'] ?? [];
+            $paymentMethodObject = $chargesData[0]['payment_method']['object'] ?? null;
+            if ($this->isBnplPayment($paymentMethodObject)) {
+                $this->_conektaLogger->info('BNPL payment detected - adding 25 second delay at start');
+                sleep(25);
+            }
+
             $event = $body['type'];
 
             $this->_conektaLogger->info('Controller Index :: execute body json ', ['event' => $event]);
@@ -134,35 +141,6 @@ class Index extends Action implements CsrfAwareActionInterface
                     $chargesData = $body['data']['object']['charges']['data'] ?? [];
                     $paymentMethodObject = $chargesData[0]['payment_method']['object'] ?? null;
                     
-                    // Manejo especial para pagos BNPL
-                    if ($this->isBnplPayment($paymentMethodObject)) {
-                        $this->_conektaLogger->info('BNPL payment detected - handling pending state');
-                        
-                        // Intentar encontrar la orden primero
-                        try {
-                            $order = $this->webhookRepository->findByMetadataOrderId($body);
-                            if ($order->getId()) {
-                                // Actualizar estado con información específica para BNPL
-                                $order->addCommentToStatusHistory("BNPL payment initiated - awaiting completion")
-                                    ->setIsCustomerNotified(false);
-                                $order->save();
-                                $this->_conektaLogger->info('BNPL order found and updated', ['order_id' => $order->getId()]);
-                                break;
-                            }
-                        } catch (EntityNotFoundException $e) {
-                            $this->_conektaLogger->info('BNPL order not found, attempting recovery');
-                        }
-                        
-                        try {
-                            $this->missingOrder->recover_order($body);
-                            $this->_conektaLogger->info('BNPL order recovery attempted');
-                        } catch (Exception $e) {
-                            $this->_conektaLogger->error('Failed to recover BNPL order: ' . $e->getMessage());
-                        }
-                        break;
-                    }
-                    
-                    // Lógica original para otros métodos de pago
                     if ($paymentMethodObject === null || !$this->isCardPayment($paymentMethodObject)){
                         $this->missingOrder->recover_order($body);
                     }
@@ -179,23 +157,6 @@ class Index extends Action implements CsrfAwareActionInterface
                     $chargesData = $body['data']['object']['charges']['data'] ?? [];
                     $paymentMethodObject = $chargesData[0]['payment_method']['object'] ?? null;
                     
-                    // Manejo especial para pagos BNPL completados
-                    if ($this->isBnplPayment($paymentMethodObject)) {
-                        $this->_conektaLogger->info('BNPL payment completion detected');
-                        
-                        // Verificar que el pago esté realmente completado
-                        $charge = $body['data']['object'];
-                        if (!isset($charge['payment_status']) || $charge['payment_status'] !== "paid") {
-                            $this->_conektaLogger->warning('BNPL payment not fully completed yet', [
-                                'payment_status' => $charge['payment_status'] ?? 'unknown'
-                            ]);
-                            // Devolver éxito pero no procesar el pago aún
-                            return $resultRaw->setHttpResponseCode($response);
-                        }
-                        
-                        $this->_conektaLogger->info('BNPL payment confirmed as paid, processing order');
-                    }
-                    
                     if ($paymentMethodObject !== null && $this->isCardPayment($paymentMethodObject)){
                         $this->missingOrder->recover_order($body);
                     }
@@ -204,14 +165,6 @@ class Index extends Action implements CsrfAwareActionInterface
                 
                 case self::EVENT_ORDER_EXPIRED:
                 case self::EVENT_ORDER_CANCELED:
-                    $chargesData = $body['data']['object']['charges']['data'] ?? [];
-                    $paymentMethodObject = $chargesData[0]['payment_method']['object'] ?? null;
-                    
-                    // Manejo especial para pagos BNPL expirados/cancelados
-                    if ($this->isBnplPayment($paymentMethodObject)) {
-                        $this->_conektaLogger->info('BNPL payment expiration/cancellation detected');
-                    }
-                    
                     $this->webhookRepository->expireOrder($body);
                     break;
             }
