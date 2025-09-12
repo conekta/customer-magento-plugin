@@ -122,13 +122,6 @@ class Index extends Action implements CsrfAwareActionInterface
                 return $this->sendJsonResponse($errorResponse, Response::STATUS_CODE_400);
             }
 
-            // Check if this is a BNPL payment and add delay at the beginning
-            $chargesData = $body['data']['object']['charges']['data'] ?? [];
-            $paymentMethodObject = $chargesData[0]['payment_method']['object'] ?? null;
-            if ($this->isBnplPayment($paymentMethodObject)) {
-                $this->_conektaLogger->info('BNPL payment detected - adding 25 second delay at start');
-                sleep(25);
-            }
 
             $event = $body['type'];
 
@@ -156,6 +149,12 @@ class Index extends Action implements CsrfAwareActionInterface
                 case self::EVENT_ORDER_PAID:
                     $chargesData = $body['data']['object']['charges']['data'] ?? [];
                     $paymentMethodObject = $chargesData[0]['payment_method']['object'] ?? null;
+                    
+                    // Add 25 second delay only for BNPL payments when order is paid
+                    if ($this->isBnplPayment($paymentMethodObject)) {
+                        $this->_conektaLogger->info('BNPL payment detected - adding 25 second delay for paid order');
+                        sleep(25);
+                    }
                     
                     if ($paymentMethodObject !== null && $this->isCardPayment($paymentMethodObject)){
                         $this->missingOrder->recover_order($body);
