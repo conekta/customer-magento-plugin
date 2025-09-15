@@ -81,7 +81,7 @@ class MissingOrders
             $quoteCreated->setCustomerEmail($conektaCustomer['email'] ?? $quoteCreated->getCustomerEmail());
             $quoteCreated->getPayment()->importData(['method' => ConfigProvider::CODE]);
             $chargeData = $conektaOrder['charges']['data'][0] ?? null;
-            $paymentMethodObject = $chargeData['payment_method']['object'] ?? 'bnpl';
+            $paymentMethodObject = $chargeData['payment_method']['object'] ?? 'null';
             $txnId = $chargeData['id'] ?? null;
 
             $additionalInformation = [

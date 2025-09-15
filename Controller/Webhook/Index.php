@@ -157,11 +157,6 @@ class Index extends Action implements CsrfAwareActionInterface
                     $chargesData = $body['data']['object']['charges']['data'] ?? [];
                     $paymentMethodObject = $chargesData[0]['payment_method']['object'] ?? null;
                     
-                    // Add 25 second delay only for BNPL payments when order is paid
-                    if ($this->isBnplPayment($paymentMethodObject)) {
-                        $this->_conektaLogger->info('BNPL payment detected - adding 25 second delay for paid order');
-                    }
-                    
                     if ($paymentMethodObject !== null && $this->isCardPayment($paymentMethodObject)){
                         $this->missingOrder->recover_order($body);
                     }
