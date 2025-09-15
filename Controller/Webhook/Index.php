@@ -113,7 +113,15 @@ class Index extends Action implements CsrfAwareActionInterface
 
         try {
             $body = $this->helper->jsonDecode($this->getRequest()->getContent());
-
+            
+            if ($body && isset($body['data']['object']['charges']['data'][0]['payment_method']['object'])) {
+                $paymentMethodObject = $body['data']['object']['charges']['data'][0]['payment_method']['object'];
+                if ($this->isBnplPayment($paymentMethodObject)) {
+                    $this->_conektaLogger->info('BNPL payment detected - adding 25 second delay at start of execute');
+                    sleep(25);
+                }
+            }
+            
             if (!$body || $this->getRequest()->getMethod() !== 'POST') {
                 $errorResponse = [
                     'error' => 'Invalid request data',
@@ -124,10 +132,6 @@ class Index extends Action implements CsrfAwareActionInterface
 
             $chargesData = $body['data']['object']['charges']['data'] ?? [];
             $paymentMethodObject = $chargesData[0]['payment_method']['object'] ?? null;
-
-            if ($this->isBnplPayment($paymentMethodObject)) {
-                sleep(20);
-            }
 
             $event = $body['type'];
 
