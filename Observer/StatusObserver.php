@@ -27,7 +27,7 @@ class StatusObserver implements ObserverInterface
 
         $paymentMethodConekta = $order->getPayment()->getAdditionalInformation('payment_method');
         $this->_logger->info("execute paymentMethodConekta",["paymentMethodConekta"=> $paymentMethodConekta]);
-        if (!in_array($paymentMethodConekta, [ConfigProvider::PAYMENT_METHOD_CASH,ConfigProvider::PAYMENT_METHOD_BANK_TRANSFER])) {
+        if (!in_array($paymentMethodConekta, [ConfigProvider::PAYMENT_METHOD_CASH,ConfigProvider::PAYMENT_METHOD_BANK_TRANSFER,ConfigProvider::PAYMENT_METHOD_BNPL])) {
             return;
         }
 

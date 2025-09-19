@@ -113,7 +113,15 @@ class Index extends Action implements CsrfAwareActionInterface
 
         try {
             $body = $this->helper->jsonDecode($this->getRequest()->getContent());
-
+            
+            if ($body && isset($body['data']['object']['charges']['data'][0]['payment_method']['object'])) {
+                $paymentMethodObject = $body['data']['object']['charges']['data'][0]['payment_method']['object'];
+                if ($this->isBnplPayment($paymentMethodObject)) {
+                    $this->_conektaLogger->info('BNPL payment detected - adding 25 second delay at start of execute');
+                    sleep(25);
+                }
+            }
+            
             if (!$body || $this->getRequest()->getMethod() !== 'POST') {
                 $errorResponse = [
                     'error' => 'Invalid request data',
@@ -121,6 +129,9 @@ class Index extends Action implements CsrfAwareActionInterface
                 ];
                 return $this->sendJsonResponse($errorResponse, Response::STATUS_CODE_400);
             }
+
+            $chargesData = $body['data']['object']['charges']['data'] ?? [];
+            $paymentMethodObject = $chargesData[0]['payment_method']['object'] ?? null;
 
             $event = $body['type'];
 
@@ -130,7 +141,7 @@ class Index extends Action implements CsrfAwareActionInterface
                 case self::EVENT_WEBHOOK_PING:
                     break;
                 case self::EVENT_ORDER_PENDING_PAYMENT:
-                    if (isset($body['data']['object']["charges"]) && !$this->isCardPayment($body['data']['object']["charges"]["data"][0]["payment_method"]["object"])){
+                    if ($paymentMethodObject === null || !$this->isCardPayment($paymentMethodObject)){
                         $this->missingOrder->recover_order($body);
                     }
                     $order = $this->webhookRepository->findByMetadataOrderId($body);
@@ -143,7 +154,10 @@ class Index extends Action implements CsrfAwareActionInterface
                     }
                     break;
                 case self::EVENT_ORDER_PAID:
-                    if ($this->isCardPayment($body['data']['object']["charges"]["data"][0]["payment_method"]["object"])){
+                    $chargesData = $body['data']['object']['charges']['data'] ?? [];
+                    $paymentMethodObject = $chargesData[0]['payment_method']['object'] ?? null;
+                    
+                    if ($paymentMethodObject !== null && $this->isCardPayment($paymentMethodObject)){
                         $this->missingOrder->recover_order($body);
                     }
                     $this->webhookRepository->payOrder($body);
@@ -185,6 +199,16 @@ class Index extends Action implements CsrfAwareActionInterface
     }
     private function isCardPayment(string $paymentMethod):bool {
         return $paymentMethod == "card_payment";
+    }
+
+    /**
+     * Check if payment method is BNPL
+     *
+     * @param string|null $paymentMethod
+     * @return bool
+     */
+    private function isBnplPayment(?string $paymentMethod): bool {
+        return $paymentMethod === "bnpl_payment";
     }
 
 }

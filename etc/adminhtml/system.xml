@@ -291,6 +291,44 @@
                     </field>
                 </group>
                 <!-- // Conekta Bank Transfer // -->
+                <!-- Conekta BNPL -->
+                <group id="conekta_bnpl" translate="label" type="text" sortOrder="6" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>BNPL</label>
+                    <field id="title" translate="label" type="text" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+                        <label>Title</label>
+                        <config_path>payment/conekta_bnpl/title</config_path>
+                    </field>
+                    <field id="active" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="0">
+                        <label>Enabled</label>
+                        <config_path>payment/conekta_bnpl/active</config_path>
+                        <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    </field>
+                    <field id="order_status" translate="label" type="select" sortOrder="60" showInDefault="1" showInWebsite="1" showInStore="0">
+                        <label>New Order Status</label>
+                        <source_model>Conekta\Payments\Model\Source\Order\Status\Pendingpayment</source_model>
+                        <depends>
+                            <field id="active">1</field>
+                        </depends>
+                        <config_path>payment/conekta_bnpl/order_status</config_path>
+                    </field>
+                    <field id="instructions" translate="label" type="textarea" sortOrder="80" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Instructions</label>
+                        <depends>
+                            <field id="active">1</field>
+                        </depends>
+                        <config_path>payment/conekta_bnpl/instructions</config_path>
+                        <comment>Instructions that will be displayed on the checkout success page and in emails.</comment>
+                    </field>
+                    <field id="sort_order" translate="label" type="text" sortOrder="100" showInDefault="1" showInWebsite="1" showInStore="0">
+                        <label>Sort Order</label>
+                        <depends>
+                            <field id="active">1</field>
+                        </depends>
+                        <frontend_class>validate-number</frontend_class>
+                        <config_path>payment/conekta_bnpl/sort_order</config_path>
+                    </field>
+                </group>
+                <!-- // Conekta BNPL // -->
             </group>
         </section>
     </system>

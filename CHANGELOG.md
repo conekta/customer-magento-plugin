@@ -1,3 +1,9 @@
+### 5.2.1 - 2025/09/19
+Minor version update with improvements
+- Updated plugin version to 5.2.1
+- Updated dependencies and internal configurations
+- General module maintenance
+
 ### 5.2.0 - 2025/08/18
 Compatibility with Adobe Commerce 2.4.8-p1
 - Support for PHP 8.2, 8.3, and 8.4 in the module.

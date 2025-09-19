@@ -6,7 +6,7 @@
 
     if (in_array($block->getMethod(), ["conekta_ef"])):
         $data = $block->getOfflineInfo();
-        if (!empty($data) && isset($data["type"]) && in_array($data["type"], ['oxxo', 'cash', 'spei', 'bankTransfer'])):
+        if (!empty($data) && isset($data["type"]) && in_array($data["type"], ['oxxo', 'cash', 'spei', 'bankTransfer', 'bnpl'])):
         ?>
 
         <h5><?= /* @noEscape */
@@ -71,6 +71,27 @@
                     </tr>
                     <?php
                     break;
+                case "bnpl":
+                    ?>
+                    <tr>
+                        <td>
+                            <strong><?= /* @noEscape */
+                                __('Payment Type:'); ?></strong>
+                            <?= $block->escapeHtml(__('Buy Now Pay Later')); ?>
+                        </td>
+                    </tr>
+                    <?php if (isset($data["data"]["expires_at"]) && !empty($data["data"]["expires_at"])): ?>
+                    <tr>
+                        <td>
+                            <strong><?= /* @noEscape */
+                                __('Expires at:'); ?></strong>
+                            <?= $block->escapeHtml(date("Y-m-d", (integer)$data["data"]["expires_at"])); ?>
+                        </td>
+                    </tr>
+                    <?php endif; ?>
+                    <?php
+                    break;
+
             endswitch; ?>
             </tbody>
         </table>

@@ -328,8 +328,7 @@ define(
                             'payment_method': params.charge.payment_method.type,
                             'cc_type': params.charge.payment_method.brand,
                             'cc_last_4': params.charge.payment_method.last4,
-                            'reference': params.reference,
-                            'order_id': params.charge.order_id,
+                            'order_id': params.charge.order_id || params.id,
                             'txn_id': params.charge.id,
                             'card_type': params.charge.payment_method.card_type,
                             'card_token': $("#" + this.getCode() + "_card_token").val(),
@@ -362,8 +361,7 @@ define(
             beforePlaceOrder: function () {
                 var self = this;
                 if (this.iframOrderData() !== '') {
-                    self.placeOrder();
-                    return;
+                    return self.placeOrder();
                 }
             },
 

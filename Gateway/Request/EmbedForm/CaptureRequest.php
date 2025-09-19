@@ -131,6 +131,8 @@ class CaptureRequest implements BuilderInterface
                 $charge['payment_method']['reference'] = $reference;
                 $charge['payment_method']['expires_at'] = $expireAt;
                 break;
+            case ConfigProvider::PAYMENT_METHOD_BNPL:
+                break;
         }
 
         return $charge;
