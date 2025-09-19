@@ -1,7 +1,6 @@
 ![alt tag](https://conekta.com/static/assets/Home/conekta-logo-blue-full.svg)
 
 Magento 2 Plugin v.5.2.1 (Stable)
-========================
 
 Installation for Magento 2.4.8-p1
 -----------
