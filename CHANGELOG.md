@@ -1,3 +1,10 @@
+### 5.2.2 - 2025/09/24
+PHP 8.4 compatibility fix
+- Fixed nullable parameter declarations in Gateway/Command/GatewayCommand.php for PHP 8.4 compatibility
+- Updated HandlerInterface and ValidatorInterface parameters to use explicit nullable syntax (?Type)
+- Ensures Adobe Commerce Marketplace validation passes successfully
+- No functional changes, maintains backward compatibility with PHP 8.2+ and Magento 2.4.x
+
 ### 5.2.1 - 2025/09/19
 Minor version update with improvements
 - Updated plugin version to 5.2.1
