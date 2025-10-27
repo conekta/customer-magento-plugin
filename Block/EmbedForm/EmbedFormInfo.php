@@ -113,6 +113,9 @@ class EmbedFormInfo extends Info
             case ConfigProvider::PAYMENT_METHOD_BNPL:
                 $title = 'BNPL (Compra ahora, paga después)';
                 break;
+            case ConfigProvider::PAYMENT_METHOD_PAY_BY_BANK:
+                $title = 'Pago Directo';
+                break;
         }
 
         return $title;
@@ -160,6 +163,17 @@ class EmbedFormInfo extends Info
     public function isBnplPaymentMethod(): bool
     {
         return $this->getPaymentMethodType() === ConfigProvider::PAYMENT_METHOD_BNPL;
+    }
+
+    /**
+     * Is Pay By Bank payment method
+     *
+     * @return bool
+     * @throws LocalizedException
+     */
+    public function isPayByBankPaymentMethod(): bool
+    {
+        return $this->getPaymentMethodType() === ConfigProvider::PAYMENT_METHOD_PAY_BY_BANK;
     }
 
     /**
