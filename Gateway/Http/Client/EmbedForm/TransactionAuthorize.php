@@ -98,7 +98,8 @@ class TransactionAuthorize implements ClientInterface
         //If is offline-like payment, add extra info needed
         if ($paymentMethod == ConfigProvider::PAYMENT_METHOD_CASH ||
             $paymentMethod == ConfigProvider::PAYMENT_METHOD_BANK_TRANSFER ||
-            $paymentMethod == ConfigProvider::PAYMENT_METHOD_BNPL
+            $paymentMethod == ConfigProvider::PAYMENT_METHOD_BNPL ||
+            $paymentMethod == ConfigProvider::PAYMENT_METHOD_PAY_BY_BANK
         ) {
             $response['offline_info'] = [];
             try {
@@ -122,6 +123,17 @@ class TransactionAuthorize implements ClientInterface
                     $response['offline_info']['data']['bank_name'] = $paymentMethodResponse->getBank();
                 } elseif ($paymentMethod == ConfigProvider::PAYMENT_METHOD_BNPL) {
                     // BNPL does not have a reference
+                } elseif ($paymentMethod == ConfigProvider::PAYMENT_METHOD_PAY_BY_BANK) {
+                    // Pay By Bank - capturar deep_link y redirect_url
+                    if (method_exists($paymentMethodResponse, 'getDeepLink')) {
+                        $response['offline_info']['data']['deep_link'] = $paymentMethodResponse->getDeepLink();
+                    }
+                    if (method_exists($paymentMethodResponse, 'getRedirectUrl')) {
+                        $response['offline_info']['data']['redirect_url'] = $paymentMethodResponse->getRedirectUrl();
+                    }
+                    if (method_exists($paymentMethodResponse, 'getReference')) {
+                        $response['offline_info']['data']['reference'] = $paymentMethodResponse->getReference();
+                    }
                 }
             } catch (Exception $e) {
                 $this->_conektaLogger->error(
