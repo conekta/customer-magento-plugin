@@ -133,6 +133,12 @@ class CaptureRequest implements BuilderInterface
                 break;
             case ConfigProvider::PAYMENT_METHOD_BNPL:
                 break;
+            case ConfigProvider::PAYMENT_METHOD_PAY_BY_BANK:
+                // Pay By Bank usa expiración en minutos
+                $expirationMinutes = $this->_conektaHelper->getPayByBankExpirationMinutes();
+                $expireAt = time() + ($expirationMinutes * 60);
+                $charge['payment_method']['expires_at'] = $expireAt;
+                break;
         }
 
         return $charge;
