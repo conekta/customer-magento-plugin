@@ -1,0 +1,91 @@
+<?php
+$title = $block->escapeHtml($block->getMethod()->getTitle());
+$payByBankData = $block->getDataPayByBank();
+$isMobile = $block->isMobileDevice();
+?>
+
+<dl class="payment-method">
+    <dt class="title"><?= /* @noEscape */ $title; ?></dt>
+    <?php if ($payByBankData) { ?>
+    <dd style="margin: 0 !important; -webkit-margin-start: 0 !important;">
+        <table class="data-table admin__table-secondary">
+            <tbody>
+                <?php if (isset($payByBankData['reference']) && !empty($payByBankData['reference'])): ?>
+                <tr>
+                    <th><strong><?= /* @noEscape */ __('Reference Number:'); ?></strong></th>
+                    <td>
+                        <?= $block->escapeHtml($payByBankData['reference']); ?>
+                    </td>
+                </tr>
+                <?php endif; ?>
+                
+                <?php if (isset($payByBankData['expires_at']) && !empty($payByBankData['expires_at'])): ?>
+                <tr>
+                    <th><strong><?= /* @noEscape */ __('Expires at:'); ?></strong></th>
+                    <td>
+                        <?= $block->escapeHtml(date("Y-m-d H:i:s", (integer) $payByBankData['expires_at'])); ?>
+                    </td>
+                </tr>
+                <?php endif; ?>
+                
+                <?php 
+                // Determinar qué URL usar basándose en el dispositivo
+                $paymentUrl = null;
+                if ($isMobile && isset($payByBankData['deep_link']) && !empty($payByBankData['deep_link'])): 
+                    $paymentUrl = $payByBankData['deep_link'];
+                elseif (!$isMobile && isset($payByBankData['redirect_url']) && !empty($payByBankData['redirect_url'])): 
+                    $paymentUrl = $payByBankData['redirect_url'];
+                elseif (isset($payByBankData['payment_url']) && !empty($payByBankData['payment_url'])):
+                    // Fallback para compatibilidad
+                    $paymentUrl = $payByBankData['payment_url'];
+                endif;
+                ?>
+                
+                <?php if ($paymentUrl): ?>
+                <tr>
+                    <th><strong><?= /* @noEscape */ __('Payment Link:'); ?></strong></th>
+                    <td>
+                        <a href="<?= $block->escapeUrl($paymentUrl); ?>" target="_blank" class="action primary" rel="noopener noreferrer">
+                            <?= /* @noEscape */ __('Complete Payment'); ?>
+                        </a>
+                        <script type="text/javascript">
+                            // Auto-abrir en nueva pestaña al cargar la página
+                            (function() {
+                                var paymentUrl = '<?= $block->escapeJs($paymentUrl); ?>';
+                                if (paymentUrl && !sessionStorage.getItem('payByBankOpened')) {
+                                    window.open(paymentUrl, '_blank', 'noopener,noreferrer');
+                                    sessionStorage.setItem('payByBankOpened', 'true');
+                                }
+                            })();
+                        </script>
+                    </td>
+                </tr>
+                <?php endif; ?>
+                
+                <?php if (isset($payByBankData['status']) && !empty($payByBankData['status'])): ?>
+                <tr>
+                    <th><strong><?= /* @noEscape */ __('Payment Status:'); ?></strong></th>
+                    <td>
+                        <span class="payment-status status-<?= $block->escapeHtmlAttr(strtolower($payByBankData['status'])); ?>">
+                            <?= $block->escapeHtml(ucfirst($payByBankData['status'])); ?>
+                        </span>
+                    </td>
+                </tr>
+                <?php endif; ?>
+            </tbody>
+        </table>
+    </dd>
+    <?php } else { ?>
+    <dd style="margin: 0 !important; -webkit-margin-start: 0 !important;">
+        <p><?= /* @noEscape */ __('Pay By Bank payment information will be available after order confirmation.'); ?></p>
+        <?php if ($block->getInstructions()): ?>
+        <div class="payment-instructions">
+            <strong><?= /* @noEscape */ __('Instructions:'); ?></strong>
+            <p><?= $block->escapeHtml($block->getInstructions()); ?></p>
+        </div>
+        <?php endif; ?>
+    </dd>
+    <?php } ?>
+</dl>
+<?= $block->getChildHtml(); ?>
+
