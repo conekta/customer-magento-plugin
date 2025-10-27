@@ -6,7 +6,7 @@
 
     if (in_array($block->getMethod(), ["conekta_ef"])):
         $data = $block->getOfflineInfo();
-        if (!empty($data) && isset($data["type"]) && in_array($data["type"], ['oxxo', 'cash', 'spei', 'bankTransfer', 'bnpl'])):
+        if (!empty($data) && isset($data["type"]) && in_array($data["type"], ['oxxo', 'cash', 'spei', 'bankTransfer', 'bnpl', 'pay_by_bank'])):
         ?>
 
         <h5><?= /* @noEscape */
@@ -86,6 +86,55 @@
                             <strong><?= /* @noEscape */
                                 __('Expires at:'); ?></strong>
                             <?= $block->escapeHtml(date("Y-m-d", (integer)$data["data"]["expires_at"])); ?>
+                        </td>
+                    </tr>
+                    <?php endif; ?>
+                    <?php
+                    break;
+                case "pay_by_bank":
+                    ?>
+                    <tr>
+                        <td>
+                            <strong><?= /* @noEscape */
+                                __('Payment Type:'); ?></strong>
+                            <?= $block->escapeHtml(__('Pay By Bank')); ?>
+                        </td>
+                    </tr>
+                    <?php if (isset($data["data"]["expires_at"]) && !empty($data["data"]["expires_at"])): ?>
+                    <tr>
+                        <td>
+                            <strong><?= /* @noEscape */
+                                __('Expires at:'); ?></strong>
+                            <?= $block->escapeHtml(date("Y-m-d H:i:s", (integer)$data["data"]["expires_at"])); ?>
+                        </td>
+                    </tr>
+                    <?php endif; ?>
+                    <?php 
+                    // Detectar si es móvil
+                    $isMobile = preg_match('/Mobile|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i', $_SERVER['HTTP_USER_AGENT'] ?? '');
+                    $paymentUrl = null;
+                    if ($isMobile && isset($data["data"]["deep_link"]) && !empty($data["data"]["deep_link"])): 
+                        $paymentUrl = $data["data"]["deep_link"];
+                    elseif (!$isMobile && isset($data["data"]["redirect_url"]) && !empty($data["data"]["redirect_url"])): 
+                        $paymentUrl = $data["data"]["redirect_url"];
+                    endif;
+                    ?>
+                    <?php if ($paymentUrl): ?>
+                    <tr>
+                        <td>
+                            <a href="<?= $block->escapeUrl($paymentUrl); ?>" target="_blank" class="action primary" rel="noopener noreferrer">
+                                <?= /* @noEscape */ __('Complete Payment'); ?>
+                            </a>
+                            <script type="text/javascript">
+                                // Auto-abrir en nueva pestaña
+                                (function() {
+                                    var paymentUrl = '<?= $block->escapeJs($paymentUrl); ?>';
+                                    if (paymentUrl && !sessionStorage.getItem('payByBankOpened')) {
+                                        window.open(paymentUrl, '_blank', 'noopener,noreferrer');
+                                        sessionStorage.setItem('payByBankOpened', 'true');
+                                    }
+                                })();
+                            </script>
                         </td>
                     </tr>
                     <?php endif; ?>
