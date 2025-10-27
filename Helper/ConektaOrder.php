@@ -273,6 +273,9 @@ class ConektaOrder extends Util
         if ($this->_conektaHelper->isBnplEnabled()) {
             $methods[] = 'bnpl';
         }
+        if ($this->_conektaHelper->isPayByBankEnabled()) {
+            $methods[] = 'pay_by_bank';
+        }
         return $methods;
     }
 
