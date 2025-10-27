@@ -67,6 +67,23 @@ $offlineInfo = $block->getOfflineInfo();
                         <?= $block->escapeHtml(date("Y-m-d", (integer) $offlineInfo["expires_at"])) ?>
                     </td>
                 </tr>
+                <?php } elseif ($block->isPayByBankPaymentMethod()) { ?>
+                <tr>
+                    <th><strong><?= /* @noEscape */ __('Expires at:'); ?></strong></th>
+                    <td>
+                        <?= $block->escapeHtml(date("Y-m-d H:i:s", (integer) $offlineInfo["expires_at"])) ?>
+                    </td>
+                </tr>
+                <?php if (isset($offlineInfo["payment_url"]) || isset($offlineInfo["deep_link"]) || isset($offlineInfo["redirect_url"])): ?>
+                <tr>
+                    <th><strong><?= /* @noEscape */ __('Payment Link:'); ?></strong></th>
+                    <td>
+                        <a href="#" class="action primary" target="_blank" rel="noopener noreferrer">
+                            <?= /* @noEscape */ __('Complete Payment'); ?>
+                        </a>
+                    </td>
+                </tr>
+                <?php endif; ?>
                 <?php } ?>                  
             </tbody>
         </table>
