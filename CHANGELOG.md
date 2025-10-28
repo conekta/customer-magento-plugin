@@ -1,3 +1,5 @@
+### 5.2.3 - 2025/09/24
+- Corrected plugin version number across various files.
 ### 5.2.2 - 2025/09/24
 PHP 8.4 compatibility fix
 - Fixed nullable parameter declarations in Gateway/Command/GatewayCommand.php for PHP 8.4 compatibility
