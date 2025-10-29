@@ -21,7 +21,7 @@ class ConfigProvider implements ConfigProviderInterface
     public const PAYMENT_METHOD_CASH = 'cash';
     public const PAYMENT_METHOD_BANK_TRANSFER = 'bankTransfer';
     public const PAYMENT_METHOD_BNPL = 'bnpl';
-    public const PAYMENT_METHOD_PAY_BY_BANK = 'pay_by_bank';
+    public const PAYMENT_METHOD_PAY_BY_BANK = 'payByBank';
 
     public const URL_PANEL_PAYMENTS = "https://panel.conekta.com/transactions/payments";
     /**

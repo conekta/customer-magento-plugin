@@ -6,7 +6,7 @@
 
     if (in_array($block->getMethod(), ["conekta_ef"])):
         $data = $block->getOfflineInfo();
-        if (!empty($data) && isset($data["type"]) && in_array($data["type"], ['oxxo', 'cash', 'spei', 'bankTransfer', 'bnpl', 'pay_by_bank'])):
+        if (!empty($data) && isset($data["type"]) && in_array($data["type"], ['oxxo', 'cash', 'spei', 'bankTransfer', 'bnpl', 'payByBank'])):
         ?>
 
         <h5><?= /* @noEscape */
@@ -91,7 +91,7 @@
                     <?php endif; ?>
                     <?php
                     break;
-                case "pay_by_bank":
+                case "payByBank":
                     ?>
                     <tr>
                         <td>
