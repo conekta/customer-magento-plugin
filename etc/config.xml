@@ -73,6 +73,48 @@
             </conekta_bank_transfer>
             <!-- // Conekta Bank Transfer // -->
 
+            <!-- Conekta BNPL -->
+            <conekta_bnpl>
+                <active>0</active>
+                <title>Pagos en plazos (BNPL)</title>
+                <model>ConektaPaymentsBnplFacade</model>
+                <payment_action>authorize</payment_action>
+                <order_status>pending_payment</order_status>
+                <group>offline</group>
+                <min_order_total>300</min_order_total>
+                <max_order_total></max_order_total>
+                <is_offline>1</is_offline>
+                <can_use_checkout>1</can_use_checkout>
+                <can_authorize>1</can_authorize>
+                <can_capture>0</can_capture>
+                <can_refund>0</can_refund>
+                <can_void>0</can_void>
+                <can_cancel>1</can_cancel>
+                <can_edit>1</can_edit>
+            </conekta_bnpl>
+            <!-- // Conekta BNPL // -->
+
+            <!-- Conekta Pay by Bank -->
+            <conekta_pay_by_bank>
+                <active>0</active>
+                <title>Pago por Banco (Pay by Bank)</title>
+                <model>ConektaPaymentsPayByBankFacade</model>
+                <payment_action>authorize</payment_action>
+                <order_status>pending_payment</order_status>
+                <group>offline</group>
+                <min_order_total>10</min_order_total>
+                <max_order_total></max_order_total>
+                <is_offline>1</is_offline>
+                <can_use_checkout>1</can_use_checkout>
+                <can_authorize>1</can_authorize>
+                <can_capture>0</can_capture>
+                <can_refund>0</can_refund>
+                <can_void>0</can_void>
+                <can_cancel>1</can_cancel>
+                <can_edit>1</can_edit>
+            </conekta_pay_by_bank>
+            <!-- // Conekta Pay by Bank // -->
+
             <!-- Conekta EMBED FORM -->
             <conekta_ef>
                 <active>1</active>
@@ -95,6 +137,7 @@
                 <paymentInfoKeys>FRAUD_MSG_LIST</paymentInfoKeys>
                 <privateInfoKeys>FRAUD_MSG_LIST</privateInfoKeys>
             </conekta_ef>
+            <!-- // Conekta EMBED FORM // -->
         </payment>
         <conekta>
             <global>
