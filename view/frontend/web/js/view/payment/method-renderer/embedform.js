@@ -298,7 +298,12 @@ define(
                         },
                         onFinalizePayment: function (event) {
                             self.iframOrderData(event);
-                            self.beforePlaceOrder();
+                            if (event.charge && event.charge.payment_method && 
+                                event.charge.payment_method.type === 'payByBank') {
+                                self.handlePayByBankRedirect(event);
+                            } else {
+                                self.beforePlaceOrder();
+                            }
                         },
                         onErrorPayment: function(a) {
                             self.conektaError("Ocurrió un error al procesar el pago. Por favor, inténtalo de nuevo.");
@@ -424,6 +429,29 @@ define(
                     document.getElementById("conektaIframeContainer").innerHTML = `<div style="width: 100%; text-align: center;"><p>La sesión a finalizado por 
                     favor actualice la pagina</p> <button onclick="window.location.reload()" class="button action continue primary">Actualizar</button></body></div>`;
                 }, timeToExpire)
+            },
+
+            handlePayByBankRedirect: function (event) {
+                var self = this;
+                
+                var isMobile = /Mobile|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+                
+                var paymentMethod = event.charge.payment_method;
+                var redirectUrl = null;
+                
+                if (isMobile && paymentMethod.deep_link) {
+                    redirectUrl = paymentMethod.deep_link;
+                } else if (!isMobile && paymentMethod.redirect_url) {
+                    redirectUrl = paymentMethod.redirect_url;
+                }
+                
+                if (redirectUrl) {
+                    sessionStorage.setItem('payByBankOpened', 'true');
+                    
+                    window.open(redirectUrl, '_blank', 'noopener,noreferrer');
+                }
+                
+                self.beforePlaceOrder();
             },
 
             isEmpty: function (obj) {

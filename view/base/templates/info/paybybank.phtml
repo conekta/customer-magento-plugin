@@ -1,7 +1,6 @@
 <?php
 $title = $block->escapeHtml($block->getMethod()->getTitle());
 $payByBankData = $block->getDataPayByBank();
-$isMobile = $block->isMobileDevice();
 ?>
 
 <dl class="payment-method">
@@ -28,39 +27,6 @@ $isMobile = $block->isMobileDevice();
                 </tr>
                 <?php endif; ?>
                 
-                <?php 
-                // Determinar qué URL usar basándose en el dispositivo
-                $paymentUrl = null;
-                if ($isMobile && isset($payByBankData['deep_link']) && !empty($payByBankData['deep_link'])): 
-                    $paymentUrl = $payByBankData['deep_link'];
-                elseif (!$isMobile && isset($payByBankData['redirect_url']) && !empty($payByBankData['redirect_url'])): 
-                    $paymentUrl = $payByBankData['redirect_url'];
-                elseif (isset($payByBankData['payment_url']) && !empty($payByBankData['payment_url'])):
-                    // Fallback para compatibilidad
-                    $paymentUrl = $payByBankData['payment_url'];
-                endif;
-                ?>
-                
-                <?php if ($paymentUrl): ?>
-                <tr>
-                    <th><strong><?= /* @noEscape */ __('Payment Link:'); ?></strong></th>
-                    <td>
-                        <a href="<?= $block->escapeUrl($paymentUrl); ?>" target="_blank" class="action primary" rel="noopener noreferrer">
-                            <?= /* @noEscape */ __('Complete Payment'); ?>
-                        </a>
-                        <script type="text/javascript">
-                            // Auto-abrir en nueva pestaña al cargar la página
-                            (function() {
-                                var paymentUrl = '<?= $block->escapeJs($paymentUrl); ?>';
-                                if (paymentUrl && !sessionStorage.getItem('payByBankOpened')) {
-                                    window.open(paymentUrl, '_blank', 'noopener,noreferrer');
-                                    sessionStorage.setItem('payByBankOpened', 'true');
-                                }
-                            })();
-                        </script>
-                    </td>
-                </tr>
-                <?php endif; ?>
                 
                 <?php if (isset($payByBankData['status']) && !empty($payByBankData['status'])): ?>
                 <tr>

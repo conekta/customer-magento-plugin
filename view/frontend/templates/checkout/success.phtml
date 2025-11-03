@@ -109,35 +109,6 @@
                         </td>
                     </tr>
                     <?php endif; ?>
-                    <?php 
-                    // Detectar si es móvil
-                    $isMobile = preg_match('/Mobile|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i', $_SERVER['HTTP_USER_AGENT'] ?? '');
-                    $paymentUrl = null;
-                    if ($isMobile && isset($data["data"]["deep_link"]) && !empty($data["data"]["deep_link"])): 
-                        $paymentUrl = $data["data"]["deep_link"];
-                    elseif (!$isMobile && isset($data["data"]["redirect_url"]) && !empty($data["data"]["redirect_url"])): 
-                        $paymentUrl = $data["data"]["redirect_url"];
-                    endif;
-                    ?>
-                    <?php if ($paymentUrl): ?>
-                    <tr>
-                        <td>
-                            <a href="<?= $block->escapeUrl($paymentUrl); ?>" target="_blank" class="action primary" rel="noopener noreferrer">
-                                <?= /* @noEscape */ __('Complete Payment'); ?>
-                            </a>
-                            <script type="text/javascript">
-                                // Auto-abrir en nueva pestaña
-                                (function() {
-                                    var paymentUrl = '<?= $block->escapeJs($paymentUrl); ?>';
-                                    if (paymentUrl && !sessionStorage.getItem('payByBankOpened')) {
-                                        window.open(paymentUrl, '_blank', 'noopener,noreferrer');
-                                        sessionStorage.setItem('payByBankOpened', 'true');
-                                    }
-                                })();
-                            </script>
-                        </td>
-                    </tr>
-                    <?php endif; ?>
                     <?php
                     break;
 

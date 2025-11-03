@@ -78,16 +78,5 @@ class PayByBankInfo extends Info
     {
         return $this->getMethod()->getConfigData('instructions') ?? '';
     }
-
-    /**
-     * Check if user is on mobile device
-     *
-     * @return bool
-     */
-    public function isMobileDevice(): bool
-    {
-        $userAgent = $_SERVER['HTTP_USER_AGENT'] ?? '';
-        return preg_match('/Mobile|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i', $userAgent);
-    }
 }
 
