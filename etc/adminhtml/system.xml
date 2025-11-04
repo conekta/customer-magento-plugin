@@ -3,7 +3,7 @@
     <system>
         <section id="payment">
             <group id="conekta" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="0">
-                <comment><![CDATA[<div class="conekta-payment-logo"></div><div class="conekta-payment-text">Conekta Configuration. (v5.2.3) </div>]]></comment>
+                <comment><![CDATA[<div class="conekta-payment-logo"></div><div class="conekta-payment-text">Conekta Configuration. (v5.3.0) </div>]]></comment>
                 <fieldset_css>complex conekta-section</fieldset_css>
                 <frontend_model>Magento\Paypal\Block\Adminhtml\System\Config\Fieldset\Payment</frontend_model>
                 <!--global-->
