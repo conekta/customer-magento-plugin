@@ -324,7 +324,7 @@ class Data extends Util
     public function getPayByBankExpirationMinutes(): int
     {
         $minutes = (int)$this->getConfigData('conekta_pay_by_bank', 'expiration_minutes');
-        return max(10, $minutes ?: 60);
+        return max(10, $minutes ?: 10);
     }
 
     /**
