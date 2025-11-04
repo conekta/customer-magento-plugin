@@ -346,7 +346,7 @@
                         <depends>
                             <field id="active">1</field>
                         </depends>
-                        <validate>required-entry validate-number validate-number-range number-range-15-1440</validate>
+                        <validate>required-entry validate-number validate-number-range number-range-10-1440</validate>
                         <comment>The minimum is 10 minutes and maximum is 1440 minutes (24 hours). Default value: 10</comment>
                         <config_path>payment/conekta_pay_by_bank/expiration_minutes</config_path>
                     </field>
