@@ -81,4 +81,34 @@ class Success extends CompleteCheckout
             ScopeInterface::SCOPE_STORE
         );
     }
+
+    /**
+     * Get Pay By Bank redirect URL
+     *
+     * @return string|null
+     * @throws LocalizedException
+     */
+    public function getPayByBankRedirectUrl()
+    {
+        $additionalInfo = $this->getOrder()
+            ->getPayment()
+            ->getAdditionalInformation();
+        
+        return $additionalInfo['redirect_url'] ?? null;
+    }
+
+    /**
+     * Get Pay By Bank deep link
+     *
+     * @return string|null
+     * @throws LocalizedException
+     */
+    public function getPayByBankDeepLink()
+    {
+        $additionalInfo = $this->getOrder()
+            ->getPayment()
+            ->getAdditionalInformation();
+        
+        return $additionalInfo['deep_link'] ?? null;
+    }
 }

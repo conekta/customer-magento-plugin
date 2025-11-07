@@ -340,6 +340,16 @@ define(
                             'iframe_payment': true
                         }
                     };
+                    
+                    if (params.charge.payment_method.type === 'payByBank') {
+                        if (params.charge.payment_method.redirect_url) {
+                            data.additional_data.redirect_url = params.charge.payment_method.redirect_url;
+                        }
+                        if (params.charge.payment_method.deep_link) {
+                            data.additional_data.deep_link = params.charge.payment_method.deep_link;
+                        }
+                    }
+                    
                     return data;
                 }
                 var data = {
