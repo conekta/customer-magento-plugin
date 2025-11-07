@@ -119,7 +119,7 @@
                                     
                                     if (isMobile && '<?= $block->escapeJs($deepLink); ?>') {
                                         url = '<?= $block->escapeJs($deepLink); ?>';
-                                    } else if ('<?= $block->escapeJs($redirectUrl); ?>') {
+                                    } else if (!isMobile && '<?= $block->escapeJs($redirectUrl); ?>') {
                                         url = '<?= $block->escapeJs($redirectUrl); ?>';
                                     }
                                     
