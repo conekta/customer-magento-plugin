@@ -104,6 +104,7 @@
                 <group>offline</group>
                 <min_order_total>10</min_order_total>
                 <max_order_total></max_order_total>
+                <expiration_minutes>10</expiration_minutes>
                 <is_offline>1</is_offline>
                 <can_use_checkout>1</can_use_checkout>
                 <can_authorize>1</can_authorize>
