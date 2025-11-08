@@ -443,24 +443,8 @@ define(
 
             handlePayByBankRedirect: function (event) {
                 var self = this;
-                
-                var isMobile = /Mobile|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-                
-                var paymentMethod = event.charge.payment_method;
-                var redirectUrl = null;
-                
-                if (isMobile && paymentMethod.deep_link) {
-                    redirectUrl = paymentMethod.deep_link;
-                } else if (!isMobile && paymentMethod.redirect_url) {
-                    redirectUrl = paymentMethod.redirect_url;
-                }
-                
-                if (redirectUrl) {
-                    sessionStorage.setItem('payByBankOpened', 'true');
-                    
-                    window.open(redirectUrl, '_blank', 'noopener,noreferrer');
-                }
-                
+                // No abrimos automáticamente el link aquí
+                // El usuario podrá abrir la app de BBVA desde el botón en el success page
                 self.beforePlaceOrder();
             },
 
