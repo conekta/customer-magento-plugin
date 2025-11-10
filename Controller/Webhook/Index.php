@@ -120,6 +120,11 @@ class Index extends Action implements CsrfAwareActionInterface
                     $this->_conektaLogger->info('BNPL payment detected - adding 25 second delay at start of execute');
                     sleep(25);
                 }
+
+                if ($this->isPayByBankPayment($paymentMethodObject)) {
+                    $this->_conektaLogger->info('Pay By Bank payment detected - adding 25 second delay at start of execute');
+                    sleep(25);
+                }
             }
             
             if (!$body || $this->getRequest()->getMethod() !== 'POST') {
@@ -210,4 +215,15 @@ class Index extends Action implements CsrfAwareActionInterface
     private function isBnplPayment(?string $paymentMethod): bool {
         return $paymentMethod === "bnpl_payment";
     }
+
+    /**
+     * Check if payment method is Pay By Bank
+     *
+     * @param string|null $paymentMethod
+     * @return bool
+     */
+    private function isPayByBankPayment(?string $paymentMethod): bool {
+        return $paymentMethod === "pay_by_bank_payment";
+    }
+
 }
