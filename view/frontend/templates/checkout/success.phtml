@@ -6,7 +6,7 @@
 
     if (in_array($block->getMethod(), ["conekta_ef"])):
         $data = $block->getOfflineInfo();
-        if (!empty($data) && isset($data["type"]) && in_array($data["type"], ['oxxo', 'cash', 'spei', 'bankTransfer', 'bnpl', 'payByBank'])):
+        if (!empty($data) && isset($data["type"]) && in_array($data["type"], ['oxxo', 'cash', 'spei', 'bankTransfer', 'bnpl', 'payByBank', 'pay_by_bank'])):
         ?>
 
         <h5><?= /* @noEscape */
@@ -92,6 +92,7 @@
                     <?php
                     break;
                 case "payByBank":
+                case "pay_by_bank":
                     $redirectUrl = $data["data"]["redirect_url"] ?? null;
                     $deepLink = $data["data"]["deep_link"] ?? null;
                     ?>

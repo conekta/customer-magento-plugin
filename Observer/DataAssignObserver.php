@@ -25,6 +25,8 @@ class DataAssignObserver extends AbstractDataAssignObserver
     public const TXN_ID = 'txn_id';
     public const CARD_TYPE = 'card_type';
     public const REFERENCE = 'reference';
+    public const REDIRECT_URL = 'redirect_url';
+    public const DEEP_LINK = 'deep_link';
     /**
      * @var string[]
      */
@@ -44,6 +46,8 @@ class DataAssignObserver extends AbstractDataAssignObserver
         self::ORDER_ID,
         self::TXN_ID,
         self::REFERENCE,
+        self::REDIRECT_URL,
+        self::DEEP_LINK,
     ];
     /**
      * @var Session
