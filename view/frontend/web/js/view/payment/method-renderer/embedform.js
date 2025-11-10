@@ -298,12 +298,7 @@ define(
                         },
                         onFinalizePayment: function (event) {
                             self.iframOrderData(event);
-                            if (event.charge && event.charge.payment_method && 
-                                event.charge.payment_method.type === 'payByBank') {
-                                self.handlePayByBankRedirect(event);
-                            } else {
-                                self.beforePlaceOrder();
-                            }
+                            self.beforePlaceOrder();
                         },
                         onErrorPayment: function(a) {
                             self.conektaError("Ocurrió un error al procesar el pago. Por favor, inténtalo de nuevo.");
@@ -341,7 +336,7 @@ define(
                         }
                     };
                     
-                    if (params.charge.payment_method.type === 'payByBank') {
+                    if (params.charge.payment_method.type === 'payByBank' || params.charge.payment_method.type === 'pay_by_bank') {
                         if (params.charge.payment_method.redirect_url) {
                             data.additional_data.redirect_url = params.charge.payment_method.redirect_url;
                         }
@@ -439,13 +434,6 @@ define(
                     document.getElementById("conektaIframeContainer").innerHTML = `<div style="width: 100%; text-align: center;"><p>La sesión a finalizado por 
                     favor actualice la pagina</p> <button onclick="window.location.reload()" class="button action continue primary">Actualizar</button></body></div>`;
                 }, timeToExpire)
-            },
-
-            handlePayByBankRedirect: function (event) {
-                var self = this;
-                // No abrimos automáticamente el link aquí
-                // El usuario podrá abrir la app de BBVA desde el botón en el success page
-                self.beforePlaceOrder();
             },
 
             isEmpty: function (obj) {
