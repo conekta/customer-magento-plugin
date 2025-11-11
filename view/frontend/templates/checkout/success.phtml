@@ -141,7 +141,7 @@
                     </tr>
                     <?php if (isset($data["data"]["expires_at"]) && !empty($data["data"]["expires_at"])): ?>
                     <tr>
-                        <td style="text-align: center; padding-top: 15px;">
+                        <td colspan="2" style="text-align: center; padding-top: 15px;">
                             <small style="color: #999;">
                                 <strong><?= /* @noEscape */ __('Expira el:'); ?></strong>
                                 <?= $block->escapeHtml(date("Y-m-d H:i:s", (integer)$data["data"]["expires_at"])); ?>
