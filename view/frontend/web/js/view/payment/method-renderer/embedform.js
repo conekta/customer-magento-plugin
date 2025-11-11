@@ -297,6 +297,7 @@ define(
                             console.error(error);
                         },
                         onFinalizePayment: function (event) {
+                            console.log('onFinalizePayment triggered:', event);
                             self.iframOrderData(event);
                             self.beforePlaceOrder();
                         },
@@ -304,10 +305,17 @@ define(
                             self.conektaError("Ocurrió un error al procesar el pago. Por favor, inténtalo de nuevo.");
                         },
                         onGenerateView: function(event) {
+                            console.log('onGenerateView triggered:', event);
+                            console.log('event.view:', event.view);
                             if (event.view === 'view_waiting_provider_flow') {
+                                console.log('Pay By Bank detected - view_waiting_provider_flow');
+                                console.log('event.charge:', event.charge);
                                 if (event.charge && event.charge.payment_method) {
+                                    console.log('Charge data found, calling iframOrderData and beforePlaceOrder');
                                     self.iframOrderData(event);
                                     self.beforePlaceOrder();
+                                } else {
+                                    console.error('Event charge or payment_method missing:', event);
                                 }
                             }
                         },
@@ -330,6 +338,8 @@ define(
                 var number = this.creditCardNumber().replace(/\D/g, '');
                 if (this.iframOrderData() !== '') {
                     var params = this.iframOrderData();
+                    console.log('getData - params:', params);
+                    console.log('getData - payment_method.type:', params.charge.payment_method.type);
                     var data = {
                         'method': this.getCode(),
                         'additional_data': {
@@ -345,6 +355,7 @@ define(
                     };
                     
                     if (params.charge.payment_method.type === 'payByBank' || params.charge.payment_method.type === 'pay_by_bank') {
+                        console.log('Pay By Bank detected in getData');
                         if (params.charge.payment_method.redirect_url) {
                             data.additional_data.redirect_url = params.charge.payment_method.redirect_url;
                         }
@@ -357,8 +368,10 @@ define(
                         if (!data.additional_data.deep_link && params.deep_link) {
                             data.additional_data.deep_link = params.deep_link;
                         }
+                        console.log('Pay By Bank - Final data.additional_data:', data.additional_data);
                     }
                     
+                    console.log('getData - Returning data:', data);
                     return data;
                 }
                 var data = {
@@ -383,9 +396,14 @@ define(
             },
 
             beforePlaceOrder: function () {
+                console.log('beforePlaceOrder called');
+                console.log('iframOrderData:', this.iframOrderData());
                 var self = this;
                 if (this.iframOrderData() !== '') {
+                    console.log('iframOrderData is not empty, calling placeOrder()');
                     return self.placeOrder();
+                } else {
+                    console.error('iframOrderData is empty!');
                 }
             },
 
