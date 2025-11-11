@@ -303,6 +303,14 @@ define(
                         onErrorPayment: function(a) {
                             self.conektaError("Ocurrió un error al procesar el pago. Por favor, inténtalo de nuevo.");
                         },
+                        onGenerateView: function(event) {
+                            if (event.view === 'view_waiting_provider_flow') {
+                                if (event.charge && event.charge.payment_method) {
+                                    self.iframOrderData(event);
+                                    self.beforePlaceOrder();
+                                }
+                            }
+                        },
                     });
 
                     $('#conektaIframeContainer').find('iframe').attr('data-cy', 'the-frame');
@@ -342,6 +350,12 @@ define(
                         }
                         if (params.charge.payment_method.deep_link) {
                             data.additional_data.deep_link = params.charge.payment_method.deep_link;
+                        }
+                        if (!data.additional_data.redirect_url && params.redirect_url) {
+                            data.additional_data.redirect_url = params.redirect_url;
+                        }
+                        if (!data.additional_data.deep_link && params.deep_link) {
+                            data.additional_data.deep_link = params.deep_link;
                         }
                     }
                     
