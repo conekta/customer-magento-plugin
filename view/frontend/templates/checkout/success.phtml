@@ -6,7 +6,7 @@
 
     if (in_array($block->getMethod(), ["conekta_ef"])):
         $data = $block->getOfflineInfo();
-        if (!empty($data) && isset($data["type"]) && in_array($data["type"], ['oxxo', 'cash', 'spei', 'bankTransfer', 'bnpl'])):
+        if (!empty($data) && isset($data["type"]) && in_array($data["type"], ['oxxo', 'cash', 'spei', 'bankTransfer', 'bnpl', 'pay_by_bank'])):
         ?>
 
         <h5><?= /* @noEscape */
@@ -89,6 +89,53 @@
                         </td>
                     </tr>
                     <?php endif; ?>
+                    <?php
+                    break;
+                case "pay_by_bank":
+                    ?>
+                    <tr>
+                        <td colspan="2">
+                            <h3 style="margin-bottom: 15px;"><?= /* @noEscape */
+                                __('Complete the payment in your BBVA app to finish your purchase'); ?></h3>
+                            <p style="margin-bottom: 10px;"><?= /* @noEscape */
+                                __("Haven't completed it yet?"); ?></p>
+                        </td>
+                    </tr>
+                    <?php if (isset($data["data"]["reference"]) && !empty($data["data"]["reference"])): ?>
+                    <tr>
+                        <td>
+                            <strong><?= /* @noEscape */
+                                __('Reference Number:'); ?></strong>
+                            <span
+                                class="conekta_payment_reference"><?= $block->escapeHtml($data["data"]["reference"]); ?></span>
+                        </td>
+                    </tr>
+                    <?php endif; ?>
+                    <?php if (isset($data["data"]["expires_at"]) && !empty($data["data"]["expires_at"])): ?>
+                    <tr>
+                        <td>
+                            <strong><?= /* @noEscape */
+                                __('Expires on:'); ?></strong>
+                            <?= $block->escapeHtml(date("Y-m-d H:i:s", (integer)$data["data"]["expires_at"])); ?>
+                        </td>
+                    </tr>
+                    <?php endif; ?>
+                    <tr>
+                        <td>
+                            <?php
+                            $isMobile = preg_match('/(android|iphone|ipad|mobile)/i', $_SERVER['HTTP_USER_AGENT'] ?? '');
+                            $openUrl = $isMobile && isset($data["data"]["deep_link"]) ? $data["data"]["deep_link"] : ($data["data"]["redirect_url"] ?? '');
+                            if (!empty($openUrl)):
+                            ?>
+                            <a href="<?= $block->escapeUrl($openUrl); ?>" 
+                               target="_blank" 
+                               class="action primary" 
+                               style="display: inline-block; padding: 10px 20px; background-color: #003d82; color: #fff; text-decoration: none; border-radius: 5px; margin-top: 10px;">
+                                <?= /* @noEscape */ __('Open BBVA app'); ?>
+                            </a>
+                            <?php endif; ?>
+                        </td>
+                    </tr>
                     <?php
                     break;
 
