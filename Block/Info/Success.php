@@ -31,6 +31,11 @@ class Success extends CompleteCheckout
                 'payment/conekta_bnpl/instructions',
                 ScopeInterface::SCOPE_STORE
             );
+        } elseif ($type == 'pay_by_bank') {
+            return $this->_scopeConfig->getValue(
+                'payment/conekta_pay_by_bank/instructions',
+                ScopeInterface::SCOPE_STORE
+            );
         }
     }
 
