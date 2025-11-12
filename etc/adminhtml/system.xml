@@ -303,6 +303,15 @@
                         <config_path>payment/conekta_bnpl/active</config_path>
                         <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     </field>
+                    <field id="show_in_conekta" translate="label" type="select" sortOrder="15" showInDefault="1" showInWebsite="1" showInStore="0">
+                        <label>Show in Conekta Component</label>
+                        <config_path>payment/conekta_bnpl/show_in_conekta</config_path>
+                        <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                        <depends>
+                            <field id="active">1</field>
+                        </depends>
+                        <comment>Enable to show BNPL option in the Conekta payment component.</comment>
+                    </field>
                     <field id="order_status" translate="label" type="select" sortOrder="60" showInDefault="1" showInWebsite="1" showInStore="0">
                         <label>New Order Status</label>
                         <source_model>Conekta\Payments\Model\Source\Order\Status\Pendingpayment</source_model>
@@ -329,6 +338,70 @@
                     </field>
                 </group>
                 <!-- // Conekta BNPL // -->
+
+                <!-- Conekta Pay By Bank -->
+                <group id="conekta_pay_by_bank" translate="label" type="text" sortOrder="7" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Pay By Bank</label>
+                    <field id="title" translate="label" type="text" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+                        <label>Title</label>
+                        <config_path>payment/conekta_pay_by_bank/title</config_path>
+                    </field>
+                    <field id="active" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="0">
+                        <label>Enabled</label>
+                        <config_path>payment/conekta_pay_by_bank/active</config_path>
+                        <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    </field>
+                    <field id="show_in_conekta" translate="label" type="select" sortOrder="15" showInDefault="1" showInWebsite="1" showInStore="0">
+                        <label>Show in Conekta Component</label>
+                        <config_path>payment/conekta_pay_by_bank/show_in_conekta</config_path>
+                        <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                        <depends>
+                            <field id="active">1</field>
+                        </depends>
+                        <comment>Enable to show Pay By Bank option in the Conekta payment component.</comment>
+                    </field>
+                    <field id="min_order_total" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="0">
+                        <label>Minimum Order Total</label>
+                        <depends>
+                            <field id="active">1</field>
+                        </depends>
+                        <validate>validate-number validate-number-range number-range-10-10000000000000000000</validate>
+                        <comment>The minimum amount is $10 [MXN]</comment>
+                        <config_path>payment/conekta_pay_by_bank/min_order_total</config_path>
+                    </field>
+                    <field id="max_order_total" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="0">
+                        <label>Maximum Order Total</label>
+                        <depends>
+                            <field id="active">1</field>
+                        </depends>
+                        <config_path>payment/conekta_pay_by_bank/max_order_total</config_path>
+                    </field>
+                    <field id="order_status" translate="label" type="select" sortOrder="60" showInDefault="1" showInWebsite="1" showInStore="0">
+                        <label>New Order Status</label>
+                        <source_model>Conekta\Payments\Model\Source\Order\Status\Pendingpayment</source_model>
+                        <depends>
+                            <field id="active">1</field>
+                        </depends>
+                        <config_path>payment/conekta_pay_by_bank/order_status</config_path>
+                    </field>
+                    <field id="instructions" translate="label" type="textarea" sortOrder="80" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Instructions</label>
+                        <depends>
+                            <field id="active">1</field>
+                        </depends>
+                        <config_path>payment/conekta_pay_by_bank/instructions</config_path>
+                        <comment>Instructions that will be displayed on the checkout success page and in emails.</comment>
+                    </field>
+                    <field id="sort_order" translate="label" type="text" sortOrder="100" showInDefault="1" showInWebsite="1" showInStore="0">
+                        <label>Sort Order</label>
+                        <depends>
+                            <field id="active">1</field>
+                        </depends>
+                        <frontend_class>validate-number</frontend_class>
+                        <config_path>payment/conekta_pay_by_bank/sort_order</config_path>
+                    </field>
+                </group>
+                <!-- // Conekta Pay By Bank // -->
             </group>
         </section>
     </system>
