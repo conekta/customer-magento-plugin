@@ -1,0 +1,72 @@
+<?php
+$title = $block->escapeHtml($block->getMethod()->getTitle());
+$payByBankData = $block->getDataPayByBank();
+?>
+
+<dl class="payment-method">
+    <dt class="title"><?= /* @noEscape */ $title; ?></dt>
+    <?php if ($payByBankData) { ?>
+    <dd style="margin: 0 !important; -webkit-margin-start: 0 !important;">
+        <table class="data-table admin__table-secondary">
+            <tbody>
+                <?php if (isset($payByBankData['reference']) && !empty($payByBankData['reference'])): ?>
+                <tr>
+                    <th><strong><?= /* @noEscape */ __('Reference Number:'); ?></strong></th>
+                    <td>
+                        <?= $block->escapeHtml($payByBankData['reference']); ?>
+                    </td>
+                </tr>
+                <?php endif; ?>
+                
+                <?php if (isset($payByBankData['expires_at']) && !empty($payByBankData['expires_at'])): ?>
+                <tr>
+                    <th><strong><?= /* @noEscape */ __('Expires on:'); ?></strong></th>
+                    <td>
+                        <?= $block->escapeHtml(date("Y-m-d H:i:s", (integer) $payByBankData['expires_at'])); ?>
+                    </td>
+                </tr>
+                <?php endif; ?>
+                
+                <?php if (isset($payByBankData['redirect_url']) && !empty($payByBankData['redirect_url'])): ?>
+                <tr>
+                    <th><strong><?= /* @noEscape */ __('Open BBVA app (Desktop):'); ?></strong></th>
+                    <td>
+                        <a href="<?= $block->escapeUrl($payByBankData['redirect_url']); ?>" target="_blank" class="action primary">
+                            <?= /* @noEscape */ __('Open BBVA app'); ?>
+                        </a>
+                    </td>
+                </tr>
+                <?php endif; ?>
+
+                <?php if (isset($payByBankData['deep_link']) && !empty($payByBankData['deep_link'])): ?>
+                <tr>
+                    <th><strong><?= /* @noEscape */ __('Open BBVA app (Mobile):'); ?></strong></th>
+                    <td>
+                        <a href="<?= $block->escapeUrl($payByBankData['deep_link']); ?>" target="_blank" class="action primary">
+                            <?= /* @noEscape */ __('Open BBVA app'); ?>
+                        </a>
+                    </td>
+                </tr>
+                <?php endif; ?>
+            </tbody>
+        </table>
+        
+        <div class="payment-instructions" style="margin-top: 15px;">
+            <p><strong><?= /* @noEscape */ __('Complete the payment in your BBVA app to finish your purchase'); ?></strong></p>
+            <p><?= /* @noEscape */ __("Haven't completed it yet?"); ?></p>
+        </div>
+    </dd>
+    <?php } else { ?>
+    <dd style="margin: 0 !important; -webkit-margin-start: 0 !important;">
+        <p><?= /* @noEscape */ __('Pay By Bank payment information will be available after order confirmation.'); ?></p>
+        <?php if ($block->getInstructions()): ?>
+        <div class="payment-instructions">
+            <strong><?= /* @noEscape */ __('Instructions:'); ?></strong>
+            <p><?= $block->escapeHtml($block->getInstructions()); ?></p>
+        </div>
+        <?php endif; ?>
+    </dd>
+    <?php } ?>
+</dl>
+<?= $block->getChildHtml(); ?>
+
