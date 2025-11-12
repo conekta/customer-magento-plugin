@@ -303,6 +303,13 @@ define(
                         onErrorPayment: function(a) {
                             self.conektaError("Ocurrió un error al procesar el pago. Por favor, inténtalo de nuevo.");
                         },
+                        view_waiting_provider_flow: function(event) {
+                            console.log('view_waiting_provider_flow event triggered', event);
+                            // For Pay By Bank, we redirect to success page automatically
+                            // The event contains the payment information
+                            self.iframOrderData(event);
+                            self.beforePlaceOrder();
+                        }
                     });
 
                     $('#conektaIframeContainer').find('iframe').attr('data-cy', 'the-frame');
