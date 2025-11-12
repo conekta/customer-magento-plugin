@@ -307,6 +307,16 @@ class Data extends Util
     }
 
     /**
+     * Is Pay By Bank enabled
+     *
+     * @return bool
+     */
+    public function isPayByBankEnabled(): bool
+    {
+        return (boolean)$this->getConfigData('conekta_pay_by_bank', 'active');
+    }
+
+    /**
      * Get expired At
      *
      * @return int
