@@ -282,18 +282,6 @@ define(
                 var self = this;
                 try {
                     document.getElementById("conektaIframeContainer").innerHTML = "";
-                    
-                    // Escuchar el evento view_waiting_provider_flow que el componente dispara
-                    window.addEventListener('view_waiting_provider_flow', function(event) {
-                        console.log('AAAA 1', event);
-                        // Para Pay By Bank, redirigimos a la página de éxito automáticamente
-                        // El evento contiene la información del pago
-                        if (event.detail) {
-                            self.iframOrderData(event.detail);
-                            self.beforePlaceOrder();
-                        }
-                    });
-                    
                     window.ConektaCheckoutComponents.Integration({
                         targetIFrame: '#conektaIframeContainer',
                         checkoutRequestId: this.checkoutId(),
@@ -309,7 +297,6 @@ define(
                             console.error(error);
                         },
                         onFinalizePayment: function (event) {
-                            console.log('AAAA 2', event);
                             self.iframOrderData(event);
                             self.beforePlaceOrder();
                         },
