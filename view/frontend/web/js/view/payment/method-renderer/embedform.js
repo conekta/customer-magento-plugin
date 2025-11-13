@@ -290,6 +290,10 @@ define(
                         clearInterval(self.periodicCheck);
                         self.periodicCheck = null;
                     }
+                    if (self.messageListener) {
+                        window.removeEventListener('message', self.messageListener);
+                        self.messageListener = null;
+                    }
                     
                     document.getElementById("conektaIframeContainer").innerHTML = "";
                     window.ConektaCheckoutComponents.Integration({
@@ -435,21 +439,95 @@ define(
             startWaitingProviderFlowObserver: function () {
                 var self = this;
                 
+                console.log('[Conekta Debug] Iniciando observer para waiting-provider-flow-screen');
+                
+                // Escuchar eventos postMessage del iframe
+                var messageHandler = function(event) {
+                    console.log('[Conekta Debug] postMessage recibido:', event);
+                    console.log('[Conekta Debug] event.data:', event.data);
+                    console.log('[Conekta Debug] event.origin:', event.origin);
+                    
+                    try {
+                        var data = event.data;
+                        
+                        // Intentar parsear si es string
+                        if (typeof data === 'string') {
+                            try {
+                                data = JSON.parse(data);
+                                console.log('[Conekta Debug] Datos parseados:', data);
+                            } catch(e) {
+                                console.log('[Conekta Debug] No es JSON válido');
+                            }
+                        }
+                        
+                        // Buscar indicadores de waiting provider flow
+                        var shouldRedirect = false;
+                        
+                        if (data) {
+                            // Verificar diferentes propiedades que podrían indicar el evento
+                            if (data.type === 'waiting_provider_flow' ||
+                                data.event === 'waiting_provider_flow' ||
+                                data.action === 'waiting_provider_flow' ||
+                                data.screen === 'waiting-provider-flow' ||
+                                data.view === 'waiting_provider_flow' ||
+                                (data.type && data.type.includes('waiting')) ||
+                                (data.event && typeof data.event === 'string' && data.event.includes('waiting'))) {
+                                shouldRedirect = true;
+                                console.log('[Conekta Debug] Detectado evento waiting provider flow por propiedad directa');
+                            }
+                            
+                            // Buscar en strings
+                            var dataStr = JSON.stringify(data).toLowerCase();
+                            if (dataStr.includes('waiting-provider-flow') || 
+                                dataStr.includes('waiting_provider_flow') ||
+                                dataStr.includes('waitingproviderflow')) {
+                                shouldRedirect = true;
+                                console.log('[Conekta Debug] Detectado waiting provider flow en string del mensaje');
+                            }
+                        }
+                        
+                        if (shouldRedirect) {
+                            console.log('[Conekta Debug] ¡Redirigiendo a success!');
+                            self.redirectToSuccess();
+                        }
+                    } catch(error) {
+                        console.error('[Conekta Debug] Error procesando mensaje:', error);
+                    }
+                };
+                
+                // Agregar listener si no existe
+                if (!self.messageListener) {
+                    self.messageListener = messageHandler;
+                    window.addEventListener('message', self.messageListener);
+                    console.log('[Conekta Debug] Listener de postMessage agregado');
+                }
+                
                 // Función para verificar si el elemento existe
-                var checkForWaitingScreen = function() {
+                var checkForWaitingScreen = function(isVerbose) {
+                    if (isVerbose) {
+                        console.log('[Conekta Debug] Verificando existencia de waiting-provider-flow-screen...');
+                    }
+                    
                     var waitingScreen = document.getElementById('waiting-provider-flow-screen');
                     
                     if (waitingScreen) {
-                        console.log('Detectado waiting-provider-flow-screen, redirigiendo a success...');
-                        
-                        // Detener el observer si existe
-                        if (self.domObserver) {
-                            self.domObserver.disconnect();
-                        }
-                        
-                        // Redirigir a la página de éxito
-                        window.location.href = window.checkoutConfig.defaultSuccessPageUrl;
+                        console.log('[Conekta Debug] ¡Detectado waiting-provider-flow-screen en DOM principal!');
+                        self.redirectToSuccess();
                         return true;
+                    }
+                    
+                    // Buscar por clase también
+                    var waitingScreenByClass = document.querySelector('.waiting-provider-flow-screen');
+                    if (waitingScreenByClass) {
+                        console.log('[Conekta Debug] ¡Detectado por clase .waiting-provider-flow-screen!');
+                        self.redirectToSuccess();
+                        return true;
+                    }
+                    
+                    // Buscar cualquier elemento que contenga "waiting" en el id o clase
+                    var allElements = document.querySelectorAll('[id*="waiting"], [class*="waiting"]');
+                    if (allElements.length > 0) {
+                        console.log('[Conekta Debug] Elementos encontrados con "waiting":', allElements);
                     }
                     
                     // También intentar buscar dentro del iframe si es accesible
@@ -458,25 +536,22 @@ define(
                         if (iframe && iframe.contentDocument) {
                             var iframeWaitingScreen = iframe.contentDocument.getElementById('waiting-provider-flow-screen');
                             if (iframeWaitingScreen) {
-                                console.log('Detectado waiting-provider-flow-screen en iframe, redirigiendo a success...');
-                                
-                                if (self.domObserver) {
-                                    self.domObserver.disconnect();
-                                }
-                                
-                                window.location.href = window.checkoutConfig.defaultSuccessPageUrl;
+                                console.log('[Conekta Debug] ¡Detectado waiting-provider-flow-screen en iframe!');
+                                self.redirectToSuccess();
                                 return true;
                             }
+                        } else if (iframe) {
+                            console.log('[Conekta Debug] Iframe encontrado pero contentDocument no accesible (CORS)');
                         }
                     } catch(e) {
-                        // El iframe puede no ser accesible debido a CORS, esto es normal
+                        console.log('[Conekta Debug] No se puede acceder al contenido del iframe (esperado por CORS):', e.message);
                     }
                     
                     return false;
                 };
                 
                 // Verificar inmediatamente
-                if (checkForWaitingScreen()) {
+                if (checkForWaitingScreen(true)) {
                     return;
                 }
                 
@@ -489,7 +564,10 @@ define(
                 };
                 
                 self.domObserver = new MutationObserver(function(mutations) {
-                    checkForWaitingScreen();
+                    // No verbose en mutaciones para no saturar la consola
+                    if (checkForWaitingScreen(false)) {
+                        console.log('[Conekta Debug] Elemento detectado por MutationObserver');
+                    }
                 });
                 
                 // Observar el contenedor del iframe y el body completo
@@ -508,15 +586,48 @@ define(
                 self.periodicCheck = setInterval(function() {
                     checkCount++;
                     
-                    if (checkForWaitingScreen()) {
+                    // Log cada 10 verificaciones para no saturar la consola
+                    var isVerbose = (checkCount % 10 === 0 || checkCount === 1);
+                    if (isVerbose) {
+                        console.log('[Conekta Debug] Verificación periódica #' + checkCount + '/' + maxChecks);
+                    }
+                    
+                    if (checkForWaitingScreen(isVerbose)) {
+                        console.log('[Conekta Debug] ¡Elemento encontrado! Deteniendo verificación periódica');
                         clearInterval(self.periodicCheck);
                     }
                     
                     if (checkCount >= maxChecks) {
                         clearInterval(self.periodicCheck);
-                        console.log('Finalizada verificación periódica de waiting-provider-flow-screen');
+                        console.log('[Conekta Debug] Finalizada verificación periódica de waiting-provider-flow-screen después de ' + maxChecks + ' intentos');
                     }
                 }, 500);
+            },
+            
+            redirectToSuccess: function() {
+                var self = this;
+                
+                console.log('[Conekta Debug] Ejecutando redirección a página de éxito...');
+                
+                // Limpiar todos los observers y listeners
+                if (self.domObserver) {
+                    self.domObserver.disconnect();
+                    self.domObserver = null;
+                }
+                if (self.periodicCheck) {
+                    clearInterval(self.periodicCheck);
+                    self.periodicCheck = null;
+                }
+                if (self.messageListener) {
+                    window.removeEventListener('message', self.messageListener);
+                    self.messageListener = null;
+                }
+                
+                // Redirigir a la página de éxito
+                var successUrl = window.checkoutConfig.defaultSuccessPageUrl;
+                console.log('[Conekta Debug] URL de éxito:', successUrl);
+                console.log('[Conekta Debug] Redirigiendo ahora...');
+                window.location.href = successUrl;
             },
             
             validateCheckoutSession: function () {
