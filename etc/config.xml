@@ -76,7 +76,7 @@
             <!-- Conekta EMBED FORM -->
             <conekta_ef>
                 <active>1</active>
-                <title>Conekta - Paga con tarjeta, efectivo, Transferencia Bancaria o Pagos en plazos</title>
+                <title>Conekta - Paga con tarjeta, Efectivo, Transferencia Bancaria o Pagos en plazos</title>
                 <group>conekta</group>
                 <model>ConektaPaymentsEmbedFormFacade</model>
                 <iframe_enabled>0</iframe_enabled>
