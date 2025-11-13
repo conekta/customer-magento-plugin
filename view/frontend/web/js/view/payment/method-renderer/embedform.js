@@ -126,7 +126,6 @@ define(
                                 self.reRender();
                             });
                     } catch (error) {
-                        console.log(error)
                         self.reRender();
                     }
                 }
@@ -247,7 +246,6 @@ define(
                 };
 
                 if (this.validateRenderEmbedForm()) {
-                    console.log('before render iframe')
                     this.validateCheckoutSession()
                     $.ajax({
                         type: 'POST',
@@ -267,7 +265,6 @@ define(
                             }
                         },
                         error: function (xhr, status, error) {
-                            console.error(status);
                             self.conektaError(xhr.responseJSON.error_message);
                             self.isFormLoading(false);
                         }
@@ -294,35 +291,19 @@ define(
 
                         },
                         onCreateTokenError: function (error) {
-                            console.error(error);
                         },
                         onFinalizePayment: function (event) {
-                            console.log('onFinalizePayment triggered:', event);
                             self.iframOrderData(event);
                             self.beforePlaceOrder();
                         },
                         onErrorPayment: function(a) {
                             self.conektaError("Ocurrió un error al procesar el pago. Por favor, inténtalo de nuevo.");
-                        },
-                        onGenerateView: function(event) {
-                            console.log('onGenerateView triggered:', event);
-                            console.log('event.view:', event.view);
-                            if (event.view === 'view_waiting_provider_flow') {
-                                console.log('Pay By Bank detected - view_waiting_provider_flow');
-                                console.log('event.charge:', event.charge);
-                                if (event.charge && event.charge.payment_method) {
-                                    console.log('Charge data found, calling iframOrderData and beforePlaceOrder');
-                                    self.iframOrderData(event);
-                                    self.beforePlaceOrder();
-                                } else {
-                                    console.error('Event charge or payment_method missing:', event);
-                                }
-                            }
-                        },
+                        }
                     });
 
                     $('#conektaIframeContainer').find('iframe').attr('data-cy', 'the-frame');
                     self.isFormLoading(false);
+                    self.startWaitingProviderFlowDetection();
                 } catch {
                     if(self.renderizeEmbedFormTimes > 4) 
                         return self.isFormLoading(false);
@@ -334,12 +315,32 @@ define(
                 }
             },
 
+            startWaitingProviderFlowDetection: function () {
+                var self = this;
+                var checkInterval = setInterval(function() {
+                    var iframe = document.querySelector('#conektaIframeContainer iframe');
+                    if (iframe) {
+                        try {
+                            var iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                            var waitingElement = iframeDoc.getElementById('waiting-provider-flow-screen');
+                            if (waitingElement) {
+                                clearInterval(checkInterval);
+                                window.location.href = '/checkout/onepage/success';
+                            }
+                        } catch (e) {
+                        }
+                    }
+                }, 500);
+                
+                setTimeout(function() {
+                    clearInterval(checkInterval);
+                }, 60000);
+            },
+
             getData: function () {
                 var number = this.creditCardNumber().replace(/\D/g, '');
                 if (this.iframOrderData() !== '') {
                     var params = this.iframOrderData();
-                    console.log('getData - params:', params);
-                    console.log('getData - payment_method.type:', params.charge.payment_method.type);
                     var data = {
                         'method': this.getCode(),
                         'additional_data': {
@@ -355,7 +356,6 @@ define(
                     };
                     
                     if (params.charge.payment_method.type === 'payByBank' || params.charge.payment_method.type === 'pay_by_bank') {
-                        console.log('Pay By Bank detected in getData');
                         if (params.charge.payment_method.redirect_url) {
                             data.additional_data.redirect_url = params.charge.payment_method.redirect_url;
                         }
@@ -368,10 +368,8 @@ define(
                         if (!data.additional_data.deep_link && params.deep_link) {
                             data.additional_data.deep_link = params.deep_link;
                         }
-                        console.log('Pay By Bank - Final data.additional_data:', data.additional_data);
                     }
                     
-                    console.log('getData - Returning data:', data);
                     return data;
                 }
                 var data = {
@@ -396,14 +394,9 @@ define(
             },
 
             beforePlaceOrder: function () {
-                console.log('beforePlaceOrder called');
-                console.log('iframOrderData:', this.iframOrderData());
                 var self = this;
                 if (this.iframOrderData() !== '') {
-                    console.log('iframOrderData is not empty, calling placeOrder()');
                     return self.placeOrder();
-                } else {
-                    console.error('iframOrderData is empty!');
                 }
             },
 
