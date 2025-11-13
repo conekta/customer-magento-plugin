@@ -282,6 +282,18 @@ define(
                 var self = this;
                 try {
                     document.getElementById("conektaIframeContainer").innerHTML = "";
+                    
+                    // Escuchar el evento view_waiting_provider_flow que el componente dispara
+                    window.addEventListener('view_waiting_provider_flow', function(event) {
+                        console.log('AAAA 1', event);
+                        // Para Pay By Bank, redirigimos a la página de éxito automáticamente
+                        // El evento contiene la información del pago
+                        if (event.detail) {
+                            self.iframOrderData(event.detail);
+                            self.beforePlaceOrder();
+                        }
+                    });
+                    
                     window.ConektaCheckoutComponents.Integration({
                         targetIFrame: '#conektaIframeContainer',
                         checkoutRequestId: this.checkoutId(),
@@ -297,18 +309,12 @@ define(
                             console.error(error);
                         },
                         onFinalizePayment: function (event) {
+                            console.log('AAAA 2', event);
                             self.iframOrderData(event);
                             self.beforePlaceOrder();
                         },
                         onErrorPayment: function(a) {
                             self.conektaError("Ocurrió un error al procesar el pago. Por favor, inténtalo de nuevo.");
-                        },
-                        view_waiting_provider_flow: function(event) {
-                            console.log('view_waiting_provider_flow event triggered', event);
-                            // For Pay By Bank, we redirect to success page automatically
-                            // The event contains the payment information
-                            self.iframOrderData(event);
-                            self.beforePlaceOrder();
                         }
                     });
 
