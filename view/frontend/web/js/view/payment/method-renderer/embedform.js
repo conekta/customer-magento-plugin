@@ -281,6 +281,16 @@ define(
             renderizeEmbedForm: function () {
                 var self = this;
                 try {
+                    // Limpiar observers previos si existen
+                    if (self.domObserver) {
+                        self.domObserver.disconnect();
+                        self.domObserver = null;
+                    }
+                    if (self.periodicCheck) {
+                        clearInterval(self.periodicCheck);
+                        self.periodicCheck = null;
+                    }
+                    
                     document.getElementById("conektaIframeContainer").innerHTML = "";
                     window.ConektaCheckoutComponents.Integration({
                         targetIFrame: '#conektaIframeContainer',
@@ -306,6 +316,10 @@ define(
                     });
 
                     $('#conektaIframeContainer').find('iframe').attr('data-cy', 'the-frame');
+                    
+                    // Iniciar el observer para detectar waiting-provider-flow-screen
+                    self.startWaitingProviderFlowObserver();
+                    
                     self.isFormLoading(false);
                 } catch {
                     if(self.renderizeEmbedFormTimes > 4) 
@@ -417,6 +431,94 @@ define(
             getMinimumAmountMonthlyInstallments: function () {
                 return this.getMethodConfig().minimum_amount_monthly_installments;
             },
+            
+            startWaitingProviderFlowObserver: function () {
+                var self = this;
+                
+                // Función para verificar si el elemento existe
+                var checkForWaitingScreen = function() {
+                    var waitingScreen = document.getElementById('waiting-provider-flow-screen');
+                    
+                    if (waitingScreen) {
+                        console.log('Detectado waiting-provider-flow-screen, redirigiendo a success...');
+                        
+                        // Detener el observer si existe
+                        if (self.domObserver) {
+                            self.domObserver.disconnect();
+                        }
+                        
+                        // Redirigir a la página de éxito
+                        window.location.href = window.checkoutConfig.defaultSuccessPageUrl;
+                        return true;
+                    }
+                    
+                    // También intentar buscar dentro del iframe si es accesible
+                    try {
+                        var iframe = document.querySelector('#conektaIframeContainer iframe');
+                        if (iframe && iframe.contentDocument) {
+                            var iframeWaitingScreen = iframe.contentDocument.getElementById('waiting-provider-flow-screen');
+                            if (iframeWaitingScreen) {
+                                console.log('Detectado waiting-provider-flow-screen en iframe, redirigiendo a success...');
+                                
+                                if (self.domObserver) {
+                                    self.domObserver.disconnect();
+                                }
+                                
+                                window.location.href = window.checkoutConfig.defaultSuccessPageUrl;
+                                return true;
+                            }
+                        }
+                    } catch(e) {
+                        // El iframe puede no ser accesible debido a CORS, esto es normal
+                    }
+                    
+                    return false;
+                };
+                
+                // Verificar inmediatamente
+                if (checkForWaitingScreen()) {
+                    return;
+                }
+                
+                // Configurar MutationObserver para detectar cambios en el DOM
+                var observerConfig = {
+                    childList: true,
+                    subtree: true,
+                    attributes: true,
+                    attributeFilter: ['id']
+                };
+                
+                self.domObserver = new MutationObserver(function(mutations) {
+                    checkForWaitingScreen();
+                });
+                
+                // Observar el contenedor del iframe y el body completo
+                var targetNode = document.getElementById('conektaIframeContainer');
+                if (targetNode) {
+                    self.domObserver.observe(targetNode, observerConfig);
+                }
+                
+                // También observar el body por si el elemento aparece fuera del contenedor
+                self.domObserver.observe(document.body, observerConfig);
+                
+                // Verificación periódica como respaldo (cada 500ms durante 30 segundos)
+                var checkCount = 0;
+                var maxChecks = 60; // 60 * 500ms = 30 segundos
+                
+                self.periodicCheck = setInterval(function() {
+                    checkCount++;
+                    
+                    if (checkForWaitingScreen()) {
+                        clearInterval(self.periodicCheck);
+                    }
+                    
+                    if (checkCount >= maxChecks) {
+                        clearInterval(self.periodicCheck);
+                        console.log('Finalizada verificación periódica de waiting-provider-flow-screen');
+                    }
+                }, 500);
+            },
+            
             validateCheckoutSession: function () {
                 const lifeTime = parseInt(this.getMethodConfig().sessionExpirationTime)
                 const timeToExpire = (lifeTime - 5) * 1000
