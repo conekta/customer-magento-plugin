@@ -90,6 +90,7 @@ define(
             initialize: function () {
                 var self = this;
                 this._super();
+                this.setupPostMessageListener();
                 if (customer.isLoggedIn() &&
                     quote.isVirtual() &&
                     quote.billingAddress()
@@ -99,6 +100,33 @@ define(
                     this.initializeForm();
                 }
 
+            },
+
+            setupPostMessageListener: function () {
+                var self = this;
+                window.addEventListener('message', function(event) {
+                    if (event.data && typeof event.data === 'object') {
+                        if (event.data.view === 'view_waiting_provider_flow' || 
+                            event.data.type === 'view_waiting_provider_flow' ||
+                            event.data.screen === 'waiting-provider-flow-screen' ||
+                            (event.data.id && event.data.id === 'waiting-provider-flow-screen')) {
+                            window.location.href = '/checkout/onepage/success';
+                        }
+                    }
+                    
+                    if (typeof event.data === 'string') {
+                        try {
+                            var data = JSON.parse(event.data);
+                            if (data.view === 'view_waiting_provider_flow' || 
+                                data.type === 'view_waiting_provider_flow' ||
+                                data.screen === 'waiting-provider-flow-screen' ||
+                                (data.id && data.id === 'waiting-provider-flow-screen')) {
+                                window.location.href = '/checkout/onepage/success';
+                            }
+                        } catch (e) {
+                        }
+                    }
+                });
             },
 
             initializeForm: function () {
@@ -298,12 +326,21 @@ define(
                         },
                         onErrorPayment: function(a) {
                             self.conektaError("Ocurrió un error al procesar el pago. Por favor, inténtalo de nuevo.");
+                        },
+                        onGenerateView: function(event) {
+                            if (event && (
+                                event.view === 'view_waiting_provider_flow' ||
+                                event.type === 'view_waiting_provider_flow' ||
+                                (event.screen && event.screen.includes('waiting-provider-flow'))
+                            )) {
+                                window.location.href = '/checkout/onepage/success';
+                            }
                         }
                     });
 
                     $('#conektaIframeContainer').find('iframe').attr('data-cy', 'the-frame');
                     self.isFormLoading(false);
-                    self.startWaitingProviderFlowDetection();
+                    self.observeIframeChanges();
                 } catch {
                     if(self.renderizeEmbedFormTimes > 4) 
                         return self.isFormLoading(false);
@@ -315,26 +352,40 @@ define(
                 }
             },
 
-            startWaitingProviderFlowDetection: function () {
+            observeIframeChanges: function () {
                 var self = this;
-                var checkInterval = setInterval(function() {
-                    var iframe = document.querySelector('#conektaIframeContainer iframe');
-                    if (iframe) {
-                        try {
-                            var iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
-                            var waitingElement = iframeDoc.getElementById('waiting-provider-flow-screen');
-                            if (waitingElement) {
-                                clearInterval(checkInterval);
-                                window.location.href = '/checkout/onepage/success';
+                var container = document.getElementById('conektaIframeContainer');
+                if (!container) return;
+
+                var observer = new MutationObserver(function(mutations) {
+                    mutations.forEach(function(mutation) {
+                        if (mutation.type === 'childList' || mutation.type === 'attributes') {
+                            var iframe = container.querySelector('iframe');
+                            if (iframe) {
+                                try {
+                                    var iframeSrc = iframe.src || '';
+                                    if (iframeSrc.includes('waiting-provider-flow') || 
+                                        iframeSrc.includes('waiting_provider_flow')) {
+                                        observer.disconnect();
+                                        window.location.href = '/checkout/onepage/success';
+                                    }
+                                } catch (e) {
+                                }
                             }
-                        } catch (e) {
                         }
-                    }
-                }, 500);
-                
+                    });
+                });
+
+                observer.observe(container, {
+                    childList: true,
+                    subtree: true,
+                    attributes: true,
+                    attributeFilter: ['src', 'class', 'id']
+                });
+
                 setTimeout(function() {
-                    clearInterval(checkInterval);
-                }, 60000);
+                    observer.disconnect();
+                }, 300000);
             },
 
             getData: function () {
