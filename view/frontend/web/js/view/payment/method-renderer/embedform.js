@@ -300,6 +300,7 @@ define(
                             self.conektaError("Ocurrió un error al procesar el pago. Por favor, inténtalo de nuevo.");
                         },
                         onPbbWaitingPay: function(event) {
+                            console.log('AAAAAAA', event);
                             window.location.href = '/checkout/onepage/success';
                         }
                     });
