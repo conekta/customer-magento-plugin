@@ -90,7 +90,6 @@ define(
             initialize: function () {
                 var self = this;
                 this._super();
-                this.setupPostMessageListener();
                 if (customer.isLoggedIn() &&
                     quote.isVirtual() &&
                     quote.billingAddress()
@@ -100,33 +99,6 @@ define(
                     this.initializeForm();
                 }
 
-            },
-
-            setupPostMessageListener: function () {
-                var self = this;
-                window.addEventListener('message', function(event) {
-                    if (event.data && typeof event.data === 'object') {
-                        if (event.data.view === 'view_waiting_provider_flow' || 
-                            event.data.type === 'view_waiting_provider_flow' ||
-                            event.data.screen === 'waiting-provider-flow-screen' ||
-                            (event.data.id && event.data.id === 'waiting-provider-flow-screen')) {
-                            window.location.href = '/checkout/onepage/success';
-                        }
-                    }
-                    
-                    if (typeof event.data === 'string') {
-                        try {
-                            var data = JSON.parse(event.data);
-                            if (data.view === 'view_waiting_provider_flow' || 
-                                data.type === 'view_waiting_provider_flow' ||
-                                data.screen === 'waiting-provider-flow-screen' ||
-                                (data.id && data.id === 'waiting-provider-flow-screen')) {
-                                window.location.href = '/checkout/onepage/success';
-                            }
-                        } catch (e) {
-                        }
-                    }
-                });
             },
 
             initializeForm: function () {
@@ -327,15 +299,6 @@ define(
                         onErrorPayment: function(a) {
                             self.conektaError("Ocurrió un error al procesar el pago. Por favor, inténtalo de nuevo.");
                         },
-                        onGenerateView: function(event) {
-                            if (event && (
-                                event.view === 'view_waiting_provider_flow' ||
-                                event.type === 'view_waiting_provider_flow' ||
-                                (event.screen && event.screen.includes('waiting-provider-flow'))
-                            )) {
-                                window.location.href = '/checkout/onepage/success';
-                            }
-                        },
                         onPbbWaitingPay: function(event) {
                             window.location.href = '/checkout/onepage/success';
                         }
@@ -343,7 +306,6 @@ define(
 
                     $('#conektaIframeContainer').find('iframe').attr('data-cy', 'the-frame');
                     self.isFormLoading(false);
-                    self.observeIframeChanges();
                 } catch {
                     if(self.renderizeEmbedFormTimes > 4) 
                         return self.isFormLoading(false);
@@ -353,42 +315,6 @@ define(
                         self.renderizeEmbedForm();
                     }, 500);
                 }
-            },
-
-            observeIframeChanges: function () {
-                var self = this;
-                var container = document.getElementById('conektaIframeContainer');
-                if (!container) return;
-
-                var observer = new MutationObserver(function(mutations) {
-                    mutations.forEach(function(mutation) {
-                        if (mutation.type === 'childList' || mutation.type === 'attributes') {
-                            var iframe = container.querySelector('iframe');
-                            if (iframe) {
-                                try {
-                                    var iframeSrc = iframe.src || '';
-                                    if (iframeSrc.includes('waiting-provider-flow') || 
-                                        iframeSrc.includes('waiting_provider_flow')) {
-                                        observer.disconnect();
-                                        window.location.href = '/checkout/onepage/success';
-                                    }
-                                } catch (e) {
-                                }
-                            }
-                        }
-                    });
-                });
-
-                observer.observe(container, {
-                    childList: true,
-                    subtree: true,
-                    attributes: true,
-                    attributeFilter: ['src', 'class', 'id']
-                });
-
-                setTimeout(function() {
-                    observer.disconnect();
-                }, 300000);
             },
 
             getData: function () {
@@ -408,22 +334,6 @@ define(
                             'iframe_payment': true
                         }
                     };
-                    
-                    if (params.charge.payment_method.type === 'payByBank' || params.charge.payment_method.type === 'pay_by_bank') {
-                        if (params.charge.payment_method.redirect_url) {
-                            data.additional_data.redirect_url = params.charge.payment_method.redirect_url;
-                        }
-                        if (params.charge.payment_method.deep_link) {
-                            data.additional_data.deep_link = params.charge.payment_method.deep_link;
-                        }
-                        if (!data.additional_data.redirect_url && params.redirect_url) {
-                            data.additional_data.redirect_url = params.redirect_url;
-                        }
-                        if (!data.additional_data.deep_link && params.deep_link) {
-                            data.additional_data.deep_link = params.deep_link;
-                        }
-                    }
-                    
                     return data;
                 }
                 var data = {
