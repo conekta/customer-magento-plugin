@@ -335,6 +335,9 @@ define(
                             )) {
                                 window.location.href = '/checkout/onepage/success';
                             }
+                        },
+                        onPbbWaitingPay: function(event) {
+                            window.location.href = '/checkout/onepage/success';
                         }
                     });
 
