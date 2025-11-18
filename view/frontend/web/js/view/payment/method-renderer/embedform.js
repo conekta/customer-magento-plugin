@@ -299,7 +299,8 @@ define(
                         onErrorPayment: function(a) {
                             self.conektaError("Ocurrió un error al procesar el pago. Por favor, inténtalo de nuevo.");
                         },
-                        onPbbWaitingPay: function(event) {                            
+                        onPbbWaitingPay: function(event) {     
+                            console.log('AAAAAAA', event);
                             self.iframOrderData(event);
                             self.beforePlaceOrder();
                         }
