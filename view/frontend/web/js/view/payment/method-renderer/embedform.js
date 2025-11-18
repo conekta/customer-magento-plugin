@@ -321,6 +321,13 @@ define(
                                 }
                             };
                             
+                            try {
+                                var popupWindow = window.open('', 'popupWindow');
+                                if (popupWindow) {
+                                    popupWindow.close();
+                                }
+                            } catch (e) {}
+                            
                             self.iframOrderData(payByBankEvent);
                             self.beforePlaceOrder();
                         }
