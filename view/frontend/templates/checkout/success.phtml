@@ -6,6 +6,10 @@
 
     if (in_array($block->getMethod(), ["conekta_ef"])):
         $data = $block->getOfflineInfo();
+        echo "<pre style='background: #f0f0f0; padding: 10px; margin: 10px;'>DEBUG - Method: " . $block->getMethod() . "<br>";
+        echo "Offline Info: ";
+        print_r($data);
+        echo "</pre>";
         
         if (!empty($data) && isset($data["type"]) && in_array($data["type"], ['oxxo', 'cash', 'spei', 'bankTransfer', 'bnpl', 'payByBank', 'pay_by_bank'])):
         ?>
