@@ -300,15 +300,11 @@ define(
                             self.conektaError("Ocurrió un error al procesar el pago. Por favor, inténtalo de nuevo.");
                         },
                         onPayByBankWaitingPay: function(data) {
-                            console.log('onPayByBankWaitingPay - Data received:', data);
-                            
-                            // Extraer datos del objeto
                             var provider = data.provider || 'bbva';
                             var redirectUrl = data.redirectUrl || '';
                             var deepLink = data.deepLink || '';
                             var reference = data.reference || '';
                             
-                            // Crear estructura para pay-by-bank con URLs completas
                             var payByBankEvent = {
                                 charge: {
                                     id: 'pending',
@@ -325,9 +321,6 @@ define(
                                 }
                             };
                             
-                            console.log('onPayByBankWaitingPay - Processing order with:', payByBankEvent);
-                            
-                            // Guardar datos y proceder con place order
                             self.iframOrderData(payByBankEvent);
                             self.beforePlaceOrder();
                         }

@@ -101,7 +101,6 @@
                     <tr>
                         <td colspan="2" style="text-align: center; padding: 30px 20px;">
                             <div style="max-width: 500px; margin: 0 auto;">
-                                <!-- Referencia de pago -->
                                 <div style="margin-bottom: 25px; padding: 15px; background-color: #f8f9fa; border-radius: 8px;">
                                     <p style="font-size: 14px; color: #666; margin: 0 0 5px 0;">
                                         <?= /* @noEscape */ __('Referencia de pago:'); ?>
@@ -111,27 +110,22 @@
                                     </p>
                                 </div>
                                 
-                                <!-- Mensaje principal -->
                                 <h3 style="font-size: 20px; margin-bottom: 15px; color: #333; font-weight: 600;">
                                     <?= /* @noEscape */ __('Completa el pago en tu app BBVA para finalizar tu compra'); ?>
                                 </h3>
                                 
-                                <!-- Mensaje informativo -->
                                 <p style="font-size: 14px; color: #666; margin-bottom: 20px;">
                                     <?= /* @noEscape */ __('Aquí te avisaremos cuando esté listo.'); ?>
                                 </p>
                                 
-                                <!-- Pregunta -->
                                 <p style="font-size: 16px; color: #333; margin-bottom: 20px; font-weight: 500;">
                                     <?= /* @noEscape */ __('¿Aún no lo has completado?'); ?>
                                 </p>
                                 
-                                <!-- Política de privacidad -->
                                 <p style="font-size: 12px; color: #999; margin-bottom: 25px; line-height: 1.5;">
                                     <?= /* @noEscape */ __('Al continuar estoy aceptando la política de privacidad del servicio.'); ?>
                                 </p>
                                 
-                                <!-- Botón -->
                                 <?php if ($redirectUrl || $deepLink): ?>
                                 <button 
                                     id="payByBankButton"
@@ -145,11 +139,9 @@
                                         var isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
                                         var url = null;
                                         
-                                        // Priorizar deep_link en mobile
                                         if (isMobile && '<?= $block->escapeJs($deepLink); ?>') {
                                             url = '<?= $block->escapeJs($deepLink); ?>';
                                         } 
-                                        // Usar redirect_url en desktop o como fallback
                                         else if ('<?= $block->escapeJs($redirectUrl); ?>') {
                                             url = '<?= $block->escapeJs($redirectUrl); ?>';
                                         }
@@ -159,7 +151,6 @@
                                         }
                                     }
                                     
-                                    // Efectos hover del botón
                                     document.getElementById('payByBankButton').addEventListener('mouseenter', function() {
                                         this.style.backgroundColor = '#003366';
                                         this.style.transform = 'translateY(-2px)';

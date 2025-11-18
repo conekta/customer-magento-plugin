@@ -103,7 +103,6 @@ class TransactionAuthorize implements ClientInterface
         ) {
             $response['offline_info'] = [];
             
-            // Para pay_by_bank con txn_id "pending", usar datos del frontend
             if ($paymentMethod == ConfigProvider::PAYMENT_METHOD_PAY_BY_BANK && $txnId === 'pending') {
                 $this->_conektaLogger->info('EmbedForm :: Using frontend data for pending pay_by_bank');
                 $response['offline_info'] = [
@@ -116,7 +115,6 @@ class TransactionAuthorize implements ClientInterface
                     ]
                 ];
             } else {
-                // Flujo normal: obtener datos desde API de Conekta
                 try {
                     $conektaOrder = $this->conektaApiClient->getOrderByID($request['order_id']);
                     $charge = $conektaOrder->getCharges()->getData()[0];
@@ -139,7 +137,6 @@ class TransactionAuthorize implements ClientInterface
                     } elseif ($paymentMethod == ConfigProvider::PAYMENT_METHOD_BNPL) {
                         // BNPL does not have a reference
                     } elseif ($paymentMethod == ConfigProvider::PAYMENT_METHOD_PAY_BY_BANK) {
-                        // Pay By Bank - capturar deep_link y redirect_url
                         if (method_exists($paymentMethodResponse, 'getDeepLink')) {
                             $response['offline_info']['data']['deep_link'] = $paymentMethodResponse->getDeepLink();
                         }
