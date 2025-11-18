@@ -102,44 +102,60 @@ class TransactionAuthorize implements ClientInterface
             $paymentMethod == ConfigProvider::PAYMENT_METHOD_PAY_BY_BANK
         ) {
             $response['offline_info'] = [];
-            try {
-                $conektaOrder = $this->conektaApiClient->getOrderByID($request['order_id']);
-                $charge = $conektaOrder->getCharges()->getData()[0];
-
-                $txnId = $charge->getID();
-                $paymentMethodResponse = $charge->getPaymentMethod();
+            
+            // Para pay_by_bank con txn_id "pending", usar datos del frontend
+            if ($paymentMethod == ConfigProvider::PAYMENT_METHOD_PAY_BY_BANK && $txnId === 'pending') {
+                $this->_conektaLogger->info('EmbedForm :: Using frontend data for pending pay_by_bank');
                 $response['offline_info'] = [
-                    "type" => $paymentMethodResponse->getType(),
+                    "type" => "pay_by_bank",
                     "data" => [
-                        "expires_at" => $paymentMethodResponse->getExpiresAt()
+                        "redirect_url" => $request['payment_method_details']['payment_method']['redirect_url'] ?? '',
+                        "deep_link" => $request['payment_method_details']['payment_method']['deep_link'] ?? '',
+                        "reference" => $request['payment_method_details']['payment_method']['reference'] ?? '',
+                        "expires_at" => time() + (24 * 60 * 60) // 24 horas desde ahora
                     ]
                 ];
+            } else {
+                // Flujo normal: obtener datos desde API de Conekta
+                try {
+                    $conektaOrder = $this->conektaApiClient->getOrderByID($request['order_id']);
+                    $charge = $conektaOrder->getCharges()->getData()[0];
 
-                if ($paymentMethod == ConfigProvider::PAYMENT_METHOD_CASH) {
-                    $response['offline_info']['data']['barcode_url'] = $paymentMethodResponse->getBarcodeUrl();
-                    $response['offline_info']['data']['reference'] = $paymentMethodResponse->getReference();
-                } elseif ($paymentMethod == ConfigProvider::PAYMENT_METHOD_BANK_TRANSFER) {
-                    $response['offline_info']['data']['clabe'] = $paymentMethodResponse->getClabe();
-                    $response['offline_info']['data']['bank_name'] = $paymentMethodResponse->getBank();
-                } elseif ($paymentMethod == ConfigProvider::PAYMENT_METHOD_BNPL) {
-                    // BNPL does not have a reference
-                } elseif ($paymentMethod == ConfigProvider::PAYMENT_METHOD_PAY_BY_BANK) {
-                    // Pay By Bank - capturar deep_link y redirect_url
-                    if (method_exists($paymentMethodResponse, 'getDeepLink')) {
-                        $response['offline_info']['data']['deep_link'] = $paymentMethodResponse->getDeepLink();
-                    }
-                    if (method_exists($paymentMethodResponse, 'getRedirectUrl')) {
-                        $response['offline_info']['data']['redirect_url'] = $paymentMethodResponse->getRedirectUrl();
-                    }
-                    if (method_exists($paymentMethodResponse, 'getReference')) {
+                    $txnId = $charge->getID();
+                    $paymentMethodResponse = $charge->getPaymentMethod();
+                    $response['offline_info'] = [
+                        "type" => $paymentMethodResponse->getType(),
+                        "data" => [
+                            "expires_at" => $paymentMethodResponse->getExpiresAt()
+                        ]
+                    ];
+
+                    if ($paymentMethod == ConfigProvider::PAYMENT_METHOD_CASH) {
+                        $response['offline_info']['data']['barcode_url'] = $paymentMethodResponse->getBarcodeUrl();
                         $response['offline_info']['data']['reference'] = $paymentMethodResponse->getReference();
+                    } elseif ($paymentMethod == ConfigProvider::PAYMENT_METHOD_BANK_TRANSFER) {
+                        $response['offline_info']['data']['clabe'] = $paymentMethodResponse->getClabe();
+                        $response['offline_info']['data']['bank_name'] = $paymentMethodResponse->getBank();
+                    } elseif ($paymentMethod == ConfigProvider::PAYMENT_METHOD_BNPL) {
+                        // BNPL does not have a reference
+                    } elseif ($paymentMethod == ConfigProvider::PAYMENT_METHOD_PAY_BY_BANK) {
+                        // Pay By Bank - capturar deep_link y redirect_url
+                        if (method_exists($paymentMethodResponse, 'getDeepLink')) {
+                            $response['offline_info']['data']['deep_link'] = $paymentMethodResponse->getDeepLink();
+                        }
+                        if (method_exists($paymentMethodResponse, 'getRedirectUrl')) {
+                            $response['offline_info']['data']['redirect_url'] = $paymentMethodResponse->getRedirectUrl();
+                        }
+                        if (method_exists($paymentMethodResponse, 'getReference')) {
+                            $response['offline_info']['data']['reference'] = $paymentMethodResponse->getReference();
+                        }
                     }
+                } catch (Exception $e) {
+                    $this->_conektaLogger->error(
+                        'EmbedForm :: HTTP Client TransactionCapture :: cannot get offline info. ',
+                        ['exception' => $e]
+                    );
                 }
-            } catch (Exception $e) {
-                $this->_conektaLogger->error(
-                    'EmbedForm :: HTTP Client TransactionCapture :: cannot get offline info. ',
-                    ['exception' => $e]
-                );
             }
         }
 

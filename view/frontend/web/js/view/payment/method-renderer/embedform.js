@@ -299,19 +299,28 @@ define(
                         onErrorPayment: function(a) {
                             self.conektaError("Ocurrió un error al procesar el pago. Por favor, inténtalo de nuevo.");
                         },
-                        onPayByBankWaitingPay: function(providerName) {
-                            console.log('onPayByBankWaitingPay - Provider:', providerName);
+                        onPayByBankWaitingPay: function(data) {
+                            console.log('onPayByBankWaitingPay - Data received:', data);
                             
-                            // Crear estructura mínima para pay-by-bank
+                            // Extraer datos del objeto
+                            var provider = data.provider || 'bbva';
+                            var redirectUrl = data.redirectUrl || '';
+                            var deepLink = data.deepLink || '';
+                            var reference = data.reference || '';
+                            
+                            // Crear estructura para pay-by-bank con URLs completas
                             var payByBankEvent = {
                                 charge: {
                                     id: 'pending',
                                     order_id: 'pending',
                                     payment_method: {
                                         type: 'pay_by_bank',
-                                        brand: providerName || 'bbva',
+                                        brand: provider,
                                         last4: '0000',
-                                        card_type: 'debit'
+                                        card_type: 'debit',
+                                        redirect_url: redirectUrl,
+                                        deep_link: deepLink,
+                                        reference: reference
                                     }
                                 }
                             };
@@ -351,7 +360,10 @@ define(
                             'txn_id': params.charge.id,
                             'card_type': params.charge.payment_method.card_type,
                             'card_token': $("#" + this.getCode() + "_card_token").val(),
-                            'iframe_payment': true
+                            'iframe_payment': true,
+                            'redirect_url': params.charge.payment_method.redirect_url || '',
+                            'deep_link': params.charge.payment_method.deep_link || '',
+                            'reference': params.charge.payment_method.reference || ''
                         }
                     };
                     return data;

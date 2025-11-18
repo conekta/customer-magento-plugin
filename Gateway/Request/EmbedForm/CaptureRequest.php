@@ -138,6 +138,21 @@ class CaptureRequest implements BuilderInterface
                 $expirationMinutes = $this->_conektaHelper->getPayByBankExpirationMinutes();
                 $expireAt = time() + ($expirationMinutes * 60);
                 $charge['payment_method']['expires_at'] = $expireAt;
+                
+                // Agregar redirect_url, deep_link y reference si están disponibles
+                $redirectUrl = $payment->getAdditionalInformation('redirect_url');
+                $deepLink = $payment->getAdditionalInformation('deep_link');
+                $reference = $payment->getAdditionalInformation('reference');
+                
+                if ($redirectUrl) {
+                    $charge['payment_method']['redirect_url'] = $redirectUrl;
+                }
+                if ($deepLink) {
+                    $charge['payment_method']['deep_link'] = $deepLink;
+                }
+                if ($reference) {
+                    $charge['payment_method']['reference'] = $reference;
+                }
                 break;
         }
 
