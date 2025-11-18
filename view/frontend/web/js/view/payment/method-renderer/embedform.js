@@ -299,62 +299,27 @@ define(
                         onErrorPayment: function(a) {
                             self.conektaError("Ocurrió un error al procesar el pago. Por favor, inténtalo de nuevo.");
                         },
-                        onPayByBankWaitingPay: function(event) {
-                            console.log('onPayByBankWaitingPay - Event received:', event);
+                        onPayByBankWaitingPay: function(providerName) {
+                            console.log('onPayByBankWaitingPay - Provider:', providerName);
                             
-                            // Parsear event si viene como string
-                            var eventData = event;
-                            if (typeof event === 'string') {
-                                try {
-                                    eventData = JSON.parse(event);
-                                } catch (e) {
-                                    console.error('Error parsing event:', e);
-                                    eventData = event;
-                                }
-                            }
-                            
-                            // Extraer datos de forma segura
-                            var chargeId = '';
-                            var orderId = '';
-                            var brand = 'pay_by_bank';
-                            var last4 = '0000';
-                            var cardType = 'debit';
-                            
-                            if (eventData.charge) {
-                                chargeId = eventData.charge.id || '';
-                                orderId = eventData.charge.order_id || '';
-                                if (eventData.charge.payment_method) {
-                                    brand = eventData.charge.payment_method.brand || 'pay_by_bank';
-                                    last4 = eventData.charge.payment_method.last4 || '0000';
-                                    cardType = eventData.charge.payment_method.card_type || 'debit';
-                                }
-                            }
-                            
-                            // Si no hay charge, intentar obtener de nivel superior
-                            if (!chargeId) {
-                                chargeId = eventData.id || '';
-                            }
-                            if (!orderId) {
-                                orderId = eventData.order_id || eventData.id || '';
-                            }
-                            
-                            // Transformar event para que tenga la estructura correcta para getData()
-                            var transformedEvent = {
+                            // Crear estructura mínima para pay-by-bank
+                            var payByBankEvent = {
                                 charge: {
-                                    id: chargeId,
-                                    order_id: orderId,
+                                    id: 'pending',
+                                    order_id: 'pending',
                                     payment_method: {
                                         type: 'pay_by_bank',
-                                        brand: brand,
-                                        last4: last4,
-                                        card_type: cardType
+                                        brand: providerName || 'bbva',
+                                        last4: '0000',
+                                        card_type: 'debit'
                                     }
                                 }
                             };
                             
-                            console.log('onPayByBankWaitingPay - Transformed event:', transformedEvent);
+                            console.log('onPayByBankWaitingPay - Processing order with:', payByBankEvent);
                             
-                            self.iframOrderData(transformedEvent);
+                            // Guardar datos y proceder con place order
+                            self.iframOrderData(payByBankEvent);
                             self.beforePlaceOrder();
                         }
                     });
