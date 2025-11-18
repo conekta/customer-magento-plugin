@@ -299,8 +299,62 @@ define(
                         onErrorPayment: function(a) {
                             self.conektaError("Ocurrió un error al procesar el pago. Por favor, inténtalo de nuevo.");
                         },
-                        onPayByBankWaitingPay: function(event) {     
-                            self.iframOrderData(event);
+                        onPayByBankWaitingPay: function(event) {
+                            console.log('onPayByBankWaitingPay - Event received:', event);
+                            
+                            // Parsear event si viene como string
+                            var eventData = event;
+                            if (typeof event === 'string') {
+                                try {
+                                    eventData = JSON.parse(event);
+                                } catch (e) {
+                                    console.error('Error parsing event:', e);
+                                    eventData = event;
+                                }
+                            }
+                            
+                            // Extraer datos de forma segura
+                            var chargeId = '';
+                            var orderId = '';
+                            var brand = 'pay_by_bank';
+                            var last4 = '0000';
+                            var cardType = 'debit';
+                            
+                            if (eventData.charge) {
+                                chargeId = eventData.charge.id || '';
+                                orderId = eventData.charge.order_id || '';
+                                if (eventData.charge.payment_method) {
+                                    brand = eventData.charge.payment_method.brand || 'pay_by_bank';
+                                    last4 = eventData.charge.payment_method.last4 || '0000';
+                                    cardType = eventData.charge.payment_method.card_type || 'debit';
+                                }
+                            }
+                            
+                            // Si no hay charge, intentar obtener de nivel superior
+                            if (!chargeId) {
+                                chargeId = eventData.id || '';
+                            }
+                            if (!orderId) {
+                                orderId = eventData.order_id || eventData.id || '';
+                            }
+                            
+                            // Transformar event para que tenga la estructura correcta para getData()
+                            var transformedEvent = {
+                                charge: {
+                                    id: chargeId,
+                                    order_id: orderId,
+                                    payment_method: {
+                                        type: 'pay_by_bank',
+                                        brand: brand,
+                                        last4: last4,
+                                        card_type: cardType
+                                    }
+                                }
+                            };
+                            
+                            console.log('onPayByBankWaitingPay - Transformed event:', transformedEvent);
+                            
+                            self.iframOrderData(transformedEvent);
                             self.beforePlaceOrder();
                         }
                     });
