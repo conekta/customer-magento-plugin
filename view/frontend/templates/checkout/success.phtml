@@ -6,6 +6,16 @@
 
     if (in_array($block->getMethod(), ["conekta_ef"])):
         $data = $block->getOfflineInfo();
+        
+        // DEBUG TEMPORAL - REMOVER DESPUÉS
+        echo '<div style="background: yellow; padding: 20px; margin: 20px; border: 2px solid red;">';
+        echo '<strong>DEBUG INFO:</strong><br>';
+        echo 'Payment Method: ' . $block->getMethod() . '<br>';
+        echo 'Offline Info: <pre>' . print_r($data, true) . '</pre>';
+        echo 'Data Type: ' . ($data['type'] ?? 'NO TYPE') . '<br>';
+        echo 'Is Empty: ' . (empty($data) ? 'YES' : 'NO') . '<br>';
+        echo '</div>';
+        
         if (!empty($data) && isset($data["type"]) && in_array($data["type"], ['oxxo', 'cash', 'spei', 'bankTransfer', 'bnpl', 'payByBank', 'pay_by_bank'])):
         ?>
 
