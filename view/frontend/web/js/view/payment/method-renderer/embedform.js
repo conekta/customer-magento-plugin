@@ -305,6 +305,17 @@ define(
                             var deepLink = data.deepLink || '';
                             var reference = data.reference || '';
                             
+                            try {
+                                localStorage.setItem('conekta_pbb_data', JSON.stringify({
+                                    type: 'pay_by_bank',
+                                    redirect_url: redirectUrl,
+                                    deep_link: deepLink,
+                                    reference: reference,
+                                    provider: provider,
+                                    timestamp: Date.now()
+                                }));
+                            } catch (e) {}
+                            
                             var payByBankEvent = {
                                 charge: {
                                     id: 'pending',

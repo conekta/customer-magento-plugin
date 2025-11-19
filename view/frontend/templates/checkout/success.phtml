@@ -1,6 +1,82 @@
 <?php /** @var $block \Conekta\Payments\Block\Info\Success */ ?>
 
 <div class="checkout-success">
+    <div id="pbb-container-js"></div>
+
+    <script type="text/javascript">
+        (function() {
+            var pbbDataFromStorage = localStorage.getItem('conekta_pbb_data');
+            if (pbbDataFromStorage) {
+                try {
+                    var parsedData = JSON.parse(pbbDataFromStorage);
+                    var fiveMinutesAgo = Date.now() - (5 * 60 * 1000);
+                    
+                    if (parsedData.timestamp && parsedData.timestamp > fiveMinutesAgo && parsedData.type === 'pay_by_bank') {
+                        var redirectUrl = parsedData.redirect_url || '';
+                        var deepLink = parsedData.deep_link || '';
+                        var reference = parsedData.reference || '<?= $block->escapeJs($block->getOrder()->getIncrementId()); ?>';
+                        
+                        var html = '<h5><?= $block->escapeJs(__('Instructions:')); ?></h5>';
+                        html += '<table class="data" style="margin: 20px; -webkit-margin-start: 0;"><tbody>';
+                        html += '<tr><td colspan="2" style="text-align: center; padding: 30px 20px;">';
+                        html += '<div style="max-width: 500px; margin: 0 auto;">';
+                        html += '<div style="margin-bottom: 25px; padding: 15px; background-color: #f8f9fa; border-radius: 8px;">';
+                        html += '<p style="font-size: 14px; color: #666; margin: 0 0 5px 0;"><?= $block->escapeJs(__('Referencia de pago:')); ?></p>';
+                        html += '<p style="font-size: 18px; font-weight: bold; color: #333; margin: 0;">' + reference + '</p>';
+                        html += '</div>';
+                        html += '<h3 style="font-size: 20px; margin-bottom: 15px; color: #333; font-weight: 600;">';
+                        html += '<?= $block->escapeJs(__('Completa el pago en tu app BBVA para finalizar tu compra')); ?>';
+                        html += '</h3>';
+                        html += '<p style="font-size: 14px; color: #666; margin-bottom: 20px;">';
+                        html += '<?= $block->escapeJs(__('Aquí te avisaremos cuando esté listo.')); ?>';
+                        html += '</p>';
+                        html += '<p style="font-size: 16px; color: #333; margin-bottom: 20px; font-weight: 500;">';
+                        html += '<?= $block->escapeJs(__('¿Aún no lo has completado?')); ?>';
+                        html += '</p>';
+                        html += '<p style="font-size: 12px; color: #999; margin-bottom: 25px; line-height: 1.5;">';
+                        html += '<?= $block->escapeJs(__('Al continuar estoy aceptando la política de privacidad del servicio.')); ?>';
+                        html += '</p>';
+                        
+                        if (redirectUrl || deepLink) {
+                            html += '<button id="payByBankButton" ';
+                            html += 'style="background-color: #004481; color: white; padding: 14px 40px; border: none; ';
+                            html += 'border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; ';
+                            html += 'transition: all 0.3s; box-shadow: 0 2px 4px rgba(0,0,0,0.1); width: 100%; max-width: 300px;">';
+                            html += '<?= $block->escapeJs(__('Abrir app BBVA')); ?>';
+                            html += '</button>';
+                        }
+                        
+                        html += '</div></td></tr></tbody></table>';
+                        
+                        document.getElementById('pbb-container-js').innerHTML = html;
+                        
+                        setTimeout(function() {
+                            var btn = document.getElementById('payByBankButton');
+                            if (btn) {
+                                btn.addEventListener('click', function() {
+                                    var isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+                                    var url = (isMobile && deepLink) ? deepLink : redirectUrl;
+                                    if (url) window.open(url, '_blank', 'noopener,noreferrer');
+                                });
+                                
+                                btn.addEventListener('mouseenter', function() {
+                                    this.style.backgroundColor = '#003366';
+                                    this.style.transform = 'translateY(-2px)';
+                                    this.style.boxShadow = '0 4px 8px rgba(0,0,0,0.2)';
+                                });
+                                btn.addEventListener('mouseleave', function() {
+                                    this.style.backgroundColor = '#004481';
+                                    this.style.transform = 'translateY(0)';
+                                    this.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
+                                });
+                            }
+                        }, 100);
+                    }
+                    localStorage.removeItem('conekta_pbb_data');
+                } catch (e) {}
+            }
+        })();
+    </script>
 
     <?php
 
