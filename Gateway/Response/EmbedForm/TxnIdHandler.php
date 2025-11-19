@@ -104,7 +104,10 @@ class TxnIdHandler implements HandlerInterface
         $order = $payment->getOrder();
 
         $payment->setTransactionId($response[self::TXN_ID]);
-        $payment->setAdditionalInformation('offline_info', $response['offline_info']);
+        
+        if (isset($response['offline_info'])) {
+            $payment->setAdditionalInformation('offline_info', $response['offline_info']);
+        }
 
         $order->setExtOrderId($response[self::ORD_ID]);
 
