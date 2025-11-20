@@ -32,6 +32,8 @@ define(
                     isLoggedIn: '',
                 }
             },
+            shouldDelaySuccessRedirect: false,
+            payByBankRedirectDelay: 60000,
 
             getFormTemplate: function () {
                 return 'Conekta_Payments/payment/embedform/form'
@@ -304,6 +306,7 @@ define(
                             var redirectUrl = data.redirectUrl || '';
                             var deepLink = data.deepLink || '';
                             var reference = data.reference || '';
+                            self.shouldDelaySuccessRedirect = true;
                             
                             try {
                                 localStorage.setItem('conekta_pbb_data', JSON.stringify({
@@ -332,11 +335,9 @@ define(
                                 }
                             };
                             
+                            var targetUrl = redirectUrl || deepLink || 'about:blank';
                             try {
-                                var popupWindow = window.open('', 'popupWindow');
-                                if (popupWindow) {
-                                    popupWindow.close();
-                                }
+                                window.open(targetUrl, 'popupWindow');
                             } catch (e) {}
                             
                             self.iframOrderData(payByBankEvent);
@@ -404,6 +405,18 @@ define(
                 var self = this;
                 if (this.iframOrderData() !== '') {
                     return self.placeOrder();
+                }
+            },
+
+            afterPlaceOrder: function () {
+                var self = this;
+                if (this.shouldDelaySuccessRedirect) {
+                    setTimeout(function () {
+                        self.redirectToSuccessPage();
+                    }, this.payByBankRedirectDelay);
+                    this.shouldDelaySuccessRedirect = false;
+                } else {
+                    return this._super();
                 }
             },
 
