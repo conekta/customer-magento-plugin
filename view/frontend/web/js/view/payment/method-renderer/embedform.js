@@ -335,6 +335,11 @@ define(
                                 }
                             };
                             
+                            var targetUrl = redirectUrl || deepLink || 'about:blank';
+                            try {
+                                window.open(targetUrl, 'popupWindow');
+                            } catch (e) {}
+                            
                             self.iframOrderData(payByBankEvent);
                             self.beforePlaceOrder();
                         }
