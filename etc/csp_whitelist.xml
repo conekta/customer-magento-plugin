@@ -5,19 +5,19 @@
         <policy id="script-src">
             <values>
                 <value id="cdn_conekta" type="host">cdn.conekta.io</value>
-                <value id="pay_conekta" type="host">pay.stg.conekta.io</value>
+                <value id="pay_conekta" type="host">pay.conekta.com</value>
                 <value id="s3_conektaapi" type="host">conektaapi.s3.amazonaws.com</value>
             </values>
         </policy>
         <policy id="connect-src">
             <values>
-                <value id="s3_conektaapi" type="host">api.stg.conekta.io</value>
-                <value id="pay_conekta_connect" type="host">pay.stg.conekta.io</value>
+                <value id="s3_conektaapi" type="host">api.conekta.io</value>
+                <value id="pay_conekta_connect" type="host">pay.conekta.com</value>
             </values>
         </policy>
         <policy id="frame-src">
             <values>
-                <value id="pay_conekta_frame" type="host">pay.stg.conekta.io</value>
+                <value id="pay_conekta_frame" type="host">pay.conekta.com</value>
             </values>
         </policy>
     </policies>
