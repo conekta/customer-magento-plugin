@@ -111,13 +111,15 @@ class TransactionAuthorize implements ClientInterface
                 
                 if ($txnId === 'pending' || $hasRedirectUrl || $hasDeepLink) {
                     $this->_conektaLogger->info('EmbedForm :: Using frontend data for pay_by_bank');
+                    $expirationMinutes = $this->_conektaHelper->getPayByBankExpirationMinutes();
+
                     $response['offline_info'] = [
                         "type" => "pay_by_bank",
                         "data" => [
                             "redirect_url" => $request['payment_method_details']['payment_method']['redirect_url'] ?? '',
                             "deep_link" => $request['payment_method_details']['payment_method']['deep_link'] ?? '',
                             "reference" => $request['payment_method_details']['payment_method']['reference'] ?? '',
-                            "expires_at" => time() + (24 * 60 * 60)
+                            "expires_at" => time() + ($expirationMinutes * 60)
                         ]
                     ];
                 } else {
