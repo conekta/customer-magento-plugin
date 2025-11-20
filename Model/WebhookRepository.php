@@ -154,14 +154,27 @@ class WebhookRepository
             throw new EntityNotFoundException(__($message));
         }
 
-        $order->setState(Order::STATE_PROCESSING);
-        $order->setStatus(Order::STATE_PROCESSING);
-
-        $order->addCommentToStatusHistory("Payment received successfully")
-            ->setIsCustomerNotified(true);
+        $payment = $order->getPayment();
+        $paymentMethod = $payment->getAdditionalInformation('payment_method');
+        
+        $asyncPaymentMethods = [
+            'pay_by_bank',
+            'bnpl',
+            'bank_transfer', 
+            'cash'
+        ];
+        
+        if (!in_array($paymentMethod, $asyncPaymentMethods)) {
+            $order->setState(Order::STATE_PROCESSING);
+            $order->setStatus(Order::STATE_PROCESSING);
+            $order->addCommentToStatusHistory("Payment received successfully")
+                ->setIsCustomerNotified(true);
+        } else {
+            $order->addCommentToStatusHistory("Payment confirmation received from Conekta")
+                ->setIsCustomerNotified(false);
+        }
 
         $order->save();
-        $this->_conektaLogger->info('WebhookRepository :: execute - Order status updated');
 
         $invoice = $this->invoiceService->prepareInvoice($order);
         $invoice->register();
