@@ -337,7 +337,11 @@ define(
                             
                             var targetUrl = redirectUrl || deepLink || 'about:blank';
                             try {
-                                window.open(targetUrl, 'popupWindow');
+                                window.open(
+                                    targetUrl,
+                                    'popupWindow',
+                                    'width=900,height=900,menubar=no,toolbar=no,location=no,status=no,resizable=yes,scrollbars=yes'
+                                );
                             } catch (e) {}
                             
                             self.iframOrderData(payByBankEvent);
