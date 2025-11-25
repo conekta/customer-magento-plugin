@@ -335,20 +335,26 @@ define(
                                 }
                             };
                             
-                            var targetUrl = redirectUrl || deepLink || 'about:blank';
+                            var userAgent = window.navigator.userAgent || '';
+                            var isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
+                            var targetUrl = (isMobileDevice ? deepLink : redirectUrl) || 'about:blank';
                             var popupWindow = null;
                             var popupName = 'conektaPayByBank_' + Date.now();
                             var popupFeatures = 'width=900,height=900,menubar=no,toolbar=no,location=no,status=no,resizable=yes,scrollbars=yes';
                             
-                            try {
-                                popupWindow = window.open('', popupName, popupFeatures);
-                                if (popupWindow) {
-                                    popupWindow.location = targetUrl;
-                                } else {
+                            if (isMobileDevice) {
+                                window.location.href = targetUrl;
+                            } else {
+                                try {
+                                    popupWindow = window.open('', popupName, popupFeatures);
+                                    if (popupWindow) {
+                                        popupWindow.location = targetUrl;
+                                    } else {
+                                        window.location.href = targetUrl;
+                                    }
+                                } catch (e) {
                                     window.location.href = targetUrl;
                                 }
-                            } catch (e) {
-                                window.location.href = targetUrl;
                             }
                             
                             self.iframOrderData(payByBankEvent);
