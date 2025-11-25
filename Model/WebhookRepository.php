@@ -5,6 +5,7 @@ namespace Conekta\Payments\Model;
 use Conekta\Payments\Exception\EntityNotFoundException;
 use Conekta\Payments\Logger\Logger as ConektaLogger;
 use Conekta\Payments\Api\Data\ConektaSalesOrderInterface;
+use Conekta\Payments\Model\Ui\EmbedForm\ConfigProvider;
 use Exception;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Sales\Api\Data\OrderInterface;
@@ -156,15 +157,15 @@ class WebhookRepository
 
         $payment = $order->getPayment();
         $paymentMethod = $payment->getAdditionalInformation('payment_method');
-        
+
         $asyncPaymentMethods = [
-            'pay_by_bank',
-            'bnpl',
-            'bank_transfer', 
-            'cash'
+            ConfigProvider::PAYMENT_METHOD_PAY_BY_BANK,
+            ConfigProvider::PAYMENT_METHOD_BNPL,
+            ConfigProvider::PAYMENT_METHOD_BANK_TRANSFER,
+            ConfigProvider::PAYMENT_METHOD_CASH
         ];
-        
-        $shouldInvoice = !in_array($paymentMethod, $asyncPaymentMethods);
+
+        $shouldInvoice = !in_array($paymentMethod, $asyncPaymentMethods, true);
 
         if ($shouldInvoice) {
             $order->setState(Order::STATE_PROCESSING);
