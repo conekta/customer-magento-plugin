@@ -164,42 +164,48 @@ class WebhookRepository
             'cash'
         ];
         
-        if (!in_array($paymentMethod, $asyncPaymentMethods)) {
+        $shouldInvoice = !in_array($paymentMethod, $asyncPaymentMethods);
+
+        if ($shouldInvoice) {
             $order->setState(Order::STATE_PROCESSING);
             $order->setStatus(Order::STATE_PROCESSING);
             $order->addCommentToStatusHistory("Payment received successfully")
                 ->setIsCustomerNotified(true);
         } else {
+            $order->setState(Order::STATE_PENDING_PAYMENT);
+            $order->setStatus(Order::STATE_PENDING_PAYMENT);
             $order->addCommentToStatusHistory("Payment confirmation received from Conekta")
                 ->setIsCustomerNotified(false);
         }
 
         $order->save();
 
-        $invoice = $this->invoiceService->prepareInvoice($order);
-        $invoice->register();
-        $invoice->save();
-        $transactionSave = $this->transaction->addObject(
-            $invoice
-        )->addObject(
-            $invoice->getOrder()
-        );
-        $transactionSave->save();
-
-        $this->_conektaLogger->info('WebhookRepository :: execute - The invoice to be created');
-
-        try {
-            $this->invoiceSender->send($invoice);
-            $order->addCommentToStatusHistory(
-                __('Notified customer about invoice creation')
-            )
-                ->setIsCustomerNotified(true)
-                ->save();
-            $this->_conektaLogger->info(
-                'WebhookRepository :: execute - Notified customer about invoice creation'
+        if ($shouldInvoice) {
+            $invoice = $this->invoiceService->prepareInvoice($order);
+            $invoice->register();
+            $invoice->save();
+            $transactionSave = $this->transaction->addObject(
+                $invoice
+            )->addObject(
+                $invoice->getOrder()
             );
-        } catch (Exception $e) {
-            $this->_conektaLogger->error($e->getMessage());
+            $transactionSave->save();
+
+            $this->_conektaLogger->info('WebhookRepository :: execute - The invoice to be created');
+
+            try {
+                $this->invoiceSender->send($invoice);
+                $order->addCommentToStatusHistory(
+                    __('Notified customer about invoice creation')
+                )
+                    ->setIsCustomerNotified(true)
+                    ->save();
+                $this->_conektaLogger->info(
+                    'WebhookRepository :: execute - Notified customer about invoice creation'
+                );
+            } catch (Exception $e) {
+                $this->_conektaLogger->error($e->getMessage());
+            }
         }
     }
 }
