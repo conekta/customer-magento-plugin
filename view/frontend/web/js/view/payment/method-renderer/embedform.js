@@ -341,14 +341,7 @@ define(
                             var popupName = 'conektaPayByBank_' + Date.now();
                             var popupFeatures = 'width=900,height=900,menubar=no,toolbar=no,location=no,status=no,resizable=yes,scrollbars=yes';
                             
-                            try {
-                                var popupWindow = window.open(targetUrl, popupName, popupFeatures);
-                                if (!popupWindow) {
-                                    window.location.href = targetUrl;
-                                }
-                            } catch (e) {
-                                window.location.href = targetUrl;
-                            }
+                            window.open(targetUrl, popupName, popupFeatures);
                             
                             self.iframOrderData(payByBankEvent);
                             self.beforePlaceOrder();
