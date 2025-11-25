@@ -336,13 +336,20 @@ define(
                             };
                             
                             var targetUrl = redirectUrl || deepLink || 'about:blank';
+                            var popupWindow = null;
+                            var popupName = 'conektaPayByBank_' + Date.now();
+                            var popupFeatures = 'width=900,height=900,menubar=no,toolbar=no,location=no,status=no,resizable=yes,scrollbars=yes';
+                            
                             try {
-                                window.open(
-                                    targetUrl,
-                                    'popupWindow',
-                                    'width=900,height=900,menubar=no,toolbar=no,location=no,status=no,resizable=yes,scrollbars=yes'
-                                );
-                            } catch (e) {}
+                                popupWindow = window.open('', popupName, popupFeatures);
+                                if (popupWindow) {
+                                    popupWindow.location = targetUrl;
+                                } else {
+                                    window.location.href = targetUrl;
+                                }
+                            } catch (e) {
+                                window.location.href = targetUrl;
+                            }
                             
                             self.iframOrderData(payByBankEvent);
                             self.beforePlaceOrder();
