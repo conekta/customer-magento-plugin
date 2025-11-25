@@ -341,9 +341,9 @@ define(
                             var targetUrl = (isMobileDevice ? deepLink : redirectUrl) || 'about:blank';
                             var popupName = 'conektaPayByBank_' + Date.now();
                             var popupFeatures = 'width=900,height=900,menubar=no,toolbar=no,location=no,status=no,resizable=yes,scrollbars=yes';
+                            window.open(targetUrl, popupName, popupFeatures);
                             */
                            
-                            window.open(targetUrl, popupName, popupFeatures);
                             
                             self.iframOrderData(payByBankEvent);
                             self.beforePlaceOrder();
