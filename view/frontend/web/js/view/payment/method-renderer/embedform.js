@@ -34,7 +34,7 @@ define(
                 }
             },
             shouldDelaySuccessRedirect: false,
-            payByBankRedirectDelay: 10000,
+            payByBankRedirectDelay: 20000,
 
             getFormTemplate: function () {
                 return 'Conekta_Payments/payment/embedform/form'
