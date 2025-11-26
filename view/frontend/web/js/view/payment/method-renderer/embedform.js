@@ -14,9 +14,10 @@ define(
         'Magento_Checkout/js/model/shipping-save-processor',
         'Magento_Checkout/js/action/set-billing-address',
         'Magento_Checkout/js/model/cart/totals-processor/default',
-        'Magento_Checkout/js/model/cart/cache'
+        'Magento_Checkout/js/model/cart/cache',
+        'Magento_Checkout/js/action/redirect-on-success'
     ],
-    function (ko, CONEKTA, conektaCheckout, Component, $, quote, customer, validator, storage, uiRegistry, domRe, shSP, sBA, totalsProcessor, cartCache) {
+    function (ko, CONEKTA, conektaCheckout, Component, $, quote, customer, validator, storage, uiRegistry, domRe, shSP, sBA, totalsProcessor, cartCache, redirectOnSuccessAction) {
         'use strict';
 
         return Component.extend({
@@ -413,6 +414,10 @@ define(
                 } else {
                     return this._super();
                 }
+            },
+
+            redirectToSuccessPage: function () {
+                redirectOnSuccessAction.execute();
             },
 
             validate: function () {
