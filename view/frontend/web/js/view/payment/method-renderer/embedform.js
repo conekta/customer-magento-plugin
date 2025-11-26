@@ -34,7 +34,7 @@ define(
                 }
             },
             shouldDelaySuccessRedirect: false,
-            payByBankRedirectDelay: 90000,
+            payByBankRedirectDelay: 10000,
 
             getFormTemplate: function () {
                 return 'Conekta_Payments/payment/embedform/form'
@@ -407,9 +407,10 @@ define(
             afterPlaceOrder: function () {
                 var self = this;
                 if (this.shouldDelaySuccessRedirect) {
+                    var delay = this.payByBankRedirectDelay;
                     setTimeout(function () {
                         self.redirectToSuccessPage();
-                    }, this.payByBankRedirectDelay);
+                    }, delay);
                     this.shouldDelaySuccessRedirect = false;
                 } else {
                     return this._super();
