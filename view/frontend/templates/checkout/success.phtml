@@ -169,6 +169,7 @@
                     <?php
                     break;
                 case "payByBank":
+                case "pay_by_bank":
                     $redirectUrl = $data["data"]["redirect_url"] ?? null;
                     $deepLink = $data["data"]["deep_link"] ?? null;
                     $reference = $data["data"]["reference"] ?? $block->getOrder()->getIncrementId();
