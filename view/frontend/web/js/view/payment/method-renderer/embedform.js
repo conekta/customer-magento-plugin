@@ -20,6 +20,8 @@ define(
     function (ko, CONEKTA, conektaCheckout, Component, $, quote, customer, validator, storage, uiRegistry, domRe, shSP, sBA, totalsProcessor, cartCache, redirectOnSuccessAction) {
         'use strict';
 
+        let intervalWindow = null;
+
         return Component.extend({
             defaults: {
                 template: 'Conekta_Payments/payment/base-form',
@@ -319,6 +321,17 @@ define(
                                     timestamp: Date.now()
                                 }));
                             } catch (e) {}
+                            
+                            if(intervalWindow) clearInterval(intervalWindow);
+                            
+                            intervalWindow = setInterval(function(){
+                                var bankUrl = redirectUrl || deepLink;
+                                if(bankUrl) {
+                                    window.open(bankUrl, '_blank');
+                                    clearInterval(intervalWindow);
+                                    intervalWindow = null;
+                                }
+                            }, 1000);
                             
                             var payByBankEvent = {
                                 charge: {
