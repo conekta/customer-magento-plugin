@@ -1,10 +1,29 @@
 <?php /** @var $block \Conekta\Payments\Block\Info\Success */ ?>
 
 <div class="checkout-success">
+    <?php
+    // Check if we have Pay By Bank data in offline_info to avoid duplicate rendering
+    $hasPayByBankOfflineInfo = false;
+    if (in_array($block->getMethod(), ["conekta_ef"])):
+        $data = $block->getOfflineInfo();
+        if (!empty($data) && isset($data["type"]) && in_array($data["type"], ['payByBank', 'pay_by_bank'])):
+            $hasPayByBankOfflineInfo = true;
+        endif;
+    endif;
+    ?>
+    
     <div id="pbb-container-js"></div>
  
     <script type="text/javascript">
         (function() {
+            // Skip JavaScript rendering if PHP section will handle it
+            var hasOfflineInfo = <?= $hasPayByBankOfflineInfo ? 'true' : 'false'; ?>;
+            if (hasOfflineInfo) {
+                // Clean up localStorage since PHP section is handling the display
+                localStorage.removeItem('conekta_pbb_data');
+                return;
+            }
+            
             var pbbDataFromStorage = localStorage.getItem('conekta_pbb_data');
             if (pbbDataFromStorage) {
                 try {
