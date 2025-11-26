@@ -115,7 +115,7 @@ class TransactionAuthorize implements ClientInterface
                     $expirationMinutes = $this->_conektaHelper->getPayByBankExpirationMinutes();
 
                     $response['offline_info'] = [
-                        "type" => "pay_by_bank",
+                        "type" => "payByBank",
                         "data" => [
                             "redirect_url" => $request['payment_method_details']['payment_method']['redirect_url'] ?? '',
                             "deep_link" => $request['payment_method_details']['payment_method']['deep_link'] ?? '',
