@@ -36,7 +36,7 @@ define(
                 }
             },
             shouldDelaySuccessRedirect: false,
-            payByBankRedirectDelay: 20000,
+            payByBankRedirectDelay: 1000,
 
             getFormTemplate: function () {
                 return 'Conekta_Payments/payment/embedform/form'
@@ -322,17 +322,6 @@ define(
                                 }));
                             } catch (e) {}
                             
-                            if(intervalWindow) clearInterval(intervalWindow);
-                            
-                            intervalWindow = setInterval(function(){
-                                var bankUrl = redirectUrl || deepLink;
-                                if(bankUrl) {
-                                    window.open(bankUrl, '_blank');
-                                    clearInterval(intervalWindow);
-                                    intervalWindow = null;
-                                }
-                            }, 1000);
-                            
                             var payByBankEvent = {
                                 charge: {
                                     id: 'pending',
@@ -348,9 +337,15 @@ define(
                                     }
                                 }
                             };
+
+                            if(intervalWindow) clearInterval(intervalWindow);
                             
-                            self.iframOrderData(payByBankEvent);
-                            self.beforePlaceOrder();
+                            intervalWindow = setInterval(function(){
+                                self.iframOrderData(payByBankEvent);
+                                self.beforePlaceOrder();
+                                clearInterval(intervalWindow);
+                                intervalWindow = null;
+                            }, 1000);
                         }
                     });
 
