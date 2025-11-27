@@ -20,7 +20,7 @@ define(
     function (ko, CONEKTA, conektaCheckout, Component, $, quote, customer, validator, storage, uiRegistry, domRe, shSP, sBA, totalsProcessor, cartCache, redirectOnSuccessAction) {
         'use strict';
 
-        let intervalWindow = null;
+        let timeoutWindow = null;
 
         return Component.extend({
             defaults: {
@@ -36,7 +36,7 @@ define(
                 }
             },
             shouldDelaySuccessRedirect: false,
-            payByBankRedirectDelay: 1000,
+            payByBankRedirectDelay: 2000,
 
             getFormTemplate: function () {
                 return 'Conekta_Payments/payment/embedform/form'
@@ -338,14 +338,14 @@ define(
                                 }
                             };
 
-                            if(intervalWindow) clearInterval(intervalWindow);
+                            const delay = self.payByBankRedirectDelay;
+
+                            if(timeoutWindow) clearTimeout(timeoutWindow);
                             
-                            intervalWindow = setInterval(function(){
+                            timeoutWindow = setTimeout(function(){
                                 self.iframOrderData(payByBankEvent);
                                 self.beforePlaceOrder();
-                                clearInterval(intervalWindow);
-                                intervalWindow = null;
-                            }, 1000);
+                            }, delay);
                         }
                     });
 
