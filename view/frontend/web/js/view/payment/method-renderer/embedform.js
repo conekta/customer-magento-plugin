@@ -339,7 +339,7 @@ define(
                             };
 
                             if (deepLink && self.isMobileDevice()) {
-                                window.location.href = deepLink;
+                                window.open(deepLink, '_blank');
                             }
 
                             const delay = self.payByBankRedirectDelay;
