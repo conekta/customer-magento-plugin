@@ -338,6 +338,10 @@ define(
                                 }
                             };
 
+                            if (deepLink && self.isMobileDevice()) {
+                                window.location.href = deepLink;
+                            }
+
                             const delay = self.payByBankRedirectDelay;
 
                             if(timeoutWindow) clearTimeout(timeoutWindow);
@@ -492,6 +496,10 @@ define(
 
             isEmpty: function (obj) {
                 return obj === undefined || obj === null || obj === ''
+            },
+
+            isMobileDevice: function() {
+                return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
             }
         });
     }
