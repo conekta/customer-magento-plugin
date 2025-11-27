@@ -313,7 +313,7 @@ define(
                             
                             try {
                                 localStorage.setItem('conekta_pbb_data', JSON.stringify({
-                                    type: 'pay_by_bank',
+                                    type: 'payByBank',
                                     redirect_url: redirectUrl,
                                     deep_link: deepLink,
                                     reference: reference,
@@ -327,7 +327,7 @@ define(
                                     id: 'pending',
                                     order_id: 'pending',
                                     payment_method: {
-                                        type: 'pay_by_bank',
+                                        type: 'payByBank',
                                         brand: provider,
                                         last4: '0000',
                                         card_type: 'debit',

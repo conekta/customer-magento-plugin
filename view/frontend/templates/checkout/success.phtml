@@ -6,7 +6,7 @@
     $hasPayByBankOfflineInfo = false;
     if (in_array($block->getMethod(), ["conekta_ef"])):
         $data = $block->getOfflineInfo();
-        if (!empty($data) && isset($data["type"]) && in_array($data["type"], ['payByBank', 'pay_by_bank'])):
+        if (!empty($data) && isset($data["type"]) && in_array($data["type"], ['payByBank'])):
             $hasPayByBankOfflineInfo = true;
         endif;
     endif;
@@ -30,7 +30,7 @@
                     var parsedData = JSON.parse(pbbDataFromStorage);
                     var fiveMinutesAgo = Date.now() - (5 * 60 * 1000);
                     
-                    if (parsedData.timestamp && parsedData.timestamp > fiveMinutesAgo && parsedData.type === 'pay_by_bank') {
+                    if (parsedData.timestamp && parsedData.timestamp > fiveMinutesAgo && parsedData.type === 'payByBank') {
                         var redirectUrl = parsedData.redirect_url || '';
                         var deepLink = parsedData.deep_link || '';
                         var reference = parsedData.reference || '<?= $block->escapeJs($block->getOrder()->getIncrementId()); ?>';
@@ -102,7 +102,7 @@
     if (in_array($block->getMethod(), ["conekta_ef"])):
         $data = $block->getOfflineInfo();
         
-        if (!empty($data) && isset($data["type"]) && in_array($data["type"], ['oxxo', 'cash', 'spei', 'bankTransfer', 'bnpl', 'payByBank', 'pay_by_bank'])):
+        if (!empty($data) && isset($data["type"]) && in_array($data["type"], ['oxxo', 'cash', 'spei', 'bankTransfer', 'bnpl', 'payByBank'])):
         ?>
 
         <h5><?= /* @noEscape */
@@ -188,7 +188,6 @@
                     <?php
                     break;
                 case "payByBank":
-                case "pay_by_bank":
                     $redirectUrl = $data["data"]["redirect_url"] ?? null;
                     $deepLink = $data["data"]["deep_link"] ?? null;
                     $reference = $data["data"]["reference"] ?? $block->getOrder()->getIncrementId();
