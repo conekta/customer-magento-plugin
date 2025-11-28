@@ -93,10 +93,10 @@ class TxnIdHandler implements HandlerInterface
         $payment->unsAdditionalInformation('cc_last_4');
         $payment->unsAdditionalInformation('card_token');
 
-        $payment->setIsTransactionPending(false);
+        $payment->setIsTransactionPending(true);
         $payment->setTransactionId($response[self::TXN_ID]);
-        $payment->setIsTransactionClosed(true);
-        $payment->setShouldCloseParentTransaction(true);
+        $payment->setIsTransactionClosed(false);
+        $payment->setShouldCloseParentTransaction(false);
     }
 
     private function handleOffline($payment, $response)
