@@ -76,45 +76,17 @@ class WebhookRepository
         if (!isset($body['data']['object']) ||
             !isset($body['data']['object']['id'])
         ) {
-            $this->_conektaLogger->error('WebhookRepository :: Missing order information in body', [
-                'body_keys' => array_keys($body)
-            ]);
             throw new LocalizedException(__('Missing order information'));
         }
         $conektaOrderId = $body['data']['object']['id'];
         
         $this->_conektaLogger->info('WebhookRepository :: findByMetadataOrderId started', [
-            'conekta_order_id' => $conektaOrderId
+            'order_id' => $conektaOrderId
         ]);
 
-        try {
-            $conektaSalesOrder = $this->conektaOrderSalesInterface->loadByConektaOrderId($conektaOrderId);
-            
-            $this->_conektaLogger->info('WebhookRepository :: Conekta sales order loaded', [
-                'increment_order_id' => $conektaSalesOrder->getIncrementOrderId()
-            ]);
-            
-            $order = $this->orderInterface->loadByIncrementId($conektaSalesOrder->getIncrementOrderId());
-            
-            if ($order->getId()) {
-                $this->_conektaLogger->info('WebhookRepository :: Order found successfully', [
-                    'order_id' => $order->getId(),
-                    'increment_id' => $order->getIncrementId()
-                ]);
-            } else {
-                $this->_conektaLogger->warning('WebhookRepository :: Order not found by increment_id', [
-                    'increment_id' => $conektaSalesOrder->getIncrementOrderId()
-                ]);
-            }
-            
-            return $order;
-        } catch (Exception $e) {
-            $this->_conektaLogger->error('WebhookRepository :: Error loading order', [
-                'error' => $e->getMessage(),
-                'conekta_order_id' => $conektaOrderId
-            ]);
-            throw $e;
-        }
+        $conektaSalesOrder = $this->conektaOrderSalesInterface->loadByConektaOrderId($conektaOrderId);
+
+        return $this->orderInterface->loadByIncrementId($conektaSalesOrder->getIncrementOrderId());
     }
 
     /**
@@ -166,71 +138,55 @@ class WebhookRepository
      */
     public function payOrder($body)
     {
-        $this->_conektaLogger->info('WebhookRepository :: payOrder started');
+
+        $order = $this->findByMetadataOrderId($body);
+        
+        $charge = $body['data']['object'];
+        if (!isset($charge['payment_status']) || $charge['payment_status'] !== "paid") {
+            throw new LocalizedException(__('Missing order information'));
+        }
+        
+        if (!$order->getId()) {
+            $message = 'The order does not exists';
+            $this->_conektaLogger->error(
+                'WebhookRepository :: execute - ' . $message
+            );
+            throw new EntityNotFoundException(__($message));
+        }
+
+        $order->setState(Order::STATE_PROCESSING);
+        $order->setStatus(Order::STATE_PROCESSING);
+
+        $order->addCommentToStatusHistory("Payment received successfully")
+            ->setIsCustomerNotified(true);
+
+        $order->save();
+        $this->_conektaLogger->info('WebhookRepository :: execute - Order status updated');
+
+        $invoice = $this->invoiceService->prepareInvoice($order);
+        $invoice->register();
+        $invoice->save();
+        $transactionSave = $this->transaction->addObject(
+            $invoice
+        )->addObject(
+            $invoice->getOrder()
+        );
+        $transactionSave->save();
+
+        $this->_conektaLogger->info('WebhookRepository :: execute - The invoice to be created');
 
         try {
-            $order = $this->findByMetadataOrderId($body);
-            
-            $charge = $body['data']['object'];
-            if (!isset($charge['payment_status']) || $charge['payment_status'] !== "paid") {
-                $this->_conektaLogger->error('WebhookRepository :: Invalid payment status', [
-                    'payment_status' => $charge['payment_status'] ?? 'not set'
-                ]);
-                throw new LocalizedException(__('Missing order information'));
-            }
-            
-            if (!$order->getId()) {
-                $message = 'The order does not exists';
-                $this->_conektaLogger->error(
-                    'WebhookRepository :: execute - ' . $message
-                );
-                throw new EntityNotFoundException(__($message));
-            }
-
-            $this->_conektaLogger->info('WebhookRepository :: Updating order state to processing', [
-                'order_id' => $order->getId()
-            ]);
-
-            $order->setState(Order::STATE_PROCESSING);
-            $order->setStatus(Order::STATE_PROCESSING);
-
-            $order->addCommentToStatusHistory("Payment received successfully")
-                ->setIsCustomerNotified(true);
-
-            $order->save();
-            $this->_conektaLogger->info('WebhookRepository :: execute - Order status updated');
-
-            $this->_conektaLogger->info('WebhookRepository :: Preparing invoice');
-            $invoice = $this->invoiceService->prepareInvoice($order);
-            $invoice->register();
-            $invoice->save();
-            $transactionSave = $this->transaction->addObject(
-                $invoice
-            )->addObject(
-                $invoice->getOrder()
+            $this->invoiceSender->send($invoice);
+            $order->addCommentToStatusHistory(
+                __('Notified customer about invoice creation')
+            )
+                ->setIsCustomerNotified(true)
+                ->save();
+            $this->_conektaLogger->info(
+                'WebhookRepository :: execute - Notified customer about invoice creation'
             );
-            $transactionSave->save();
-
-            $this->_conektaLogger->info('WebhookRepository :: execute - Invoice created successfully');
-
-            try {
-                $this->invoiceSender->send($invoice);
-                $order->addCommentToStatusHistory(
-                    __('Notified customer about invoice creation')
-                )
-                    ->setIsCustomerNotified(true)
-                    ->save();
-                $this->_conektaLogger->info(
-                    'WebhookRepository :: execute - Notified customer about invoice creation'
-                );
-            } catch (Exception $e) {
-                $this->_conektaLogger->error('WebhookRepository :: Error sending invoice email: ' . $e->getMessage());
-            }
         } catch (Exception $e) {
-            $this->_conektaLogger->error('WebhookRepository :: Error in payOrder: ' . $e->getMessage(), [
-                'trace' => $e->getTraceAsString()
-            ]);
-            throw $e;
+            $this->_conektaLogger->error($e->getMessage());
         }
     }
 }
