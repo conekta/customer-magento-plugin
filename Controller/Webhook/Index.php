@@ -157,7 +157,9 @@ class Index extends Action implements CsrfAwareActionInterface
                     $chargesData = $body['data']['object']['charges']['data'] ?? [];
                     $paymentMethodObject = $chargesData[0]['payment_method']['object'] ?? null;
                     
-                    if ($paymentMethodObject !== null && $this->isCardPayment($paymentMethodObject)){
+                    if ($paymentMethodObject !== null && 
+                        ($this->isCardPayment($paymentMethodObject) || $this->isPayByBankPayment($paymentMethodObject))
+                    ) {
                         $this->missingOrder->recover_order($body);
                     }
                     $this->webhookRepository->payOrder($body);
@@ -209,5 +211,15 @@ class Index extends Action implements CsrfAwareActionInterface
      */
     private function isBnplPayment(?string $paymentMethod): bool {
         return $paymentMethod === "bnpl_payment";
+    }
+
+    /**
+     * Check if payment method is Pay By Bank
+     *
+     * @param string|null $paymentMethod
+     * @return bool
+     */
+    private function isPayByBankPayment(?string $paymentMethod): bool {
+        return $paymentMethod === "pay_by_bank_payment";
     }
 }
