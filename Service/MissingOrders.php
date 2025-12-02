@@ -58,26 +58,44 @@ class MissingOrders
      */
     public function recover_order($event){
         try {
+            $this->_conektaLogger->info('MissingOrders :: recover_order started');
+            
             //check order en order with external id
             $conektaOrderFound = $this->webhookRepository->findByMetadataOrderId($event);
 
             if ($conektaOrderFound->getId() != null || !empty($conektaOrderFound->getId()) ) {
-                $this->_conektaLogger->info('order is ready', ['order' => $conektaOrderFound, 'is_set', isset($conektaOrderFound)]);
+                $this->_conektaLogger->info('MissingOrders :: Order already exists, skipping recovery', [
+                    'order_id' => $conektaOrderFound->getId()
+                ]);
                 return;
             }
+            
+            $this->_conektaLogger->info('MissingOrders :: Order not found, proceeding with recovery');
+            
             $conektaOrder = $event['data']['object'];
             $conektaCustomer = $conektaOrder['customer_info'] ?? [];
             $metadata = $conektaOrder['metadata'];
             $storeId = $metadata['store'];
             $quoteId = $metadata['quote_id'];
+            
+            $this->_conektaLogger->info('MissingOrders :: Loading quote', [
+                'quote_id' => $quoteId,
+                'store_id' => $storeId
+            ]);
+            
             $quoteCreated = $this->_cartRepository->get($quoteId);
             $quoteCreated->setStoreId($storeId);
 
             $orderFounded = $this->objectManager->create('Magento\Sales\Model\Order')->load($quoteCreated->getReservedOrderId(), OrderInterface::INCREMENT_ID);
             if ($orderFounded->getId() != null || !empty($orderFounded->getId()) ) {
-                $this->_conektaLogger->info('order is ready', ['order' => $orderFounded, 'is_set', isset($orderFounded)]);
+                $this->_conektaLogger->info('MissingOrders :: Order already exists by reserved order id, skipping recovery', [
+                    'order_id' => $orderFounded->getId()
+                ]);
                 return;
             }
+            
+            $this->_conektaLogger->info('MissingOrders :: Setting up quote payment');
+            
             $quoteCreated->setCustomerEmail($conektaCustomer['email'] ?? $quoteCreated->getCustomerEmail());
             $quoteCreated->getPayment()->importData(['method' => ConfigProvider::CODE]);
             $chargeData = $conektaOrder['charges']['data'][0] ?? null;
@@ -95,7 +113,11 @@ class MissingOrders
             }
             $additionalInformation= array_merge($additionalInformation, $this->getAdditionalInformation($chargeData));
             $quoteCreated->getPayment()->setAdditionalInformation($additionalInformation);
+            
+            $this->_conektaLogger->info('MissingOrders :: Saving missing fields to quote');
             $this->saveMissingFieldsQuote($quoteCreated, $conektaOrder);
+            
+            $this->_conektaLogger->info('MissingOrders :: Submitting quote to create order');
             $order = $this->quoteManagement->submit($quoteCreated);
             $order->setStoreId($storeId);
             $order->save();
@@ -103,17 +125,26 @@ class MissingOrders
             $order->addCommentToStatusHistory("Missing Order from conekta ". "<a href='". ConfigProvider::URL_PANEL_PAYMENTS ."/".$conektaOrder["id"]. "' target='_blank'>".$conektaOrder["id"]."</a>")
                 ->setIsCustomerNotified(true)
                 ->save();
+                
+            $this->_conektaLogger->info('MissingOrders :: Order created successfully', [
+                'order_id' => $order->getId(),
+                'increment_id' => $order->getIncrementId()
+            ]);
+            
             if ($txnId) {
+                $this->_conektaLogger->info('MissingOrders :: Updating conekta reference');
                 $this->updateConektaReference($txnId,  $order->getRealOrderId());
             }
             return ;
 
         }catch (NoSuchEntityException $e){
-            $this->_conektaLogger->error($e->getMessage());
+            $this->_conektaLogger->error('MissingOrders :: NoSuchEntityException - ' . $e->getMessage());
             return;
         }
         catch (Exception | LocalizedException $e) {
-            $this->_conektaLogger->error('recovery order '.$e->getMessage());
+            $this->_conektaLogger->error('MissingOrders :: recovery order error - ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString()
+            ]);
             throw  $e;
         }
     }
