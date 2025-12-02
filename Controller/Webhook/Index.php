@@ -116,10 +116,16 @@ class Index extends Action implements CsrfAwareActionInterface
             
             if ($body && isset($body['data']['object']['charges']['data'][0]['payment_method']['object'])) {
                 $paymentMethodObject = $body['data']['object']['charges']['data'][0]['payment_method']['object'];
+                
                 if ($this->isBnplPayment($paymentMethodObject)) {
                     $this->_conektaLogger->info('BNPL payment detected - adding 25 second delay at start of execute');
                     sleep(25);
                 } 
+
+                if ($this->isPayByBankPayment($paymentMethodObject)) {
+                    $this->_conektaLogger->info('Pay By Bank payment detected - adding 25 second delay at start of execute');
+                    sleep(25);
+                }
             }
             
             if (!$body || $this->getRequest()->getMethod() !== 'POST') {
