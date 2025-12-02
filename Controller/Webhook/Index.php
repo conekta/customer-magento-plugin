@@ -156,15 +156,12 @@ class Index extends Action implements CsrfAwareActionInterface
                 case self::EVENT_ORDER_PAID:
                     $chargesData = $body['data']['object']['charges']['data'] ?? [];
                     $paymentMethodObject = $chargesData[0]['payment_method']['object'] ?? null;
-                    
-                    if ($paymentMethodObject !== null && $this->isPayByBankPayment($paymentMethodObject)) {
-                        $this->processPayByBankPayment($body);
-                    } else {
-                        if ($paymentMethodObject !== null && $this->isCardPayment($paymentMethodObject)) {
-                            $this->missingOrder->recover_order($body);
-                        }
-                        $this->webhookRepository->payOrder($body);
+
+                    if ($paymentMethodObject !== null && $this->isCardPayment($paymentMethodObject)) {
+                        $this->missingOrder->recover_order($body);
                     }
+
+                    $this->webhookRepository->payOrder($body);
                     break;
                 
                 case self::EVENT_ORDER_EXPIRED:
