@@ -157,12 +157,14 @@ class Index extends Action implements CsrfAwareActionInterface
                     $chargesData = $body['data']['object']['charges']['data'] ?? [];
                     $paymentMethodObject = $chargesData[0]['payment_method']['object'] ?? null;
                     
-                    if ($paymentMethodObject !== null && 
-                        ($this->isCardPayment($paymentMethodObject) || $this->isPayByBankPayment($paymentMethodObject))
-                    ) {
-                        $this->missingOrder->recover_order($body);
+                    if ($paymentMethodObject !== null && $this->isPayByBankPayment($paymentMethodObject)) {
+                        $this->processPayByBankPayment($body);
+                    } else {
+                        if ($paymentMethodObject !== null && $this->isCardPayment($paymentMethodObject)) {
+                            $this->missingOrder->recover_order($body);
+                        }
+                        $this->webhookRepository->payOrder($body);
                     }
-                    $this->webhookRepository->payOrder($body);
                     break;
                 
                 case self::EVENT_ORDER_EXPIRED:
@@ -221,5 +223,34 @@ class Index extends Action implements CsrfAwareActionInterface
      */
     private function isPayByBankPayment(?string $paymentMethod): bool {
         return $paymentMethod === "pay_by_bank_payment";
+    }
+
+    /**
+     * Process Pay By Bank payment with retry fallback
+     *
+     * @param array $body
+     * @return void
+     * @throws EntityNotFoundException
+     */
+    private function processPayByBankPayment(array $body): void
+    {
+        $maxRetries = 3;
+        $retryDelay = 5;
+        
+        for ($attempt = 1; $attempt <= $maxRetries; $attempt++) {
+            try {
+                $this->missingOrder->recover_order($body);
+                $this->webhookRepository->payOrder($body);
+                return;
+            } catch (EntityNotFoundException $e) {
+                $this->_conektaLogger->info("PayByBank attempt {$attempt}/{$maxRetries} failed: " . $e->getMessage());
+                
+                if ($attempt < $maxRetries) {
+                    sleep($retryDelay);
+                } else {
+                    throw $e;
+                }
+            }
+        }
     }
 }
