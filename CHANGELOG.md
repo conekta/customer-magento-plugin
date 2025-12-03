@@ -1,4 +1,4 @@
-### 5.3.0 - 2025/11/04
+### 5.3.0 - 2025/12/03
 New feature: Pay By Bank payment method
 - Added complete support for the new "Pay By Bank" payment method
 - Implementation of administrative configuration for Pay By Bank
