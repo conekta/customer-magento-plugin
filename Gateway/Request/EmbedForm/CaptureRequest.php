@@ -99,6 +99,7 @@ class CaptureRequest implements BuilderInterface
         $request['iframe_payment'] = $iframePayment;
         $request['order_id'] = $iframeOrderId;
         $request['txn_id'] = $txnId;
+        $request['quote_id'] = $payment->getAdditionalInformation('quote_id');
 
         $request['conekta_customer_id'] = $payment->getAdditionalInformation('conekta_customer_id');
 

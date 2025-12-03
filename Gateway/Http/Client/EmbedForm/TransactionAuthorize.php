@@ -8,6 +8,7 @@ use Conekta\Payments\Helper\Data as ConektaHelper;
 use Conekta\Payments\Logger\Logger as ConektaLogger;
 use Conekta\Payments\Api\Data\ConektaSalesOrderInterface;
 use Conekta\Payments\Model\ConektaSalesOrderFactory;
+use Conekta\Payments\Model\ConektaQuoteFactory;
 use Conekta\Payments\Model\Ui\EmbedForm\ConfigProvider;
 use Magento\Payment\Gateway\Http\ClientInterface;
 use Magento\Payment\Gateway\Http\TransferInterface;
@@ -39,6 +40,11 @@ class TransactionAuthorize implements ClientInterface
     protected $conektaSalesOrderFactory;
 
     /**
+     * @var ConektaQuoteFactory
+     */
+    protected $conektaQuoteFactory;
+
+    /**
      * @var ConektaApiClient
      */
     private $conektaApiClient;
@@ -54,13 +60,15 @@ class TransactionAuthorize implements ClientInterface
      * @param ConektaLogger $conektaLogger
      * @param ConektaApiClient $conektaApiClient
      * @param ConektaSalesOrderFactory $conektaSalesOrderFactory
+     * @param ConektaQuoteFactory $conektaQuoteFactory
      */
     public function __construct(
         Logger                   $logger,
         ConektaHelper            $conektaHelper,
         ConektaLogger            $conektaLogger,
         ConektaApiClient         $conektaApiClient,
-        ConektaSalesOrderFactory $conektaSalesOrderFactory
+        ConektaSalesOrderFactory $conektaSalesOrderFactory,
+        ConektaQuoteFactory      $conektaQuoteFactory
     )
     {
         $this->_conektaHelper = $conektaHelper;
@@ -68,6 +76,7 @@ class TransactionAuthorize implements ClientInterface
         $this->_conektaLogger->info('HTTP Client TransactionCapture :: __construct');
         $this->logger = $logger;
         $this->conektaSalesOrderFactory = $conektaSalesOrderFactory;
+        $this->conektaQuoteFactory = $conektaQuoteFactory;
         $this->conektaApiClient = $conektaApiClient;
     }
 
@@ -83,11 +92,26 @@ class TransactionAuthorize implements ClientInterface
         $this->_conektaLogger->info('HTTP Client TransactionCapture :: placeRequest', $request);
 
         $txnId = $request['txn_id'];
+        $conektaOrderId = $request['order_id'];
+
+        // For Pay by Bank, order_id comes as 'pending' from frontend
+        // We need to get the real conekta_order_id from conekta_quote table
+        if ($conektaOrderId === 'pending' && isset($request['quote_id'])) {
+            $quoteId = $request['quote_id'];
+            $conektaQuote = $this->conektaQuoteFactory->create()->load($quoteId, 'quote_id');
+            if ($conektaQuote->getId() && $conektaQuote->getConektaOrderId()) {
+                $conektaOrderId = $conektaQuote->getConektaOrderId();
+                $this->_conektaLogger->info('PayByBank: Retrieved real conekta_order_id from quote', [
+                    'quote_id' => $quoteId,
+                    'conekta_order_id' => $conektaOrderId
+                ]);
+            }
+        }
 
         $this->conektaSalesOrderFactory
             ->create()
             ->setData([
-                ConektaSalesOrderInterface::CONEKTA_ORDER_ID => $request['order_id'],
+                ConektaSalesOrderInterface::CONEKTA_ORDER_ID => $conektaOrderId,
                 ConektaSalesOrderInterface::INCREMENT_ORDER_ID => $request['metadata']['order_id']
             ])
             ->save();
@@ -127,7 +151,7 @@ class TransactionAuthorize implements ClientInterface
                         $response,
                         1,
                         $txnId,
-                        $request['order_id']
+                        $conektaOrderId
                     ) + [
                         'error_code' => '',
                         'payment_method_details' => $request['payment_method_details']

@@ -121,11 +121,6 @@ class Index extends Action implements CsrfAwareActionInterface
                     $this->_conektaLogger->info('BNPL payment detected - adding 25 second delay at start of execute');
                     sleep(25);
                 } 
-
-                if ($this->isPayByBankPayment($paymentMethodObject)) {
-                    $this->_conektaLogger->info('Pay By Bank payment detected - adding 25 second delay at start of execute');
-                    sleep(15);
-                }
             }
             
             if (!$body || $this->getRequest()->getMethod() !== 'POST') {
