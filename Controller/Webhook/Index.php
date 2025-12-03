@@ -120,7 +120,9 @@ class Index extends Action implements CsrfAwareActionInterface
                 if ($this->isBnplPayment($paymentMethodObject)) {
                     $this->_conektaLogger->info('BNPL payment detected - adding 25 second delay at start of execute');
                     sleep(25);
-                } 
+                } elseif ($this->isPayByBankPayment($paymentMethodObject)) {
+                    $this->_conektaLogger->info('Pay By Bank payment detected - will use retry logic');
+                }
             }
             
             if (!$body || $this->getRequest()->getMethod() !== 'POST') {
@@ -158,11 +160,14 @@ class Index extends Action implements CsrfAwareActionInterface
                     $chargesData = $body['data']['object']['charges']['data'] ?? [];
                     $paymentMethodObject = $chargesData[0]['payment_method']['object'] ?? null;
 
-                    if ($paymentMethodObject !== null && $this->isCardPayment($paymentMethodObject)) {
+                    if ($paymentMethodObject !== null && $this->isPayByBankPayment($paymentMethodObject)) {
+                        $this->processPayByBankPayment($body);
+                    } elseif ($paymentMethodObject !== null && $this->isCardPayment($paymentMethodObject)) {
                         $this->missingOrder->recover_order($body);
+                        $this->webhookRepository->payOrder($body);
+                    } else {
+                        $this->webhookRepository->payOrder($body);
                     }
-
-                    $this->webhookRepository->payOrder($body);
                     break;
                 
                 case self::EVENT_ORDER_EXPIRED:
