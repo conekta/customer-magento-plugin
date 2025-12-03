@@ -14,10 +14,13 @@ define(
         'Magento_Checkout/js/model/shipping-save-processor',
         'Magento_Checkout/js/action/set-billing-address',
         'Magento_Checkout/js/model/cart/totals-processor/default',
-        'Magento_Checkout/js/model/cart/cache'
+        'Magento_Checkout/js/model/cart/cache',
+        'Magento_Checkout/js/action/redirect-on-success'
     ],
-    function (ko, CONEKTA, conektaCheckout, Component, $, quote, customer, validator, storage, uiRegistry, domRe, shSP, sBA, totalsProcessor, cartCache) {
+    function (ko, CONEKTA, conektaCheckout, Component, $, quote, customer, validator, storage, uiRegistry, domRe, shSP, sBA, totalsProcessor, cartCache, redirectOnSuccessAction) {
         'use strict';
+
+        let timeoutWindow = null;
 
         return Component.extend({
             defaults: {
@@ -32,6 +35,8 @@ define(
                     isLoggedIn: '',
                 }
             },
+            shouldDelaySuccessRedirect: false,
+            payByBankRedirectDelay: 2000,
 
             getFormTemplate: function () {
                 return 'Conekta_Payments/payment/embedform/form'
@@ -126,7 +131,6 @@ define(
                                 self.reRender();
                             });
                     } catch (error) {
-                        console.log(error)
                         self.reRender();
                     }
                 }
@@ -247,7 +251,6 @@ define(
                 };
 
                 if (this.validateRenderEmbedForm()) {
-                    console.log('before render iframe')
                     this.validateCheckoutSession()
                     $.ajax({
                         type: 'POST',
@@ -267,7 +270,6 @@ define(
                             }
                         },
                         error: function (xhr, status, error) {
-                            console.error(status);
                             self.conektaError(xhr.responseJSON.error_message);
                             self.isFormLoading(false);
                         }
@@ -294,7 +296,6 @@ define(
 
                         },
                         onCreateTokenError: function (error) {
-                            console.error(error);
                         },
                         onFinalizePayment: function (event) {
                             self.iframOrderData(event);
@@ -303,6 +304,53 @@ define(
                         onErrorPayment: function(a) {
                             self.conektaError("Ocurrió un error al procesar el pago. Por favor, inténtalo de nuevo.");
                         },
+                        onPayByBankWaitingPay: function(data) {
+                            var provider = data.provider || 'bbva';
+                            var redirectUrl = data.redirectUrl || '';
+                            var deepLink = data.deepLink || '';
+                            var reference = data.reference || '';
+                            self.shouldDelaySuccessRedirect = true;
+                            
+                            try {
+                                localStorage.setItem('conekta_pbb_data', JSON.stringify({
+                                    type: 'payByBank',
+                                    redirect_url: redirectUrl,
+                                    deep_link: deepLink,
+                                    reference: reference,
+                                    provider: provider,
+                                    timestamp: Date.now()
+                                }));
+                            } catch (e) {}
+                            
+                            var payByBankEvent = {
+                                charge: {
+                                    id: 'pending',
+                                    order_id: 'pending',
+                                    payment_method: {
+                                        type: 'payByBank',
+                                        brand: provider,
+                                        last4: '0000',
+                                        card_type: 'debit',
+                                        redirect_url: redirectUrl,
+                                        deep_link: deepLink,
+                                        reference: reference
+                                    }
+                                }
+                            };
+
+                            if (deepLink && self.isMobileDevice()) {
+                                window.open(deepLink, '_blank');
+                            }
+
+                            const delay = self.payByBankRedirectDelay;
+
+                            if(timeoutWindow) clearTimeout(timeoutWindow);
+                            
+                            timeoutWindow = setTimeout(function(){
+                                self.iframOrderData(payByBankEvent);
+                                self.beforePlaceOrder();
+                            }, delay);
+                        }
                     });
 
                     $('#conektaIframeContainer').find('iframe').attr('data-cy', 'the-frame');
@@ -332,7 +380,10 @@ define(
                             'txn_id': params.charge.id,
                             'card_type': params.charge.payment_method.card_type,
                             'card_token': $("#" + this.getCode() + "_card_token").val(),
-                            'iframe_payment': true
+                            'iframe_payment': true,
+                            'redirect_url': params.charge.payment_method.redirect_url || '',
+                            'deep_link': params.charge.payment_method.deep_link || '',
+                            'reference': params.charge.payment_method.reference || ''
                         }
                     };
                     return data;
@@ -363,6 +414,23 @@ define(
                 if (this.iframOrderData() !== '') {
                     return self.placeOrder();
                 }
+            },
+
+            afterPlaceOrder: function () {
+                var self = this;
+                if (this.shouldDelaySuccessRedirect) {
+                    var delay = this.payByBankRedirectDelay;
+                    setTimeout(function () {
+                        self.redirectToSuccessPage();
+                    }, delay);
+                    this.shouldDelaySuccessRedirect = false;
+                } else {
+                    return this._super();
+                }
+            },
+
+            redirectToSuccessPage: function () {
+                redirectOnSuccessAction.execute();
             },
 
             validate: function () {
@@ -428,6 +496,10 @@ define(
 
             isEmpty: function (obj) {
                 return obj === undefined || obj === null || obj === ''
+            },
+
+            isMobileDevice: function() {
+                return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
             }
         });
     }

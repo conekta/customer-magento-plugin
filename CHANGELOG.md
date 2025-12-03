@@ -1,3 +1,12 @@
+### 5.3.0 - 2025/12/03
+New feature: Pay By Bank payment method
+- Added complete support for the new "Pay By Bank" payment method
+- Implementation of administrative configuration for Pay By Bank
+- New information blocks and UI components for Pay By Bank
+- Integration with Conekta API to process bank payments
+- Specific validators and builders for Pay By Bank transactions
+- Improved user experience during the bank payment process
+
 ### 5.2.3 - 2025/09/24
 - Corrected plugin version number across various files.
 ### 5.2.2 - 2025/09/24

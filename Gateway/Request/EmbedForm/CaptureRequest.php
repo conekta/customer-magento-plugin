@@ -99,6 +99,7 @@ class CaptureRequest implements BuilderInterface
         $request['iframe_payment'] = $iframePayment;
         $request['order_id'] = $iframeOrderId;
         $request['txn_id'] = $txnId;
+        $request['quote_id'] = $payment->getAdditionalInformation('quote_id');
 
         $request['conekta_customer_id'] = $payment->getAdditionalInformation('conekta_customer_id');
 
@@ -132,6 +133,25 @@ class CaptureRequest implements BuilderInterface
                 $charge['payment_method']['expires_at'] = $expireAt;
                 break;
             case ConfigProvider::PAYMENT_METHOD_BNPL:
+                break;
+            case ConfigProvider::PAYMENT_METHOD_PAY_BY_BANK:
+                $expirationMinutes = $this->_conektaHelper->getPayByBankExpirationMinutes();
+                $expireAt = time() + ($expirationMinutes * 60);
+                $charge['payment_method']['expires_at'] = $expireAt;
+                
+                $redirectUrl = $payment->getAdditionalInformation('redirect_url');
+                $deepLink = $payment->getAdditionalInformation('deep_link');
+                $reference = $payment->getAdditionalInformation('reference');
+                
+                if ($redirectUrl) {
+                    $charge['payment_method']['redirect_url'] = $redirectUrl;
+                }
+                if ($deepLink) {
+                    $charge['payment_method']['deep_link'] = $deepLink;
+                }
+                if ($reference) {
+                    $charge['payment_method']['reference'] = $reference;
+                }
                 break;
         }
 

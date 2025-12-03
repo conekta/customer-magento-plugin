@@ -470,4 +470,82 @@
         </arguments>
     </type>
     <!-- ******************************************* Bank Transfer End *********************************************** -->
+
+    <!-- +++++++++++++++++++++++++++++++++++++++++++++ BNPL +++++++++++++++++++++++++++++++++++++++++++++++++ -->
+    <!-- Payment Method Facade configuration -->
+    <virtualType name="ConektaPaymentsBnplFacade" type="Magento\Payment\Model\Method\Adapter">
+        <arguments>
+            <argument name="code" xsi:type="string">conekta_bnpl</argument>
+            <argument name="formBlockType" xsi:type="string">Magento\Payment\Block\Form</argument>
+            <argument name="infoBlockType" xsi:type="string">Conekta\Payments\Block\Bnpl\BnplInfo</argument>
+            <argument name="valueHandlerPool" xsi:type="object">ConektaPaymentsBnplValueHandlerPool</argument>
+        </arguments>
+    </virtualType>
+
+    <!-- Configuration reader -->
+    <virtualType name="ConektaPaymentsBnplConfig" type="Magento\Payment\Gateway\Config\Config">
+        <arguments>
+            <argument name="methodCode" xsi:type="string">conekta_bnpl</argument>
+        </arguments>
+    </virtualType>
+
+    <!-- Value handlers infrastructure -->
+    <virtualType name="ConektaPaymentsBnplValueHandlerPool" type="Magento\Payment\Gateway\Config\ValueHandlerPool">
+        <arguments>
+            <argument name="handlers" xsi:type="array">
+                <item name="default" xsi:type="string">ConektaPaymentsBnplConfigValueHandler</item>
+            </argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="ConektaPaymentsBnplConfigValueHandler" type="Magento\Payment\Gateway\Config\ConfigValueHandler">
+        <arguments>
+            <argument name="configInterface" xsi:type="object">ConektaPaymentsBnplConfig</argument>
+        </arguments>
+    </virtualType>
+
+    <type name="Conekta\Payments\Block\Bnpl\BnplInfo">
+        <arguments>
+            <argument name="config" xsi:type="object">ConektaPaymentsBnplConfig</argument>
+        </arguments>
+    </type>
+    <!-- ******************************************* BNPL End *********************************************** -->
+
+    <!-- +++++++++++++++++++++++++++++++++++++++++++++ Pay By Bank +++++++++++++++++++++++++++++++++++++++++++++++++ -->
+    <!-- Payment Method Facade configuration -->
+    <virtualType name="ConektaPaymentsPayByBankFacade" type="Magento\Payment\Model\Method\Adapter">
+        <arguments>
+            <argument name="code" xsi:type="string">conekta_pay_by_bank</argument>
+            <argument name="formBlockType" xsi:type="string">Magento\Payment\Block\Form</argument>
+            <argument name="infoBlockType" xsi:type="string">Conekta\Payments\Block\PayByBank\PayByBankInfo</argument>
+            <argument name="valueHandlerPool" xsi:type="object">ConektaPaymentsPayByBankValueHandlerPool</argument>
+        </arguments>
+    </virtualType>
+
+    <!-- Configuration reader -->
+    <virtualType name="ConektaPaymentsPayByBankConfig" type="Magento\Payment\Gateway\Config\Config">
+        <arguments>
+            <argument name="methodCode" xsi:type="string">conekta_pay_by_bank</argument>
+        </arguments>
+    </virtualType>
+
+    <!-- Value handlers infrastructure -->
+    <virtualType name="ConektaPaymentsPayByBankValueHandlerPool" type="Magento\Payment\Gateway\Config\ValueHandlerPool">
+        <arguments>
+            <argument name="handlers" xsi:type="array">
+                <item name="default" xsi:type="string">ConektaPaymentsPayByBankConfigValueHandler</item>
+            </argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="ConektaPaymentsPayByBankConfigValueHandler" type="Magento\Payment\Gateway\Config\ConfigValueHandler">
+        <arguments>
+            <argument name="configInterface" xsi:type="object">ConektaPaymentsPayByBankConfig</argument>
+        </arguments>
+    </virtualType>
+
+    <type name="Conekta\Payments\Block\PayByBank\PayByBankInfo">
+        <arguments>
+            <argument name="config" xsi:type="object">ConektaPaymentsPayByBankConfig</argument>
+        </arguments>
+    </type>
+    <!-- ******************************************* Pay By Bank End *********************************************** -->
 </config>

@@ -116,9 +116,12 @@ class Index extends Action implements CsrfAwareActionInterface
             
             if ($body && isset($body['data']['object']['charges']['data'][0]['payment_method']['object'])) {
                 $paymentMethodObject = $body['data']['object']['charges']['data'][0]['payment_method']['object'];
+                
                 if ($this->isBnplPayment($paymentMethodObject)) {
                     $this->_conektaLogger->info('BNPL payment detected - adding 25 second delay at start of execute');
                     sleep(25);
+                } elseif ($this->isPayByBankPayment($paymentMethodObject)) {
+                    $this->_conektaLogger->info('Pay By Bank payment detected - will use retry logic');
                 }
             }
             
@@ -156,11 +159,15 @@ class Index extends Action implements CsrfAwareActionInterface
                 case self::EVENT_ORDER_PAID:
                     $chargesData = $body['data']['object']['charges']['data'] ?? [];
                     $paymentMethodObject = $chargesData[0]['payment_method']['object'] ?? null;
-                    
-                    if ($paymentMethodObject !== null && $this->isCardPayment($paymentMethodObject)){
+
+                    if ($paymentMethodObject !== null && $this->isPayByBankPayment($paymentMethodObject)) {
+                        $this->processPayByBankPayment($body);
+                    } elseif ($paymentMethodObject !== null && $this->isCardPayment($paymentMethodObject)) {
                         $this->missingOrder->recover_order($body);
+                        $this->webhookRepository->payOrder($body);
+                    } else {
+                        $this->webhookRepository->payOrder($body);
                     }
-                    $this->webhookRepository->payOrder($body);
                     break;
                 
                 case self::EVENT_ORDER_EXPIRED:
@@ -211,4 +218,42 @@ class Index extends Action implements CsrfAwareActionInterface
         return $paymentMethod === "bnpl_payment";
     }
 
+    /**
+     * Check if payment method is Pay By Bank
+     *
+     * @param string|null $paymentMethod
+     * @return bool
+     */
+    private function isPayByBankPayment(?string $paymentMethod): bool {
+        return $paymentMethod === "pay_by_bank_payment";
+    }
+
+    /**
+     * Process Pay By Bank payment with retry fallback
+     *
+     * @param array $body
+     * @return void
+     * @throws EntityNotFoundException
+     */
+    private function processPayByBankPayment(array $body): void
+    {
+        $maxRetries = 3;
+        $retryDelay = 5;
+        
+        for ($attempt = 1; $attempt <= $maxRetries; $attempt++) {
+            try {
+                $this->missingOrder->recover_order($body);
+                $this->webhookRepository->payOrder($body);
+                return;
+            } catch (EntityNotFoundException $e) {
+                $this->_conektaLogger->info("PayByBank attempt {$attempt}/{$maxRetries} failed: " . $e->getMessage());
+                
+                if ($attempt < $maxRetries) {
+                    sleep($retryDelay);
+                } else {
+                    throw $e;
+                }
+            }
+        }
+    }
 }

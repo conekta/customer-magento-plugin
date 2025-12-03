@@ -1,12 +1,108 @@
 <?php /** @var $block \Conekta\Payments\Block\Info\Success */ ?>
 
 <div class="checkout-success">
+    <?php
+    // Check if we have Pay By Bank data in offline_info to avoid duplicate rendering
+    $hasPayByBankOfflineInfo = false;
+    if (in_array($block->getMethod(), ["conekta_ef"])):
+        $data = $block->getOfflineInfo();
+        if (!empty($data) && isset($data["type"]) && in_array($data["type"], ['payByBank'])):
+            $hasPayByBankOfflineInfo = true;
+        endif;
+    endif;
+    ?>
+    
+    <div id="pbb-container-js"></div>
+ 
+    <script type="text/javascript">
+        (function() {
+            // Skip JavaScript rendering if PHP section will handle it
+            var hasOfflineInfo = <?= $hasPayByBankOfflineInfo ? 'true' : 'false'; ?>;
+            if (hasOfflineInfo) {
+                // Clean up localStorage since PHP section is handling the display
+                localStorage.removeItem('conekta_pbb_data');
+                return;
+            }
+            
+            var pbbDataFromStorage = localStorage.getItem('conekta_pbb_data');
+            if (pbbDataFromStorage) {
+                try {
+                    var parsedData = JSON.parse(pbbDataFromStorage);
+                    var fiveMinutesAgo = Date.now() - (5 * 60 * 1000);
+                    
+                    if (parsedData.timestamp && parsedData.timestamp > fiveMinutesAgo && parsedData.type === 'payByBank') {
+                        var redirectUrl = parsedData.redirect_url || '';
+                        var deepLink = parsedData.deep_link || '';
+                        var reference = parsedData.reference || '<?= $block->escapeJs($block->getOrder()->getIncrementId()); ?>';
+                        
+                        var html = '<h5><?= $block->escapeJs(__('Instructions:')); ?></h5>';
+                        html += '<table class="data" style="margin: 20px; -webkit-margin-start: 0;"><tbody>';
+                        html += '<tr><td colspan="2" style="text-align: center; padding: 30px 20px;">';
+                        html += '<div style="max-width: 500px; margin: 0 auto;">';
+                        html += '<div style="margin-bottom: 25px; padding: 15px; background-color: #f8f9fa; border-radius: 8px;">';
+                        html += '<p style="font-size: 14px; color: #666; margin: 0 0 5px 0;"><?= $block->escapeJs(__('Referencia de pago:')); ?></p>';
+                        html += '<p style="font-size: 18px; font-weight: bold; color: #333; margin: 0;">' + reference + '</p>';
+                        html += '</div>';
+                        html += '<h3 style="font-size: 20px; margin-bottom: 15px; color: #333; font-weight: 600;">';
+                        html += '<?= $block->escapeJs(__('Completa el pago en tu app BBVA para finalizar tu compra')); ?>';
+                        html += '</h3>';
+                        html += '<p style="font-size: 14px; color: #666; margin-bottom: 20px;">';
+                        html += '<?= $block->escapeJs(__('Aquí te avisaremos cuando esté listo.')); ?>';
+                        html += '</p>';
+                        html += '<p style="font-size: 16px; color: #333; margin-bottom: 20px; font-weight: 500;">';
+                        html += '<?= $block->escapeJs(__('¿Aún no lo has completado?')); ?>';
+                        html += '</p>';
+                        html += '<p style="font-size: 12px; color: #999; margin-bottom: 25px; line-height: 1.5;">';
+                        html += '<?= $block->escapeJs(__('Al continuar estoy aceptando la política de privacidad del servicio.')); ?>';
+                        html += '</p>';
+                        
+                        if (redirectUrl || deepLink) {
+                            html += '<button id="payByBankButtonJs" ';
+                            html += 'style="background-color: #004481; color: white; padding: 14px 40px; border: none; ';
+                            html += 'border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; ';
+                            html += 'transition: all 0.3s; box-shadow: 0 2px 4px rgba(0,0,0,0.1); width: 100%; max-width: 300px;">';
+                            html += '<?= $block->escapeJs(__('Abrir app BBVA')); ?>';
+                            html += '</button>';
+                        }
+                        
+                        html += '</div></td></tr></tbody></table>';
+                        
+                        document.getElementById('pbb-container-js').innerHTML = html;
+                        
+                        setTimeout(function() {
+                            var btn = document.getElementById('payByBankButtonJs');
+                            if (btn) {
+                                btn.addEventListener('click', function() {
+                                    var isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+                                    var url = (isMobile && deepLink) ? deepLink : redirectUrl;
+                                    if (url) window.open(url, '_blank', 'noopener,noreferrer');
+                                });
+                                
+                                btn.addEventListener('mouseenter', function() {
+                                    this.style.backgroundColor = '#003366';
+                                    this.style.transform = 'translateY(-2px)';
+                                    this.style.boxShadow = '0 4px 8px rgba(0,0,0,0.2)';
+                                });
+                                btn.addEventListener('mouseleave', function() {
+                                    this.style.backgroundColor = '#004481';
+                                    this.style.transform = 'translateY(0)';
+                                    this.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
+                                });
+                            }
+                        }, 100);
+                    }
+                    localStorage.removeItem('conekta_pbb_data');
+                } catch (e) {}
+            }
+        })();
+    </script>
 
     <?php
 
     if (in_array($block->getMethod(), ["conekta_ef"])):
         $data = $block->getOfflineInfo();
-        if (!empty($data) && isset($data["type"]) && in_array($data["type"], ['oxxo', 'cash', 'spei', 'bankTransfer', 'bnpl'])):
+        
+        if (!empty($data) && isset($data["type"]) && in_array($data["type"], ['oxxo', 'cash', 'spei', 'bankTransfer', 'bnpl', 'payByBank'])):
         ?>
 
         <h5><?= /* @noEscape */
@@ -86,6 +182,91 @@
                             <strong><?= /* @noEscape */
                                 __('Expires at:'); ?></strong>
                             <?= $block->escapeHtml(date("Y-m-d", (integer)$data["data"]["expires_at"])); ?>
+                        </td>
+                    </tr>
+                    <?php endif; ?>
+                    <?php
+                    break;
+                case "payByBank":
+                    $redirectUrl = $data["data"]["redirect_url"] ?? null;
+                    $deepLink = $data["data"]["deep_link"] ?? null;
+                    $reference = $data["data"]["reference"] ?? $block->getOrder()->getIncrementId();
+                    ?>
+                    <tr>
+                        <td colspan="2" style="text-align: center; padding: 30px 20px;">
+                            <div style="max-width: 500px; margin: 0 auto;">
+                                <div style="margin-bottom: 25px; padding: 15px; background-color: #f8f9fa; border-radius: 8px;">
+                                    <p style="font-size: 14px; color: #666; margin: 0 0 5px 0;">
+                                        <?= /* @noEscape */ __('Referencia de pago:'); ?>
+                                    </p>
+                                    <p style="font-size: 18px; font-weight: bold; color: #333; margin: 0;">
+                                        <?= $block->escapeHtml($reference); ?>
+                                    </p>
+                                </div>
+                                
+                                <h3 style="font-size: 20px; margin-bottom: 15px; color: #333; font-weight: 600;">
+                                    <?= /* @noEscape */ __('Completa el pago en tu app BBVA para finalizar tu compra'); ?>
+                                </h3>
+                                
+                                <p style="font-size: 14px; color: #666; margin-bottom: 20px;">
+                                    <?= /* @noEscape */ __('Aquí te avisaremos cuando esté listo.'); ?>
+                                </p>
+                                
+                                <p style="font-size: 16px; color: #333; margin-bottom: 20px; font-weight: 500;">
+                                    <?= /* @noEscape */ __('¿Aún no lo has completado?'); ?>
+                                </p>
+                                
+                                <p style="font-size: 12px; color: #999; margin-bottom: 25px; line-height: 1.5;">
+                                    <?= /* @noEscape */ __('Al continuar estoy aceptando la política de privacidad del servicio.'); ?>
+                                </p>
+                                
+                                <?php if ($redirectUrl || $deepLink): ?>
+                                <button 
+                                    id="payByBankButtonPhp"
+                                    onclick="openPayByBank()"
+                                    style="background-color: #004481; color: white; padding: 14px 40px; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; transition: all 0.3s; box-shadow: 0 2px 4px rgba(0,0,0,0.1); width: 100%; max-width: 300px;">
+                                    <?= /* @noEscape */ __('Abrir app BBVA'); ?>
+                                </button>
+                                
+                                <script type="text/javascript">
+                                    function openPayByBank() {
+                                        var isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+                                        var url = null;
+                                        
+                                        if (isMobile && '<?= $block->escapeJs($deepLink); ?>') {
+                                            url = '<?= $block->escapeJs($deepLink); ?>';
+                                        } 
+                                        else if ('<?= $block->escapeJs($redirectUrl); ?>') {
+                                            url = '<?= $block->escapeJs($redirectUrl); ?>';
+                                        }
+                                        
+                                        if (url) {
+                                            window.open(url, '_blank', 'noopener,noreferrer');
+                                        }
+                                    }
+                                    
+                                    document.getElementById('payByBankButtonPhp').addEventListener('mouseenter', function() {
+                                        this.style.backgroundColor = '#003366';
+                                        this.style.transform = 'translateY(-2px)';
+                                        this.style.boxShadow = '0 4px 8px rgba(0,0,0,0.2)';
+                                    });
+                                    document.getElementById('payByBankButtonPhp').addEventListener('mouseleave', function() {
+                                        this.style.backgroundColor = '#004481';
+                                        this.style.transform = 'translateY(0)';
+                                        this.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
+                                    });
+                                </script>
+                                <?php endif; ?>
+                            </div>
+                        </td>
+                    </tr>
+                    <?php if (isset($data["data"]["expires_at"]) && !empty($data["data"]["expires_at"])): ?>
+                    <tr>
+                        <td colspan="2" style="text-align: center; padding-top: 15px;">
+                            <small style="color: #999;">
+                                <strong><?= /* @noEscape */ __('Expira el:'); ?></strong>
+                                <?= $block->escapeHtml($block->formatDateMexicoTimezone((integer)$data["data"]["expires_at"])); ?>
+                            </small>
                         </td>
                     </tr>
                     <?php endif; ?>

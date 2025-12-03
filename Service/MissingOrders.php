@@ -174,6 +174,7 @@ class MissingOrders
                 ];
             case "bank_transfer_payment":
             case "bnpl_payment":
+            case "pay_by_bank_payment":
             case "cash_payment":
                 return [];
         }
@@ -200,6 +201,8 @@ class MissingOrders
                 return ConfigProvider::PAYMENT_METHOD_BANK_TRANSFER;
             case "bnpl_payment":
                 return ConfigProvider::PAYMENT_METHOD_BNPL;
+            case "pay_by_bank_payment":
+                return ConfigProvider::PAYMENT_METHOD_PAY_BY_BANK;
         }
         return "";
     }

@@ -52,6 +52,7 @@ class Webhook implements ObserverInterface
             || $this->_conektaHelper->isBankTransferEnabled()
             || $this->_conektaHelper->isCreditCardEnabled()
             || $this->_conektaHelper->isBnplEnabled()
+            || $this->_conektaHelper->isPayByBankEnabled()
         ) {
             $this->config->createWebhook();
         }

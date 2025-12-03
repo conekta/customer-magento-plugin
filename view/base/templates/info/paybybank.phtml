@@ -1,0 +1,57 @@
+<?php
+$title = $block->escapeHtml($block->getMethod()->getTitle());
+$payByBankData = $block->getDataPayByBank();
+?>
+
+<dl class="payment-method">
+    <dt class="title"><?= /* @noEscape */ $title; ?></dt>
+    <?php if ($payByBankData) { ?>
+    <dd style="margin: 0 !important; -webkit-margin-start: 0 !important;">
+        <table class="data-table admin__table-secondary">
+            <tbody>
+                <?php if (isset($payByBankData['reference']) && !empty($payByBankData['reference'])): ?>
+                <tr>
+                    <th><strong><?= /* @noEscape */ __('Reference Number:'); ?></strong></th>
+                    <td>
+                        <?= $block->escapeHtml($payByBankData['reference']); ?>
+                    </td>
+                </tr>
+                <?php endif; ?>
+                
+                <?php if (isset($payByBankData['expires_at']) && !empty($payByBankData['expires_at'])): ?>
+                <tr>
+                    <th><strong><?= /* @noEscape */ __('Expires at:'); ?></strong></th>
+                    <td>
+                        <?= $block->escapeHtml(date("Y-m-d H:i:s", (integer) $payByBankData['expires_at'])); ?>
+                    </td>
+                </tr>
+                <?php endif; ?>
+                
+                
+                <?php if (isset($payByBankData['status']) && !empty($payByBankData['status'])): ?>
+                <tr>
+                    <th><strong><?= /* @noEscape */ __('Payment Status:'); ?></strong></th>
+                    <td>
+                        <span class="payment-status status-<?= $block->escapeHtmlAttr(strtolower($payByBankData['status'])); ?>">
+                            <?= $block->escapeHtml(ucfirst($payByBankData['status'])); ?>
+                        </span>
+                    </td>
+                </tr>
+                <?php endif; ?>
+            </tbody>
+        </table>
+    </dd>
+    <?php } else { ?>
+    <dd style="margin: 0 !important; -webkit-margin-start: 0 !important;">
+        <p><?= /* @noEscape */ __('Pay By Bank payment information will be available after order confirmation.'); ?></p>
+        <?php if ($block->getInstructions()): ?>
+        <div class="payment-instructions">
+            <strong><?= /* @noEscape */ __('Instructions:'); ?></strong>
+            <p><?= $block->escapeHtml($block->getInstructions()); ?></p>
+        </div>
+        <?php endif; ?>
+    </dd>
+    <?php } ?>
+</dl>
+<?= $block->getChildHtml(); ?>
+

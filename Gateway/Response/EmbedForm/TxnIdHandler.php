@@ -54,6 +54,7 @@ class TxnIdHandler implements HandlerInterface
             case ConfigProvider::PAYMENT_METHOD_CASH:
             case ConfigProvider::PAYMENT_METHOD_BANK_TRANSFER:
             case ConfigProvider::PAYMENT_METHOD_BNPL:
+            case ConfigProvider::PAYMENT_METHOD_PAY_BY_BANK:
                 $this->handleOffline($payment, $response);
                 break;
         }
@@ -103,7 +104,10 @@ class TxnIdHandler implements HandlerInterface
         $order = $payment->getOrder();
 
         $payment->setTransactionId($response[self::TXN_ID]);
-        $payment->setAdditionalInformation('offline_info', $response['offline_info']);
+        
+        if (isset($response['offline_info'])) {
+            $payment->setAdditionalInformation('offline_info', $response['offline_info']);
+        }
 
         $order->setExtOrderId($response[self::ORD_ID]);
 

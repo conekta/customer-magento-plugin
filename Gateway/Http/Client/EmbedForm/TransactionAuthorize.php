@@ -8,6 +8,7 @@ use Conekta\Payments\Helper\Data as ConektaHelper;
 use Conekta\Payments\Logger\Logger as ConektaLogger;
 use Conekta\Payments\Api\Data\ConektaSalesOrderInterface;
 use Conekta\Payments\Model\ConektaSalesOrderFactory;
+use Conekta\Payments\Model\ConektaQuoteFactory;
 use Conekta\Payments\Model\Ui\EmbedForm\ConfigProvider;
 use Magento\Payment\Gateway\Http\ClientInterface;
 use Magento\Payment\Gateway\Http\TransferInterface;
@@ -39,6 +40,11 @@ class TransactionAuthorize implements ClientInterface
     protected $conektaSalesOrderFactory;
 
     /**
+     * @var ConektaQuoteFactory
+     */
+    protected $conektaQuoteFactory;
+
+    /**
      * @var ConektaApiClient
      */
     private $conektaApiClient;
@@ -54,13 +60,15 @@ class TransactionAuthorize implements ClientInterface
      * @param ConektaLogger $conektaLogger
      * @param ConektaApiClient $conektaApiClient
      * @param ConektaSalesOrderFactory $conektaSalesOrderFactory
+     * @param ConektaQuoteFactory $conektaQuoteFactory
      */
     public function __construct(
         Logger                   $logger,
         ConektaHelper            $conektaHelper,
         ConektaLogger            $conektaLogger,
         ConektaApiClient         $conektaApiClient,
-        ConektaSalesOrderFactory $conektaSalesOrderFactory
+        ConektaSalesOrderFactory $conektaSalesOrderFactory,
+        ConektaQuoteFactory      $conektaQuoteFactory
     )
     {
         $this->_conektaHelper = $conektaHelper;
@@ -68,6 +76,7 @@ class TransactionAuthorize implements ClientInterface
         $this->_conektaLogger->info('HTTP Client TransactionCapture :: __construct');
         $this->logger = $logger;
         $this->conektaSalesOrderFactory = $conektaSalesOrderFactory;
+        $this->conektaQuoteFactory = $conektaQuoteFactory;
         $this->conektaApiClient = $conektaApiClient;
     }
 
@@ -83,11 +92,26 @@ class TransactionAuthorize implements ClientInterface
         $this->_conektaLogger->info('HTTP Client TransactionCapture :: placeRequest', $request);
 
         $txnId = $request['txn_id'];
+        $conektaOrderId = $request['order_id'];
+
+        // For Pay by Bank, order_id comes as 'pending' from frontend
+        // We need to get the real conekta_order_id from conekta_quote table
+        if ($conektaOrderId === 'pending' && isset($request['quote_id'])) {
+            $quoteId = $request['quote_id'];
+            $conektaQuote = $this->conektaQuoteFactory->create()->load($quoteId, 'quote_id');
+            if ($conektaQuote->getId() && $conektaQuote->getConektaOrderId()) {
+                $conektaOrderId = $conektaQuote->getConektaOrderId();
+                $this->_conektaLogger->info('PayByBank: Retrieved real conekta_order_id from quote', [
+                    'quote_id' => $quoteId,
+                    'conekta_order_id' => $conektaOrderId
+                ]);
+            }
+        }
 
         $this->conektaSalesOrderFactory
             ->create()
             ->setData([
-                ConektaSalesOrderInterface::CONEKTA_ORDER_ID => $request['order_id'],
+                ConektaSalesOrderInterface::CONEKTA_ORDER_ID => $conektaOrderId,
                 ConektaSalesOrderInterface::INCREMENT_ORDER_ID => $request['metadata']['order_id']
             ])
             ->save();
@@ -98,11 +122,46 @@ class TransactionAuthorize implements ClientInterface
         //If is offline-like payment, add extra info needed
         if ($paymentMethod == ConfigProvider::PAYMENT_METHOD_CASH ||
             $paymentMethod == ConfigProvider::PAYMENT_METHOD_BANK_TRANSFER ||
-            $paymentMethod == ConfigProvider::PAYMENT_METHOD_BNPL
+            $paymentMethod == ConfigProvider::PAYMENT_METHOD_BNPL ||
+            $paymentMethod == ConfigProvider::PAYMENT_METHOD_PAY_BY_BANK
         ) {
             $response['offline_info'] = [];
+            
+            // Special handling for Pay By Bank with frontend data
+            if ($paymentMethod == ConfigProvider::PAYMENT_METHOD_PAY_BY_BANK) {
+                $hasRedirectUrl = isset($request['payment_method_details']['payment_method']['redirect_url']) && 
+                                  !empty($request['payment_method_details']['payment_method']['redirect_url']);
+                $hasDeepLink = isset($request['payment_method_details']['payment_method']['deep_link']) && 
+                               !empty($request['payment_method_details']['payment_method']['deep_link']);
+                
+                if ($txnId === 'pending' || $hasRedirectUrl || $hasDeepLink) {
+                    $expirationMinutes = $this->_conektaHelper->getPayByBankExpirationMinutes();
+
+                    $response['offline_info'] = [
+                        "type" => "payByBank",
+                        "data" => [
+                            "redirect_url" => $request['payment_method_details']['payment_method']['redirect_url'] ?? '',
+                            "deep_link" => $request['payment_method_details']['payment_method']['deep_link'] ?? '',
+                            "reference" => $request['payment_method_details']['payment_method']['reference'] ?? '',
+                            "expires_at" => time() + ($expirationMinutes * 60)
+                        ]
+                    ];
+                    // Skip API call for Pay By Bank when frontend data is available
+                    return $this->generateResponseForCode(
+                        $response,
+                        1,
+                        $txnId,
+                        $conektaOrderId
+                    ) + [
+                        'error_code' => '',
+                        'payment_method_details' => $request['payment_method_details']
+                    ];
+                }
+            }
+            
+            // Fetch offline info from Conekta API for all offline payment methods
             try {
-                $conektaOrder = $this->conektaApiClient->getOrderByID($request['order_id']);
+                $conektaOrder = $this->conektaApiClient->getOrderByID($conektaOrderId);
                 $charge = $conektaOrder->getCharges()->getData()[0];
 
                 $txnId = $charge->getID();
@@ -122,6 +181,16 @@ class TransactionAuthorize implements ClientInterface
                     $response['offline_info']['data']['bank_name'] = $paymentMethodResponse->getBank();
                 } elseif ($paymentMethod == ConfigProvider::PAYMENT_METHOD_BNPL) {
                     // BNPL does not have a reference
+                } elseif ($paymentMethod == ConfigProvider::PAYMENT_METHOD_PAY_BY_BANK) {
+                    if (method_exists($paymentMethodResponse, 'getDeepLink')) {
+                        $response['offline_info']['data']['deep_link'] = $paymentMethodResponse->getDeepLink();
+                    }
+                    if (method_exists($paymentMethodResponse, 'getRedirectUrl')) {
+                        $response['offline_info']['data']['redirect_url'] = $paymentMethodResponse->getRedirectUrl();
+                    }
+                    if (method_exists($paymentMethodResponse, 'getReference')) {
+                        $response['offline_info']['data']['reference'] = $paymentMethodResponse->getReference();
+                    }
                 }
             } catch (Exception $e) {
                 $this->_conektaLogger->error(
@@ -135,7 +204,7 @@ class TransactionAuthorize implements ClientInterface
             $response,
             1,
             $txnId,
-            $request['order_id']
+            $conektaOrderId
         );
         $response['error_code'] = '';
         $response['payment_method_details'] = $request['payment_method_details'];
