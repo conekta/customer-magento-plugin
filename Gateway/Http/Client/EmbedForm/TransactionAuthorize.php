@@ -161,7 +161,7 @@ class TransactionAuthorize implements ClientInterface
             
             // Fetch offline info from Conekta API for all offline payment methods
             try {
-                $conektaOrder = $this->conektaApiClient->getOrderByID($request['order_id']);
+                $conektaOrder = $this->conektaApiClient->getOrderByID($conektaOrderId);
                 $charge = $conektaOrder->getCharges()->getData()[0];
 
                 $txnId = $charge->getID();
@@ -204,7 +204,7 @@ class TransactionAuthorize implements ClientInterface
             $response,
             1,
             $txnId,
-            $request['order_id']
+            $conektaOrderId
         );
         $response['error_code'] = '';
         $response['payment_method_details'] = $request['payment_method_details'];
