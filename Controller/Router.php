@@ -61,7 +61,7 @@ class Router implements RouterInterface
         if ($pathRequest === '.well-known/apple-developer-merchantid-domain-association') {
             $request->setModuleName('conekta')->setControllerName('applepay')->setActionName('domainassociation');
             $request->setAlias(Url::REWRITE_REQUEST_PATH_ALIAS, $pathRequest);
-            return;
+            return $this->actionFactory->create(\Magento\Framework\App\Action\Forward::class);
         }
 
         $urlWebhook = $this->_conektaHelper->getUrlWebhookOrDefault();
@@ -72,6 +72,7 @@ class Router implements RouterInterface
         if ($pathRequest === $pathWebhook) {
             $request->setModuleName('conekta')->setControllerName('webhook')->setActionName('index');
             $request->setAlias(Url::REWRITE_REQUEST_PATH_ALIAS, $pathRequest);
+            return $this->actionFactory->create(\Magento\Framework\App\Action\Forward::class);
         }
     }
 }
