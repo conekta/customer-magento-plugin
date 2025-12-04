@@ -57,6 +57,13 @@ class Router implements RouterInterface
         
         $pathRequest = trim($request->getPathInfo(), '/');
 
+        // Handle Apple Pay domain association file
+        if ($pathRequest === '.well-known/apple-developer-merchantid-domain-association') {
+            $request->setModuleName('conekta')->setControllerName('applepay')->setActionName('domainassociation');
+            $request->setAlias(Url::REWRITE_REQUEST_PATH_ALIAS, $pathRequest);
+            return;
+        }
+
         $urlWebhook = $this->_conektaHelper->getUrlWebhookOrDefault();
         $urlWebhook = trim($urlWebhook, '/');
         $pathWebhook = substr($urlWebhook, -strlen($pathRequest));
