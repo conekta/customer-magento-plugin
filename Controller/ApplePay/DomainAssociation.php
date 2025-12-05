@@ -57,12 +57,11 @@ class DomainAssociation extends Action implements CsrfAwareActionInterface
      */
     public function execute()
     {
-        // Apple Pay domain association file content (hex encoded)
-        $hexContent = '7b2276657273696f6e223a312c227073704964223a2243353241324536454230304431323336323434354345323746364243453445413534424342363643393339333330344533343842303830333843453343333538222c22637265617465644f6e223a313736323532393837333132307d';
-        $content = hex2bin($hexContent);
+        // Apple Pay domain association file content
+        $content = '7b2276657273696f6e223a312c227073704964223a2243353241324536454230304431323336323434354345323746364243453445413534424342363643393339333330344533343842303830333843453343333538222c22637265617465644f6e223a313736323532393837333132307d';
         
         $resultRaw = $this->resultRawFactory->create();
-        $resultRaw->setHeader('Content-Type', 'application/json', true);
+        $resultRaw->setHeader('Content-Type', 'text/plain', true);
         $resultRaw->setContents($content);
         
         return $resultRaw;
