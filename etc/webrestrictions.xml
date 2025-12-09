@@ -7,4 +7,5 @@
 -->
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_WebsiteRestriction:etc/webrestrictions.xsd">
     <action path="conekta_webhook_index" type="generic" />
+    <action path="conekta_applepay_domainassociation" type="generic" />
 </config>

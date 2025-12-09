@@ -6,7 +6,7 @@
         "conekta/conekta-php": "v6.0.8"
     },
     "type": "magento2-module",
-    "version": "5.3.0",
+    "version": "5.3.1",
     "license": [
         "OSL-3.0",
         "AFL-3.0"

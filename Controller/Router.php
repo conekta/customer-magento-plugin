@@ -13,6 +13,11 @@ use Magento\Framework\Url;
 class Router implements RouterInterface
 {
     /**
+     * Apple Pay domain association path
+     */
+    private const APPLE_PAY_DOMAIN_ASSOCIATION_PATH = '.well-known/apple-developer-merchantid-domain-association';
+
+    /**
      * @var ActionFactory
      */
     protected ActionFactory $actionFactory;
@@ -57,6 +62,13 @@ class Router implements RouterInterface
         
         $pathRequest = trim($request->getPathInfo(), '/');
 
+        // Handle Apple Pay domain association file
+        if ($pathRequest === self::APPLE_PAY_DOMAIN_ASSOCIATION_PATH) {
+            $request->setModuleName('conekta')->setControllerName('applepay')->setActionName('domainassociation');
+            $request->setAlias(Url::REWRITE_REQUEST_PATH_ALIAS, $pathRequest);
+            return $this->actionFactory->create(\Magento\Framework\App\Action\Forward::class);
+        }
+
         $urlWebhook = $this->_conektaHelper->getUrlWebhookOrDefault();
         $urlWebhook = trim($urlWebhook, '/');
         $pathWebhook = substr($urlWebhook, -strlen($pathRequest));
@@ -65,6 +77,7 @@ class Router implements RouterInterface
         if ($pathRequest === $pathWebhook) {
             $request->setModuleName('conekta')->setControllerName('webhook')->setActionName('index');
             $request->setAlias(Url::REWRITE_REQUEST_PATH_ALIAS, $pathRequest);
+            return $this->actionFactory->create(\Magento\Framework\App\Action\Forward::class);
         }
     }
 }
