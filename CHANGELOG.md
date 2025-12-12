@@ -1,9 +1,10 @@
+### 5.3.2 - 2025/12/03
+- Fix Conekta lib for php 8.4
 ### 5.3.1 - 2025/12/03
 Apple Pay Domain Verification
 - Added endpoint for Apple Pay domain verification at `.well-known/apple-developer-merchantid-domain-association`
 - Implemented custom router handler for Apple Pay domain association file
 - Updated web restrictions to allow public access to domain verification endpoint
-- Fix Conekta lib for php 8.4
 
 ### 5.3.0 - 2025/12/03
 New feature: Pay By Bank payment method
