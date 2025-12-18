@@ -423,7 +423,7 @@ class Data extends Util
      * @throws LocalizedException
      * @throws NoSuchEntityException
      */
-    public function getMetadataAttributesConekta($items): array
+    public function getMetadataAttributesConekta(array $items): array
     {
         $productAttributes = $this->getMetadataAttributes('metadata_additional_products');
 

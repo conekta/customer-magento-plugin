@@ -42,7 +42,7 @@ class ConektaOrder extends Util
     /**
      * @var Quote|null
      */
-    protected $quote = null;
+    protected ?Quote $quote = null;
     /**
      * @var CustomerRepositoryInterface
      */
@@ -101,7 +101,7 @@ class ConektaOrder extends Util
      * @throws NoSuchEntityException
      * @throws InputMismatchException
      */
-    public function generateOrderParams($guestEmail): array
+    public function generateOrderParams(string $guestEmail): array
     {
         $this->conektaLogger->info('ConektaOrder.generateOrderParams init');
 
@@ -197,7 +197,7 @@ class ConektaOrder extends Util
             'expires_at'                   => $this->_conektaHelper->getExpiredAt(),
             'needs_shipping_contact'       => true
         ];
-        $validOrderWithCheckout['currency']= $this->_conektaHelper->getCurrencyCode();
+        $validOrderWithCheckout['currency'] = $this->_conektaHelper->getCurrencyCode();
         $validOrderWithCheckout['metadata'] = $this->getMetadataOrder($orderItems);
         
         return $validOrderWithCheckout;
@@ -313,7 +313,7 @@ class ConektaOrder extends Util
      * @throws LocalizedException
      * @throws NoSuchEntityException
      */
-    public function getMetadataOrder($orderItems): array
+    public function getMetadataOrder(array $orderItems): array
     {
         return array_merge(
             $this->_conektaHelper->getMagentoMetadata(),

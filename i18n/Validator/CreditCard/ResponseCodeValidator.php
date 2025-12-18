@@ -41,7 +41,7 @@ class ResponseCodeValidator extends AbstractValidator
      * @param array $response
      * @return bool
      */
-    private function isSuccessfulTransaction(array $response)
+    private function isSuccessfulTransaction(array $response): bool
     {
         return isset($response[self::RESULT_CODE])
         && $response[self::RESULT_CODE] !== TransactionCapture::FAILURE;
