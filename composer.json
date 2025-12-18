@@ -6,7 +6,7 @@
         "conekta/conekta-php": "dev-upgrade-php-generator"
     },
     "type": "magento2-module",
-    "version": "5.3.2",
+    "version": "5.3.3",
     "license": [
         "OSL-3.0",
         "AFL-3.0"
