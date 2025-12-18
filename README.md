@@ -27,7 +27,7 @@ php bin/magento setup:di:compile
 
 5. Enable plugin
 ```bash
-php bin/magento module:enable conekta_payments 
+php bin/magento module:enable Conekta_Payments 
 ```
 
 6. Update and/or enable cache
