@@ -89,7 +89,7 @@ class Logger
      * @param array $array
      * @return void
      */
-    public function debug(string $message, array $array = [])
+    public function debug(string $message, array $array = []): void
     {
         $this->logger->debug($message, $array);
     }
@@ -99,7 +99,7 @@ class Logger
      * @param array $orderParams
      * @return void
      */
-    public function critical(Exception $e, array $orderParams)
+    public function critical(Exception $e, array $orderParams): void
     {
         $this->logger->critical($e->getMessage(), $orderParams);
     }
