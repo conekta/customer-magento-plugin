@@ -15,6 +15,7 @@ use Conekta\Model\ChargeResponse;
 use Conekta\Model\ChargeUpdateRequest;
 use Conekta\Model\Customer;
 use Conekta\Model\CustomerResponse;
+use Conekta\Model\Error;
 use Conekta\Model\GetWebhooksResponse;
 use Conekta\Model\OrderRefundRequest;
 use Conekta\Model\OrderRequest;
@@ -179,7 +180,7 @@ class ConektaApiClient
     /**
      * @throws ApiException
      */
-    public function orderRefund(string $orderID, array $orderRefundData)
+    public function orderRefund(string $orderID, array $orderRefundData): OrderResponse|Error
     {
         $orderRefundRequest = new OrderRefundRequest($orderRefundData);
 

@@ -3,10 +3,10 @@
     "description": "Conekta payment gateway",
     "require": {
         "php": "^8.2 || ^8.3 || ^8.4",
-        "conekta/conekta-php": "v7.0.7"
+        "conekta/conekta-php": "v7.0.8"
     },
     "type": "magento2-module",
-    "version": "5.3.2",
+    "version": "5.3.3",
     "license": [
         "OSL-3.0",
         "AFL-3.0"

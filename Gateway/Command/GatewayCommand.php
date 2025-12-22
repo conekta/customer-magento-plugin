@@ -4,7 +4,6 @@ namespace Conekta\Payments\Gateway\Command;
 use Conekta\Payments\Logger\Logger as ConektaLogger;
 use Magento\Framework\Phrase;
 use Magento\Payment\Gateway\Command\CommandException;
-use Magento\Payment\Gateway\Command\ResultInterface;
 use Magento\Payment\Gateway\CommandInterface;
 use Magento\Payment\Gateway\Http\ClientException;
 use Magento\Payment\Gateway\Http\ClientInterface;
@@ -19,32 +18,32 @@ class GatewayCommand implements CommandInterface
     /**
      * @var BuilderInterface
      */
-    private $requestBuilder;
+    private BuilderInterface $requestBuilder;
 
     /**
      * @var TransferFactoryInterface
      */
-    private $transferFactory;
+    private TransferFactoryInterface $transferFactory;
 
     /**
      * @var ClientInterface
      */
-    private $client;
+    private ClientInterface $client;
 
     /**
-     * @var HandlerInterface
+     * @var ?HandlerInterface
      */
-    private $handler;
+    private ?HandlerInterface $handler;
 
     /**
-     * @var ValidatorInterface
+     * @var ?ValidatorInterface
      */
-    private $validator;
+    private ?ValidatorInterface $validator;
 
     /**
      * @var ConektaLogger
      */
-    private $_conektaLogger;
+    private ConektaLogger $_conektaLogger;
 
     /**
      * @param BuilderInterface $requestBuilder
@@ -80,9 +79,9 @@ class GatewayCommand implements CommandInterface
      * @throws ClientException
      * @throws ConverterException
      */
-    public function execute(array $commandSubject)
+    public function execute(array $commandSubject): void
     {
-        $this->_conektaLogger->info('Command GatewayCommand :: execute');
+        $this->_conektaLogger->info('Conekta Command GatewayCommand :: execute');
 
         // @TODO implement exceptions catching
         $transferO = $this->transferFactory->create(
@@ -102,17 +101,17 @@ class GatewayCommand implements CommandInterface
                 }
 
                 throw new CommandException(
-                    __(implode("; ", $errorMessages))
+                    !empty($errorMessages)
+                        ? __(implode(PHP_EOL, $errorMessages))
+                        : __('Transaction has been declined. Please try again later.')
                 );
             }
         }
 
-        if ($this->handler) {
-            $this->handler->handle(
-                $commandSubject,
-                $response
-            );
-        }
+        $this->handler?->handle(
+            $commandSubject,
+            $response
+        );
     }
 
     /**
@@ -121,10 +120,10 @@ class GatewayCommand implements CommandInterface
      * @param Phrase[] $fails
      * @return void
      */
-    private function logExceptions(array $fails)
+    private function logExceptions(array $fails): void
     {
         foreach ($fails as $failPhrase) {
-            $this->_conektaLogger->critical((string) $failPhrase);
+            $this->_conektaLogger->error($failPhrase, $fails);
         }
     }
 }

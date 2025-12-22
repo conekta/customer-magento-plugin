@@ -179,8 +179,6 @@ class TransactionAuthorize implements ClientInterface
                 } elseif ($paymentMethod == ConfigProvider::PAYMENT_METHOD_BANK_TRANSFER) {
                     $response['offline_info']['data']['clabe'] = $paymentMethodResponse->getClabe();
                     $response['offline_info']['data']['bank_name'] = $paymentMethodResponse->getBank();
-                } elseif ($paymentMethod == ConfigProvider::PAYMENT_METHOD_BNPL) {
-                    // BNPL does not have a reference
                 } elseif ($paymentMethod == ConfigProvider::PAYMENT_METHOD_PAY_BY_BANK) {
                     if (method_exists($paymentMethodResponse, 'getDeepLink')) {
                         $response['offline_info']['data']['deep_link'] = $paymentMethodResponse->getDeepLink();
