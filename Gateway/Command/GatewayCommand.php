@@ -101,7 +101,9 @@ class GatewayCommand implements CommandInterface
                 }
 
                 throw new CommandException(
-                    __(implode("; ", $errorMessages))
+                    !empty($errorMessages)
+                        ? __(implode(PHP_EOL, $errorMessages))
+                        : __('Transaction has been declined. Please try again later.')
                 );
             }
         }
