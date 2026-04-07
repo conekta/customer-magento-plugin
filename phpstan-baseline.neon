@@ -11,6 +11,41 @@ parameters:
 			path: Gateway/Command/GatewayCommand.php
 
 		-
+			message: "#^Property Conekta\\\\Payments\\\\Gateway\\\\Http\\\\Client\\\\BankTransfer\\\\TransactionAuthorize\\:\\:\\$results is never read, only written\\.$#"
+			count: 1
+			path: Gateway/Http/Client/BankTransfer/TransactionAuthorize.php
+
+		-
+			message: "#^Property Conekta\\\\Payments\\\\Gateway\\\\Http\\\\Client\\\\Cash\\\\TransactionAuthorize\\:\\:\\$results is never read, only written\\.$#"
+			count: 1
+			path: Gateway/Http/Client/Cash/TransactionAuthorize.php
+
+		-
+			message: "#^Property Conekta\\\\Payments\\\\Gateway\\\\Http\\\\Client\\\\EmbedForm\\\\TransactionAuthorize\\:\\:\\$charge is unused\\.$#"
+			count: 1
+			path: Gateway/Http/Client/EmbedForm/TransactionAuthorize.php
+
+		-
+			message: "#^Property Conekta\\\\Payments\\\\Gateway\\\\Http\\\\Client\\\\EmbedForm\\\\TransactionAuthorize\\:\\:\\$logger is never read, only written\\.$#"
+			count: 1
+			path: Gateway/Http/Client/EmbedForm/TransactionAuthorize.php
+
+		-
+			message: "#^Property Conekta\\\\Payments\\\\Gateway\\\\Http\\\\Client\\\\EmbedForm\\\\TransactionAuthorize\\:\\:\\$results is never read, only written\\.$#"
+			count: 1
+			path: Gateway/Http/Client/EmbedForm/TransactionAuthorize.php
+
+		-
+			message: "#^Property Conekta\\\\Payments\\\\Gateway\\\\Request\\\\BankTransfer\\\\AuthorizeRequest\\:\\:\\$config is never read, only written\\.$#"
+			count: 1
+			path: Gateway/Request/BankTransfer/AuthorizeRequest.php
+
+		-
+			message: "#^Property Conekta\\\\Payments\\\\Gateway\\\\Request\\\\Cash\\\\AuthorizeRequest\\:\\:\\$config is never read, only written\\.$#"
+			count: 1
+			path: Gateway/Request/Cash/AuthorizeRequest.php
+
+		-
 			message: "#^PHPDoc tag @param references unknown parameter\\: \\$invoiceService$#"
 			count: 1
 			path: Gateway/Response/EmbedForm/TxnIdHandler.php
@@ -36,6 +71,21 @@ parameters:
 			path: Helper/ConektaOrder.php
 
 		-
+			message: "#^If condition is always false\\.$#"
+			count: 1
+			path: Helper/Data.php
+
+		-
+			message: "#^Method Conekta\\\\Payments\\\\Helper\\\\Data\\:\\:customFormat\\(\\) never returns false so it can be removed from the return type\\.$#"
+			count: 1
+			path: Helper/Data.php
+
+		-
+			message: "#^Negated boolean expression is always false\\.$#"
+			count: 1
+			path: Helper/Data.php
+
+		-
 			message: "#^PHPDoc tag @param for parameter \\$items with type mixed is not subtype of native type array\\.$#"
 			count: 3
 			path: Helper/Data.php
@@ -44,6 +94,16 @@ parameters:
 			message: "#^PHPDoc tag @param for parameter \\$quoteId with type mixed is not subtype of native type int\\.$#"
 			count: 1
 			path: Helper/Data.php
+
+		-
+			message: "#^Right side of && is always false\\.$#"
+			count: 1
+			path: Helper/Data.php
+
+		-
+			message: "#^Property Conekta\\\\Payments\\\\Model\\\\EmbedFormRepository\\:\\:\\$conektaQuoteInterface is never read, only written\\.$#"
+			count: 1
+			path: Model/EmbedFormRepository.php
 
 		-
 			message: "#^Variable \\$conektaOrder in empty\\(\\) always exists and is not falsy\\.$#"
@@ -72,6 +132,11 @@ parameters:
 
 		-
 			message: "#^Binary operation \"\\*\" between string and 100 results in an error\\.$#"
+			count: 1
+			path: Model/Ui/CreditCard/ConfigProvider.php
+
+		-
+			message: "#^Method Conekta\\\\Payments\\\\Model\\\\Ui\\\\CreditCard\\\\ConfigProvider\\:\\:_getStartYears\\(\\) is unused\\.$#"
 			count: 1
 			path: Model/Ui/CreditCard/ConfigProvider.php
 

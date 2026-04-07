@@ -5,6 +5,9 @@
 - Added unit tests for webhook controller
 - Added GitHub Actions CI workflow with PHP 8.2/8.3/8.4 matrix
 
+### 5.3.3 - 2025/12/22
+- Updates Conekta PHP library and fixes PHP 8.4 issues by @fcarrero in #65
+
 ### 5.3.2 - 2025/12/03
 - Fix Conekta lib for php 8.4
 ### 5.3.1 - 2025/12/03

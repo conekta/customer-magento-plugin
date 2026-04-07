@@ -169,7 +169,7 @@ class IndexTest extends TestCase
         $this->configureRequest('POST', $body);
 
         $this->missingOrders->expects($this->once())
-            ->method('recover_order')
+            ->method('recoverOrder')
             ->with($body);
         $this->webhookRepository->expects($this->once())
             ->method('payOrder')
@@ -192,7 +192,7 @@ class IndexTest extends TestCase
         $this->webhookRepository->method('findByMetadataOrderId')->willReturn($order);
 
         $this->missingOrders->expects($this->once())
-            ->method('recover_order')
+            ->method('recoverOrder')
             ->with($body);
 
         $result = $this->controller->execute();
@@ -210,7 +210,7 @@ class IndexTest extends TestCase
         $this->webhookRepository->method('findByMetadataOrderId')->willReturn($order);
 
         $this->missingOrders->expects($this->never())
-            ->method('recover_order');
+            ->method('recoverOrder');
 
         $result = $this->controller->execute();
 

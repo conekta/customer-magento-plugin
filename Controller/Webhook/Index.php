@@ -143,7 +143,7 @@ class Index extends Action implements CsrfAwareActionInterface
                     break;
                 case self::EVENT_ORDER_PENDING_PAYMENT:
                     if ($paymentMethodObject === null || !$this->isCardPayment($paymentMethodObject)){
-                        $this->missingOrder->recover_order($body);
+                        $this->missingOrder->recoverOrder($body);
                     }
                     $order = $this->webhookRepository->findByMetadataOrderId($body);
                     if (!$order->getId()) {
@@ -161,7 +161,7 @@ class Index extends Action implements CsrfAwareActionInterface
                     if ($paymentMethodObject !== null && $this->isPayByBankPayment($paymentMethodObject)) {
                         $this->processPayByBankPayment($body);
                     } elseif ($paymentMethodObject !== null && $this->isCardPayment($paymentMethodObject)) {
-                        $this->missingOrder->recover_order($body);
+                        $this->missingOrder->recoverOrder($body);
                         $this->webhookRepository->payOrder($body);
                     } else {
                         $this->webhookRepository->payOrder($body);
@@ -181,7 +181,10 @@ class Index extends Action implements CsrfAwareActionInterface
             ];
             return $this->sendJsonResponse($errorResponse, Response::STATUS_CODE_404);
         } catch (\Exception $e) {
-            $this->_conektaLogger->error('Controller Index :: ' . $e->getMessage());
+            $this->_conektaLogger->error('Controller Index :: ' . $e->getMessage(), [
+                'exception' => get_class($e),
+                'trace' => $e->getTraceAsString(),
+            ]);
             $errorResponse = [
                 'error' => 'Internal Server Error',
                 'message' => $e->getMessage(),
@@ -250,7 +253,7 @@ class Index extends Action implements CsrfAwareActionInterface
         
         for ($attempt = 1; $attempt <= $maxRetries; $attempt++) {
             try {
-                $this->missingOrder->recover_order($body);
+                $this->missingOrder->recoverOrder($body);
                 $this->webhookRepository->payOrder($body);
                 return;
             } catch (EntityNotFoundException $e) {

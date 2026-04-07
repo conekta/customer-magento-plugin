@@ -3,10 +3,10 @@
 namespace Conekta\Payments\Service;
 
 use Conekta\Payments\Api\ConektaApiClient;
+use Conekta\Payments\Helper\Data as ConektaData;
 use Conekta\Payments\Logger\Logger as ConektaLogger;
 use Conekta\Payments\Model\Ui\EmbedForm\ConfigProvider;
 use Conekta\Payments\Model\WebhookRepository;
-use Magento\Framework\App\ObjectManager;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Quote\Model\Quote;
@@ -14,49 +14,44 @@ use Magento\Quote\Model\QuoteManagement;
 use Exception;
 use Magento\Quote\Api\CartRepositoryInterface;
 use Magento\Sales\Api\Data\OrderInterface;
-use Conekta\Payments\Helper\Util;
-use Conekta\Payments\Helper\Data as ConektaData;
+use Magento\Sales\Api\OrderRepositoryInterface;
+use Magento\Sales\Model\OrderFactory;
+
 class MissingOrders
 {
-    /**
-     * @var WebhookRepository
-     */
     private WebhookRepository $webhookRepository;
-
     private ConektaLogger $_conektaLogger;
-
     private QuoteManagement $quoteManagement;
     private ConektaApiClient $conektaApiClient;
-
     protected CartRepositoryInterface $_cartRepository;
-
-
-    private ObjectManager $objectManager;
-
-    private Util $utilHelper;
-
+    private ConektaData $utilHelper;
+    private OrderFactory $orderFactory;
+    private OrderRepositoryInterface $orderRepository;
 
     public function __construct(
         WebhookRepository $webhookRepository,
         ConektaLogger $conektaLogger,
         QuoteManagement $quoteManagement,
         ConektaApiClient $conektaApiClient,
-        CartRepositoryInterface $cartRepository
-    ){
+        CartRepositoryInterface $cartRepository,
+        ConektaData $utilHelper,
+        OrderFactory $orderFactory,
+        OrderRepositoryInterface $orderRepository
+    ) {
         $this->webhookRepository = $webhookRepository;
         $this->_conektaLogger = $conektaLogger;
         $this->quoteManagement = $quoteManagement;
         $this->conektaApiClient = $conektaApiClient;
-
-        $this->objectManager = ObjectManager::getInstance();
         $this->_cartRepository = $cartRepository;
-        $this->utilHelper = $this->objectManager->create(ConektaData::class);
+        $this->utilHelper = $utilHelper;
+        $this->orderFactory = $orderFactory;
+        $this->orderRepository = $orderRepository;
     }
 
     /**
      * @throws LocalizedException
      */
-    public function recover_order($event){
+    public function recoverOrder($event){
         try {
             //check order en order with external id
             $conektaOrderFound = $this->webhookRepository->findByMetadataOrderId($event);
@@ -70,7 +65,7 @@ class MissingOrders
             $metadata = $conektaOrder['metadata'] ?? [];
 
             if (empty($metadata['quote_id'])) {
-                $this->_conektaLogger->info('recover_order: no quote_id in metadata, skipping (not a Magento order)');
+                $this->_conektaLogger->info('recoverOrder: no quote_id in metadata, skipping (not a Magento order)');
                 return;
             }
 
@@ -79,7 +74,7 @@ class MissingOrders
             $quoteCreated = $this->_cartRepository->get($quoteId);
             $quoteCreated->setStoreId($storeId);
 
-            $orderFounded = $this->objectManager->create('Magento\Sales\Model\Order')->load($quoteCreated->getReservedOrderId(), OrderInterface::INCREMENT_ID);
+            $orderFounded = $this->orderFactory->create()->load($quoteCreated->getReservedOrderId(), OrderInterface::INCREMENT_ID);
             if ($orderFounded->getId() != null || !empty($orderFounded->getId()) ) {
                 $this->_conektaLogger->info('order is ready', ['order' => $orderFounded, 'is_set', isset($orderFounded)]);
                 return;
@@ -104,11 +99,11 @@ class MissingOrders
             $this->saveMissingFieldsQuote($quoteCreated, $conektaOrder);
             $order = $this->quoteManagement->submit($quoteCreated);
             $order->setStoreId($storeId);
-            $order->save();
 
             $order->addCommentToStatusHistory("Missing Order from conekta ". "<a href='". ConfigProvider::URL_PANEL_PAYMENTS ."/".$conektaOrder["id"]. "' target='_blank'>".$conektaOrder["id"]."</a>")
-                ->setIsCustomerNotified(true)
-                ->save();
+                ->setIsCustomerNotified(true);
+
+            $this->orderRepository->save($order);
             if ($txnId) {
                 $this->updateConektaReference($txnId,  $order->getRealOrderId());
             }

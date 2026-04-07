@@ -14,11 +14,12 @@ use Magento\Quote\Model\Quote\Address as QuoteAddress;
 use Magento\Quote\Model\Quote\Payment as QuotePayment;
 use Magento\Quote\Model\QuoteManagement;
 use Magento\Sales\Api\Data\OrderInterface;
+use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\Status\History as StatusHistory;
+use Magento\Sales\Model\OrderFactory;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use ReflectionClass;
 
 class MissingOrdersTest extends TestCase
 {
@@ -28,7 +29,8 @@ class MissingOrdersTest extends TestCase
     private MockObject $quoteManagement;
     private MockObject $conektaApiClient;
     private MockObject $cartRepository;
-    private MockObject $objectManager;
+    private MockObject $orderFactory;
+    private MockObject $orderRepository;
 
     /** @var array<string, int> track calls to key methods */
     private array $callCounts;
@@ -49,22 +51,16 @@ class MissingOrdersTest extends TestCase
         $this->conektaApiClient = $this->createMock(ConektaApiClient::class);
         $this->cartRepository = $this->createMock(CartRepositoryInterface::class);
 
-        $reflection = new ReflectionClass(MissingOrders::class);
-        $this->missingOrders = $reflection->newInstanceWithoutConstructor();
+        $this->orderFactory = $this->getMockBuilder(OrderFactory::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods(['create'])
+            ->getMock();
 
-        $props = [
-            'webhookRepository' => $this->webhookRepository,
-            '_conektaLogger' => $this->conektaLogger,
-            'quoteManagement' => $this->quoteManagement,
-            'conektaApiClient' => $this->conektaApiClient,
-            '_cartRepository' => $this->cartRepository,
-        ];
-
-        foreach ($props as $name => $value) {
-            $prop = $reflection->getProperty($name);
-            $prop->setAccessible(true);
-            $prop->setValue($this->missingOrders, $value);
-        }
+        $this->orderRepository = $this->createMock(OrderRepositoryInterface::class);
+        $this->orderRepository->method('save')->willReturnCallback(function ($order) {
+            $this->callCounts['order_save']++;
+            return $order;
+        });
 
         $utilHelper = $this->createMock(ConektaData::class);
         $utilHelper->method('splitName')->willReturnCallback(function (string $fullName) {
@@ -75,18 +71,16 @@ class MissingOrdersTest extends TestCase
             ];
         });
 
-        $utilProp = $reflection->getProperty('utilHelper');
-        $utilProp->setAccessible(true);
-        $utilProp->setValue($this->missingOrders, $utilHelper);
-
-        $this->objectManager = $this->getMockBuilder(\Magento\Framework\App\ObjectManager::class)
-            ->disableOriginalConstructor()
-            ->onlyMethods(['create'])
-            ->getMock();
-
-        $omProp = $reflection->getProperty('objectManager');
-        $omProp->setAccessible(true);
-        $omProp->setValue($this->missingOrders, $this->objectManager);
+        $this->missingOrders = new MissingOrders(
+            $this->webhookRepository,
+            $this->conektaLogger,
+            $this->quoteManagement,
+            $this->conektaApiClient,
+            $this->cartRepository,
+            $utilHelper,
+            $this->orderFactory,
+            $this->orderRepository
+        );
     }
 
     private function buildEvent(
@@ -199,8 +193,7 @@ class MissingOrdersTest extends TestCase
     {
         $noOrder = $this->createMockOrder(null);
         $noOrder->method('load')->willReturnSelf();
-        $this->objectManager->method('create')
-            ->with('Magento\Sales\Model\Order')
+        $this->orderFactory->method('create')
             ->willReturn($noOrder);
 
         $statusHistory = $this->createMock(StatusHistory::class);
@@ -212,10 +205,6 @@ class MissingOrdersTest extends TestCase
         $newOrder->method('setStoreId')->willReturnCallback(function ($id) use ($newOrder, &$savedStoreId) {
             $savedStoreId = $id;
             return $newOrder;
-        });
-        $newOrder->method('save')->willReturnCallback(function () {
-            $this->callCounts['order_save']++;
-            return null;
         });
         $newOrder->method('addCommentToStatusHistory')->willReturn($statusHistory);
         $newOrder->method('getRealOrderId')->willReturn('100000001');
@@ -246,7 +235,7 @@ class MissingOrdersTest extends TestCase
             return $this->createMockQuote();
         });
 
-        $this->missingOrders->recover_order($event);
+        $this->missingOrders->recoverOrder($event);
 
         $this->assertSame(0, $this->callCounts['cartRepository_get'], 'No debió buscar el quote');
         $this->assertSame(0, $this->callCounts['quoteManagement_submit'], 'No debió crear orden');
@@ -274,7 +263,7 @@ class MissingOrdersTest extends TestCase
             return $this->createMockQuote();
         });
 
-        $this->missingOrders->recover_order($event);
+        $this->missingOrders->recoverOrder($event);
 
         $this->assertSame(0, $this->callCounts['cartRepository_get'], 'No debió buscar el quote');
         $this->assertSame(0, $this->callCounts['quoteManagement_submit'], 'No debió crear orden');
@@ -296,7 +285,7 @@ class MissingOrdersTest extends TestCase
             return $this->createMockQuote();
         });
 
-        $this->missingOrders->recover_order($event);
+        $this->missingOrders->recoverOrder($event);
 
         $this->assertSame(0, $this->callCounts['cartRepository_get'], 'No debió buscar el quote');
         $this->assertSame(0, $this->callCounts['quoteManagement_submit'], 'No debió crear orden');
@@ -316,14 +305,14 @@ class MissingOrdersTest extends TestCase
 
         $existingOrder = $this->createMockOrder(42);
         $existingOrder->method('load')->willReturnSelf();
-        $this->objectManager->method('create')->willReturn($existingOrder);
+        $this->orderFactory->method('create')->willReturn($existingOrder);
 
         $this->quoteManagement->method('submit')->willReturnCallback(function () {
             $this->callCounts['quoteManagement_submit']++;
             return $this->createMock(Order::class);
         });
 
-        $this->missingOrders->recover_order($event);
+        $this->missingOrders->recoverOrder($event);
 
         $this->assertSame(0, $this->callCounts['quoteManagement_submit'], 'No debió crear orden si ya existe por incrementId');
     }
@@ -351,7 +340,7 @@ class MissingOrdersTest extends TestCase
                 return $chargeResponse;
             });
 
-        $this->missingOrders->recover_order($event);
+        $this->missingOrders->recoverOrder($event);
 
         $this->assertSame(1, $this->callCounts['quoteManagement_submit'], 'Debió crear la orden');
         $this->assertSame(1, $this->callCounts['order_save'], 'Debió guardar la orden');
@@ -399,7 +388,7 @@ class MissingOrdersTest extends TestCase
 
         $this->setupFullRecoveryMocks($quote);
 
-        $this->missingOrders->recover_order($event);
+        $this->missingOrders->recoverOrder($event);
 
         $this->assertNotNull($capturedAdditionalInfo, 'Debió setear additional information');
         $this->assertSame('card', $capturedAdditionalInfo['payment_method']);
@@ -427,7 +416,7 @@ class MissingOrdersTest extends TestCase
                 $loggedMessages[] = $msg;
             });
 
-        $this->missingOrders->recover_order($event);
+        $this->missingOrders->recoverOrder($event);
 
         $this->assertSame(0, $this->callCounts['quoteManagement_submit'], 'No debió intentar crear orden');
         $this->assertNotEmpty($loggedMessages, 'Debió loguear el error');
@@ -449,7 +438,7 @@ class MissingOrdersTest extends TestCase
         $this->expectException(\Exception::class);
         $this->expectExceptionMessage('DB connection failed');
 
-        $this->missingOrders->recover_order($event);
+        $this->missingOrders->recoverOrder($event);
     }
 
     // --- LocalizedException is rethrown ---
@@ -467,7 +456,7 @@ class MissingOrdersTest extends TestCase
         $this->expectException(LocalizedException::class);
         $this->expectExceptionMessage('Something localized');
 
-        $this->missingOrders->recover_order($event);
+        $this->missingOrders->recoverOrder($event);
     }
 
     // --- Recovery with cash_payment (no card additional info) ---
@@ -509,7 +498,7 @@ class MissingOrdersTest extends TestCase
 
         $this->setupFullRecoveryMocks($quote);
 
-        $this->missingOrders->recover_order($event);
+        $this->missingOrders->recoverOrder($event);
 
         $this->assertNotNull($capturedAdditionalInfo, 'Debió setear additional information');
         $this->assertSame('cash', $capturedAdditionalInfo['payment_method']);
@@ -541,7 +530,7 @@ class MissingOrdersTest extends TestCase
                 $loggedMessages[] = $msg;
             });
 
-        $this->missingOrders->recover_order($event);
+        $this->missingOrders->recoverOrder($event);
 
         $this->assertSame(1, $this->callCounts['quoteManagement_submit'], 'Debió crear la orden');
         $this->assertSame(1, $this->callCounts['order_save'], 'Debió guardar la orden');

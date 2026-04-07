@@ -111,6 +111,10 @@ class RouterTest extends TestCase
         $this->conektaHelper->method('getUrlWebhookOrDefault')
             ->willReturn('https://mystore.com/my-custom-webhook');
 
+        $this->request->expects($this->once())->method('setModuleName')->with('conekta');
+        $this->request->expects($this->once())->method('setControllerName')->with('webhook');
+        $this->request->expects($this->once())->method('setActionName')->with('index');
+
         $result = $this->router->match($this->request);
 
         $this->assertNotNull($result);
