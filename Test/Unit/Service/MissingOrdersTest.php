@@ -252,6 +252,56 @@ class MissingOrdersTest extends TestCase
         $this->assertSame(0, $this->callCounts['quoteManagement_submit'], 'No debió crear orden');
     }
 
+    // --- No quote_id in metadata (not a Magento order) ---
+
+    public function testReturnsEarlyWhenQuoteIdIsMissing(): void
+    {
+        $event = $this->buildEvent();
+        // Remove quote_id from metadata
+        unset($event['data']['object']['metadata']['quote_id']);
+
+        $notFoundOrder = $this->createMockOrder(null);
+        $this->webhookRepository->method('findByMetadataOrderId')->willReturn($notFoundOrder);
+
+        $loggedMessages = [];
+        $this->conektaLogger->method('info')
+            ->willReturnCallback(function ($msg) use (&$loggedMessages) {
+                $loggedMessages[] = $msg;
+            });
+
+        $this->cartRepository->method('get')->willReturnCallback(function () {
+            $this->callCounts['cartRepository_get']++;
+            return $this->createMockQuote();
+        });
+
+        $this->missingOrders->recover_order($event);
+
+        $this->assertSame(0, $this->callCounts['cartRepository_get'], 'No debió buscar el quote');
+        $this->assertSame(0, $this->callCounts['quoteManagement_submit'], 'No debió crear orden');
+        $this->assertNotEmpty($loggedMessages, 'Debió loguear que no hay quote_id');
+        $this->assertStringContainsString('no quote_id', $loggedMessages[0]);
+    }
+
+    public function testReturnsEarlyWhenMetadataIsMissing(): void
+    {
+        $event = $this->buildEvent();
+        // Remove metadata entirely
+        unset($event['data']['object']['metadata']);
+
+        $notFoundOrder = $this->createMockOrder(null);
+        $this->webhookRepository->method('findByMetadataOrderId')->willReturn($notFoundOrder);
+
+        $this->cartRepository->method('get')->willReturnCallback(function () {
+            $this->callCounts['cartRepository_get']++;
+            return $this->createMockQuote();
+        });
+
+        $this->missingOrders->recover_order($event);
+
+        $this->assertSame(0, $this->callCounts['cartRepository_get'], 'No debió buscar el quote');
+        $this->assertSame(0, $this->callCounts['quoteManagement_submit'], 'No debió crear orden');
+    }
+
     // --- Order already exists by increment id ---
 
     public function testReturnsEarlyWhenOrderAlreadyExistsByIncrementId(): void

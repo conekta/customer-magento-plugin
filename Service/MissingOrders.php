@@ -67,9 +67,15 @@ class MissingOrders
             }
             $conektaOrder = $event['data']['object'];
             $conektaCustomer = $conektaOrder['customer_info'] ?? [];
-            $metadata = $conektaOrder['metadata'];
-            $storeId = $metadata['store'];
+            $metadata = $conektaOrder['metadata'] ?? [];
+
+            if (empty($metadata['quote_id'])) {
+                $this->_conektaLogger->info('recover_order: no quote_id in metadata, skipping (not a Magento order)');
+                return;
+            }
+
             $quoteId = $metadata['quote_id'];
+            $storeId = $metadata['store'] ?? null;
             $quoteCreated = $this->_cartRepository->get($quoteId);
             $quoteCreated->setStoreId($storeId);
 
