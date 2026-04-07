@@ -5,7 +5,6 @@ use Conekta\Payments\Exception\EntityNotFoundException;
 use Conekta\Payments\Logger\Logger as ConektaLogger;
 use Conekta\Payments\Model\WebhookRepository;
 use Conekta\Payments\Service\MissingOrders;
-use Exception;
 use Laminas\Http\Response;
 use Magento\Framework\App\Action\Action;
 use Magento\Framework\App\Action\Context;
@@ -109,7 +108,6 @@ class Index extends Action implements CsrfAwareActionInterface
     public function execute()
     {
         $response = Response::STATUS_CODE_200;
-        $resultRaw = $this->resultRawFactory->create();
 
         try {
             $body = $this->helper->jsonDecode($this->getRequest()->getContent());
@@ -176,15 +174,24 @@ class Index extends Action implements CsrfAwareActionInterface
                     break;
             }
 
-        }catch (EntityNotFoundException $e) {
+        } catch (EntityNotFoundException $e) {
             $errorResponse = [
                 'error' => 'Entity Not Found',
                 'message' => $e->getMessage(),
             ];
             return $this->sendJsonResponse($errorResponse, Response::STATUS_CODE_404);
-        }
-        catch (Exception $e) {
-            $this->_conektaLogger->error('Controller Index :: '. $e->getMessage());
+        } catch (\Exception $e) {
+            $this->_conektaLogger->error('Controller Index :: ' . $e->getMessage());
+            $errorResponse = [
+                'error' => 'Internal Server Error',
+                'message' => $e->getMessage(),
+            ];
+            return $this->sendJsonResponse($errorResponse, Response::STATUS_CODE_500);
+        } catch (\Throwable $e) {
+            $this->_conektaLogger->error('Controller Index :: ' . $e->getMessage(), [
+                'exception' => get_class($e),
+                'trace' => $e->getTraceAsString(),
+            ]);
             $errorResponse = [
                 'error' => 'Internal Server Error',
                 'message' => $e->getMessage(),
@@ -192,6 +199,7 @@ class Index extends Action implements CsrfAwareActionInterface
             return $this->sendJsonResponse($errorResponse, Response::STATUS_CODE_500);
         }
         
+        $resultRaw = $this->resultRawFactory->create();
         return $resultRaw->setHttpResponseCode($response);
     }
 
