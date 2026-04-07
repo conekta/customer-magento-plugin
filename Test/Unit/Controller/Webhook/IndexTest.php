@@ -9,7 +9,6 @@ use Conekta\Payments\Service\MissingOrders;
 use Laminas\Http\Response;
 use Magento\Framework\App\Action\Context;
 use Magento\Framework\App\RequestInterface;
-use Magento\Framework\Controller\Result\Json;
 use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Framework\Controller\Result\Raw;
 use Magento\Framework\Json\Helper\Data;
@@ -25,17 +24,28 @@ class IndexTest extends TestCase
     private MockObject $missingOrders;
     private MockObject $request;
     private MockObject $resultRaw;
+    private ?int $capturedHttpCode = null;
+    private ?string $capturedBody = null;
 
     protected function setUp(): void
     {
+        $this->capturedHttpCode = null;
+        $this->capturedBody = null;
+
         $this->request = $this->getMockBuilder(RequestInterface::class)
             ->addMethods(['getMethod', 'getContent'])
             ->getMockForAbstractClass();
 
         $this->resultRaw = $this->createMock(Raw::class);
-        $this->resultRaw->method('setHttpResponseCode')->willReturnSelf();
+        $this->resultRaw->method('setHttpResponseCode')->willReturnCallback(function ($code) {
+            $this->capturedHttpCode = $code;
+            return $this->resultRaw;
+        });
         $this->resultRaw->method('setHeader')->willReturnSelf();
-        $this->resultRaw->method('setContents')->willReturnSelf();
+        $this->resultRaw->method('setContents')->willReturnCallback(function ($content) {
+            $this->capturedBody = $content;
+            return $this->resultRaw;
+        });
 
         $resultRawFactory = $this->getMockBuilder(\Magento\Framework\Controller\Result\RawFactory::class)
             ->disableOriginalConstructor()
@@ -104,11 +114,12 @@ class IndexTest extends TestCase
     {
         $this->configureRequest('POST', null);
 
-        $this->resultRaw->expects($this->once())
-            ->method('setHttpResponseCode')
-            ->with(Response::STATUS_CODE_400);
+        $result = $this->controller->execute();
 
-        $this->controller->execute();
+        $this->assertSame(Response::STATUS_CODE_400, $this->capturedHttpCode);
+        $this->assertNotNull($this->capturedBody);
+        $decoded = json_decode($this->capturedBody, true);
+        $this->assertSame('Invalid request data', $decoded['error']);
     }
 
     public function testReturns400WhenMethodIsNotPost(): void
@@ -116,11 +127,11 @@ class IndexTest extends TestCase
         $body = $this->buildWebhookBody('webhook_ping');
         $this->configureRequest('GET', $body);
 
-        $this->resultRaw->expects($this->once())
-            ->method('setHttpResponseCode')
-            ->with(Response::STATUS_CODE_400);
+        $result = $this->controller->execute();
 
-        $this->controller->execute();
+        $this->assertSame(Response::STATUS_CODE_400, $this->capturedHttpCode);
+        $decoded = json_decode($this->capturedBody, true);
+        $this->assertSame('Invalid request data', $decoded['error']);
     }
 
     // --- Webhook ping ---
@@ -130,11 +141,10 @@ class IndexTest extends TestCase
         $body = $this->buildWebhookBody('webhook_ping');
         $this->configureRequest('POST', $body);
 
-        $this->resultRaw->expects($this->once())
-            ->method('setHttpResponseCode')
-            ->with(Response::STATUS_CODE_200);
+        $result = $this->controller->execute();
 
-        $this->controller->execute();
+        $this->assertSame(Response::STATUS_CODE_200, $this->capturedHttpCode);
+        $this->assertNull($this->capturedBody);
     }
 
     // --- order.paid ---
@@ -148,7 +158,9 @@ class IndexTest extends TestCase
             ->method('payOrder')
             ->with($body);
 
-        $this->controller->execute();
+        $result = $this->controller->execute();
+
+        $this->assertSame(Response::STATUS_CODE_200, $this->capturedHttpCode);
     }
 
     public function testOrderPaidWithCardRecoversThenPays(): void
@@ -163,7 +175,9 @@ class IndexTest extends TestCase
             ->method('payOrder')
             ->with($body);
 
-        $this->controller->execute();
+        $result = $this->controller->execute();
+
+        $this->assertSame(Response::STATUS_CODE_200, $this->capturedHttpCode);
     }
 
     // --- order.pending_payment ---
@@ -181,7 +195,9 @@ class IndexTest extends TestCase
             ->method('recover_order')
             ->with($body);
 
-        $this->controller->execute();
+        $result = $this->controller->execute();
+
+        $this->assertSame(Response::STATUS_CODE_200, $this->capturedHttpCode);
     }
 
     public function testPendingPaymentCardDoesNotRecoverOrder(): void
@@ -196,7 +212,9 @@ class IndexTest extends TestCase
         $this->missingOrders->expects($this->never())
             ->method('recover_order');
 
-        $this->controller->execute();
+        $result = $this->controller->execute();
+
+        $this->assertSame(Response::STATUS_CODE_200, $this->capturedHttpCode);
     }
 
     public function testPendingPaymentReturns404WhenOrderNotFound(): void
@@ -208,11 +226,11 @@ class IndexTest extends TestCase
         $order->method('getId')->willReturn(null);
         $this->webhookRepository->method('findByMetadataOrderId')->willReturn($order);
 
-        $this->resultRaw->expects($this->once())
-            ->method('setHttpResponseCode')
-            ->with(Response::STATUS_CODE_404);
+        $result = $this->controller->execute();
 
-        $this->controller->execute();
+        $this->assertSame(Response::STATUS_CODE_404, $this->capturedHttpCode);
+        $decoded = json_decode($this->capturedBody, true);
+        $this->assertSame('Order not found', $decoded['error']);
     }
 
     // --- order.expired / order.canceled ---
@@ -226,7 +244,9 @@ class IndexTest extends TestCase
             ->method('expireOrder')
             ->with($body);
 
-        $this->controller->execute();
+        $result = $this->controller->execute();
+
+        $this->assertSame(Response::STATUS_CODE_200, $this->capturedHttpCode);
     }
 
     public function testOrderCanceledCallsExpireOrder(): void
@@ -238,7 +258,9 @@ class IndexTest extends TestCase
             ->method('expireOrder')
             ->with($body);
 
-        $this->controller->execute();
+        $result = $this->controller->execute();
+
+        $this->assertSame(Response::STATUS_CODE_200, $this->capturedHttpCode);
     }
 
     // --- Error handling ---
@@ -251,11 +273,12 @@ class IndexTest extends TestCase
         $this->webhookRepository->method('payOrder')
             ->willThrowException(new EntityNotFoundException('Order not found'));
 
-        $this->resultRaw->expects($this->once())
-            ->method('setHttpResponseCode')
-            ->with(Response::STATUS_CODE_404);
+        $result = $this->controller->execute();
 
-        $this->controller->execute();
+        $this->assertSame(Response::STATUS_CODE_404, $this->capturedHttpCode);
+        $decoded = json_decode($this->capturedBody, true);
+        $this->assertSame('Entity Not Found', $decoded['error']);
+        $this->assertSame('Order not found', $decoded['message']);
     }
 
     public function testGenericExceptionReturns500(): void
@@ -266,11 +289,12 @@ class IndexTest extends TestCase
         $this->webhookRepository->method('payOrder')
             ->willThrowException(new \RuntimeException('Something went wrong'));
 
-        $this->resultRaw->expects($this->once())
-            ->method('setHttpResponseCode')
-            ->with(Response::STATUS_CODE_500);
+        $result = $this->controller->execute();
 
-        $this->controller->execute();
+        $this->assertSame(Response::STATUS_CODE_500, $this->capturedHttpCode);
+        $decoded = json_decode($this->capturedBody, true);
+        $this->assertSame('Internal Server Error', $decoded['error']);
+        $this->assertSame('Something went wrong', $decoded['message']);
     }
 
     public function testThrowableErrorReturns500(): void
@@ -281,11 +305,12 @@ class IndexTest extends TestCase
         $this->webhookRepository->method('payOrder')
             ->willThrowException(new \TypeError('Type error occurred'));
 
-        $this->resultRaw->expects($this->once())
-            ->method('setHttpResponseCode')
-            ->with(Response::STATUS_CODE_500);
+        $result = $this->controller->execute();
 
-        $this->controller->execute();
+        $this->assertSame(Response::STATUS_CODE_500, $this->capturedHttpCode);
+        $decoded = json_decode($this->capturedBody, true);
+        $this->assertSame('Internal Server Error', $decoded['error']);
+        $this->assertSame('Type error occurred', $decoded['message']);
     }
 
     // --- CSRF ---
