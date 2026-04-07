@@ -1,13 +1,8 @@
 parameters:
 	ignoreErrors:
 		-
-			message: "#^Method Conekta\\\\Payments\\\\Controller\\\\Router\\:\\:match\\(\\) should return Magento\\\\Framework\\\\App\\\\ActionInterface but empty return statement found\\.$#"
-			count: 1
-			path: Controller/Router.php
-
-		-
-			message: "#^Method Conekta\\\\Payments\\\\Controller\\\\Router\\:\\:match\\(\\) should return Magento\\\\Framework\\\\App\\\\ActionInterface but return statement is missing\\.$#"
-			count: 1
+			message: "#^Method Conekta\\\\Payments\\\\Controller\\\\Router\\:\\:match\\(\\) should return Magento\\\\Framework\\\\App\\\\ActionInterface but returns null\\.$#"
+			count: 2
 			path: Controller/Router.php
 
 		-
@@ -76,37 +71,7 @@ parameters:
 			path: Model/System/Config/Source/MetadataProduct.php
 
 		-
-			message: "#^Method Conekta\\\\Payments\\\\Model\\\\Ui\\\\BankTransfer\\\\ConfigProvider\\:\\:getConfig\\(\\) has invalid return type array\\.$#"
-			count: 1
-			path: Model/Ui/BankTransfer/ConfigProvider.php
-
-		-
-			message: "#^Method Conekta\\\\Payments\\\\Model\\\\Ui\\\\BankTransfer\\\\ConfigProvider\\:\\:getConfig\\(\\) should return array\\<array\\<array\\>\\> but returns array\\<string, array\\<string, array\\<string, mixed\\>\\>\\>\\.$#"
-			count: 1
-			path: Model/Ui/BankTransfer/ConfigProvider.php
-
-		-
-			message: "#^Method Conekta\\\\Payments\\\\Model\\\\Ui\\\\Cash\\\\ConfigProvider\\:\\:getConfig\\(\\) has invalid return type array\\.$#"
-			count: 1
-			path: Model/Ui/Cash/ConfigProvider.php
-
-		-
-			message: "#^Method Conekta\\\\Payments\\\\Model\\\\Ui\\\\Cash\\\\ConfigProvider\\:\\:getConfig\\(\\) should return array\\<array\\<array\\>\\> but returns array\\<string, array\\<string, array\\<string, mixed\\>\\>\\>\\.$#"
-			count: 1
-			path: Model/Ui/Cash/ConfigProvider.php
-
-		-
 			message: "#^Binary operation \"\\*\" between string and 100 results in an error\\.$#"
-			count: 1
-			path: Model/Ui/CreditCard/ConfigProvider.php
-
-		-
-			message: "#^Method Conekta\\\\Payments\\\\Model\\\\Ui\\\\CreditCard\\\\ConfigProvider\\:\\:getConfig\\(\\) has invalid return type array\\.$#"
-			count: 1
-			path: Model/Ui/CreditCard/ConfigProvider.php
-
-		-
-			message: "#^Method Conekta\\\\Payments\\\\Model\\\\Ui\\\\CreditCard\\\\ConfigProvider\\:\\:getConfig\\(\\) should return array\\<array\\<array\\>\\> but returns array\\<string, array\\<string, array\\<string, mixed\\>\\>\\>\\.$#"
 			count: 1
 			path: Model/Ui/CreditCard/ConfigProvider.php
 
@@ -117,16 +82,6 @@ parameters:
 
 		-
 			message: "#^Binary operation \"\\*\" between string and 100 results in an error\\.$#"
-			count: 1
-			path: Model/Ui/EmbedForm/ConfigProvider.php
-
-		-
-			message: "#^Method Conekta\\\\Payments\\\\Model\\\\Ui\\\\EmbedForm\\\\ConfigProvider\\:\\:getConfig\\(\\) has invalid return type array\\.$#"
-			count: 1
-			path: Model/Ui/EmbedForm/ConfigProvider.php
-
-		-
-			message: "#^Method Conekta\\\\Payments\\\\Model\\\\Ui\\\\EmbedForm\\\\ConfigProvider\\:\\:getConfig\\(\\) should return array\\<array\\<array\\>\\> but returns array\\<string, array\\<string, array\\<string, mixed\\>\\>\\>\\.$#"
 			count: 1
 			path: Model/Ui/EmbedForm/ConfigProvider.php
 

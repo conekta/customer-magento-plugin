@@ -57,9 +57,9 @@ class Router implements RouterInterface
     public function match(RequestInterface $request)
     {
         if ($request->getModuleName() === 'conekta') {
-            return;
+            return null;
         }
-        
+
         $pathRequest = trim($request->getPathInfo(), '/');
 
         // Handle Apple Pay domain association file
@@ -79,5 +79,7 @@ class Router implements RouterInterface
             $request->setAlias(Url::REWRITE_REQUEST_PATH_ALIAS, $pathRequest);
             return $this->actionFactory->create(\Magento\Framework\App\Action\Forward::class);
         }
+
+        return null;
     }
 }

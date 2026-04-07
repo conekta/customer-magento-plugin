@@ -52,7 +52,7 @@ class ConfigProvider implements ConfigProviderInterface
     /**
      * Get config
      *
-     * @return \array[][]
+     * @return array
      */
     public function getConfig()
     {
