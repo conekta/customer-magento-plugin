@@ -39,7 +39,7 @@ class IndexTest extends TestCase
 
         $resultRawFactory = $this->getMockBuilder(\Magento\Framework\Controller\Result\RawFactory::class)
             ->disableOriginalConstructor()
-            ->addMethods(['create'])
+            ->onlyMethods(['create'])
             ->getMock();
         $resultRawFactory->method('create')->willReturn($this->resultRaw);
 
