@@ -37,6 +37,6 @@
         "squizlabs/php_codesniffer": "^3.7",
         "magento/framework": "^103.0 || ^104.0",
         "magento/payment-services": "*",
-        "phpstan/phpstan": "1.10.32"
+        "phpstan/phpstan": "^1.12"
     }
 }

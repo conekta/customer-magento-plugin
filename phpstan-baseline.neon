@@ -1,0 +1,136 @@
+parameters:
+	ignoreErrors:
+		-
+			message: "#^Method Conekta\\\\Payments\\\\Controller\\\\Router\\:\\:match\\(\\) should return Magento\\\\Framework\\\\App\\\\ActionInterface but empty return statement found\\.$#"
+			count: 1
+			path: Controller/Router.php
+
+		-
+			message: "#^Method Conekta\\\\Payments\\\\Controller\\\\Router\\:\\:match\\(\\) should return Magento\\\\Framework\\\\App\\\\ActionInterface but return statement is missing\\.$#"
+			count: 1
+			path: Controller/Router.php
+
+		-
+			message: "#^Return type \\(void\\) of method Conekta\\\\Payments\\\\Gateway\\\\Command\\\\GatewayCommand\\:\\:execute\\(\\) should be compatible with return type \\(Magento\\\\Payment\\\\Gateway\\\\Command\\\\ResultInterface\\|null\\) of method Magento\\\\Payment\\\\Gateway\\\\CommandInterface\\:\\:execute\\(\\)$#"
+			count: 1
+			path: Gateway/Command/GatewayCommand.php
+
+		-
+			message: "#^PHPDoc tag @param references unknown parameter\\: \\$invoiceService$#"
+			count: 1
+			path: Gateway/Response/EmbedForm/TxnIdHandler.php
+
+		-
+			message: "#^PHPDoc tag @param references unknown parameter\\: \\$transactionFactory$#"
+			count: 1
+			path: Gateway/Response/EmbedForm/TxnIdHandler.php
+
+		-
+			message: "#^Binary operation \"\\*\" between string and 100 results in an error\\.$#"
+			count: 1
+			path: Helper/ConektaOrder.php
+
+		-
+			message: "#^PHPDoc tag @param for parameter \\$guestEmail with type mixed is not subtype of native type string\\.$#"
+			count: 1
+			path: Helper/ConektaOrder.php
+
+		-
+			message: "#^PHPDoc tag @param for parameter \\$orderItems with type mixed is not subtype of native type array\\.$#"
+			count: 1
+			path: Helper/ConektaOrder.php
+
+		-
+			message: "#^PHPDoc tag @param for parameter \\$items with type mixed is not subtype of native type array\\.$#"
+			count: 3
+			path: Helper/Data.php
+
+		-
+			message: "#^PHPDoc tag @param for parameter \\$quoteId with type mixed is not subtype of native type int\\.$#"
+			count: 1
+			path: Helper/Data.php
+
+		-
+			message: "#^Variable \\$conektaOrder in empty\\(\\) always exists and is not falsy\\.$#"
+			count: 1
+			path: Model/EmbedFormRepository.php
+
+		-
+			message: "#^Call to an undefined method Magento\\\\Framework\\\\Session\\\\StorageInterface\\:\\:getData\\(\\)\\.$#"
+			count: 4
+			path: Model/Session.php
+
+		-
+			message: "#^Call to an undefined method Magento\\\\Framework\\\\Session\\\\StorageInterface\\:\\:setData\\(\\)\\.$#"
+			count: 1
+			path: Model/Session.php
+
+		-
+			message: "#^PHPDoc type array of property Conekta\\\\Payments\\\\Model\\\\Source\\\\Order\\\\Status\\\\Pendingpayment\\:\\:\\$_stateStatuses is not covariant with PHPDoc type array\\<string\\> of overridden property Magento\\\\Sales\\\\Model\\\\Config\\\\Source\\\\Order\\\\Status\\:\\:\\$_stateStatuses\\.$#"
+			count: 1
+			path: Model/Source/Order/Status/Pendingpayment.php
+
+		-
+			message: "#^Call to an undefined method Magento\\\\Eav\\\\Api\\\\Data\\\\AttributeInterface\\:\\:getFrontendLabel\\(\\)\\.$#"
+			count: 1
+			path: Model/System/Config/Source/MetadataProduct.php
+
+		-
+			message: "#^Method Conekta\\\\Payments\\\\Model\\\\Ui\\\\BankTransfer\\\\ConfigProvider\\:\\:getConfig\\(\\) has invalid return type array\\.$#"
+			count: 1
+			path: Model/Ui/BankTransfer/ConfigProvider.php
+
+		-
+			message: "#^Method Conekta\\\\Payments\\\\Model\\\\Ui\\\\BankTransfer\\\\ConfigProvider\\:\\:getConfig\\(\\) should return array\\<array\\<array\\>\\> but returns array\\<string, array\\<string, array\\<string, mixed\\>\\>\\>\\.$#"
+			count: 1
+			path: Model/Ui/BankTransfer/ConfigProvider.php
+
+		-
+			message: "#^Method Conekta\\\\Payments\\\\Model\\\\Ui\\\\Cash\\\\ConfigProvider\\:\\:getConfig\\(\\) has invalid return type array\\.$#"
+			count: 1
+			path: Model/Ui/Cash/ConfigProvider.php
+
+		-
+			message: "#^Method Conekta\\\\Payments\\\\Model\\\\Ui\\\\Cash\\\\ConfigProvider\\:\\:getConfig\\(\\) should return array\\<array\\<array\\>\\> but returns array\\<string, array\\<string, array\\<string, mixed\\>\\>\\>\\.$#"
+			count: 1
+			path: Model/Ui/Cash/ConfigProvider.php
+
+		-
+			message: "#^Binary operation \"\\*\" between string and 100 results in an error\\.$#"
+			count: 1
+			path: Model/Ui/CreditCard/ConfigProvider.php
+
+		-
+			message: "#^Method Conekta\\\\Payments\\\\Model\\\\Ui\\\\CreditCard\\\\ConfigProvider\\:\\:getConfig\\(\\) has invalid return type array\\.$#"
+			count: 1
+			path: Model/Ui/CreditCard/ConfigProvider.php
+
+		-
+			message: "#^Method Conekta\\\\Payments\\\\Model\\\\Ui\\\\CreditCard\\\\ConfigProvider\\:\\:getConfig\\(\\) should return array\\<array\\<array\\>\\> but returns array\\<string, array\\<string, array\\<string, mixed\\>\\>\\>\\.$#"
+			count: 1
+			path: Model/Ui/CreditCard/ConfigProvider.php
+
+		-
+			message: "#^Variable \\$cc_types in empty\\(\\) always exists and is not falsy\\.$#"
+			count: 1
+			path: Model/Ui/CreditCard/ConfigProvider.php
+
+		-
+			message: "#^Binary operation \"\\*\" between string and 100 results in an error\\.$#"
+			count: 1
+			path: Model/Ui/EmbedForm/ConfigProvider.php
+
+		-
+			message: "#^Method Conekta\\\\Payments\\\\Model\\\\Ui\\\\EmbedForm\\\\ConfigProvider\\:\\:getConfig\\(\\) has invalid return type array\\.$#"
+			count: 1
+			path: Model/Ui/EmbedForm/ConfigProvider.php
+
+		-
+			message: "#^Method Conekta\\\\Payments\\\\Model\\\\Ui\\\\EmbedForm\\\\ConfigProvider\\:\\:getConfig\\(\\) should return array\\<array\\<array\\>\\> but returns array\\<string, array\\<string, array\\<string, mixed\\>\\>\\>\\.$#"
+			count: 1
+			path: Model/Ui/EmbedForm/ConfigProvider.php
+
+		-
+			message: "#^Variable \\$conektaOrderFound in isset\\(\\) always exists and is not nullable\\.$#"
+			count: 1
+			path: Service/MissingOrders.php
