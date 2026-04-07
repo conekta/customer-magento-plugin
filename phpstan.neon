@@ -3,6 +3,7 @@ includes:
 
 parameters:
     level: 4
+    reportUnmatchedIgnoredErrors: false
     paths:
         - Controller
         - Model
