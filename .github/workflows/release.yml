@@ -1,0 +1,209 @@
+name: Release & Marketplace Deploy
+
+on:
+  push:
+    tags:
+      - '[0-9]*'
+
+permissions:
+  contents: write
+
+jobs:
+  validate-version:
+    name: Validate tag version
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.check.outputs.version }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Validate tag matches composer.json and module.xml
+        id: check
+        run: |
+          TAG_VERSION="${GITHUB_REF_NAME}"
+          COMPOSER_VERSION=$(jq -r '.version' composer.json)
+          MODULE_VERSION=$(grep -oP 'setup_version="\K[^"]+' etc/module.xml)
+
+          echo "Tag version:      $TAG_VERSION"
+          echo "Composer version: $COMPOSER_VERSION"
+          echo "Module version:   $MODULE_VERSION"
+
+          if [ "$TAG_VERSION" != "$COMPOSER_VERSION" ]; then
+            echo "::error::Tag version ($TAG_VERSION) does not match composer.json version ($COMPOSER_VERSION)"
+            exit 1
+          fi
+
+          if [ "$TAG_VERSION" != "$MODULE_VERSION" ]; then
+            echo "::error::Tag version ($TAG_VERSION) does not match module.xml setup_version ($MODULE_VERSION)"
+            exit 1
+          fi
+
+          echo "version=$TAG_VERSION" >> "$GITHUB_OUTPUT"
+          echo "All versions match: $TAG_VERSION"
+
+  tests:
+    name: Tests (PHP ${{ matrix.php }})
+    needs: validate-version
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['8.2', '8.3', '8.4', '8.5']
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup PHP ${{ matrix.php }}
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          tools: composer:v2
+
+      - name: Install dependencies
+        run: |
+          composer config --no-interaction http-basic.repo.magento.com "${{ secrets.MAGENTO_PUBLIC_KEY }}" "${{ secrets.MAGENTO_PRIVATE_KEY }}"
+          composer install --no-interaction --prefer-dist --ignore-platform-reqs
+
+      - name: Run PHPStan
+        run: vendor/bin/phpstan analyse --no-progress --memory-limit=512M
+
+      - name: Run tests
+        run: vendor/bin/phpunit
+
+  build-and-release:
+    name: Build ZIP & GitHub Release
+    needs: [validate-version, tests]
+    runs-on: ubuntu-latest
+    outputs:
+      zip_name: ${{ steps.build.outputs.zip_name }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Build plugin ZIP
+        id: build
+        run: |
+          VERSION="${{ needs.validate-version.outputs.version }}"
+          ZIP_NAME="conekta_conekta_payments-${VERSION}.zip"
+          zip -r "$ZIP_NAME" . \
+            -x "*.git*" "*.idea*" "vendor/*" "Makefile" "README.md" \
+            "composer.lock" ".DS_Store" "Test/*" "phpunit.xml" \
+            "phpstan.neon" "phpstan-baseline.neon" "AGENTS.md" \
+            "CHANGELOG.md" ".github/*"
+          echo "zip_name=$ZIP_NAME" >> "$GITHUB_OUTPUT"
+          echo "Built $ZIP_NAME ($(du -h "$ZIP_NAME" | cut -f1))"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ steps.build.outputs.zip_name }}
+          generate_release_notes: true
+
+      - name: Upload ZIP as artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: plugin-zip
+          path: ${{ steps.build.outputs.zip_name }}
+
+  marketplace-deploy:
+    name: Deploy to Adobe Commerce Marketplace
+    needs: [validate-version, build-and-release]
+    runs-on: ubuntu-latest
+    environment:
+      name: marketplace
+    steps:
+      - name: Download ZIP artifact
+        uses: actions/download-artifact@v8
+        with:
+          name: plugin-zip
+
+      - name: Authenticate with EQP API
+        id: auth
+        run: |
+          RESPONSE=$(curl -sf -X POST \
+            -u "${{ secrets.EQP_APP_ID }}:${{ secrets.EQP_APP_SECRET }}" \
+            -H 'Content-Type: application/json' \
+            -d '{ "grant_type": "session", "expires_in": 7200 }' \
+            https://commercedeveloper-api.adobe.com/rest/v1/app/session/token)
+
+          TOKEN=$(echo "$RESPONSE" | jq -r '.ust')
+          if [ -z "$TOKEN" ] || [ "$TOKEN" = "null" ]; then
+            echo "::error::Failed to authenticate with EQP API"
+            echo "$RESPONSE"
+            exit 1
+          fi
+
+          echo "::add-mask::$TOKEN"
+          echo "token=$TOKEN" >> "$GITHUB_OUTPUT"
+          echo "EQP authentication successful"
+
+      - name: Upload ZIP to EQP
+        id: upload
+        run: |
+          VERSION="${{ needs.validate-version.outputs.version }}"
+          ZIP_NAME="conekta_conekta_payments-${VERSION}.zip"
+
+          RESPONSE=$(curl -sf -X POST \
+            -H "Authorization: Bearer ${{ steps.auth.outputs.token }}" \
+            -F "file=@${ZIP_NAME};type=application/zip" \
+            https://commercedeveloper-api.adobe.com/rest/v1/files/uploads)
+
+          FILE_ID=$(echo "$RESPONSE" | jq -r '.[0].file_upload_id')
+          if [ -z "$FILE_ID" ] || [ "$FILE_ID" = "null" ]; then
+            echo "::error::Failed to upload ZIP to EQP"
+            echo "$RESPONSE"
+            exit 1
+          fi
+
+          echo "file_id=$FILE_ID" >> "$GITHUB_OUTPUT"
+          echo "Uploaded ZIP, file_upload_id: $FILE_ID"
+
+      - name: Submit package for review
+        run: |
+          VERSION="${{ needs.validate-version.outputs.version }}"
+          FILE_ID="${{ steps.upload.outputs.file_id }}"
+
+          SUBMISSION=$(cat <<PAYLOAD
+          [{
+            "action": {
+              "technical": "submit",
+              "marketing": "submit"
+            },
+            "type": "extension",
+            "platform": "M2",
+            "version_compatibility": [{
+              "edition": "CE",
+              "versions": ["2.4"]
+            }, {
+              "edition": "EE",
+              "versions": ["2.4"]
+            }, {
+              "edition": "ECE",
+              "versions": ["2.4"]
+            }],
+            "artifact": {
+              "file_upload_id": "$FILE_ID"
+            },
+            "release_notes": "Release v${VERSION} - see https://github.com/${{ github.repository }}/releases/tag/${VERSION}",
+            "eqp_sku": "conekta/conekta_payments"
+          }]
+          PAYLOAD
+          )
+
+          RESPONSE=$(curl -sf -X PUT \
+            -H "Authorization: Bearer ${{ steps.auth.outputs.token }}" \
+            -H "Content-Type: application/json" \
+            -d "$SUBMISSION" \
+            https://commercedeveloper-api.adobe.com/rest/v1/products/packages)
+
+          echo "Marketplace submission response:"
+          echo "$RESPONSE" | jq .
+
+          SUBMISSION_ID=$(echo "$RESPONSE" | jq -r '.[0].submission_id // empty')
+          if [ -z "$SUBMISSION_ID" ]; then
+            echo "::warning::Could not extract submission_id. Check response above."
+          else
+            echo "Submitted for review. Submission ID: $SUBMISSION_ID"
+            echo "### Marketplace Submission" >> "$GITHUB_STEP_SUMMARY"
+            echo "- **Version:** ${VERSION}" >> "$GITHUB_STEP_SUMMARY"
+            echo "- **Submission ID:** ${SUBMISSION_ID}" >> "$GITHUB_STEP_SUMMARY"
+            echo "- **Status:** Submitted for review" >> "$GITHUB_STEP_SUMMARY"
+          fi
