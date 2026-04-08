@@ -1,4 +1,5 @@
-### 5.4.0 - 2026/04/08
+### 5.5.0 - 2026/04/08
+- Version bump for Magento Marketplace compatibility (requires version > 5.4.4)
 
 ### 5.3.4 - 2026/04/07
 - Fixed Conekta logo image path in checkout
