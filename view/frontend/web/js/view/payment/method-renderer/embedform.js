@@ -303,7 +303,9 @@ define(
                         },
                         onErrorPayment: function(a) {
                             self.conektaError("Ocurrió un error al procesar el pago. Por favor, inténtalo de nuevo.");
-                            self.renderizeEmbedForm();
+                            setTimeout(function() {
+                                self.renderizeEmbedForm();
+                            }, 1000);
                         },
                         onPayByBankWaitingPay: function(data) {
                             var provider = data.provider || 'bbva';
