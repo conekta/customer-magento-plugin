@@ -1,0 +1,33 @@
+includes:
+    - phpstan-baseline.neon
+
+parameters:
+    level: 4
+    reportUnmatchedIgnoredErrors: false
+    paths:
+        - Controller
+        - Model
+        - Service
+        - Observer
+        - Helper
+        - Gateway
+        - Block
+        - Api
+    excludePaths:
+        - vendor
+        - Test
+    scanDirectories:
+        - vendor/magento/framework
+    ignoreErrors:
+        # Magento auto-generated factory classes
+        - '#has unknown class .+Factory as its type#'
+        - '#has invalid type .+Factory#'
+        - '#Call to method create\(\) on an unknown class .+Factory#'
+        # Magento concrete methods accessed through interfaces
+        - '#Call to an undefined method Magento\\Framework\\App\\RequestInterface::#'
+        - '#Call to an undefined method Magento\\Store\\Api\\Data\\StoreInterface::#'
+        - '#Call to an undefined method Magento\\Quote\\Api\\Data\\CartInterface::#'
+        - '#Call to an undefined method Magento\\Customer\\Model\\#'
+        - '#Call to an undefined method Magento\\Payment\\Model\\InfoInterface::#'
+        - '#Call to an undefined method Magento\\Sales\\Api\\Data\\#'
+        - '#Call to an undefined method Magento\\Framework\\Event::#'

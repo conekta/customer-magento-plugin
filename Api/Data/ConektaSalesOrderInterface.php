@@ -43,4 +43,12 @@ interface ConektaSalesOrderInterface
      * @return mixed
      */
     public function setIncrementOrderId($value);
+
+    /**
+     * Load by Conekta Order Id
+     *
+     * @param string $conektaOrderId
+     * @return $this
+     */
+    public function loadByConektaOrderId($conektaOrderId);
 }
