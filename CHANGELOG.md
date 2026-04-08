@@ -1,3 +1,5 @@
+### 5.4.0 - 2026/04/08
+
 ### 5.3.4 - 2026/04/07
 - Fixed Conekta logo image path in checkout
 - Improved webhook error responses to always return JSON body (400, 404, 500)
