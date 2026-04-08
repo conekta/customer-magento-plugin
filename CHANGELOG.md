@@ -2,7 +2,8 @@
 - Fixed Conekta logo image path in checkout
 - Improved webhook error responses to always return JSON body (400, 404, 500)
 - Added `\Throwable` catch to handle PHP fatal errors in webhook controller
-- Added unit tests for webhook controller
+- Fixed null checkout crash in EmbedFormRepository when Conekta order has no checkout
+- Added unit tests for webhook controller, router, MissingOrders and EmbedFormRepository
 - Added GitHub Actions CI workflow with PHP 8.2/8.3/8.4 matrix
 
 ### 5.3.3 - 2025/12/22

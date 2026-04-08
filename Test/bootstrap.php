@@ -9,3 +9,9 @@ if (!class_exists(\Magento\Framework\Controller\Result\RawFactory::class)) {
 if (!class_exists(\Magento\Sales\Model\OrderFactory::class)) {
     require_once __DIR__ . '/Stub/OrderFactory.php';
 }
+if (!class_exists(\Conekta\Payments\Model\ConektaQuoteFactory::class)) {
+    require_once __DIR__ . '/Stub/ConektaQuoteFactory.php';
+}
+if (!class_exists(\Conekta\Payments\Model\ConektaQuoteRepositoryFactory::class)) {
+    require_once __DIR__ . '/Stub/ConektaQuoteRepositoryFactory.php';
+}

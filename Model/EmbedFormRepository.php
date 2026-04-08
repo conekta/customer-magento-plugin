@@ -128,7 +128,7 @@ class EmbedFormRepository implements EmbedFormRepositoryInterface
             $conektaQuote = $conektaQuoteRepo->getByid($quoteId);
             $conektaOrder = $this->conektaOrderApi->getOrderByID($conektaQuote->getConektaOrderId());
 
-            if (!empty($conektaOrder)) {
+            if (!empty($conektaOrder) && $conektaOrder->getCheckout() !== null) {
                 $chekoutParams = $orderParams['checkout'];
                 $conektaChekout = $conektaOrder->getCheckout();
                 $conektaCheckoutMonthlyInstallmentsOptions = (array)$conektaChekout->getMonthlyInstallmentsOptions();
@@ -144,6 +144,8 @@ class EmbedFormRepository implements EmbedFormRepositoryInterface
                 ) {
                     $hasToCreateNewOrder = true;
                 }
+            } else {
+                $hasToCreateNewOrder = true;
             }
         } catch (NoSuchEntityException $e) {
             $conektaQuote = null;
@@ -163,6 +165,7 @@ class EmbedFormRepository implements EmbedFormRepositoryInterface
              *      2.1- conekta order has payment_status OR
              *      2.2- conekta order checkout has expired
              *      2.3- checkout parameters has changed
+             *      2.4- conekta order checkout is null
              */
             if ($hasToCreateNewOrder) {
                 $this->_conektaLogger->info('EmbedFormRepository::generate Creates conekta order', $orderParams);
