@@ -1,3 +1,6 @@
+### 5.5.1 - 2026/05/26
+- [BE-849] Fix "Call to a member function setStoreId() on null" in MissingOrders by guarding when cartRepository returns null
+
 ### 5.5.0 - 2026/04/08
 - Version bump for Magento Marketplace compatibility (requires version > 5.4.4)
 

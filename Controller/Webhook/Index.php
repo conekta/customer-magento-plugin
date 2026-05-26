@@ -2,6 +2,7 @@
 namespace Conekta\Payments\Controller\Webhook;
 
 use Conekta\Payments\Exception\EntityNotFoundException;
+use Conekta\Payments\Exception\QuoteNotFoundException;
 use Conekta\Payments\Logger\Logger as ConektaLogger;
 use Conekta\Payments\Model\WebhookRepository;
 use Conekta\Payments\Service\MissingOrders;
@@ -174,6 +175,12 @@ class Index extends Action implements CsrfAwareActionInterface
                     break;
             }
 
+        } catch (QuoteNotFoundException $e) {
+            // Quote does not exist — the order is not recoverable and retrying will not resolve it.
+            // Return 204 (No Content) so Conekta stops retrying this webhook.
+            $this->_conektaLogger->info('Controller Index :: Quote not recoverable, acknowledging webhook: ' . $e->getMessage());
+            $resultRaw = $this->resultRawFactory->create();
+            return $resultRaw->setHttpResponseCode(Response::STATUS_CODE_204);
         } catch (EntityNotFoundException $e) {
             $errorResponse = [
                 'error' => 'Entity Not Found',

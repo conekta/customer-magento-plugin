@@ -3,6 +3,7 @@
 namespace Conekta\Payments\Service;
 
 use Conekta\Payments\Api\ConektaApiClient;
+use Conekta\Payments\Exception\QuoteNotFoundException;
 use Conekta\Payments\Helper\Data as ConektaData;
 use Conekta\Payments\Logger\Logger as ConektaLogger;
 use Conekta\Payments\Model\Ui\EmbedForm\ConfigProvider;
@@ -50,8 +51,9 @@ class MissingOrders
 
     /**
      * @throws LocalizedException
+     * @throws QuoteNotFoundException when the quote referenced by the webhook metadata cannot be loaded
      */
-    public function recoverOrder($event){
+    public function recoverOrder(array $event){
         try {
             //check order en order with external id
             $conektaOrderFound = $this->webhookRepository->findByMetadataOrderId($event);
@@ -71,7 +73,15 @@ class MissingOrders
 
             $quoteId = $metadata['quote_id'];
             $storeId = $metadata['store'] ?? null;
+            // CartRepositoryInterface::get() declares non-null + NoSuchEntityException,
+            // but real installs with plugins/around-interceptors may return null instead of throwing (BE-849).
             $quoteCreated = $this->_cartRepository->get($quoteId);
+
+            /** @phpstan-ignore-next-line booleanNot.alwaysFalse */
+            if (!$quoteCreated) {
+                throw new QuoteNotFoundException('Quote not found for quote_id ' . $quoteId);
+            }
+
             $quoteCreated->setStoreId($storeId);
 
             $orderFounded = $this->orderFactory->create()->load($quoteCreated->getReservedOrderId(), OrderInterface::INCREMENT_ID);
@@ -109,7 +119,9 @@ class MissingOrders
             }
             return ;
 
-        }catch (NoSuchEntityException $e){
+        } catch (QuoteNotFoundException $e) {
+            throw $e;
+        } catch (NoSuchEntityException $e){
             $this->_conektaLogger->error($e->getMessage());
             return;
         }

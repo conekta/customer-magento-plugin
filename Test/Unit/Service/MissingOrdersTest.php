@@ -2,6 +2,7 @@
 namespace Conekta\Payments\Test\Unit\Service;
 
 use Conekta\Payments\Api\ConektaApiClient;
+use Conekta\Payments\Exception\QuoteNotFoundException;
 use Conekta\Payments\Helper\Data as ConektaData;
 use Conekta\Payments\Logger\Logger as ConektaLogger;
 use Conekta\Payments\Model\WebhookRepository;
@@ -505,6 +506,23 @@ class MissingOrdersTest extends TestCase
         $this->assertArrayNotHasKey('cc_type', $capturedAdditionalInfo);
         $this->assertArrayNotHasKey('cc_last_4', $capturedAdditionalInfo);
         $this->assertArrayNotHasKey('cc_exp_month', $capturedAdditionalInfo);
+    }
+
+    // --- BE-849: cartRepository->get returning null throws QuoteNotFoundException ---
+
+    public function testThrowsQuoteNotFoundWhenCartRepositoryReturnsNull(): void
+    {
+        $event = $this->buildEvent();
+
+        $notFoundOrder = $this->createMockOrder(null);
+        $this->webhookRepository->method('findByMetadataOrderId')->willReturn($notFoundOrder);
+
+        $this->cartRepository->method('get')->willReturn(null);
+
+        $this->expectException(QuoteNotFoundException::class);
+        $this->expectExceptionMessage('Quote not found for quote_id 999');
+
+        $this->missingOrders->recoverOrder($event);
     }
 
     // --- Conekta API failure doesn't break recovery ---
