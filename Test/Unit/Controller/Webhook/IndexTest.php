@@ -3,6 +3,7 @@ namespace Conekta\Payments\Test\Unit\Controller\Webhook;
 
 use Conekta\Payments\Controller\Webhook\Index;
 use Conekta\Payments\Exception\EntityNotFoundException;
+use Conekta\Payments\Exception\QuoteNotFoundException;
 use Conekta\Payments\Logger\Logger as ConektaLogger;
 use Conekta\Payments\Model\WebhookRepository;
 use Conekta\Payments\Service\MissingOrders;
@@ -264,6 +265,22 @@ class IndexTest extends TestCase
     }
 
     // --- Error handling ---
+
+    public function testQuoteNotFoundExceptionReturns204AndSkipsPayOrder(): void
+    {
+        $body = $this->buildWebhookBody('order.paid', 'card_payment');
+        $this->configureRequest('POST', $body);
+
+        $this->missingOrders->expects($this->once())
+            ->method('recoverOrder')
+            ->willThrowException(new QuoteNotFoundException('Quote not found for quote_id 999'));
+        $this->webhookRepository->expects($this->never())
+            ->method('payOrder');
+
+        $result = $this->controller->execute();
+
+        $this->assertSame(Response::STATUS_CODE_204, $this->capturedHttpCode);
+    }
 
     public function testEntityNotFoundExceptionReturns404(): void
     {
