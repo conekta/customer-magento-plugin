@@ -37,7 +37,7 @@ $offlineInfo = $block->getOfflineInfo();
                 <tr>
                     <th><strong><?= /* @noEscape */ __('Expires at:'); ?></strong></th>
                     <td>
-                        <?= $block->escapeHtml(date("Y-m-d", (integer) $offlineInfo["expires_at"])); ?>
+                        <?= $block->escapeHtml(date("Y-m-d", (int) $offlineInfo["expires_at"])); ?>
                     </td>
                 </tr>
 
@@ -57,21 +57,21 @@ $offlineInfo = $block->getOfflineInfo();
                 <tr>
                     <th><strong><?= /* @noEscape */ __('Expires at:'); ?></strong></th>
                     <td>
-                        <?= $block->escapeHtml(date("Y-m-d", (integer) $offlineInfo["expires_at"])) ?>
+                        <?= $block->escapeHtml(date("Y-m-d", (int) $offlineInfo["expires_at"])) ?>
                     </td>
                 </tr>
                 <?php } elseif ($block->isBnplPaymentMethod()) { ?>
                 <tr>
                     <th><strong><?= /* @noEscape */ __('Expires at:'); ?></strong></th>
                     <td>
-                        <?= $block->escapeHtml(date("Y-m-d", (integer) $offlineInfo["expires_at"])) ?>
+                        <?= $block->escapeHtml(date("Y-m-d", (int) $offlineInfo["expires_at"])) ?>
                     </td>
                 </tr>
                 <?php } elseif ($block->isPayByBankPaymentMethod()) { ?>
                 <tr>
                     <th><strong><?= /* @noEscape */ __('Expires at:'); ?></strong></th>
                     <td>
-                        <?= $block->escapeHtml(date("Y-m-d H:i:s", (integer) $offlineInfo["expires_at"])) ?>
+                        <?= $block->escapeHtml(date("Y-m-d H:i:s", (int) $offlineInfo["expires_at"])) ?>
                     </td>
                 </tr>
                 <?php } ?>                  

@@ -189,7 +189,7 @@ class ConfigProvider implements ConfigProviderInterface
     private function _getYears()
     {
         $years = [];
-        $cYear = (integer) date("Y");
+        $cYear = (int) date("Y");
         $cYear = --$cYear;
         for ($i=1; $i <= 8; $i++) {
             $year = (string) ($cYear + $i);
@@ -207,7 +207,7 @@ class ConfigProvider implements ConfigProviderInterface
     private function _getStartYears()
     {
         $years = [];
-        $cYear = (integer) date("Y");
+        $cYear = (int) date("Y");
 
         for ($i=5; $i>=0; $i--) {
             $year = (string)($cYear - $i);

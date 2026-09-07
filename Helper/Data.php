@@ -253,7 +253,7 @@ class Data extends Util
      */
     public function is3DSEnabled(): bool
     {
-        return (boolean)$this->getConfigData('conekta_cc', 'iframe_enabled');
+        return (bool)$this->getConfigData('conekta_cc', 'iframe_enabled');
     }
 
     /**
@@ -263,7 +263,7 @@ class Data extends Util
      */
     public function isSaveCardEnabled(): bool
     {
-        return (boolean)$this->getConfigData('conekta_cc', 'enable_saved_card');
+        return (bool)$this->getConfigData('conekta_cc', 'enable_saved_card');
     }
 
     /**
@@ -273,7 +273,7 @@ class Data extends Util
      */
     public function isCreditCardEnabled(): bool
     {
-        return (boolean)$this->getConfigData('conekta_cc', 'active');
+        return (bool)$this->getConfigData('conekta_cc', 'active');
     }
 
     /**
@@ -283,7 +283,7 @@ class Data extends Util
      */
     public function isCashEnabled(): bool
     {
-        return (boolean)$this->getConfigData('conekta_cash', 'active');
+        return (bool)$this->getConfigData('conekta_cash', 'active');
     }
 
     /**
@@ -293,7 +293,7 @@ class Data extends Util
      */
     public function isBankTransferEnabled(): bool
     {
-        return (boolean)$this->getConfigData('conekta_bank_transfer', 'active');
+        return (bool)$this->getConfigData('conekta_bank_transfer', 'active');
     }
 
     /**
@@ -303,7 +303,7 @@ class Data extends Util
      */
     public function isBnplEnabled(): bool
     {
-        return (boolean)$this->getConfigData('conekta_bnpl', 'active');
+        return (bool)$this->getConfigData('conekta_bnpl', 'active');
     }
 
     /**
@@ -313,7 +313,7 @@ class Data extends Util
      */
     public function isPayByBankEnabled(): bool
     {
-        return (boolean)$this->getConfigData('conekta_pay_by_bank', 'active');
+        return (bool)$this->getConfigData('conekta_pay_by_bank', 'active');
     }
 
     /**

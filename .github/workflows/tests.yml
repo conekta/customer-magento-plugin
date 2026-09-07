@@ -29,6 +29,9 @@ jobs:
           composer config --no-interaction http-basic.repo.magento.com "${{ secrets.MAGENTO_PUBLIC_KEY }}" "${{ secrets.MAGENTO_PRIVATE_KEY }}"
           composer install --no-interaction --prefer-dist --ignore-platform-reqs
 
+      - name: Run PHP compatibility check
+        run: vendor/bin/phpcs
+
       - name: Run PHPStan
         run: vendor/bin/phpstan analyse --no-progress --memory-limit=512M
 

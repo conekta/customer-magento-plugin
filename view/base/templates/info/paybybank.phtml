@@ -22,7 +22,7 @@ $payByBankData = $block->getDataPayByBank();
                 <tr>
                     <th><strong><?= /* @noEscape */ __('Expires at:'); ?></strong></th>
                     <td>
-                        <?= $block->escapeHtml(date("Y-m-d H:i:s", (integer) $payByBankData['expires_at'])); ?>
+                        <?= $block->escapeHtml(date("Y-m-d H:i:s", (int) $payByBankData['expires_at'])); ?>
                     </td>
                 </tr>
                 <?php endif; ?>

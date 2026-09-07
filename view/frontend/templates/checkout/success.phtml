@@ -129,7 +129,7 @@
                         <td>
                             <strong><?= /* @noEscape */
                                 __('Expires at:'); ?></strong>
-                            <?= $block->escapeHtml(date("Y-m-d", (integer)$data["data"]["expires_at"])); ?>
+                            <?= $block->escapeHtml(date("Y-m-d", (int)$data["data"]["expires_at"])); ?>
                         </td>
                     </tr>
                     <?php
@@ -155,7 +155,7 @@
                         <td>
                             <strong><?= /* @noEscape */
                                 __('Expires at:'); ?></strong>
-                            <?= $block->escapeHtml(date("Y-m-d", (integer)$data["data"]["expires_at"])); ?>
+                            <?= $block->escapeHtml(date("Y-m-d", (int)$data["data"]["expires_at"])); ?>
                         </td>
                     </tr>
                     <tr>
@@ -181,7 +181,7 @@
                         <td>
                             <strong><?= /* @noEscape */
                                 __('Expires at:'); ?></strong>
-                            <?= $block->escapeHtml(date("Y-m-d", (integer)$data["data"]["expires_at"])); ?>
+                            <?= $block->escapeHtml(date("Y-m-d", (int)$data["data"]["expires_at"])); ?>
                         </td>
                     </tr>
                     <?php endif; ?>
@@ -265,7 +265,7 @@
                         <td colspan="2" style="text-align: center; padding-top: 15px;">
                             <small style="color: #999;">
                                 <strong><?= /* @noEscape */ __('Expira el:'); ?></strong>
-                                <?= $block->escapeHtml($block->formatDateMexicoTimezone((integer)$data["data"]["expires_at"])); ?>
+                                <?= $block->escapeHtml($block->formatDateMexicoTimezone((int)$data["data"]["expires_at"])); ?>
                             </small>
                         </td>
                     </tr>

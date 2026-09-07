@@ -22,7 +22,7 @@ $bnplData = $block->getDataBnpl();
                 <tr>
                     <th><strong><?= /* @noEscape */ __('Expires at:'); ?></strong></th>
                     <td>
-                        <?= $block->escapeHtml(date("Y-m-d H:i:s", (integer) $bnplData['expires_at'])); ?>
+                        <?= $block->escapeHtml(date("Y-m-d H:i:s", (int) $bnplData['expires_at'])); ?>
                     </td>
                 </tr>
                 <?php endif; ?>
