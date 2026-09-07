@@ -1,3 +1,6 @@
+### 5.5.2 - 2026/09/07
+- Version bump for Adobe Commerce 2.4.9 version compatibility (Marketplace requirement, deadline 2026/08/14)
+
 ### 5.5.1 - 2026/05/26
 - [BE-849] Fix "Call to a member function setStoreId() on null" in MissingOrders by guarding when cartRepository returns null
 
