@@ -2,7 +2,7 @@
 
 Magento 2 Plugin v.5.5.2 (Stable)
 
-Installation for Magento 2.4.8-p1
+Installation for Magento 2.4.9
 -----------
 
 1. First add this repository in your composer config
@@ -111,7 +111,7 @@ bin/magento c:f
 
 Magento Version Compatibility
 -----------------------------
-The plugin has been tested in Magento 2.4.8-p1, 2.4.7, 2.4.6 
+The plugin has been tested in Magento 2.4.9, 2.4.8-p1, 2.4.7, 2.4.6 
 Support is not guaranteed for untested versions.
 
 
