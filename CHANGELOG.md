@@ -1,3 +1,8 @@
+### 5.5.3 - 2026/09/07
+- Fix `setup:di:compile` failure on Adobe Commerce 2.4.9 / PHP 8.5: replaced non-canonical casts `(integer)`/`(boolean)` with `(int)`/`(bool)`
+- Added PHP 8.5 to the supported versions in composer.json
+- Enhance zip-plugin target to exclude additional files and directories
+
 ### 5.5.2 - 2026/09/07
 - Version bump for Adobe Commerce 2.4.9 version compatibility (Marketplace requirement, deadline 2026/08/14)
 

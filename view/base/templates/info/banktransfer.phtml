@@ -27,7 +27,7 @@ $data = $block->getDataBankTransfer();
                     <td>
                         <strong><?= /* @noEscape */ __('Expires at:'); ?></strong>
                         <br>
-                        <?= $block->escapeHtml(date("Y-m-d", (integer) $data["expires_at"])) ?>
+                        <?= $block->escapeHtml(date("Y-m-d", (int) $data["expires_at"])) ?>
                     </td>
                 </tr>
             </tbody>
