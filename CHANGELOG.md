@@ -1,3 +1,7 @@
+### 5.5.4 - 2026/10/19
+- Webhook now verifies order status and amount with the Conekta API before updating orders
+- Missing order recovery now builds the order from the Conekta API order
+
 ### 5.5.3 - 2026/09/07
 - Fix `setup:di:compile` failure on Adobe Commerce 2.4.9 / PHP 8.5: replaced non-canonical casts `(integer)`/`(boolean)` with `(int)`/`(bool)`
 - Added PHP 8.5 to the supported versions in composer.json
