@@ -33,6 +33,8 @@ class MissingOrdersTest extends TestCase
     private MockObject $orderFactory;
     private MockObject $orderRepository;
 
+    private ?array $conektaApiOrder;
+
     /** @var array<string, int> track calls to key methods */
     private array $callCounts;
 
@@ -47,6 +49,10 @@ class MissingOrdersTest extends TestCase
         ];
 
         $this->webhookRepository = $this->createMock(WebhookRepository::class);
+        $this->conektaApiOrder = null;
+        $this->webhookRepository->method('fetchConektaOrder')->willReturnCallback(
+            fn (array $event) => $this->conektaApiOrder ?? $event['data']['object']
+        );
         $this->conektaLogger = $this->createMock(ConektaLogger::class);
         $this->quoteManagement = $this->createMock(QuoteManagement::class);
         $this->conektaApiClient = $this->createMock(ConektaApiClient::class);
@@ -348,6 +354,66 @@ class MissingOrdersTest extends TestCase
         $this->assertSame(1, $this->callCounts['conektaApi_updateCharge'], 'Debió actualizar la referencia en Conekta');
         $this->assertSame('chrg_123', $capturedChargeArgs['chargeId']);
         $this->assertSame(['reference_id' => '100000001'], $capturedChargeArgs['data']);
+    }
+
+    public function testRecoverOrderUsesConektaApiOrderInsteadOfWebhookBody(): void
+    {
+        $this->conektaApiOrder = $this->buildEvent(quoteId: '999')['data']['object'];
+        $event = $this->buildEvent(quoteId: '666');
+
+        $notFoundOrder = $this->createMockOrder(null);
+        $this->webhookRepository->method('findByMetadataOrderId')->willReturn($notFoundOrder);
+
+        $requestedQuoteId = null;
+        $quote = $this->createMockQuote();
+        $this->cartRepository->method('get')->willReturnCallback(function ($quoteId) use (&$requestedQuoteId, $quote) {
+            $requestedQuoteId = $quoteId;
+            return $quote;
+        });
+        $this->setupFullRecoveryMocks($quote);
+        $this->conektaApiClient->method('updateCharge')
+            ->willReturn($this->createMock(\Conekta\Model\ChargeResponse::class));
+
+        $this->missingOrders->recoverOrder($event);
+
+        $this->assertSame('999', $requestedQuoteId);
+        $this->assertSame(1, $this->callCounts['quoteManagement_submit']);
+    }
+
+    public function testRecoverOrderDoesNotCreateOrderWhenConektaApiRejectsOrderId(): void
+    {
+        $event = $this->buildEvent(conektaOrderId: 'ord_forged');
+
+        $notFoundOrder = $this->createMockOrder(null);
+        $this->webhookRepository = $this->createMock(WebhookRepository::class);
+        $this->webhookRepository->method('findByMetadataOrderId')->willReturn($notFoundOrder);
+        $this->webhookRepository->method('fetchConektaOrder')
+            ->willThrowException(new \Conekta\ApiException('Not Found', 404));
+        $this->cartRepository->method('get')->willReturnCallback(function () {
+            $this->callCounts['cartRepository_get']++;
+            return $this->createMockQuote();
+        });
+        $missingOrders = new MissingOrders(
+            $this->webhookRepository,
+            $this->conektaLogger,
+            $this->quoteManagement,
+            $this->conektaApiClient,
+            $this->cartRepository,
+            $this->createMock(ConektaData::class),
+            $this->orderFactory,
+            $this->orderRepository
+        );
+
+        $thrown = null;
+        try {
+            $missingOrders->recoverOrder($event);
+        } catch (\Conekta\ApiException $e) {
+            $thrown = $e;
+        }
+
+        $this->assertInstanceOf(\Conekta\ApiException::class, $thrown);
+        $this->assertSame(0, $this->callCounts['cartRepository_get']);
+        $this->assertSame(0, $this->callCounts['quoteManagement_submit']);
     }
 
     // --- Recovery with card_payment has additional info ---

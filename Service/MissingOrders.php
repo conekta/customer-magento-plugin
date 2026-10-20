@@ -62,7 +62,7 @@ class MissingOrders
                 $this->_conektaLogger->info('order is ready', ['order' => $conektaOrderFound, 'is_set', isset($conektaOrderFound)]);
                 return;
             }
-            $conektaOrder = $event['data']['object'];
+            $conektaOrder = $this->webhookRepository->fetchConektaOrder($event);
             $conektaCustomer = $conektaOrder['customer_info'] ?? [];
             $metadata = $conektaOrder['metadata'] ?? [];
 

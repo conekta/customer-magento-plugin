@@ -2,6 +2,8 @@
 
 namespace Conekta\Payments\Model;
 
+use Conekta\ApiException;
+use Conekta\Payments\Api\ConektaApiClient;
 use Conekta\Payments\Exception\EntityNotFoundException;
 use Conekta\Payments\Logger\Logger as ConektaLogger;
 use Conekta\Payments\Api\Data\ConektaSalesOrderInterface;
@@ -15,6 +17,16 @@ use Magento\Framework\DB\Transaction;
 
 class WebhookRepository
 {
+    private const CONEKTA_STATUS_PAID = 'paid';
+    private const CONEKTA_CLOSED_STATUSES = ['expired', 'canceled'];
+    private const PAYABLE_ORDER_STATES = [
+        Order::STATE_NEW,
+        Order::STATE_PENDING_PAYMENT,
+        Order::STATE_PAYMENT_REVIEW,
+        Order::STATE_PROCESSING,
+    ];
+    private const AMOUNT_TOLERANCE_IN_CENTS = 100;
+
     /**
      * @var OrderInterface
      */
@@ -39,6 +51,7 @@ class WebhookRepository
      * @var ConektaSalesOrderInterface
      */
     private ConektaSalesOrderInterface $conektaOrderSalesInterface;
+    private ConektaApiClient $conektaApiClient;
 
     /**
      * @param OrderInterface $orderInterface
@@ -47,6 +60,7 @@ class WebhookRepository
      * @param Transaction $transaction
      * @param ConektaLogger $conektaLogger
      * @param ConektaSalesOrderInterface $conektaOrderSalesInterface
+     * @param ConektaApiClient $conektaApiClient
      */
     public function __construct(
         OrderInterface $orderInterface,
@@ -54,7 +68,8 @@ class WebhookRepository
         InvoiceSender $invoiceSender,
         Transaction $transaction,
         ConektaLogger $conektaLogger,
-        ConektaSalesOrderInterface $conektaOrderSalesInterface
+        ConektaSalesOrderInterface $conektaOrderSalesInterface,
+        ConektaApiClient $conektaApiClient
     ) {
         $this->orderInterface = $orderInterface;
         $this->invoiceService = $invoiceService;
@@ -62,6 +77,18 @@ class WebhookRepository
         $this->transaction = $transaction;
         $this->_conektaLogger = $conektaLogger;
         $this->conektaOrderSalesInterface = $conektaOrderSalesInterface;
+        $this->conektaApiClient = $conektaApiClient;
+    }
+
+    public function fetchConektaOrder(array $body): array
+    {
+        if (!isset($body['data']['object']['id'])) {
+            throw new LocalizedException(__('Missing order information'));
+        }
+
+        $conektaOrder = $this->conektaApiClient->getOrderByID((string)$body['data']['object']['id']);
+
+        return json_decode((string)json_encode($conektaOrder), true) ?? [];
     }
 
     /**
@@ -111,6 +138,17 @@ class WebhookRepository
         if ($order->getState() === Order::STATE_PENDING_PAYMENT ||
             $order->getState() === Order::STATE_PAYMENT_REVIEW
         ) {
+            $conektaOrder = $this->fetchConektaOrder($body);
+            $conektaStatus = $conektaOrder['payment_status'] ?? null;
+            if (!in_array($conektaStatus, self::CONEKTA_CLOSED_STATUSES, true)) {
+                $this->_conektaLogger->error('WebhookRepository :: expireOrder - Conekta order is not expired or canceled, order not updated', [
+                    'order_id' => $order->getIncrementId(),
+                    'conekta_order_id' => $conektaOrder['id'] ?? null,
+                    'conekta_payment_status' => $conektaStatus,
+                ]);
+                return;
+            }
+
             if ($order->canCancel()) {
                 $order->cancel();
                 $order->setState(Order::STATE_CANCELED);
@@ -134,24 +172,25 @@ class WebhookRepository
      * @param mixed $body
      * @return void
      * @throws LocalizedException
+     * @throws ApiException
      * @throws Exception
      */
     public function payOrder($body)
     {
 
         $order = $this->findByMetadataOrderId($body);
-        
-        $charge = $body['data']['object'];
-        if (!isset($charge['payment_status']) || $charge['payment_status'] !== "paid") {
-            throw new LocalizedException(__('Missing order information'));
-        }
-        
+
         if (!$order->getId()) {
             $message = 'The order does not exists';
             $this->_conektaLogger->error(
                 'WebhookRepository :: execute - ' . $message
             );
             throw new EntityNotFoundException(__($message));
+        }
+
+        $conektaOrder = $this->fetchConektaOrder($body);
+        if (!$this->canMarkAsPaid($order, $conektaOrder)) {
+            return;
         }
 
         $order->setState(Order::STATE_PROCESSING);
@@ -188,5 +227,37 @@ class WebhookRepository
         } catch (Exception $e) {
             $this->_conektaLogger->error($e->getMessage());
         }
+    }
+
+    private function canMarkAsPaid(Order $order, array $conektaOrder): bool
+    {
+        $context = [
+            'order_id' => $order->getIncrementId(),
+            'order_state' => $order->getState(),
+            'conekta_order_id' => $conektaOrder['id'] ?? null,
+            'conekta_payment_status' => $conektaOrder['payment_status'] ?? null,
+        ];
+
+        if (($conektaOrder['payment_status'] ?? null) !== self::CONEKTA_STATUS_PAID) {
+            $this->_conektaLogger->error('WebhookRepository :: payOrder - Conekta order is not paid, order not updated', $context);
+            return false;
+        }
+
+        $paidAmount = (int)($conektaOrder['amount'] ?? 0);
+        $expectedAmount = (int)round((float)$order->getGrandTotal() * 100);
+        if ($paidAmount < $expectedAmount - self::AMOUNT_TOLERANCE_IN_CENTS) {
+            $this->_conektaLogger->error(
+                'WebhookRepository :: payOrder - Conekta paid amount is lower than order total, order not updated',
+                array_merge($context, ['paid_amount' => $paidAmount, 'expected_amount' => $expectedAmount])
+            );
+            return false;
+        }
+
+        if (!in_array($order->getState(), self::PAYABLE_ORDER_STATES, true) || $order->hasInvoices()) {
+            $this->_conektaLogger->error('WebhookRepository :: payOrder - Order is not payable or already invoiced, order not updated', $context);
+            return false;
+        }
+
+        return true;
     }
 }
